@@ -349,6 +349,28 @@ No new technology — validation not required. Same shebang driver, stdlib, pyte
 - **Plan failed because config parsing leaked into this milestone and 3.10 exploded on `tomllib`.** Response: no import; `WAKE_LINES` is a constant. Unit 8 asserts `config.toml` is not read.
 - **Plan failed because proof 4 zoomed via `git log`.** Response: clone has only the squashed tip; zoom must read `.tree` at HEAD.
 
+## Preflight Report
+
+**Result:** FAIL
+
+### Blocking findings
+
+1. **TDD ordering is invalid for proofs 2–6.** Units 10–13 create process and integration tests after units 3–9 have already implemented the behavior. Unit 11 even permits production changes only “if units 3–6 were incomplete,” so its new proof can pass on first run instead of driving code from red. Reorder each proof test before the production units that satisfy it, or organize the plan as proof-first vertical slices. Proof 5 must precede CLI dispatch; proofs 2–3 must precede nap/wake/zoom implementation; proofs 4 and 6 must precede the nested-fold implementation they validate.
+2. **`nap` arity contradicts the binary fold and zoom contracts.** Pin 1 allows any two-or-more children, while units 3–6 and the public contract require an oldest-pair fold and zoom into two halves. Define one coherent interface. The current architecture points to exactly two adjacent wake-printed child ids plus one caption; add a three-id rejection test if that is retained.
+3. **Proof 4 does not build the required three naps.** Repeatedly napping the globally oldest pair until only three view nodes remain produces one large nap plus two loose notes, not three naps. Specify three adjacent target packs and pairwise-fold within each pack. In the clone, recursively follow printed child ids to an early original sentence; a one-level zoom that happens to expose a recent raw child does not prove the nested payload.
+4. **Missing-caption degradation is not concretely implemented.** The plan’s view is built from `naps/*.sum`, so a surviving `.tree` with a missing `.sum` disappears from wake. That conflicts with the project requirement that a missing caption degrade and with `VISION.md`’s finer-grain fallback. Define and test a pair-aware fallback that preserves a wake-visible content id without blocking; reconcile this with the rule that normal wake does not load fat trees.
+5. **The canonical docs and proposed nap paths disagree.** `VISION.md` says the leaf-set id is the filename stem and shows `naps/<leafset>.sum|.tree`; the plan proposes `{minStamp}-{leafset}`. The time prefix is consistent with the sequence invariant, but the docs check currently forbids correcting these now-false path statements. Add surgical `VISION.md` updates to the plan so the canonical contract describes the chosen path format.
+
+### Required test-plan corrections
+
+- Instrument the first child unlink in unit 3 and assert both parent files already exist; also inject parent `.tree` replace failure and assert no child was removed. Final-state inspection alone cannot prove write-before-unlink ordering.
+- Run proof 2 for both caption resolutions, not an unspecified single “either” side.
+- Make proofs 4 and 6 follow nested ids through repeated one-level zoom calls to originals from every required branch/pack.
+
+### Advisory
+
+- Replace the 14 mostly horizontal units with proof-first vertical slices: conflict/identity/proof 5, then mixed view and nested fold/proofs 4 and 6. Keep `ViewNode` as the single pair-aware boundary used by wake, nap, zoom, recall, and fold. This remains Level 3 and in scope, while making TDD ordering and acceptance coverage auditable.
+
 ## Status
 
 - [x] Component analysis complete
@@ -357,6 +379,6 @@ No new technology — validation not required. Same shebang driver, stdlib, pyte
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
+- [x] Preflight (FAIL — replan required)
 - [ ] Build
 - [ ] QA

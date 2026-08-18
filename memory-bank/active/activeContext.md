@@ -1,13 +1,13 @@
 # Active Context
 
 ## Current Task: single-store
-**Phase:** PLAN - COMPLETE
+**Phase:** PREFLIGHT - COMPLETE (FAIL)
 
 ## What Was Done
-- Advanced L4 `file-backend` past ingest; classified single-store as Level 3
-- Planned `nap` / `zoom` / `recall` / mixed wait-free `wake` / left-fold / proofs 2–6 on the existing shebang driver
-- Pinned `nap` arity (wake-printed child ids + caption), nap filenames (`{minStamp}-{leafset}`), and over-budget `note` requesting a nap rather than inventing a caption
-- No creative phase: `VISION.md` already has the architecture
+- Validated the single-store plan against the driver, existing tests, canonical docs, and proofs 2–6
+- Baseline is healthy: all 34 existing tests pass on Python 3.11
+- Blocked build: proof tests are ordered after production code, `nap` arity conflicts with binary zoom/fold, proof 4 does not produce three naps, and missing-caption/path contracts need reconciliation
+- Recorded detailed findings and exact correction requirements in `tasks.md`; wrote `.preflight-status` as `FAIL`
 
 ## Next Step
-- Preflight to validate this plan against the tree, then stop for `/niko-build`
+- Run `/niko-plan` to revise the approach, then rerun `/niko-preflight`

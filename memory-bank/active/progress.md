@@ -31,3 +31,16 @@ Implement single-store memory: `nap`, `zoom`, `recall`, left-fold of adjacent vi
 * Insights
     - Hash-only nap stems would break proof 6 (oldest neighbors). Min-stamp prefix keeps identity and sequence in the name
     - `test_nap_is_unknown` must flip in the same change as the parser, after the writer exists
+
+## 2026-08-18 - PREFLIGHT - COMPLETE (FAIL)
+
+* Work completed
+    - Validated the plan against `.summem/summem`, the existing tests, `VISION.md`, `ROADMAP.md`, and the first-proof acceptance contract
+    - Confirmed the existing 34-test baseline passes on Python 3.11
+    - Recorded blocking findings and exact replan instructions in `tasks.md`
+* Decisions made
+    - Block build because proofs 2–6 are scheduled after their production behavior, violating test-first ordering
+    - Require one coherent binary `nap` contract, a real three-nap proof 4, concrete missing-caption degradation, and canonical filename documentation
+* Insights
+    - Repeated global oldest-pair folds from 100 notes leave one nap and two loose notes at a three-node view; proof 4 needs three explicit adjacent packs
+    - A `.tree` orphan is invisible when the view enumerates only `.sum` files, so “missing caption degrades” needs a pair-aware view rule
