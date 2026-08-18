@@ -4,7 +4,7 @@
 * Complexity: Level 3
 * Type: feature
 
-Python 3 CLI that auto-creates a git-root `.summem/` store, records immutable notes, and wakes a wait-free listing of those notes. First proof 1 is the gate. Store layout and leaf-set hashing freeze here, including canonical `.tree` bytes that this milestone does not yet persist.
+One shebang Python script at `.summem/summem` that auto-creates the git-root store, records immutable notes, and wakes a wait-free listing of those notes. First proof 1 is the gate. Store layout and leaf-set hashing freeze here, including canonical `.tree` bytes that this milestone does not yet persist. Tests live outside the script.
 
 ## Pinned Info
 
@@ -12,48 +12,49 @@ Python 3 CLI that auto-creates a git-root `.summem/` store, records immutable no
 
 These are the identity contract. Later milestones consume them; they do not invent a second scheme.
 
+- Brand directory: `.summem/` (not `.mem/`). The ride-along driver is `.summem/summem`. Data is `.summem/config.toml`, `.summem/notes/<name>`, and later `.summem/naps/<leafset>.sum` / `.tree`. Nested stores (Phase 3) are data only; they do not each get a copy of the driver.
+- Agent invocation: `.summem/summem wake` and `.summem/summem note "…"`. That path is the tool (same shape as `~/.optmem/memo`). It is not a leaked store file. Store files are `notes/…` and `naps/…`.
 - Store parent: walk from `$PWD` toward parents; first directory that contains `.git` (file or directory) wins. If none, the store parent is `$PWD`. Phase 1 only auto-creates at that parent. It does not walk to a non-root `.summem/` and does not implement `--path`.
-- Store paths: `<parent>/.summem/config.toml`, `<parent>/.summem/notes/<name>`. Naps will live at `<parent>/.summem/naps/<leafset>.sum` and `.tree`. Phase 1 creates `notes/` and `config.toml` only.
+- Shebang: `#!/usr/bin/env python3`. File mode includes execute. Refuse `sys.version_info < (3, 11)` before doing work. `tomllib` is stdlib at that floor.
+- Driver install: if `<parent>/.summem/summem` is missing, copy `Path(__file__).resolve()` there and `chmod 0o755`. If it exists, leave it. Wake and note never overwrite the driver.
 - Note name: `YYYYMMDDTHHMMSSZ-` plus 16 lowercase hex characters from 8 random bytes. Sequence is `ls | sort` of that name.
-- Note file bytes: UTF-8 of the note text plus a single trailing `\n`. The 280-byte `ENTRY_CHARS` limit is the text before that terminator.
+- Clock: `datetime.now(timezone.utc)` or an injected timezone-aware UTC `now`. Formatting local time with a `Z` suffix is a defect.
+- Note file bytes: UTF-8 of the note text plus a single trailing `\n`. The 280-byte `ENTRY_CHARS` limit is the UTF-8 byte length of the text before that terminator, not a character count.
 - Note digest: lowercase hex `hashlib.sha256(file_bytes).hexdigest()`.
-- Leaf-set id: sort those hex strings as ASCII, concatenate with **no delimiter** (safe: each digest is 64 hex characters), then lowercase hex `hashlib.sha256(join.encode("ascii")).hexdigest()`. A singleton note's content id is the leaf-set id of that one digest.
-- Canonical `.tree` bytes: UTF-8 JSON, `sort_keys=True`, `separators=(',', ':')`, `ensure_ascii=False`, exactly one trailing `\n`. Schema:
+- Leaf-set id: sort those hex strings as ASCII, concatenate with **no delimiter** (each digest is 64 hex characters), then lowercase hex `hashlib.sha256(join.encode("ascii")).hexdigest()`. A singleton note's content id is the leaf-set id of that one digest. The join is ASCII hex; Chinese and any other UTF-8 live in the file bytes that produced those digests.
+- Canonical `.tree` bytes: UTF-8 JSON, `sort_keys=True`, `separators=(',', ':')`, `ensure_ascii=False`, exactly one trailing `\n`. `ensure_ascii=False` is load-bearing for non-ASCII notes (default `json.dumps` would emit `\uXXXX` and break identity). Schema:
   - Tree object: `v` (integer `1`), `kids` (array)
   - Note child: `k`=`n`, `name` (filename only), `text` (note text, no terminator)
   - Nap child: `k`=`p`, `id` (leaf-set hex of the **original notes**), `sum` (caption), `tree` (nested tree object)
-- Wake line for a loose note: `<64-hex-id>  (1 note, from YYYY-MM-DD)  <text>` — two spaces around the grain parenthetical. Date comes from the filename prefix, not mtime. Full id, never an 8-character abbreviation, never a positional range, never a store path.
-- Console entry: `summem` → `summem.cli:main`. Also `python -m summem`. Subcommands this milestone implements: `wake`, `note`. Everything else is an error.
-- Package: `src/summem/` hatchling project, `requires-python = ">=3.11"`. Tests: pytest under `tests/`. Run with `uv run --python 3.11 pytest`. Do not use the bare `python3.11` pyenv shim on this machine (it 127s unless `PYENV_VERSION=3.11.11`).
+- Wake line for a loose note: `<64-hex-id>  (1 note, from YYYY-MM-DD)  <text>` — two spaces around the grain parenthetical. Date comes from the filename prefix, not mtime. Full id, never an 8-character abbreviation, never a positional range, never `notes/`, `naps/`, or `git`.
+- Stdout/stderr: `reconfigure(encoding="utf-8")` when the stream has that method (OptMem's locale fix).
+- Subcommands this milestone implements: `wake`, `note`. Everything else is an error.
+- Tests: pytest under `tests/`, loading the script with `SourceFileLoader` + `spec_from_loader` + `exec_module` (a path with no `.py` suffix makes `spec_from_file_location` return `None`). Run with `uv run --python 3.11 --with pytest pytest`. Process tests use `sys.executable` (the 3.11 under pytest) as `argv[0]`'s interpreter so this machine's `python3` 3.10 shebang is not the runner. Do not use the bare `python3.11` pyenv shim.
 - Default config file: a commented template string, not a TOML dump. `tomllib` reads; missing keys mean script defaults (`ENTRY_CHARS = 280`).
 
-### Ingest components
+### Brand layout
 
-Who calls whom, and which layer owns identity versus disk versus the agent-facing command names.
+Tool and data are siblings inside `.summem/`, the same way OptMem keeps `memo` and `memory` inside `.optmem/`.
 
 ```mermaid
 graph TD
+    classDef tool fill:#fff3e0,stroke:#ef6c00;
+    classDef data fill:#f3e5f5,stroke:#7b1fa2;
     classDef agent fill:#e1f5fe,stroke:#01579b;
-    classDef script fill:#fff3e0,stroke:#ef6c00;
-    classDef store fill:#f3e5f5,stroke:#7b1fa2;
 
-    Agent["Agent"]:::agent --> CLI["summem CLI"]:::script
-    CLI --> Store["store: auto-create and note files"]:::store
-    CLI --> Wake["wake: list loose notes"]:::script
-    Wake --> Store
-    Wake --> Codec["codec: digest, leaf-set id, .tree bytes"]:::script
-    Store --> Notes[".summem/notes"]:::store
-    Store --> Cfg[".summem/config.toml"]:::store
-    Codec --> Hash["hashlib SHA-256"]:::script
+    Agent["Agent"]:::agent --> Script[".summem/summem"]:::tool
+    Script --> Notes[".summem/notes"]:::data
+    Script --> Cfg[".summem/config.toml"]:::data
 ```
 
 ### Proof 1 merge
 
-Two worktrees, two `note` processes, one git merge, two lines on wake.
+Two worktrees, two `note` processes, one git merge, two lines on wake. Both trees also receive the same driver bytes if the script copies itself; git agrees on that path.
 
 ```mermaid
 sequenceDiagram
     participant T as Test
+    participant S as Dev script
     participant A as Worktree A
     participant B as Worktree B
     participant M as Main tree
@@ -61,51 +62,49 @@ sequenceDiagram
     T->>M: git init, empty commit
     T->>A: git worktree add -b wt-a
     T->>B: git worktree add -b wt-b
-    T->>A: python -m summem note "alpha"
+    T->>S: python3.11 S note "alpha" cwd=A
     T->>A: git add and commit
-    T->>B: python -m summem note "beta"
+    T->>S: python3.11 S note "beta" cwd=B
     T->>B: git add and commit
     T->>M: merge wt-a, merge wt-b
-    T->>M: python -m summem wake
+    T->>M: python3.11 A-or-M/.summem/summem wake
     M-->>T: two lines, zero conflicts
 ```
 
 ## Component Analysis
 
 ### Affected Components
-- **Identity codec** (`src/summem/codec.py`): does not exist → pure functions for note file bytes, note digest, leaf-set id, dumps/loads of canonical `.tree` bytes including nested nap children.
-- **Store I/O** (`src/summem/store.py`): does not exist → find store parent, auto-create `.summem/`, write one immutable note via temp file plus `os.replace`.
-- **Wake listing** (`src/summem/wake.py`): does not exist → wait-free list of loose notes with content ids; empty print is success.
-- **CLI** (`src/summem/cli.py`, `src/summem/__main__.py`): does not exist → `wake` and `note` only; unknown commands and flags fail.
-- **Package / test runner** (`pyproject.toml`, `tests/`): does not exist → hatchling + pytest so later milestones have a place to hang proofs 2–8.
-- **Tech context** (`memory-bank/techContext.md`): still says no runner → point at `pyproject.toml` and `uv run --python 3.11 pytest` after the runner exists.
+- **Driver script** (`.summem/summem`): does not exist → one shebang file holding codec, store I/O, wake, and `main`. This is the whole product.
+- **Test harness** (`tests/`, `pytest.ini`): does not exist → pytest loads the script; git worktree helper for proof 1.
+- **Activation copy** (`VISION.md`, `ROADMAP.md`): still say `summem` as if it were on `PATH`, and ROADMAP still says "package and CLI entry" → point invocations at `.summem/summem` and freeze the script path instead of a package layout.
+- **Briefing files** (`memory-bank/techContext.md`, `memory-bank/systemPatterns.md`): tech context still says no runner; system patterns name commands but not the brand path → surgical pointers after the script exists.
 
 ### Cross-Module Dependencies
-- CLI → store: `note` and first-use auto-create.
-- CLI → wake → store + codec: listing reads note files, codec names each line.
-- Store does not import wake. Codec has no disk I/O.
-- Proof 1 test → CLI as a process, then git merge, then CLI wake. It does not call store functions.
+- There are no in-repo modules. Functions in `.summem/summem` call each other: `main` → `cmd_note` / `cmd_wake` → store + codec. Codec has no disk I/O.
+- Tests → script via `SourceFileLoader`. Proof 1 → script as a process, then git merge, then `wake` as a process.
+- Auto-create may copy the running file onto `<parent>/.summem/summem`. That is the only write of the driver, and only when the path is missing.
 
 ### Boundary Changes
-- Public agent interface appears for the first time: `summem wake`, `summem note TEXT`.
-- On-disk schema appears for the first time: `.summem/config.toml`, `.summem/notes/<utc>-<rand>`.
-- Identity schema appears for the first time: digest, no-delimiter hex join, JSON `.tree` bytes. Phase 2 must import this codec, not re-derive it.
+- Public agent interface appears: `.summem/summem wake`, `.summem/summem note TEXT`.
+- On-disk schema appears: `.summem/summem`, `.summem/config.toml`, `.summem/notes/<utc>-<rand>`.
+- Identity schema appears: digest, no-delimiter hex join, JSON `.tree` bytes. Phase 2 must call the same functions in this file, not re-derive them.
 - No existing public interface to break. Empty `README.md` stays empty.
 
 ### Invariants and Constraints
-- Agents never write the store. The script is the only writer.
+- Agents never write store files. The script is the only writer.
 - Ingest commutes: two notes are two paths. No next id. No shared mutable index.
-- Sequence is in the filename.
+- Sequence is in the filename. Time is UTC.
 - Wake never refuses to print.
-- The agent interface does not mention store files, hashes as paths, or git.
+- Wake listings do not mention `notes/`, `naps/`, hashes as paths, or git.
 - Hashing is `hashlib` SHA-256 only.
-- Store directory is `.summem/`, not `.mem/`.
+- The product is one file. Tests are not the product.
 - This milestone does not implement `nap`, `zoom`, `recall`, `start`, `--path`, catalog, cover, or `ROADMAP.md` Later items.
-- Compatibility-vector tests fail before codec code exists.
+- Compatibility-vector tests fail before codec bodies exist.
+- An existing `.summem/summem` is never overwritten by auto-create.
 
 ## Open Questions
 
-None - implementation approach is clear. Architecture is already in `VISION.md`. Remaining format details are frozen in Pinned Info above, not rediscovered in a creative phase.
+None - implementation approach is clear. Operator decided the shebang lives at `.summem/summem`. Remaining format choices stay pinned above.
 
 ## Test Plan (TDD)
 
@@ -114,121 +113,135 @@ None - implementation approach is clear. Architecture is already in `VISION.md`.
 - Note file bytes: text `"hello"` → `b"hello\n"`.
 - Note digest: SHA-256 of those file bytes, lowercase hex.
 - Leaf-set id of one digest: SHA-256 of that hex string as ASCII.
-- Leaf-set id of two digests: sort the hex strings, concatenate with no delimiter, SHA-256 of the join. Order of inputs must not matter.
+- Leaf-set id of two digests: sort, concatenate with no delimiter, SHA-256 of the join. Input order must not matter.
+- Leaf-set id of a Chinese note: `你好` file bytes are UTF-8 plus `\n`; digest is SHA-256 of those bytes (not of `\uXXXX`).
 - `.tree` dumps of one note child: exact canonical JSON bytes including trailing newline.
-- `.tree` dumps of a nap child whose nested tree holds two notes: exact bytes; nested object, not a string; `id` is the leaf-set id of the two original note file bytes.
+- `.tree` dumps of a note whose text is `你好`: JSON contains the UTF-8 characters, not `\u4f60\u597d`.
+- `.tree` dumps of a nap child whose nested tree holds two notes: exact bytes; `id` is the leaf-set id of the two original note file bytes.
 - `loads_tree(dumps_tree(t))` round-trips note and nested nap trees.
-- `note` of empty text is rejected. `note` of 281 UTF-8 bytes is rejected. `note` containing `\n` or `\r` is rejected. `note` of 280 UTF-8 bytes is accepted.
-- First `note` in a git repo creates `.summem/config.toml` (comment-only template) and `.summem/notes/<utc>-<16hex>` whose contents are the file bytes above.
-- First `wake` in a git repo with no store creates the store and prints nothing (exit 0).
-- `wake` after two notes prints two lines, sorted by filename, each with a 64-hex content id and the grain `(1 note, from YYYY-MM-DD)`, and neither line contains `.summem`, `notes/`, or `git`.
-- `note` does not take a caller-supplied filename. Two notes in the same UTC second still produce two paths.
+- `note` of empty text is rejected. `note` of 281 UTF-8 bytes is rejected. `note` containing `\n` or `\r` is rejected. `note` of 280 UTF-8 bytes is accepted. `note` of 280 bytes of UTF-8 Chinese (truncated to the byte budget) is accepted; 281 is not.
+- Clock used for the name is UTC. An injected local `now` must not be accepted as if it were UTC (require `tzinfo` is `timezone.utc`).
+- First `note` in a git repo creates `.summem/config.toml` (comment-only template), `.summem/notes/<utc>-<16hex>`, and `.summem/summem` if missing. Config `tomllib.loads` yields `{}`. Existing driver bytes are unchanged if the file already exists.
+- First `wake` in a git repo with no store creates the store (including driver copy) and prints nothing (exit 0).
+- `wake` after two notes prints two lines, sorted by filename, each with a 64-hex content id and the grain `(1 note, from YYYY-MM-DD)`, and neither line contains `notes/`, `naps/`, or `git`.
+- Two notes in the same UTC second still produce two paths.
 - Unknown CLI command (`nap`) and unknown flag (`--path`) exit nonzero.
-- First proof 1: two worktrees each `python -m summem note` once, commit, merge onto main, zero conflicts, `wake` shows both texts.
+- `sys.version_info < (3, 11)` is rejected by the version guard function.
+- First proof 1: two worktrees each run the script as a process (`sys.executable`, script path, `note`); commit; merge onto main; zero conflicts; `wake` shows both texts.
 
 ### Test Infrastructure
 
-- Framework: pytest (none exists yet; created in unit 1 stub interface)
+- Framework: pytest (none exists yet; created in unit 1)
 - Test location: `tests/`
-- Conventions: `test_*.py`, pytest functions, `tmp_path` for repos, no assertions on `VISION.md` wording
-- New test files: `tests/test_codec.py`, `tests/test_store.py`, `tests/test_wake.py`, `tests/test_cli.py`, `tests/test_proof_ingest.py`, `tests/gitutil.py`
-- Runner: `uv run --python 3.11 pytest`
+- Conventions: `test_*.py`, `tmp_path`, no assertions on document wording. `tests/conftest.py` exposes `load_summem()` and `SCRIPT` (path to the development `.summem/summem`).
+- New test files: `tests/conftest.py`, `tests/test_codec.py`, `tests/test_store.py`, `tests/test_wake.py`, `tests/test_cli.py`, `tests/test_proof_ingest.py`, `tests/gitutil.py`
+- Config: `pytest.ini` with `testpaths = tests` only. No `pyproject.toml`.
+- Runner: `uv run --python 3.11 --with pytest pytest`
 
 ### Integration Tests
 
-- Proof 1 (`tests/test_proof_ingest.py`): real git worktrees, real CLI process, real merge. This is the product gate, not a change-detector on the vision document.
+- Proof 1 (`tests/test_proof_ingest.py`): real git worktrees, real script process, real merge. Product gate, not a change-detector on `VISION.md`.
 
 ## Implementation Plan
 
 ### 1. Identity codec — executable
 
-- Files: `pyproject.toml`, `src/summem/__init__.py`, `src/summem/codec.py`, `tests/test_codec.py`
+- Files: `.summem/summem`, `tests/conftest.py`, `tests/test_codec.py`, `pytest.ini`
 - Creative ref: none — format frozen in Pinned Info
 
-1. Stub tests: `tests/test_codec.py` empty cases `test_note_file_bytes_appends_newline`, `test_note_digest_is_sha256_of_file_bytes`, `test_leafset_id_singleton_hashes_hex_ascii`, `test_leafset_id_sorts_and_concatenates_without_delimiter`, `test_dumps_tree_one_note_exact_bytes`, `test_dumps_tree_nested_nap_exact_bytes`, `test_loads_tree_round_trip`.
-2. Stub interface: hatchling `pyproject.toml` (`requires-python = ">=3.11"`, script `summem = "summem.cli:main"`, optional `test = ["pytest"]`); empty `src/summem/__init__.py`; `src/summem/codec.py` signatures `note_file_bytes(text: str) -> bytes`, `note_digest(file_bytes: bytes) -> str`, `leafset_id(digests: list[str]) -> str`, `dumps_tree(tree) -> bytes`, `loads_tree(data: bytes)`, plus `NoteChild`, `NapChild`, `Tree` types — no bodies.
-3. Write tests and run red: expected hashes via `hashlib` in the test (not via the codec). Exact `.tree` bytes written out as literals that match the Pinned Info dumps rules. Nested case uses two notes and one nap caption. Run `uv run --python 3.11 pytest tests/test_codec.py` — fail on missing implementation.
-4. Write code and run green: implement the codec only. No store files. No CLI.
+1. Stub tests: `tests/test_codec.py` empty cases `test_note_file_bytes_appends_newline`, `test_note_digest_is_sha256_of_file_bytes`, `test_leafset_id_singleton_hashes_hex_ascii`, `test_leafset_id_sorts_and_concatenates_without_delimiter`, `test_leafset_id_hashes_utf8_chinese_file_bytes`, `test_dumps_tree_one_note_exact_bytes`, `test_dumps_tree_keeps_chinese_not_uescaped`, `test_dumps_tree_nested_nap_exact_bytes`, `test_loads_tree_round_trip`.
+2. Stub interface: shebang file `.summem/summem` (`#!/usr/bin/env python3`, executable bit) with empty `note_file_bytes`, `note_digest`, `leafset_id`, `dumps_tree`, `loads_tree`, and `NoteChild` / `NapChild` / `Tree`. `tests/conftest.py`: `load_summem()` via `SourceFileLoader` + `spec_from_loader` + `exec_module`. `pytest.ini`: `testpaths = tests`.
+3. Write tests and run red: expected hashes via `hashlib` in the test. Exact `.tree` literals matching the dumps rules, including one `你好` vector. Run `uv run --python 3.11 --with pytest pytest tests/test_codec.py` — fail on missing bodies.
+4. Write code and run green: implement those functions in `.summem/summem` only. No store I/O. No CLI.
 
 ### 2. Store auto-create and note — executable
 
-- Files: `src/summem/store.py`, `src/summem/defaults.py`, `tests/test_store.py`, `tests/gitutil.py`
-- Creative ref: none
+- Files: `.summem/summem`, `tests/test_store.py`, `tests/gitutil.py`
 
-1. Stub tests: `test_note_rejects_empty`, `test_note_rejects_over_280_bytes`, `test_note_rejects_newline`, `test_note_accepts_280_bytes`, `test_first_note_creates_config_and_note_file`, `test_note_name_uses_injected_clock_and_rand`, `test_same_second_notes_are_two_paths`, `test_note_is_temp_then_replace`.
-2. Stub interface: `ENTRY_CHARS = 280` and `CONFIG_TEMPLATE` in `src/summem/defaults.py`; `find_store_parent(cwd)`, `ensure_store(parent)`, `write_note(parent, text, now, rng)` in `src/summem/store.py`. `tests/gitutil.py`: `init_repo(path)` sets `user.name` / `user.email` and makes an empty commit.
-3. Write tests and run red: use `tmp_path` + `init_repo`. Inject `now` and `rng`. Assert config is comments only (`tomllib.loads` yields `{}`) and contains `ENTRY_CHARS` as a comment. Assert file bytes equal `note_file_bytes(text)`. Assert no shared index file.
-4. Write code and run green: mkdir, write template if config absent, validate text, write temp in `notes/`, `os.replace` to the UTC name. Do not hash-join in this unit except as needed to stay out of the file body.
+1. Stub tests: `test_note_rejects_empty`, `test_note_rejects_over_280_bytes`, `test_note_rejects_newline`, `test_note_accepts_280_bytes`, `test_note_280_is_utf8_bytes_not_chars`, `test_note_rejects_non_utc_now`, `test_first_note_creates_config_notes_and_driver`, `test_existing_driver_is_not_overwritten`, `test_note_name_uses_injected_utc_clock_and_rand`, `test_same_second_notes_are_two_paths`.
+2. Stub interface: `ENTRY_CHARS = 280`, `CONFIG_TEMPLATE`, `require_utc(now)`, `find_store_parent(cwd)`, `ensure_store(parent)`, `write_note(parent, text, now, rng)` in `.summem/summem`. `tests/gitutil.py`: `init_repo(path)` sets local `user.name` / `user.email` and makes an empty commit.
+3. Write tests and run red: `tmp_path` + `init_repo`. Inject UTC `now` and `rng`. Assert config is comments only. Assert file bytes equal `note_file_bytes(text)`. Assert a pre-existing driver with different bytes is left intact. Assert a naive datetime is rejected.
+4. Write code and run green: mkdir, copy driver only if missing, write template if config absent, validate text, write temp in `notes/`, `os.replace` to the UTC name.
 
 ### 3. Wake listing — executable
 
-- Files: `src/summem/wake.py`, `tests/test_wake.py`
+- Files: `.summem/summem`, `tests/test_wake.py`
 
-1. Stub tests: `test_wake_without_store_creates_and_prints_nothing`, `test_wake_lists_two_notes_sorted_by_filename`, `test_wake_line_has_full_id_and_grain_date_from_name`, `test_wake_output_omits_store_paths_and_git`, `test_wake_skips_unreadable_note_and_still_prints`.
-2. Stub interface: `wake_text(parent) -> str` (empty string if no notes).
-3. Write tests and run red: two injected names so sort order is known. Expected content id from `leafset_id([note_digest(note_file_bytes(text))])`. Grain date from the name prefix. Assert `.summem`, `notes/`, and `git` do not appear.
-4. Write code and run green: `ensure_store`, list `notes/` regular files, skip names starting with `.`, skip unreadable files, sort, format lines, join with `\n` and a trailing `\n` if any lines else `""`.
+1. Stub tests: `test_wake_without_store_creates_and_prints_nothing`, `test_wake_lists_two_notes_sorted_by_filename`, `test_wake_line_has_full_id_and_grain_date_from_name`, `test_wake_output_omits_notes_naps_and_git`, `test_wake_skips_unreadable_note_and_still_prints`.
+2. Stub interface: `wake_text(parent) -> str`.
+3. Write tests and run red: two injected names so sort order is known. Expected content id from `leafset_id([note_digest(note_file_bytes(text))])`. Assert `notes/`, `naps/`, and `git` do not appear.
+4. Write code and run green: `ensure_store`, list `notes/` regular files, skip names starting with `.`, skip unreadable files, sort, format lines, join with `\n` plus a trailing `\n` if any lines else `""`.
 
 ### 4. CLI — executable
 
-- Files: `src/summem/cli.py`, `src/summem/__main__.py`, `tests/test_cli.py`
+- Files: `.summem/summem`, `tests/test_cli.py`
 
-1. Stub tests: `test_note_subcommand_writes_and_wake_reads`, `test_nap_is_unknown`, `test_path_flag_is_unknown`, `test_note_without_text_fails`.
-2. Stub interface: `main(argv: list[str] | None = None) -> int`; `__main__.py` calls `sys.exit(main())`.
-3. Write tests and run red: `monkeypatch.chdir` to an `init_repo` tmp. Call `main(["note", "hello"])` and `main(["wake"])`. `nap` and `--path` must be nonzero. Do not implement those commands to make the tests pass.
-4. Write code and run green: argparse subcommands `wake` and `note` only. `note` takes one argument (the line). Store parent from cwd. Return 0 on success, 2 on usage errors, 1 on validation errors. Error text may say the line is too long or empty; it must not mention store paths or git.
+1. Stub tests: `test_note_subcommand_writes_and_wake_reads`, `test_nap_is_unknown`, `test_path_flag_is_unknown`, `test_note_without_text_fails`, `test_refuses_python_before_311`, `test_shebang_and_executable_bit`.
+2. Stub interface: `require_python()`, `main(argv: list[str] | None = None) -> int`, `if __name__ == "__main__"` calling `sys.exit(main())`. UTF-8 `reconfigure` at import.
+3. Write tests and run red: `monkeypatch.chdir` to an `init_repo` tmp. Call `main(["note", "hello"])` and `main(["wake"])`. `nap` and `--path` nonzero. Version guard tested by calling `require_python` with a patched `sys.version_info`. Process invocation uses `[sys.executable, str(SCRIPT), ...]`, not the shebang.
+4. Write code and run green: argparse subcommands `wake` and `note` only. Store parent from cwd. Return 0 on success, 2 on usage, 1 on validation. Error text may say the line is too long or empty; it must not mention `notes/`, `naps/`, or git.
 
 ### 5. Proof 1 worktree merge — executable
 
 - Files: `tests/test_proof_ingest.py`
 
 1. Stub tests: `test_two_worktrees_note_merge_without_conflict`.
-2. Stub interface: none new — uses CLI and `gitutil`.
-3. Write tests and run red: `git worktree add` two branches from the empty commit; in each, `subprocess` `[sys.executable, "-m", "summem", "note", ...]` then add/commit `.summem`; merge both into main; assert merge exit 0 and no conflict markers; `wake` stdout contains both texts and two content ids.
-4. Write code and run green: if this fails, fix store/CLI, not the test. Do not add a lock or a shared index to make merge easier.
+2. Stub interface: none new.
+3. Write tests and run red: `git worktree add` two branches from the empty commit; in each, `subprocess` `[sys.executable, str(SCRIPT), "note", ...]` then add/commit `.summem`; merge both into main; assert merge exit 0 and no conflict markers; `wake` stdout contains both texts and two content ids.
+4. Write code and run green: if this fails, fix the script, not the test. Do not add a lock or a shared index.
 
-### 6. Python gitignore — prose/policy
+### 6. Activation and roadmap invocation — prose/policy
+
+- Files: `VISION.md`, `ROADMAP.md`
+- No tests: prose/policy artifact
+
+1. In `VISION.md` Activation (and any command example that currently writes a bare `summem` as the program), use `.summem/summem` as the program path. Keep the CLI table's command names (`wake`, `note`, …). Do not mention `notes/` or `naps/` in the agent-facing table.
+2. In `ROADMAP.md` Phase 1, replace "Python 3 package and a CLI entry" and "Package layout and console entry" with the shebang at `.summem/summem`. Leave Later's empty `README.md` out.
+
+### 7. Python gitignore — prose/policy
 
 - Files: `.gitignore`
 - No tests: prose/policy artifact
 
-1. Ignore `__pycache__/`, `*.py[cod]`, `*.egg-info/`, `.pytest_cache/`, `dist/`, `.venv/`, `uv.lock` only if we decide not to commit a lock (do not commit a lock in this milestone).
-2. Do not ignore `.summem/` — that directory is product data users commit.
+1. Ignore `__pycache__/`, `*.py[cod]`, `.pytest_cache/`, `.venv/`.
+2. Do not ignore `.summem/` — the driver and user notes live there.
 
-### 7. Tech context pointer — prose/policy
+### 8. Persistent briefing pointers — prose/policy
 
-- Files: `memory-bank/techContext.md`
+- Files: `memory-bank/techContext.md`, `memory-bank/systemPatterns.md`
 - No tests: prose/policy artifact
 
-1. Replace "no runtime pin / no test runner" with pointers: Python `>=3.11` in `pyproject.toml`; hatchling build backend in `pyproject.toml`; tests via pytest as configured there, run with `uv run --python 3.11 pytest`.
-2. Keep the hashing and `.summem/config.toml` facts. Do not add session-specific pyenv shim notes.
+1. `techContext.md`: the program is `.summem/summem`; tests are pytest as configured in `pytest.ini`, run with `uv run --python 3.11 --with pytest pytest`. No hatchling. Keep hashing and `config.toml` facts.
+2. `systemPatterns.md`: one surgical line that the committed driver is `.summem/summem` inside the brand directory, sibling to data. Do not dump the plan.
 
 ## Technology Validation
 
-New tooling for this repo: Python 3.11+, hatchling, pytest, uv as the runner.
+New tooling for this repo: pytest as a test extra (not a runtime dependency). The product is stdlib-only Python 3.11+.
 
-PoC in `/tmp/summem-tech-poc` (not in this tree): hatchling `src/` package, `uv run --python 3.11 --with pytest --with hatchling pytest` — 1 passed; `uv build --python 3.11` produced sdist and wheel. CPython used by uv was 3.11.13. `tomllib` and `hashlib` import on `~/.pyenv/versions/3.11.11/bin/python`. Bare `python3` is 3.10.12 (too old). Bare `python3.11` pyenv shim exits 127 unless `PYENV_VERSION=3.11.11`.
+PoC in `/tmp/summem-script-poc` (not in this tree): shebang file at `.summem/summem`, `chmod +x`, `uv run --python 3.11 .summem/summem` printed `5`. `spec_from_file_location` returned `None` (no `.py` suffix). `SourceFileLoader` + pytest passed. Plan uses `spec_from_loader` + `exec_module` so we do not call deprecated `load_module()`.
 
-No new runtime dependencies. pytest is an optional test extra.
+No hatchling. No `pyproject.toml`. No new runtime dependencies.
 
 ## Challenges & Mitigations
 
-- **pyenv `python3.11` shim 127s:** always invoke tests through `uv run --python 3.11`. Document that in techContext as the run command, not as machine biography.
-- **Worktree tests need an author:** `tests/gitutil.py` sets `user.name` and `user.email` locally on the temp repo.
-- **Canonical JSON drift:** only `dumps_tree` may serialize trees. Tests lock exact bytes. Do not call `json.dumps` from store or wake.
-- **Same-second collision:** 8 random bytes in the name; retry `os.replace` only if the destination exists.
-- **Scope creep into nap/path:** CLI tests require those tokens to fail. Proof 1 is notes and merge only.
-- **Unreadable note during wake:** skip that file and print the rest. Do not raise a "cannot wake" path.
-- **Proof 1 must exercise the agent interface:** subprocess `python -m summem`, not `write_note()` directly.
+- **No-suffix import:** load tests only through `SourceFileLoader` + `exec_module`. Do not use `spec_from_file_location` alone.
+- **This machine's `python3` is 3.10:** process tests use `sys.executable` from the uv 3.11 pytest run. Shebang remains `#!/usr/bin/env python3` for consumers who already have 3.11+. Version guard covers the rest.
+- **pyenv `python3.11` shim 127s:** do not document or call that shim. Runner is `uv run --python 3.11 --with pytest pytest`.
+- **Overwriting the driver:** `ensure_store` copies only when `<parent>/.summem/summem` is missing. Tests plant a different payload and assert it survives.
+- **Local time stamped `Z`:** `require_utc` rejects naive or non-UTC `tzinfo`. CLI passes `datetime.now(timezone.utc)`.
+- **Worktree tests need an author:** `tests/gitutil.py` sets `user.name` and `user.email` locally.
+- **Canonical JSON drift:** only `dumps_tree` serializes trees.
+- **Scope creep into nap/path:** CLI tests require those tokens to fail.
+- **Proof 1 must exercise the agent interface:** subprocess of the script, not `write_note()` directly.
 
 ## Pre-Mortem
 
-- **Phase 2 invents a second `.tree` or a delimited hex join:** already covered by unit 1 nested vectors and the no-delimiter freeze; if a later reading of "join" tempts a newline separator, the vectors fail on purpose.
-- **Wake prints 8-character ids because the vision example did:** freeze is full 64 hex; wake tests assert length 64.
-- **Proof 1 is green because the test called library helpers and never merged blobs:** already covered by Challenge "Proof 1 must exercise the agent interface."
-- **Tests run under Python 3.10 and someone backports tomllib:** already covered by `requires-python` and the uv 3.11 runner.
-- **We "helpfully" implement `--path` so a worktree cwd still finds the store:** worktrees have their own cwd at the linked tree; git root detection is enough. `--path` stays unknown.
-- **Default config is a `tomllib`-illegal dump or a rewritten file on every wake:** template is comments; `ensure_store` writes the file only when it is missing.
+- **We "simplify" by putting `summem` at the git root or adding hatchling back:** the brief and this pinned layout forbid both. Preflight should fail if `pyproject.toml` or a root-level `summem` appears in the plan's file list — they do not appear.
+- **Phase 2 invents a second `.tree` or a delimited hex join:** already covered by unit 1 nested and Chinese vectors.
+- **Wake prints 8-character ids because the vision example did:** freeze is full 64 hex.
+- **Auto-create "refreshes" the script on every wake and fights a local edit or a merge:** already covered by "existing driver is not overwritten."
+- **Proof 1 is green because the test called helpers and never merged blobs:** already covered by the subprocess challenge.
+- **Chinese notes break on a latin-1 locale:** UTF-8 `reconfigure` at import; codec vector with `你好`.
 
 ## Status
 

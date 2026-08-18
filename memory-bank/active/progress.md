@@ -56,3 +56,17 @@ Implement ingest: Python 3 CLI, git-root store auto-create, `note` and wait-free
     - Tests stay outside the script
 * Insights
     - OptMem already keeps `memo` inside `.optmem/`, not at `$HOME/memo`. The earlier "put it at repo root" recommendation was a misread of that layout
+
+## 2026-08-18 - PLAN - COMPLETE
+
+* Work completed
+    - Rewrote the L3 ingest plan around `.summem/summem` as the only product file
+    - Validated shebang + pytest load via `SourceFileLoader` in a throwaway tree
+* Decisions made
+    - No creative phase: operator already chose the brand path
+    - `spec_from_file_location` is unusable on a no-suffix file; tests use `SourceFileLoader` + `exec_module`
+    - Auto-create copies the running file into `.summem/summem` only when missing
+    - Process tests invoke `sys.executable` so this machine's `python3` 3.10 is not the runner
+    - `VISION.md` / `ROADMAP.md` invocation lines update to `.summem/summem` as prose/policy
+* Insights
+    - `.summem/summem` is the tool path, like `~/.optmem/memo`. `notes/` and `naps/` remain the store files agents must not be told to edit
