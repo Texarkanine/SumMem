@@ -274,6 +274,27 @@ Status: **PASS WITH ADVISORY**. Blocking checks (TDD encoding, convention compli
 - **This repo is not a store because the driver lives here.** Resolved: a store exists when a working `summem` is bound to an agentic hook. Ingest ships the driver. It does not onboard this tree. Unit 7 now ignores generated store data here and tracks only `.summem/summem`. Tests stay in `tmp_path`.
 - **`note` text starting with `-` needs `--`.** Still open unless the operator says otherwise. Plan keeps strict argparse.
 
+## QA Findings
+
+Status: **PASS**. The shebang driver, tests, and docs match the plan. Nothing must change before acceptance.
+
+- **KISS** — one stdlib file; dataclasses and the nap codec exist because the identity freeze requires them, not as extra layers. Does not block.
+- **DRY** — digest, leaf-set, and tree helpers are the single implementation; store and wake call them. Does not block.
+- **YAGNI** — `nap` / `--path` / catalog are errors; `.tree` is serialized in tests only and not written to disk. Does not block.
+- **Completeness** — all eight plan units are present; named tests cover the freeze (exact `.tree` bytes, no-delimiter join, UTF-8 Chinese, 280 as bytes, UTC clock, driver not overwritten, wait-free skip, proof 1 merge). `tomllib` is not imported in the product. Does not block.
+- **Regression** — invocation is `.summem/summem`; no `pyproject.toml`, hatchling, or root-level `summem`. Does not block.
+- **Integrity** — no TODOs, debug prints, or placeholder strings. Temp names are dot-prefixed; wake skips them. Does not block.
+- **Documentation** — `VISION.md` identity bytes and Activation path, `ROADMAP.md` Phase 1 shebang, `.gitignore`, `techContext.md`, and `systemPatterns.md` match the plan. Does not block.
+
+### Advisories
+
+These are acceptable as-is. They do not require a build re-run.
+
+1. `tests/conftest.py` defines an unused `summem` fixture; tests call `load_summem()` directly.
+2. `find_store_parent` (subdirectory walk to `.git`, no-git `$PWD` fallback) has no dedicated test; CLI tests chdir to the repo root.
+3. `VISION.md` Sequence still illustrates an 8-character content id (`a3f2c1b8`). The product prints 64 hex, locked by tests. Phase 2 should copy the product, not that example.
+4. Copied-driver mode `0o755` is applied; tests assert the execute bit only on the development script.
+
 ## Status
 
 - [x] Component analysis complete
@@ -292,4 +313,4 @@ Status: **PASS WITH ADVISORY**. Blocking checks (TDD encoding, convention compli
     - [x] 6. Activation and roadmap invocation
     - [x] 7. Python gitignore
     - [x] 8. Persistent briefing pointers
-- [ ] QA
+- [x] QA (PASS)

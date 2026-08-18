@@ -115,3 +115,14 @@ Implement ingest: Python 3 CLI, git-root store auto-create, `note` and wait-free
     - `os.urandom` for temp names; injected rng names the committed note only
 * Insights
     - Proof 1 was green on the first run: identical driver plus two note paths merge with zero conflicts
+
+## 2026-08-18 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Semantic review of ingest against the shebang plan: codec, store, wake, CLI, proof 1, docs
+    - Wrote `.qa-validation-status` as PASS; recorded findings in `tasks.md`
+* Decisions made
+    - Accept as-is. Advisories (unused test fixture, untested `find_store_parent` walk, 8-char id still in a VISION grain example, copied-driver mode not asserted) do not block
+* Insights
+    - The identity freeze is actually in the product: exact `.tree` bytes, no-delimiter join, and 64-hex wake ids, with nap codec present but not persisted
+    - Plan deviations (`sys.modules` registration, `os.urandom` temp names) are justified and not defects
