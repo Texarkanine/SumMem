@@ -18,7 +18,7 @@
 
 Sequential. No parallel milestones.
 
-- [ ] Implement ingest: Python 3 CLI, git-root store auto-create, `note` and wait-free `wake` of loose notes, first proof 1, freeze store layout and leaf-set hashing
+- [x] Implement ingest: Python 3 CLI, git-root store auto-create, `note` and wait-free `wake` of loose notes, first proof 1, freeze store layout and leaf-set hashing
 - [ ] Implement single-store memory: `nap`, `zoom`, `recall`, left-fold of adjacent view nodes, first proofs 2-6
 - [ ] Implement scopes: `start`, `--path` walk-up, root-wake catalog, per-store config, first proofs 7-8
 

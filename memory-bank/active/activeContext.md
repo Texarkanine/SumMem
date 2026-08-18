@@ -1,15 +1,11 @@
 # Active Context
 
-## Current Task: ingest
-**Phase:** REFLECT COMPLETE
+## Current Task: single-store
+**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
 
 ## What Was Done
-- Built `.summem/summem` (codec, store, wake, CLI). Proof 1 green. QA PASS.
-- Reflected: hatchling replan was the right break; loader PoC missed dataclasses/`sys.modules`; Phase 2 must reuse this file's identity functions, not the 8-character Sequence example.
-
-## Decisions
-- This repo is not a store. Ingest tracks `.summem/summem` only.
-- Strict argparse kept.
+- Advanced L4 `file-backend`: checked off ingest, cleared ingest ephemeral files, preserved `milestones.md`, `projectbrief.md`, and `reflection/`
+- Classified milestone 2 (single-store memory) as Level 3: complete feature with multiple components (`nap`/`zoom`/`recall`/left-fold and proofs 2–6) under architecture already settled in `VISION.md` and frozen by ingest
 
 ## Next Step
-- Run `/niko` to continue to the next milestone (single-store memory).
+- Load the Level 3 workflow and execute the plan phase
