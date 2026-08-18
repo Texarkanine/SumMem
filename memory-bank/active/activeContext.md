@@ -1,11 +1,13 @@
 # Active Context
 
 ## Current Task: single-store
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Advanced L4 `file-backend`: checked off ingest, cleared ingest ephemeral files, preserved `milestones.md`, `projectbrief.md`, and `reflection/`
-- Classified milestone 2 (single-store memory) as Level 3: complete feature with multiple components (`nap`/`zoom`/`recall`/left-fold and proofs 2–6) under architecture already settled in `VISION.md` and frozen by ingest
+- Advanced L4 `file-backend` past ingest; classified single-store as Level 3
+- Planned `nap` / `zoom` / `recall` / mixed wait-free `wake` / left-fold / proofs 2–6 on the existing shebang driver
+- Pinned `nap` arity (wake-printed child ids + caption), nap filenames (`{minStamp}-{leafset}`), and over-budget `note` requesting a nap rather than inventing a caption
+- No creative phase: `VISION.md` already has the architecture
 
 ## Next Step
-- Load the Level 3 workflow and execute the plan phase
+- Preflight to validate this plan against the tree, then stop for `/niko-build`
