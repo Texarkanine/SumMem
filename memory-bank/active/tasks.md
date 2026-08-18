@@ -285,7 +285,7 @@ Status: **PASS WITH ADVISORY**. Blocking checks (TDD encoding, convention compli
 - [x] Preflight (PASS WITH ADVISORY)
 - [ ] Build
     - [x] 1. Identity codec
-    - [ ] 2. Store auto-create and note
+    - [x] 2. Store auto-create and note
     - [ ] 3. Wake listing
     - [ ] 4. CLI
     - [ ] 5. Proof 1 worktree merge

@@ -5,7 +5,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import shutil
 from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
 
 
 def note_file_bytes(text: str) -> bytes:
@@ -82,3 +86,59 @@ def _tree_from_dict(obj: dict) -> Tree:
 def loads_tree(data: bytes) -> Tree:
     """Parse canonical tree bytes into a Tree."""
     return _tree_from_dict(json.loads(data.decode("utf-8")))
+
+
+ENTRY_CHARS = 280
+
+CONFIG_TEMPLATE = """\
+# SumMem per-store knobs. Missing names mean script defaults.
+# ENTRY_CHARS = 280
+"""
+
+
+def require_utc(now):
+    """Reject *now* unless tzinfo is datetime.timezone.utc."""
+    if not isinstance(now, datetime) or now.tzinfo is not timezone.utc:
+        raise ValueError("clock must be UTC")
+    return now
+
+
+def find_store_parent(cwd):
+    """Walk from *cwd* to the first directory that contains .git, else *cwd*."""
+    cur = Path(cwd).resolve()
+    for candidate in (cur, *cur.parents):
+        if (candidate / ".git").exists():
+            return candidate
+    return cur
+
+
+def ensure_store(parent):
+    """Create the store under *parent* if missing. Never overwrite an existing driver."""
+    store = Path(parent) / ".summem"
+    (store / "notes").mkdir(parents=True, exist_ok=True)
+    driver = store / "summem"
+    if not driver.exists():
+        shutil.copy2(Path(__file__).resolve(), driver)
+        os.chmod(driver, 0o755)
+    config = store / "config.toml"
+    if not config.exists():
+        config.write_text(CONFIG_TEMPLATE, encoding="utf-8")
+    return store
+
+
+def write_note(parent, text, now, rng):
+    """Validate *text*, write one immutable note under *parent*, return its path."""
+    require_utc(now)
+    if text == "":
+        raise ValueError("note is empty")
+    if "\n" in text or "\r" in text:
+        raise ValueError("note must be one line")
+    if len(text.encode("utf-8")) > ENTRY_CHARS:
+        raise ValueError("note is too long")
+    notes = ensure_store(parent) / "notes"
+    name = f"{now.strftime('%Y%m%dT%H%M%SZ')}-{rng.randbytes(8).hex()}"
+    dest = notes / name
+    tmp = notes / f".tmp-{os.urandom(8).hex()}"
+    tmp.write_bytes(note_file_bytes(text))
+    os.replace(tmp, dest)
+    return dest
