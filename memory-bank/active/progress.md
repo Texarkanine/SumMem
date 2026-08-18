@@ -93,3 +93,13 @@ Implement ingest: Python 3 CLI, git-root store auto-create, `note` and wait-free
     - This repo is not a store because the driver is developed here. It becomes a store only when a working `summem` is bound to an agentic hook. Ingest ships the driver and ignores generated store data in this tree.
 * Insights
     - Presence of `.summem/summem` is the product, not activation. Activation is a hook. `ROADMAP.md` Later already keeps harness hooks out of this L4.
+
+## 2026-08-18 - BUILD - IN-PROGRESS
+
+* Work completed
+    - Left preflight (PASS WITH ADVISORY); starting TDD implementation of ingest
+* Decisions made
+    - Keep strict argparse (`note "-foo"` needs `--`)
+    - No creative documents to apply
+* Insights
+    - Build follows the shebang plan; hatchling stays out

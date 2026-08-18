@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: ingest
-**Phase:** PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+**Phase:** BUILD - IN-PROGRESS
 
 ## What Was Done
 - Replanned ingest as one shebang script at `.summem/summem`.
@@ -12,6 +12,7 @@
 
 ## Decisions
 - This repo becomes a store only when a working driver is bound to an agentic hook. Ingest ships `.summem/summem`. Do not commit `.summem/config.toml` or notes from this tree.
+- Strict argparse: `note "-foo"` needs `--`.
 
 ## Next Step
-- `/niko-build` is unblocked. Strict argparse (`note "-foo"` needs `--`) still stands unless you say otherwise.
+- TDD through the ingest plan: codec, store, wake, CLI, proof 1, then prose/policy.
