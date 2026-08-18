@@ -30,10 +30,10 @@ Two writers nap the same leaves with different sentences. Git conflicts on the c
 
 1. Implement Phase 2 (single-store memory) of the first file backend as specified in `VISION.md` and sequenced in `ROADMAP.md`.
 2. Extend the existing shebang driver at `.summem/summem`. Do not add a package, hatchling, `src/` layout, a root-level `summem`, or a second identity scheme. Call `leafset_id` and `dumps_tree` already in that file. The Sequence section's 8-character id is a picture, not the contract.
-3. `nap <id> "…"` and `zoom <id>` accept only a content id a wake printed. A positional range, or no id, is rejected.
+3. `nap <id-a> <id-b> "…"` accepts exactly two adjacent content ids a wake printed, plus a caption. `zoom <id>` accepts one id. A positional range, one id to `nap`, three ids, or no id, is rejected.
 4. A nap is a pair: `.sum` caption (one line, at most 280 UTF-8 bytes) and `.tree` canonical payload. Identity is the leaf set, not the sentence. Same children produce the same id and the same payload bytes. Different wording produces the same id and a different caption.
 5. A child may be a raw note or another nap. Fold writes a new pair. Children leave the view only after the parent payload exists on disk. Do not implement "nap only raw notes" and extend later. Proof 6 needs nap-of-naps.
-6. `wake` prints the current view (loose notes plus `.sum` files), wait-free. A missing or conflict-marked caption degrades; it does not block.
+6. `wake` prints the current view (loose notes plus nap pairs), wait-free. A missing or conflict-marked caption degrades to the content id without a caption; it does not block. Wake does not open `.tree`.
 7. `recall` searches the view, and original sentences inside `.tree` files.
 8. When the view is over `WAKE_LINES`, left-fold: nap the oldest adjacent view nodes. That is enough decay for the proofs. Aligned power-of-two `cover(T, budget)` is later.
 9. Satisfy first proofs 2, 3, 4, 5, and 6 in `VISION.md`. Internal order: identity and conflict (2, 3, 5) before volume and longevity (4, 6).

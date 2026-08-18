@@ -44,3 +44,17 @@ Implement single-store memory: `nap`, `zoom`, `recall`, left-fold of adjacent vi
 * Insights
     - Repeated global oldest-pair folds from 100 notes leave one nap and two loose notes at a three-node view; proof 4 needs three explicit adjacent packs
     - A `.tree` orphan is invisible when the view enumerates only `.sum` files, so “missing caption degrades” needs a pair-aware view rule
+
+## 2026-08-18 - PLAN - COMPLETE (replan after preflight FAIL)
+
+* Work completed
+    - Rewrote the L3 plan as proof-first vertical slices answering the five blocking preflight findings
+    - Pinned binary `nap` (exactly two adjacent wake ids), three-pack proof 4 (40/30/30), pair-aware missing-`.sum` degrade, and surgical `VISION.md` path updates
+* Decisions made
+    - Still no creative phase: the FAIL was plan errors, not an open architecture question
+    - Wake never opens `.tree`; nap grain on wake is date from the filename, not leaf count
+    - Proof 2 asserts both `--ours` and `--theirs` caption resolutions
+    - `test_nap_is_unknown` flips in slice 1 (reject only); successful `nap` waits for slice 2
+* Insights
+    - Global oldest-pair until three view nodes remain cannot satisfy “three naps”; packs must be folded internally
+    - Once children are unlinked, “split to children” on missing `.sum` would force opening `.tree`; id-only degrade keeps wake wait-free
