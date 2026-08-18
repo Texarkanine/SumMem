@@ -126,3 +126,13 @@ Implement ingest: Python 3 CLI, git-root store auto-create, `note` and wait-free
 * Insights
     - The identity freeze is actually in the product: exact `.tree` bytes, no-delimiter join, and 64-hex wake ids, with nap codec present but not persisted
     - Plan deviations (`sys.modules` registration, `os.urandom` temp names) are justified and not defects
+
+## 2026-08-18 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-ingest.md`
+    - Reconciled persistent files (no further edits)
+* Decisions made
+    - L4 milestone 1 is complete; do not mark `file-backend` done
+* Insights
+    - Phase 2 must call `leafset_id` / `dumps_tree` in `.summem/summem`; the Sequence section's 8-character id is not the contract
