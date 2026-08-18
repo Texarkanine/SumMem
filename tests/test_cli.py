@@ -1,0 +1,93 @@
+"""CLI: wake and note only."""
+
+from __future__ import annotations
+
+import os
+import stat
+import subprocess
+import sys
+from datetime import datetime, timezone
+from random import Random
+
+import pytest
+
+from conftest import SCRIPT, load_summem
+from gitutil import init_repo
+
+
+def test_note_subcommand_writes_and_wake_reads(tmp_path, monkeypatch, capsys):
+    """main(['note', text]) writes a note; main(['wake']) prints it."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["note", "hello"]) == 0
+    assert m.main(["wake"]) == 0
+    out = capsys.readouterr().out
+    assert "hello" in out
+    assert len(out.splitlines()) == 1
+
+
+def test_nap_is_unknown(tmp_path, monkeypatch):
+    """Unknown command nap exits nonzero."""
+    m = load_summem()
+    monkeypatch.chdir(init_repo(tmp_path / "r"))
+    assert m.main(["nap"]) != 0
+
+
+def test_path_flag_is_unknown(tmp_path, monkeypatch):
+    """Unknown flag --path exits nonzero."""
+    m = load_summem()
+    monkeypatch.chdir(init_repo(tmp_path / "r"))
+    assert m.main(["wake", "--path", "."]) != 0
+
+
+def test_note_without_text_fails(tmp_path, monkeypatch):
+    """note without text exits nonzero."""
+    m = load_summem()
+    monkeypatch.chdir(init_repo(tmp_path / "r"))
+    assert m.main(["note"]) != 0
+
+
+def test_note_error_text_omits_store_paths_and_git(tmp_path, monkeypatch, capsys):
+    """Rejection text for an over-long note mentions neither notes/, naps/, nor git."""
+    m = load_summem()
+    monkeypatch.chdir(init_repo(tmp_path / "r"))
+    assert m.main(["note", "x" * 281]) == 1
+    err = capsys.readouterr().err
+    assert "notes/" not in err
+    assert "naps/" not in err
+    assert "git" not in err
+
+
+def test_wake_prints_chinese_under_ascii_io_encoding(tmp_path):
+    """A 你好 note wakes when the child process has PYTHONIOENCODING=ascii."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "你好", datetime(2026, 1, 1, tzinfo=timezone.utc), Random(0))
+    env = os.environ.copy()
+    env["PYTHONIOENCODING"] = "ascii"
+    result = subprocess.run(
+        [sys.executable, str(SCRIPT), "wake"],
+        cwd=repo,
+        env=env,
+        capture_output=True,
+    )
+    assert result.returncode == 0
+    assert "你好".encode("utf-8") in result.stdout
+
+
+def test_refuses_python_before_311():
+    """require_python rejects a version tuple older than 3.11."""
+    m = load_summem()
+    with pytest.raises(SystemExit) as caught:
+        m.require_python((3, 10, 12))
+    assert caught.value.code == 1
+    m.require_python((3, 11, 0))
+    m.require_python((3, 12, 0))
+
+
+def test_shebang_and_executable_bit():
+    """The driver starts with the python3 shebang and is executable."""
+    first = SCRIPT.read_text(encoding="utf-8").splitlines()[0]
+    assert first == "#!/usr/bin/env python3"
+    assert SCRIPT.stat().st_mode & stat.S_IXUSR

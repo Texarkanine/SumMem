@@ -287,7 +287,7 @@ Status: **PASS WITH ADVISORY**. Blocking checks (TDD encoding, convention compli
     - [x] 1. Identity codec
     - [x] 2. Store auto-create and note
     - [x] 3. Wake listing
-    - [ ] 4. CLI
+    - [x] 4. CLI
     - [ ] 5. Proof 1 worktree merge
     - [ ] 6. Activation and roadmap invocation
     - [ ] 7. Python gitignore
