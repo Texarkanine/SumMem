@@ -58,3 +58,21 @@ Implement single-store memory: `nap`, `zoom`, `recall`, left-fold of adjacent vi
 * Insights
     - Global oldest-pair until three view nodes remain cannot satisfy “three naps”; packs must be folded internally
     - Once children are unlinked, “split to children” on missing `.sum` would force opening `.tree`; id-only degrade keeps wake wait-free
+
+## 2026-08-18 - PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+
+* Work completed
+    - Re-validated the replanned L3 plan against `.summem/summem`, the 34-test baseline (green on 3.11), `VISION.md`, `ROADMAP.md`, and the brief's acceptance criteria
+    - Confirmed all five earlier blocking findings are answered: proof tests are steps 1 and 3 of each executable unit, `nap` is binary, proof 4 is three explicit packs, missing `.sum` stays a view node, `VISION.md` is scheduled for surgical edits
+    - Probed the current CLI directly and found proof 5's assertions already pass against `HEAD`; amended unit 1 so the rejection tests can actually go red
+    - Closed two undefined-behavior holes as pins 7 and 8, and added `leaves` to the nap filename so wake carries grain
+* Decisions made
+    - Do not block: the ordering discipline is intact and every finding was a plan-text correction, writable in place
+    - `NapChild.sum` is `""` for a child with a missing or dirty `.sum`; accept and record that a parent `.tree` depends on child captions rather than inventing a second dump format Phase 1 froze out
+    - `zoom` of a loose-note id succeeds as a terminal case so the proof walkers do not special-case a nonzero exit
+    - Nap filenames become `{minStamp}-{leafset}-{leaves}`; the count is `len(digests)`, already computed for the id
+* Insights
+    - A rejection test written against a command that does not exist yet passes for the wrong reason; argparse's default-deny makes “exits nonzero” vacuous until the subparser lands
+    - `VISION.md`'s `naps/<leafset>.sum` contradicts its own “sort key is the minimum child time” and “wake never needs to open a fat `.tree`”; the filename edit resolves the document, it does not shrink the contract
+    - Naming naps by minimum child time is what keeps a pack's notes adjacent while it folds, so the left-fold never has to reach across a pack boundary
+    - Grain in the filename turns proof 4's weakest assertion (“three lines”) into a direct `40/30/30` check
