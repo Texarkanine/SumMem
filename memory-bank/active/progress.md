@@ -26,3 +26,23 @@ Build the first SumMem file backend specified in `VISION.md`, sequenced as the t
     - Omit a dependency flowchart; the three milestones are serial
 * Insights
     - A future preflight that scores Phase 2 as L4 should split on the internal gate already named in `ROADMAP.md` (identity and conflicts first, volume and longevity second)
+
+## 2026-08-18 - PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+
+* Work completed
+    - Validated the L4 milestone list against the project brief, architecture, roadmap, TDD rule, and current tree
+    - Confirmed complete coverage of first proofs 1-8 and correct serial dependency order
+    - Recorded the exact preflight gate status in `.preflight-status`
+* Decisions made
+    - Passed the milestone decomposition; each milestone will receive its own test-first L1-L3 plan and preflight before build
+    - Kept single-store memory as L3 because it is one architecture-set subsystem with explicit internal proof gates
+* Insights
+    - The ingest sub-run should freeze unspecified canonical `.tree` bytes through executable compatibility vectors that later backends can reuse
+
+## 2026-08-18 - POST-PREFLIGHT DECISIONS
+
+* Decisions made
+    - Store directory is `.summem/` because `.mem/` is already used (MemoV, 4thel00z/memories, agmem)
+    - Config is `.summem/config.toml`, read with stdlib `tomllib` (Python 3.11+); defaults are a commented template string because `tomllib` does not dump
+* Insights
+    - Left-fold of view files replaces OptMem aligned cover: there is no honest positional `[0, T)` after concurrent branches

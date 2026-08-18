@@ -42,7 +42,7 @@ graph TD
 **Freeze here, do not revisit**
 
 - Package layout and console entry
-- Store directory name and config filename
+- Store path: `.summem/config.toml`. Read with stdlib `tomllib` (Python 3.11+). Write the default file as a commented template string; `tomllib` does not dump.
 - Canonical hash: SHA-256 of file bytes, sorted hex digests, join, SHA-256 of the join
 - How wake prints a content id and a grain line
 - `.tree` dump format, even if Phase 1 does not write naps yet — Phase 2 must not invent a second identity scheme
