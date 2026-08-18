@@ -16,3 +16,17 @@ Implement ingest: Python 3 CLI, git-root store auto-create, `note` and wait-free
 * Insights
     - L4 preflight advisory still applies: failing compatibility-vector tests before the codec
     - Default `python3` on this machine is 3.10; the floor is 3.11 (`python3.11` via pyenv) because `tomllib` is stdlib there
+
+## 2026-08-18 - PLAN - COMPLETE
+
+* Work completed
+    - Wrote the L3 ingest plan in `tasks.md` with TDD-ordered units: codec, store, wake, CLI, proof 1
+    - Validated hatchling + pytest under `uv run --python 3.11` in a throwaway package
+* Decisions made
+    - No creative phase: `VISION.md` already settled architecture; remaining format choices are pinned in the plan
+    - Leaf-set join is concatenation of sorted lowercase hex with no delimiter
+    - `.tree` is canonical JSON (`sort_keys`, no extra spaces, `ensure_ascii=False`, trailing newline) with note and nested nap children
+    - Wake prints the full 64-hex content id
+    - Tests run through `uv run --python 3.11`; do not use the bare `python3.11` pyenv shim
+* Insights
+    - Nested nap vectors belong in ingest even though this milestone does not write naps, or Phase 2 will invent a second identity

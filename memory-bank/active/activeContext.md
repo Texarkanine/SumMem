@@ -1,10 +1,13 @@
 # Active Context
 
 ## Current Task: ingest
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Classified the first unchecked L4 milestone (ingest) as Level 3: a complete feature with multiple components, not a new architecture.
+- Classified ingest as Level 3.
+- Wrote the ingest plan: codec vectors first, then store, wake, CLI, proof 1.
+- Froze identity and print format in the plan pinned info (no-delimiter hex join, canonical JSON `.tree`, 64-hex wake ids).
+- Validated hatchling + pytest on CPython 3.11 via `uv`.
 
 ## Next Step
-- Load the Level 3 workflow and execute the plan phase.
+- Preflight the ingest plan, then wait for `/niko-build`.
