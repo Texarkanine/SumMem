@@ -2,57 +2,54 @@
 
 ## User Story
 
-As an agent working in a git repository, I want a script-owned concurrent memory so that many writers can record facts, wake a decaying view, and recover original sentences after a squash-merge.
+As an agent working in a git repository, I want a script that records one immutable note per fact and wakes a wait-free listing of those notes so that two writers can add two files and a normal git merge keeps both.
 
 ## Use-Case(s)
 
-### Session start
-
-An agent wakes the repository's root memory once, reads a bounded decaying view, and sees a catalog of other started memories it may pull.
-
 ### Record a fact
 
-An agent that learned something runs `note`. The script writes one short immutable file. The agent does not invent filenames or edit the store.
+An agent that learned something runs `note`. The script writes one short immutable file at the git-root store. The agent does not invent filenames or edit the store.
 
-### Compact and recover
+### Session start (root, loose notes)
 
-When asked, the agent `nap`s a sealed block the script identified. Later `zoom` and `recall` still see the original sentences, including from a fresh clone after squash onto `main`.
+An agent wakes the repository's root memory once and reads a listing of loose notes, each with a content id. Wake never refuses to print.
 
 ### Concurrent writers
 
-Two worktrees or agents record at the same time. A normal git merge keeps both facts.
-
-### Aim at a directory
-
-`start` opts a directory in. `--path` walks up to the nearest started store and does not create one.
+Two worktrees or agents each `note` once. A normal git merge has zero conflicts and both notes appear in the view.
 
 ## Requirements
 
-1. Implement the first file backend as specified in `VISION.md`.
-2. Sequence the work as the three phases in `ROADMAP.md`: ingest, single-store memory, scopes.
-3. Satisfy first proofs 1–8 in `VISION.md`. Those proofs are the acceptance bar, not a change-detector on the vision document.
-4. Agents never write the store. They run a script.
-5. The agent interface (`wake`, `note`, `nap`, `recall`, `zoom`, `start`, optional `--path`) does not mention store files, hashes as paths, or git.
-6. First implementation language is Python 3 with SHA-256 from `hashlib`.
+1. Implement Phase 1 (ingest) of the first file backend as specified in `VISION.md` and sequenced in `ROADMAP.md`.
+2. Ship a Python 3.11+ package with a console entry so agents run a script, not edit files.
+3. Auto-create the git-root store on first `wake` or `note`: `.summem/` plus a commented default `config.toml`.
+4. `note` writes one immutable file: UTC name, at most 280 bytes, temp file plus rename.
+5. `wake` prints a wait-free listing of loose notes, each with a content id. Empty output is a valid wake.
+6. Freeze store layout and leaf-set hashing so later milestones do not invent a second identity scheme: note-byte digest, sorted hex join, leaf-set id, and canonical `.tree` bytes — including nested nap children — even though this milestone does not write naps.
+7. Put failing compatibility-vector tests in place before the codec implementation. Those vectors are the executable format contract reused by the single-store milestone.
+8. Satisfy first proof 1 in `VISION.md`.
+9. Agents never write the store. The agent interface does not mention store files, hashes as paths, or git.
 
 ## Constraints
 
-1. Items listed under `ROADMAP.md` "Later" are out of this L4: sqlite or other backends, harness hooks, full OptMem aligned cover, pack-size cap, shipping an agent prompt or Cursor rule, a filled `README.md`.
+1. Out of this milestone: `nap`, `zoom`, `recall`, `start`, `--path`, root catalog, cover, config knobs beyond internal defaults, and every item under `ROADMAP.md` "Later".
 2. No actor, lease, lock, shared mutable index, or custom merge driver.
-3. Sequence is in the filename, not in `git log`. Zoom is a property of `HEAD`.
+3. Sequence is in the filename, not in `git log`.
 4. Wake never refuses to print.
 5. Personal and machine facts stay out of the repository.
-6. A scope is a started directory, not a package manifest.
-7. Missing config means script defaults. Knobs live in the store, not the environment.
-8. A missing implementation of `VISION.md` is unfinished work, not a reason to shrink the contract.
+6. Walk-up never creates a store. This milestone only auto-creates the git root.
+7. Missing config means script defaults. `tomllib` reads only; defaults are a commented template string.
+8. Store directory is `.summem/` (not `.mem/`). Config path is `.summem/config.toml`.
+9. Hashing is SHA-256 from `hashlib`. Do not call `sha256sum`, `openssl`, or `git hash-object`.
+10. First proofs 2–8 belong to later milestones. Do not implement them here.
+11. A missing piece of `VISION.md` is unfinished work, not a reason to shrink the contract.
+12. This is milestone 1 of L4 `file-backend`. Do not mark that L4 complete.
 
 ## Acceptance Criteria
 
-1. First proof 1: two worktrees each `note` once, merge, zero conflicts, two notes in the view.
-2. First proof 2: both `nap` the same pair with different sentences; one conflict, on `.sum` only; either resolution wakes and zooms.
-3. First proof 3: `<<<<<<<` in a `.sum` is skipped by wake; zoom still prints the leaves.
-4. First proof 4: one hundred notes, fold to three naps, squash onto `main`; a fresh clone of `main` can `zoom` to an original sentence.
-5. First proof 5: `nap` with a positional range, or with no content id, is rejected.
-6. First proof 6: two long-lived branches with disjoint packs merge clean; wake prints both at pack grain; a following nap folds the two oldest neighbors into one parent.
-7. First proof 7: `note --path foo/packages/baz/fee.ts` writes into `foo/packages/baz` if that store exists, else the next ancestor.
-8. First proof 8: root wake lists other started stores; `wake --path` on one of them prints that store only, not root again.
+1. Compatibility-vector tests exist and failed before the codec was written: note-byte digests, sorted leaf-set ids, and nested canonical `.tree` bytes.
+2. First proof 1: two worktrees each `note` once, merge, zero conflicts, two notes in the view.
+3. `note` of a line over 280 bytes is rejected. `note` assigns time and name; the caller does not.
+4. First `wake` or `note` in a git repo creates `.summem/config.toml` as a commented template and a `notes/` directory.
+5. `wake` prints each loose note with a content id and never mentions store paths, hashes as paths, or git.
+6. Console entry `summem` exposes `wake` and `note` only.
