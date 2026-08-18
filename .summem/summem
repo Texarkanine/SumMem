@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+"""SumMem driver. Agents run this script; they do not write the store."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from dataclasses import dataclass
+
+
+def note_file_bytes(text: str) -> bytes:
+    """Return UTF-8 encoding of *text* plus a single trailing newline."""
+    return text.encode("utf-8") + b"\n"
+
+
+def note_digest(file_bytes: bytes) -> str:
+    """Return lowercase hex SHA-256 of *file_bytes*."""
+    return hashlib.sha256(file_bytes).hexdigest()
+
+
+def leafset_id(digests: list[str]) -> str:
+    """Return lowercase hex SHA-256 of sorted hex digests joined with no delimiter."""
+    join = "".join(sorted(digests))
+    return hashlib.sha256(join.encode("ascii")).hexdigest()
+
+
+@dataclass(frozen=True)
+class NoteChild:
+    """A raw note child in a canonical tree."""
+
+    name: str
+    text: str
+
+
+@dataclass(frozen=True)
+class Tree:
+    """Canonical tree: versioned list of note and nap children."""
+
+    kids: list[NoteChild | NapChild]
+    v: int = 1
+
+
+@dataclass(frozen=True)
+class NapChild:
+    """A nap child. *id* is the leaf-set id of the original notes."""
+
+    id: str
+    sum: str
+    tree: Tree
+
+
+def _tree_dict(tree: Tree) -> dict:
+    kids = []
+    for child in tree.kids:
+        if isinstance(child, NoteChild):
+            kids.append({"k": "n", "name": child.name, "text": child.text})
+        else:
+            kids.append(
+                {"k": "p", "id": child.id, "sum": child.sum, "tree": _tree_dict(child.tree)}
+            )
+    return {"v": tree.v, "kids": kids}
+
+
+def dumps_tree(tree: Tree) -> bytes:
+    """Serialize *tree* to canonical JSON bytes with a trailing newline."""
+    body = json.dumps(_tree_dict(tree), sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return body.encode("utf-8") + b"\n"
+
+
+def _tree_from_dict(obj: dict) -> Tree:
+    kids: list[NoteChild | NapChild] = []
+    for child in obj["kids"]:
+        if child["k"] == "n":
+            kids.append(NoteChild(name=child["name"], text=child["text"]))
+        else:
+            kids.append(
+                NapChild(id=child["id"], sum=child["sum"], tree=_tree_from_dict(child["tree"]))
+            )
+    return Tree(v=obj["v"], kids=kids)
+
+
+def loads_tree(data: bytes) -> Tree:
+    """Parse canonical tree bytes into a Tree."""
+    return _tree_from_dict(json.loads(data.decode("utf-8")))
