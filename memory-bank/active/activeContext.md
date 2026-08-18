@@ -1,18 +1,25 @@
 # Active Context
 
 ## Current Task: ingest
-**Phase:** BUILD - IN-PROGRESS
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Replanned ingest as one shebang script at `.summem/summem`.
-- Dropped hatchling, `src/`, and PATH console entry.
-- Kept identity freezes (no-delimiter hex join, canonical JSON `.tree`, 64-hex wake ids, UTC clock).
-- Validated loading a no-suffix shebang file via `SourceFileLoader` under pytest.
-- Preflighted the plan: proved proof 1's merge shape, added missing tests for the UTF-8 reconfigure and the error-text rule, pinned the dot-prefixed temp file, made the version guard injectable and unpreemptable, and routed the identity byte rules into `VISION.md`.
+- Built one shebang driver at `.summem/summem`: identity codec, store auto-create, wait-free wake, `wake`/`note` CLI.
+- 34 pytest tests, including first proof 1 (two worktrees, merge, both notes in the view).
+- Wrote identity byte rules into `VISION.md`. Pointed `ROADMAP.md` Phase 1 at the shebang. Ignored generated store data in this tree. Updated briefing files.
+
+## Files
+- Created: `.summem/summem`, `pytest.ini`, `.gitignore`, `tests/conftest.py`, `tests/gitutil.py`, `tests/test_codec.py`, `tests/test_store.py`, `tests/test_wake.py`, `tests/test_cli.py`, `tests/test_proof_ingest.py`
+- Modified: `VISION.md`, `ROADMAP.md`, `memory-bank/techContext.md`, `memory-bank/systemPatterns.md`
 
 ## Decisions
-- This repo becomes a store only when a working driver is bound to an agentic hook. Ingest ships `.summem/summem`. Do not commit `.summem/config.toml` or notes from this tree.
-- Strict argparse: `note "-foo"` needs `--`.
+- `load_summem()` registers `sys.modules["summem"]` so dataclasses with postponed annotations load via `SourceFileLoader`.
+- Temp note files are named with `os.urandom`; injected `rng` is only the public name suffix.
+- Unreadable notes are skipped on `OSError` or `UnicodeDecodeError` (invalid UTF-8 in tests).
+- Strict argparse kept: `note "-foo"` still needs `--`.
+
+## Deviations
+- The plan's loader recipe omitted `sys.modules` registration; that is required for dataclasses under this load path.
 
 ## Next Step
-- TDD through the ingest plan: codec, store, wake, CLI, proof 1, then prose/policy.
+- QA review runs next.

@@ -31,7 +31,7 @@ graph TD
 
 **Build**
 
-- Python 3 package and a CLI entry so agents run a script, not edit files
+- One shebang Python 3.11+ script at `.summem/summem` so agents run a script, not edit files
 - Git-root auto-create on first `wake` or `note`
 - `note`: one immutable file, UTC name, at most 280 bytes, temp file plus rename
 - `wake`: wait-free listing of loose notes, each with a content id
@@ -41,7 +41,7 @@ graph TD
 
 **Freeze here, do not revisit**
 
-- Package layout and console entry
+- Script path: `.summem/summem` (shebang `#!/usr/bin/env python3`, executable)
 - Store path: `.summem/config.toml`. Read with stdlib `tomllib` (Python 3.11+). Write the default file as a commented template string; `tomllib` does not dump.
 - Canonical hash: SHA-256 of file bytes, sorted hex digests, join, SHA-256 of the join
 - How wake prints a content id and a grain line

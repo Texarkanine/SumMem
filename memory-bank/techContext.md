@@ -1,26 +1,24 @@
 # Tech Context
 
-The first backend specified in `VISION.md` is a Python 3 script that writes ordinary files in git. A store is a `.summem/` directory (not `.mem/` — that name is already taken in this problem space). Per-store knobs live in `.summem/config.toml`, read with stdlib [`tomllib`](https://docs.python.org/3/library/tomllib.html) (added in 3.11; parse only). Default config is a commented template written as text, not a TOML dump. Agents talk to a stable CLI (`wake`, `note`, `nap`, `recall`, `zoom`, `start`). The on-disk format may later change, including to sqlite; the CLI table in `VISION.md` must not.
+The first backend specified in `VISION.md` is a Python 3 shebang script at `.summem/summem` that writes ordinary files in git. A store is a `.summem/` directory (not `.mem/` — that name is already taken in this problem space). The driver is a sibling of store data inside that brand directory. Per-store knobs live in `.summem/config.toml`, read with stdlib [`tomllib`](https://docs.python.org/3/library/tomllib.html) (added in 3.11; parse only). Default config is a commented template written as text, not a TOML dump. Agents talk to a stable CLI (`wake`, `note`, `nap`, `recall`, `zoom`, `start`). The on-disk format may later change, including to sqlite; the CLI table in `VISION.md` must not.
 
-If you cannot find the CLI, a store implementation, or a test harness, you are looking at an unfinished tree, not a different product.
+This tree is not itself a SumMem store until a working driver is bound to an agentic hook. The committed product is `.summem/summem`. Generated store data in this repository is ignored.
 
 ## Environment Setup
 
-No runtime pin or install path exists until a project manifest or version file is added. When one appears, it is the source of truth for how to run the script. The intended floor is Python 3.11 so `tomllib` is available without a backport.
+The intended floor is Python 3.11 so `tomllib` is available without a backport. There is no project manifest and no hatchling package. Invoke the driver as `.summem/summem`. Tests must not use this machine's bare `python3` (3.10) or a `python3.11` pyenv shim; use `uv run --python 3.11`.
 
 Hashing is SHA-256 from the language standard library (`hashlib` in Python 3). Do not call `sha256sum` or `openssl`. Do not use `git hash-object`.
 
 ## Build Tools
 
-None yet. The first store is files in the git tree; there is no separate database to provision. When build or packaging files appear, link them here instead of listing commands.
+None. The product is one shebang file; there is no packaging step and no separate database to provision.
 
 License: GNU AGPL v3, in `LICENSE`.
 
 ## Testing Process
 
-No test runner is configured yet. Executable behavior is TDD-governed by `.cursor/rules/shared/always-tdd.mdc`. The acceptance proofs the file backend must satisfy are listed in `VISION.md` under "First proof". Those are product tests, not a change-detector on the vision document.
-
-When a runner and layout exist, point to their config here.
+Tests are pytest as configured in `pytest.ini`, run with `uv run --python 3.11 --with pytest pytest`. They load `.summem/summem` via `SourceFileLoader` (the path has no `.py` suffix). Executable behavior is TDD-governed by `.cursor/rules/shared/always-tdd.mdc`. The acceptance proofs the file backend must satisfy are listed in `VISION.md` under "First proof". Those are product tests, not a change-detector on the vision document.
 
 ## Canonical documents
 

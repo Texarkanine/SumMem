@@ -103,3 +103,15 @@ Implement ingest: Python 3 CLI, git-root store auto-create, `note` and wait-free
     - No creative documents to apply
 * Insights
     - Build follows the shebang plan; hatchling stays out
+
+## 2026-08-18 - BUILD - COMPLETE
+
+* Work completed
+    - Implemented `.summem/summem` (codec, store, wake, CLI) and pytest harness
+    - 34 tests passed, including proof 1 worktree merge
+    - Updated `VISION.md` identity bytes and invocation paths, `ROADMAP.md` Phase 1, `.gitignore`, briefing files
+* Decisions made
+    - Register `sys.modules["summem"]` when loading the no-suffix driver in tests
+    - `os.urandom` for temp names; injected rng names the committed note only
+* Insights
+    - Proof 1 was green on the first run: identical driver plus two note paths merge with zero conflicts

@@ -283,13 +283,13 @@ Status: **PASS WITH ADVISORY**. Blocking checks (TDD encoding, convention compli
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
 - [x] Preflight (PASS WITH ADVISORY)
-- [ ] Build
+- [x] Build
     - [x] 1. Identity codec
     - [x] 2. Store auto-create and note
     - [x] 3. Wake listing
     - [x] 4. CLI
-    - [ ] 5. Proof 1 worktree merge
-    - [ ] 6. Activation and roadmap invocation
-    - [ ] 7. Python gitignore
-    - [ ] 8. Persistent briefing pointers
+    - [x] 5. Proof 1 worktree merge
+    - [x] 6. Activation and roadmap invocation
+    - [x] 7. Python gitignore
+    - [x] 8. Persistent briefing pointers
 - [ ] QA

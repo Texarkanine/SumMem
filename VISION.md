@@ -51,7 +51,7 @@ Git’s job is to merge a directory of files. It is not a timestamp server and n
 
 The interface does not mention store files, hashes as paths, or git. It must stay stable if the backend changes. It does mention `--path`, which is how the agent aims a command at work in the tree.
 
-Every command except `start` takes an optional `--path <relative_path>`. The script walks from that path (or from `$PWD` if the flag is omitted) up to the nearest store and uses that store. `--path` may be a file: `summem note --path foo/packages/baz/fee.ts "…"` walks from `foo/packages/baz` and lands in `foo/packages/baz` if that directory was `start`ed, else further up, at least to the git root.
+Every command except `start` takes an optional `--path <relative_path>`. The script walks from that path (or from `$PWD` if the flag is omitted) up to the nearest store and uses that store. `--path` may be a file: `.summem/summem note --path foo/packages/baz/fee.ts "…"` walks from `foo/packages/baz` and lands in `foo/packages/baz` if that directory was `start`ed, else further up, at least to the git root.
 
 | Command | Contract |
 |---|---|
@@ -72,7 +72,7 @@ A command resolves **one** store: from `--path` if given, otherwise from `$PWD`,
 
 `start <dir>` is the exception: it creates a store in `<dir>` itself.
 
-Do not parse `pnpm-workspace.yaml` or any other manifest to decide what a scope is. A Cargo crate, a seed app, or any other kind of monorepo opts in the same way: `summem start <dir>`.
+Do not parse `pnpm-workspace.yaml` or any other manifest to decide what a scope is. A Cargo crate, a seed app, or any other kind of monorepo opts in the same way: `.summem/summem start <dir>`.
 
 Intermediate folders with no store are not scopes. Work there rolls up to the nearest started ancestor, which in a git repo is at least the root.
 
@@ -86,17 +86,17 @@ So SumMem pushes **root**, and makes every other store available to pull.
 
 Session start is still mandatory and once. The first wake must **resolve to the true root** — cwd at the root, or `--path` aimed at the root, not `.` from a package:
 
-> Run `summem wake` from the repository root (or `summem wake --path <root-relative>`) before any other tool call.
+> Run `.summem/summem wake` from the repository root (or `.summem/summem wake --path <root-relative>`) before any other tool call.
 > If you can see a prior **root** SumMem wake in this conversation, do not run the root wake again.
 
 That root wake prints two things:
 
 1. The root store’s decaying document (the push).
-2. A catalog of every other started store: relative path, note count, latest date, and one line of instruction — when you work under that path, `summem wake --path <that path>` if that store’s wake is not already in this conversation.
+2. A catalog of every other started store: relative path, note count, latest date, and one line of instruction — when you work under that path, `.summem/summem wake --path <that path>` if that store’s wake is not already in this conversation.
 
 The catalog is computed by walking the tree for store directories. It is not a committed index file. If in a git repo, it should honor git ignore (not .gitignore - but `git ignore` - this includes .git/info/exclude).
 
-`summem wake --path foo/packages/baz/fee.ts` pulls **only** the nearest store to that file. It does not reprint root. It does not reprint the full catalog.
+`.summem/summem wake --path foo/packages/baz/fee.ts` pulls **only** the nearest store to that file. It does not reprint root. It does not reprint the full catalog.
 
 Child memories are not guaranteed to enter context. A modern agent that can see the catalog and is about to edit `fee.ts` will probably pull. That is the honesty of the design: pull is available and advertised; it is not enforced.
 
@@ -108,7 +108,7 @@ The script does not infer a monorepo. A tree ten folders deep whose packages liv
 
 The **git root always auto-creates** on the first `wake` or `note` in that repository: store directory plus a config file filled with the script’s defaults, commented so a human can see every knob. Until someone `start`s another path, every note in the tree rolls up to root. A regular repository stays in that shape and can raise `WAKE_LINES` on the root config to spend the whole reading budget in one place.
 
-`summem start <dir>` writes the same kind of store and default config into that directory. After that, `--path` under it resolves here instead of rolling up. A five-level monorepo starts the five directories that should have their own memory and sets each config tight. Root wake stays one document plus a five-line catalog. Pulling a package is one short document, not five stacked layers and not ten accidental ones.
+`.summem/summem start <dir>` writes the same kind of store and default config into that directory. After that, `--path` under it resolves here instead of rolling up. A five-level monorepo starts the five directories that should have their own memory and sets each config tight. Root wake stays one document plus a five-line catalog. Pulling a package is one short document, not five stacked layers and not ten accidental ones.
 
 `start` is how you onboard a package. It is not implied by `package.json`, and it is not implied by `cd`.
 
@@ -144,11 +144,17 @@ Wake never prints positional ranges such as `#16-31`. Agents copy whatever looks
 
 The content id is a digest of the **leaves**, never of the summary sentence.
 
-1. For each original note, SHA-256 of the file bytes.
-2. Sort those hex digests.
-3. SHA-256 of the join → the leaf-set id, which is also the filename stem of `.sum` and `.tree`.
+1. For each original note, SHA-256 of the file bytes (UTF-8 text plus one trailing newline), lowercase hex.
+2. Sort those hex digests as ASCII and concatenate them with **no delimiter**.
+3. SHA-256 of that ASCII join → the leaf-set id, which is also the filename stem of `.sum` and `.tree`.
 
 Same children → same id → same `.tree` bytes. Different sentence → same id, different `.sum`.
+
+Canonical `.tree` bytes are UTF-8 JSON: `sort_keys=True`, `separators=(',', ':')`, `ensure_ascii=False`, exactly one trailing newline. Schema:
+
+- Tree object: `v` (integer `1`), `kids` (array)
+- Note child: `k`=`n`, `name` (filename only), `text` (note text, no terminator)
+- Nap child: `k`=`p`, `id` (leaf-set hex of the original notes), `sum` (caption), `tree` (nested tree object)
 
 Hashing is **inside the script**, SHA-256 from the language stdlib. First backend: Python 3 `hashlib`. Do not call `sha256sum` or `openssl` (PATH lottery). Do not use `git hash-object` (SHA-1 vs SHA-256 depends on the repo). The id must not change because the operator’s git was upgraded.
 
