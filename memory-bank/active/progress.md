@@ -70,3 +70,26 @@ Implement ingest: Python 3 CLI, git-root store auto-create, `note` and wait-free
     - `VISION.md` / `ROADMAP.md` invocation lines update to `.summem/summem` as prose/policy
 * Insights
     - `.summem/summem` is the tool path, like `~/.optmem/memo`. `notes/` and `naps/` remain the store files agents must not be told to edit
+
+## 2026-08-18 - PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+
+* Work completed
+    - Validated the replanned shebang-script plan against codebase reality; all blocking checks pass
+    - Re-verified the load path (`SourceFileLoader` + `exec_module` under `uv run --python 3.11`) and proved proof 1's merge shape in a throwaway repo: identical driver adds from two worktrees merge with zero conflicts and keep mode `100755`
+    - Amended `tasks.md`: tests for the UTF-8 reconfigure and the error-text rule, dot-prefixed temp-file contract, injectable version guard, `SystemExit` handling in `main`, and the identity byte rules written into `VISION.md`
+    - Wrote `.preflight-status` as `PASS WITH ADVISORY`
+* Decisions made
+    - Requirements 5 and 9 needed real tests, not implementation prose: `PYTHONIOENCODING=ascii` is a genuine red/green vector for the reconfigure
+    - The format freeze belongs in `VISION.md`, the durable design contract, not only in an ephemeral plan and test literals
+    - Keep strict argparse: loosening `note` to accept leading-dash text would silently swallow `--path` instead of rejecting it
+* Insights
+    - This machine's `python3` is 3.10 and the shebang targets `python3`, so a module-scope `tomllib` import would replace requirement 10's refusal with a `ModuleNotFoundError`. Ingest writes config and never reads it, so the product needs no `tomllib` yet
+    - Unit 2's temp file and unit 3's dot-skip were only compatible by accident; they are now one pinned contract
+    - The driver living at `.summem/summem` in this tree means the repo becomes its own store on the first root `wake` — an operator workflow decision, flagged as advisory
+
+## 2026-08-18 - POST-PREFLIGHT DECISIONS
+
+* Decisions made
+    - This repo is not a store because the driver is developed here. It becomes a store only when a working `summem` is bound to an agentic hook. Ingest ships the driver and ignores generated store data in this tree.
+* Insights
+    - Presence of `.summem/summem` is the product, not activation. Activation is a hook. `ROADMAP.md` Later already keeps harness hooks out of this L4.

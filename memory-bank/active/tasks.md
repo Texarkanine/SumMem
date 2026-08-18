@@ -16,6 +16,8 @@ These are the identity contract. Later milestones consume them; they do not inve
 - Agent invocation: `.summem/summem wake` and `.summem/summem note "…"`. That path is the tool (same shape as `~/.optmem/memo`). It is not a leaked store file. Store files are `notes/…` and `naps/…`.
 - Store parent: walk from `$PWD` toward parents; first directory that contains `.git` (file or directory) wins. If none, the store parent is `$PWD`. Phase 1 only auto-creates at that parent. It does not walk to a non-root `.summem/` and does not implement `--path`.
 - Shebang: `#!/usr/bin/env python3`. File mode includes execute. Refuse `sys.version_info < (3, 11)` before doing work. `tomllib` is stdlib at that floor.
+- Version guard runs before anything a pre-3.11 interpreter cannot execute. This machine's `python3` is 3.10, so the shebang path really does hit an old interpreter: a `ModuleNotFoundError: tomllib` traceback is not a refusal. Do not import `tomllib` (or any other 3.11-only module) at module scope. This milestone writes `config.toml` and never reads it — `ENTRY_CHARS` comes from the script default, so the product needs no `tomllib` import at all yet.
+- Note temp file: the pre-rename temp lives in `notes/` and its name starts with `.` (for example `.tmp-<16hex>`). Wake skips dot-prefixed names, so a crashed or concurrent write is never listed and never mistaken for a note. These two rules are one contract; do not change either alone.
 - Driver install: if `<parent>/.summem/summem` is missing, copy `Path(__file__).resolve()` there and `chmod 0o755`. If it exists, leave it. Wake and note never overwrite the driver.
 - Note name: `YYYYMMDDTHHMMSSZ-` plus 16 lowercase hex characters from 8 random bytes. Sequence is `ls | sort` of that name.
 - Clock: `datetime.now(timezone.utc)` or an injected timezone-aware UTC `now`. Formatting local time with a `Z` suffix is a defect.
@@ -125,8 +127,11 @@ None - implementation approach is clear. Operator decided the shebang lives at `
 - First `wake` in a git repo with no store creates the store (including driver copy) and prints nothing (exit 0).
 - `wake` after two notes prints two lines, sorted by filename, each with a 64-hex content id and the grain `(1 note, from YYYY-MM-DD)`, and neither line contains `notes/`, `naps/`, or `git`.
 - Two notes in the same UTC second still produce two paths.
+- A dot-prefixed leftover temp file in `notes/` is not listed by `wake`, and the real notes still print.
+- A `你好` note wakes without crashing when the child process runs with `PYTHONIOENCODING=ascii` (the reconfigure is what makes this pass; without it the process dies with `UnicodeEncodeError`). Verified as a red/green vector during preflight.
+- Rejection text for an over-long `note` mentions neither `notes/`, `naps/`, nor `git`.
 - Unknown CLI command (`nap`) and unknown flag (`--path`) exit nonzero.
-- `sys.version_info < (3, 11)` is rejected by the version guard function.
+- `sys.version_info < (3, 11)` is rejected by the version guard function, which takes the version tuple as an argument so no test has to monkeypatch `sys`.
 - First proof 1: two worktrees each run the script as a process (`sys.executable`, script path, `note`); commit; merge onto main; zero conflicts; `wake` shows both texts.
 
 ### Test Infrastructure
@@ -160,14 +165,14 @@ None - implementation approach is clear. Operator decided the shebang lives at `
 
 1. Stub tests: `test_note_rejects_empty`, `test_note_rejects_over_280_bytes`, `test_note_rejects_newline`, `test_note_accepts_280_bytes`, `test_note_280_is_utf8_bytes_not_chars`, `test_note_rejects_non_utc_now`, `test_first_note_creates_config_notes_and_driver`, `test_existing_driver_is_not_overwritten`, `test_note_name_uses_injected_utc_clock_and_rand`, `test_same_second_notes_are_two_paths`.
 2. Stub interface: `ENTRY_CHARS = 280`, `CONFIG_TEMPLATE`, `require_utc(now)`, `find_store_parent(cwd)`, `ensure_store(parent)`, `write_note(parent, text, now, rng)` in `.summem/summem`. `tests/gitutil.py`: `init_repo(path)` sets local `user.name` / `user.email` and makes an empty commit.
-3. Write tests and run red: `tmp_path` + `init_repo`. Inject UTC `now` and `rng`. Assert config is comments only. Assert file bytes equal `note_file_bytes(text)`. Assert a pre-existing driver with different bytes is left intact. Assert a naive datetime is rejected.
-4. Write code and run green: mkdir, copy driver only if missing, write template if config absent, validate text, write temp in `notes/`, `os.replace` to the UTC name.
+3. Write tests and run red: `tmp_path` + `init_repo`. Inject UTC `now` and `rng`. Assert config is comments only. Assert file bytes equal `note_file_bytes(text)`. Assert a pre-existing driver with different bytes is left intact. Assert a naive datetime is rejected. Assert `notes/` holds exactly one non-dot entry after a successful `write_note` (no temp file survives).
+4. Write code and run green: mkdir, copy driver only if missing, write template if config absent, validate text, write a dot-prefixed temp in `notes/`, `os.replace` to the UTC name.
 
 ### 3. Wake listing — executable
 
 - Files: `.summem/summem`, `tests/test_wake.py`
 
-1. Stub tests: `test_wake_without_store_creates_and_prints_nothing`, `test_wake_lists_two_notes_sorted_by_filename`, `test_wake_line_has_full_id_and_grain_date_from_name`, `test_wake_output_omits_notes_naps_and_git`, `test_wake_skips_unreadable_note_and_still_prints`.
+1. Stub tests: `test_wake_without_store_creates_and_prints_nothing`, `test_wake_lists_two_notes_sorted_by_filename`, `test_wake_line_has_full_id_and_grain_date_from_name`, `test_wake_output_omits_notes_naps_and_git`, `test_wake_skips_unreadable_note_and_still_prints`, `test_wake_skips_dot_prefixed_temp_file`.
 2. Stub interface: `wake_text(parent) -> str`.
 3. Write tests and run red: two injected names so sort order is known. Expected content id from `leafset_id([note_digest(note_file_bytes(text))])`. Assert `notes/`, `naps/`, and `git` do not appear.
 4. Write code and run green: `ensure_store`, list `notes/` regular files, skip names starting with `.`, skip unreadable files, sort, format lines, join with `\n` plus a trailing `\n` if any lines else `""`.
@@ -176,10 +181,10 @@ None - implementation approach is clear. Operator decided the shebang lives at `
 
 - Files: `.summem/summem`, `tests/test_cli.py`
 
-1. Stub tests: `test_note_subcommand_writes_and_wake_reads`, `test_nap_is_unknown`, `test_path_flag_is_unknown`, `test_note_without_text_fails`, `test_refuses_python_before_311`, `test_shebang_and_executable_bit`.
-2. Stub interface: `require_python()`, `main(argv: list[str] | None = None) -> int`, `if __name__ == "__main__"` calling `sys.exit(main())`. UTF-8 `reconfigure` at import.
-3. Write tests and run red: `monkeypatch.chdir` to an `init_repo` tmp. Call `main(["note", "hello"])` and `main(["wake"])`. `nap` and `--path` nonzero. Version guard tested by calling `require_python` with a patched `sys.version_info`. Process invocation uses `[sys.executable, str(SCRIPT), ...]`, not the shebang.
-4. Write code and run green: argparse subcommands `wake` and `note` only. Store parent from cwd. Return 0 on success, 2 on usage, 1 on validation. Error text may say the line is too long or empty; it must not mention `notes/`, `naps/`, or git.
+1. Stub tests: `test_note_subcommand_writes_and_wake_reads`, `test_nap_is_unknown`, `test_path_flag_is_unknown`, `test_note_without_text_fails`, `test_note_error_text_omits_store_paths_and_git`, `test_wake_prints_chinese_under_ascii_io_encoding`, `test_refuses_python_before_311`, `test_shebang_and_executable_bit`.
+2. Stub interface: `require_python(version_info: tuple[int, ...] = ...) -> None` (defaults to `sys.version_info`; injectable so the test never monkeypatches `sys`), `main(argv: list[str] | None = None) -> int`, `if __name__ == "__main__"` calling `sys.exit(main())`. UTF-8 `reconfigure` at import.
+3. Write tests and run red: `monkeypatch.chdir` to an `init_repo` tmp. Call `main(["note", "hello"])` and `main(["wake"])`. `nap` and `--path` nonzero. Version guard tested by calling `require_python((3, 10, 12))`. Process invocation uses `[sys.executable, str(SCRIPT), ...]`, not the shebang. The ascii-encoding test is a subprocess with `env` including `PYTHONIOENCODING=ascii`; assert exit 0 and `你好` in `stdout.decode("utf-8")`.
+4. Write code and run green: argparse subcommands `wake` and `note` only, `require_python()` first. Store parent from cwd. `main` catches `SystemExit` from `parse_args` and returns its code, so callers get an int rather than an exception: 0 on success, 2 on usage, 1 on validation. Error text may say the line is too long or empty; it must not mention `notes/`, `naps/`, or git.
 
 ### 5. Proof 1 worktree merge — executable
 
@@ -196,7 +201,8 @@ None - implementation approach is clear. Operator decided the shebang lives at `
 - No tests: prose/policy artifact
 
 1. In `VISION.md` Activation (and any command example that currently writes a bare `summem` as the program), use `.summem/summem` as the program path. Keep the CLI table's command names (`wake`, `note`, …). Do not mention `notes/` or `naps/` in the agent-facing table.
-2. In `ROADMAP.md` Phase 1, replace "Python 3 package and a CLI entry" and "Package layout and console entry" with the shebang at `.summem/summem`. Leave Later's empty `README.md` out.
+2. In `VISION.md` "Identifiers and hashing", write down the bytes the freeze actually pins: the sorted hex digests join with **no delimiter**; canonical `.tree` is UTF-8 JSON with `sort_keys=True`, `separators=(',', ':')`, `ensure_ascii=False`, one trailing newline; the schema is `v`/`kids` with `k=n` note children (`name`, `text`) and `k=p` nap children (`id`, `sum`, `tree`). Requirement 6 asks later milestones not to invent a second identity scheme, and `VISION.md` is the only durable home for that contract — this plan is archived, and test literals are evidence, not a contract. Keep it to the byte rules; do not import the plan.
+3. In `ROADMAP.md` Phase 1, replace "Python 3 package and a CLI entry" and "Package layout and console entry" with the shebang at `.summem/summem`. Leave Later's empty `README.md` out.
 
 ### 7. Python gitignore — prose/policy
 
@@ -204,7 +210,7 @@ None - implementation approach is clear. Operator decided the shebang lives at `
 - No tests: prose/policy artifact
 
 1. Ignore `__pycache__/`, `*.py[cod]`, `.pytest_cache/`, `.venv/`.
-2. Do not ignore `.summem/` — the driver and user notes live there.
+2. Track `.summem/summem` (the product). Ignore this repo's generated store data: `.summem/config.toml`, `.summem/notes/`, `.summem/naps/`. A stray `wake` here must not turn SumMem into a store. This tree becomes a store only when a working driver is bound to an agentic hook (Later). Consumer repos write their own ignore rules; this `.gitignore` is the development tree's.
 
 ### 8. Persistent briefing pointers — prose/policy
 
@@ -243,6 +249,31 @@ No hatchling. No `pyproject.toml`. No new runtime dependencies.
 - **Proof 1 is green because the test called helpers and never merged blobs:** already covered by the subprocess challenge.
 - **Chinese notes break on a latin-1 locale:** UTF-8 `reconfigure` at import; codec vector with `你好`.
 
+## Preflight Findings
+
+Status: **PASS WITH ADVISORY**. Blocking checks (TDD encoding, convention compliance, dependency impact, conflict detection, completeness) all pass. Amendments below are already folded into the plan above.
+
+### Verified against reality, not asserted
+
+- `SourceFileLoader` + `spec_from_loader` + `exec_module` loads a no-suffix executable and pytest calls into it under `uv run --python 3.11 --with pytest pytest` (3.11.13, pytest 9.1.1).
+- Proof 1's merge shape: two worktrees each add an identical `.summem/summem` (mode `100755`) and `.summem/config.toml` plus one distinct note; both merges onto main exit 0 with zero conflict markers and all four paths at `HEAD`. The worktree root's `.git` is a **file**, which the "`.git` file or directory" walk-up already handles.
+- Argparse with a required subparser raises `SystemExit(2)` rather than returning; `main` must catch it to honor "2 on usage" (folded into unit 4).
+- `PYTHONIOENCODING=ascii` makes a `你好` print die with `UnicodeEncodeError` without the reconfigure and succeed with it — a real red/green vector (folded into unit 4).
+
+### Amendments made
+
+1. **Requirement 5 had no test.** UTF-8 reconfigure was an implementation instruction with nothing to fail if someone deleted it. Added `test_wake_prints_chinese_under_ascii_io_encoding` to unit 4.
+2. **Requirement 9's error-text rule had no test.** "Must not mention `notes/`, `naps/`, or git" was prose in unit 4 step 4; a natural implementation prints the path it failed to write. Added `test_note_error_text_omits_store_paths_and_git`.
+3. **Temp-file naming was an unstated coupling.** Unit 2 wrote "temp in `notes/`"; unit 3 skipped names starting with `.`. Those only agree by luck. The dot prefix is now pinned as one contract, with a wake test.
+4. **Version guard could be preempted by its own imports.** `python3` on this machine is 3.10, and the shebang is `#!/usr/bin/env python3`, so a module-scope `tomllib` import would hand the operator a `ModuleNotFoundError` instead of the refusal requirement 10 asks for. Pinned: guard first, no 3.11-only module at module scope, and this milestone writes config without reading it.
+5. **Version guard was hard to test cleanly.** `require_python()` now takes the version tuple, so no test monkeypatches `sys`.
+6. **The format freeze had no durable home.** `VISION.md` states the three hashing steps but not the no-delimiter join, `ensure_ascii=False`, `sort_keys`, the trailing newline, or the `v`/`kids`/`k=n`/`k=p` schema. Everything requirement 6 freezes lived only in this ephemeral plan and in test literals. Unit 6 now writes the byte rules into `VISION.md`.
+
+### Advisory - operator decision
+
+- **This repo is not a store because the driver lives here.** Resolved: a store exists when a working `summem` is bound to an agentic hook. Ingest ships the driver. It does not onboard this tree. Unit 7 now ignores generated store data here and tracks only `.summem/summem`. Tests stay in `tmp_path`.
+- **`note` text starting with `-` needs `--`.** Still open unless the operator says otherwise. Plan keeps strict argparse.
+
 ## Status
 
 - [x] Component analysis complete
@@ -251,6 +282,6 @@ No hatchling. No `pyproject.toml`. No new runtime dependencies.
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
+- [x] Preflight (PASS WITH ADVISORY)
 - [ ] Build
 - [ ] QA
