@@ -15,3 +15,14 @@ Build the first SumMem file backend specified in `VISION.md`, sequenced as the t
     - Aligned cover and pack-size cap stay out; left-fold of view files is the v1 decay rule
 * Insights
     - Design is settled; chunking is for proof gates, not architecture discovery
+
+## 2026-08-18 - PLAN - COMPLETE
+
+* Work completed
+    - Wrote `milestones.md` with three sequential milestones and cross-milestone invariants
+* Decisions made
+    - Keep Phase 2 as one milestone (nap-of-naps included) rather than splitting proofs 2-3-5 from 4-6
+    - Estimate scopes as L2; ingest and single-store memory as L3
+    - Omit a dependency flowchart; the three milestones are serial
+* Insights
+    - A future preflight that scores Phase 2 as L4 should split on the internal gate already named in `ROADMAP.md` (identity and conflicts first, volume and longevity second)

@@ -1,11 +1,12 @@
 # Active Context
 
 ## Current Task: file-backend
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Classified as Level 4. Decision tree: not a bug, not a small enhancement, complete feature with multiple components (CLI, store I/O, identity and fold, scopes) and architectural implications (this is the file-backend architecture). Operator asked for a single L4; the tree agrees.
-- Intent confirmed: first file backend per `VISION.md`, sequenced as the three phases in `ROADMAP.md`. "Later" items stay out.
+- Generated a 3-milestone L4 plan matching `ROADMAP.md`: ingest (proof 1), single-store memory (proofs 2-6), scopes (proofs 7-8).
+- Recorded cross-milestone invariants (script-owned store, commute, filename sequence, wait-free wake, no leaked paths, no "Later" items).
+- Advisory estimates: ingest L3, single-store memory L3, scopes L2.
 
 ## Next Step
-- Load the Level 4 workflow and run the plan phase (milestone list).
+- Preflight to validate the milestone list.
