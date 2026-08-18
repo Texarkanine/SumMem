@@ -1,13 +1,11 @@
 # Active Context
 
 ## Current Task: ingest
-**Phase:** PLAN - COMPLETE
+**Phase:** PLAN - IN-PROGRESS (replan)
 
 ## What Was Done
-- Classified ingest as Level 3.
-- Wrote the ingest plan: codec vectors first, then store, wake, CLI, proof 1.
-- Froze identity and print format in the plan pinned info (no-delimiter hex join, canonical JSON `.tree`, 64-hex wake ids).
-- Validated hatchling + pytest on CPython 3.11 via `uv`.
+- Operator rejected hatchling/`src/`/PATH entry. Driver is `.summem/summem`.
+- Brief updated. Old preflight PASS cleared.
 
 ## Next Step
-- Preflight the ingest plan, then wait for `/niko-build`.
+- Rewrite the L3 ingest plan, then preflight.

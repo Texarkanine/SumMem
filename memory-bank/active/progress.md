@@ -30,3 +30,29 @@ Implement ingest: Python 3 CLI, git-root store auto-create, `note` and wait-free
     - Tests run through `uv run --python 3.11`; do not use the bare `python3.11` pyenv shim
 * Insights
     - Nested nap vectors belong in ingest even though this milestone does not write naps, or Phase 2 will invent a second identity
+
+## 2026-08-18 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Validated implementation plan against codebase reality
+    - Confirmed TDD encoding for all executable units
+    - Verified convention compliance and completeness
+    - Wrote `.preflight-status` to PASS
+* Decisions made
+    - No radical innovation required; the plan is extremely thorough and aligns with `VISION.md`
+* Insights
+    - The plan correctly uses `tmp_path` and `monkeypatch.chdir` for tests to avoid adding test-only flags to the CLI
+
+## 2026-08-18 - REPLAN - INITIATED
+
+* Work completed
+    - Operator rejected the hatchling package plan and invoked `/niko-plan`
+    - Cleared `.preflight-status` so the old PASS cannot gate build
+    - Rewrote `projectbrief.md` around a shebang driver at `.summem/summem`
+* Decisions made
+    - Product is one shebang script, not a package
+    - `.summem/` is the brand; the driver lives at `.summem/summem`
+    - Clock is `datetime.now(timezone.utc)`; `Z` without UTC is a defect
+    - Tests stay outside the script
+* Insights
+    - OptMem already keeps `memo` inside `.optmem/`, not at `$HOME/memo`. The earlier "put it at repo root" recommendation was a misread of that layout
