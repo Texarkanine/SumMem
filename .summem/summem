@@ -142,3 +142,24 @@ def write_note(parent, text, now, rng):
     tmp.write_bytes(note_file_bytes(text))
     os.replace(tmp, dest)
     return dest
+
+
+def wake_text(parent) -> str:
+    """Return the wait-free listing of loose notes under *parent*, or empty."""
+    notes = ensure_store(parent) / "notes"
+    lines = []
+    paths = sorted(p for p in notes.iterdir() if p.is_file() and not p.name.startswith("."))
+    for path in paths:
+        try:
+            raw = path.read_bytes()
+            text = raw.decode("utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        if text.endswith("\n"):
+            text = text[:-1]
+        cid = leafset_id([note_digest(raw)])
+        day = f"{path.name[0:4]}-{path.name[4:6]}-{path.name[6:8]}"
+        lines.append(f"{cid}  (1 note, from {day})  {text}")
+    if not lines:
+        return ""
+    return "\n".join(lines) + "\n"
