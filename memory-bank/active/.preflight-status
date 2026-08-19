@@ -1,0 +1,27 @@
+PASS WITH ADVISORY
+
+Prerequisites: Level 2 plan is complete (test plan, implementation unit, technology validation, pre-mortem). No creative docs are required or present.
+
+TDD encoding: The one executable unit lists stub tests, stub `usage_text()`, write tests and run red, then write code and run green. Test steps come before production. The write-tests step already forbids a full-catalog poem, so nothing was struck as a change-detector and no steps were reordered.
+
+Convention: Touchpoints match the tree — `tests/test_cli.py` plus `.summem/summem`, pytest via `pytest.ini`, `conftest.load_summem` / `SourceFileLoader`, `main(...)` and `capsys`. `usage_text()` fits the existing `*_text()` helpers and does not collide with `catalog_text()` (root-wake store list).
+
+Dependency: `main` already catches argparse `SystemExit` and returns the code, so `wake -h` and `nap --help` already work. The new work is intercept-before-`parse_args` for empty argv, top-level `-h`/`--help`, and `-h <command>`. Existing `test_path_flag_is_known_on_all_non_start_commands` covers the `--path` regression; `tests/test_proof_reject.py::test_nap_help_exits_zero` must stay green.
+
+Conflict: No duplicate of a memo-style catalog exists. Argparse already owns `-h`; intercepting first is the intended override, not a clash with a reusable helper.
+
+Completeness: Requirements 1–5 map to `usage_text()` plus the argv intercept and a one-line `--path` help string. Store behavior is out of scope as stated.
+
+Advisories for the builder (do not change the plan in this phase):
+
+1. Resolve `argv is None` the way argparse does (`sys.argv[1:]`) before the empty / `-h` check. `main()` is called with no args from `__main__`. A bare `if not argv:` would print the catalog for every process invocation, including `wake` and `nap --help`. Subprocess tests would catch it; still do not write that `if`.
+
+2. Pin streams in the new tests: missing command currently prints argparse usage on stderr (rc 2); `-h` prints help on stdout (rc 0). Assert on `out + err`, or on the stream that matches the exit code, so a stdout catalog vs a stderr usage error cannot hide a miss.
+
+3. Behaviors to Verify include `--help` and the `--path` footer; numbered write-tests only mention `main(["-h"])` and token/structure asserts. When filling tests, also pin `main(["--help"])` and footer tokens (optional `--path`, file or directory, omit → `$PWD`) without locking the poem.
+
+4. `test_command_help_still_shows_path` and `test_start_help_omits_path` are already true of argparse today (`wake -h` shows `--path PATH`; `start -h` does not). Treat them as characterization locks. `test_catalog_omits_store_paths_and_git` may also already pass on current top-level help; keep it tied to catalog `--path` placement so the suite still goes red on the new behavior.
+
+5. Do not name the new helper `catalog_text`. Do not mutate the caller’s argv list in place when rewriting `-h <command>`. Keep the `--path` help string free of `git`, `notes/`, and `naps/`.
+
+Radical innovation (advisory only, not applied): After the subparsers exist, format the catalog from those parsers (names, positionals, whether `--path` is registered) so a new command cannot make help lie. Handwrite only the footer. Optional small alignment: set `prog=".summem/summem"` so last-click argparse help matches the catalog’s copy-paste lines.
