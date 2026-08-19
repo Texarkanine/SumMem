@@ -135,3 +135,15 @@ Make SumMem CLI help a memo-style ratchet, then fold accepted PR #5 review fixes
     - Not L3: no design fork; each item names the change
 * Insights
     - Item 19 is an explicit `note` arm so fallthrough cannot write a note; argparse already rejects unknown tokens
+
+## 2026-08-19 - PLAN - COMPLETE (rework)
+
+* Work completed
+    - Wrote Level 2 plan: eight steps, TDD on executable items, VISION/comment as prose
+* Decisions made
+    - SCRIPT first so the suite can run
+    - Recall prints `format_wake_line` over `list_view`, then tree children
+    - Auto-create docs follow the code (any store command at root)
+    - Item 17 stays in `test_proof_reject.py` even though `test_unknown_prefix_is_error` exists
+* Insights
+    - Unknown argv already cannot write a note; the `note` arm is leftover-cmd insurance

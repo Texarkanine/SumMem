@@ -1,10 +1,10 @@
 # Active Context
 
 ## Current Task: cli-help
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Classified PR #5 review rework as Level 2: multiple files (driver, tests, VISION), no design fork, punch list is the brief.
+- Level 2 plan for PR #5 review punch list: SCRIPT, recall/zoom degrade, ENTRY_CHARS prompt, test accuracy, explicit `note` arm, VISION wording.
 
 ## Next Step
-- Load the Level 2 workflow and run plan.
+- Preflight, then build.
