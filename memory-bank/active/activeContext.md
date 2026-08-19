@@ -4,7 +4,7 @@
 **Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Level 2 plan for PR #5 review punch list: SCRIPT, recall/zoom degrade, ENTRY_CHARS prompt, test accuracy, explicit `note` arm, VISION wording.
+- Re-planned after preflight FAIL: printed invocations and persistent files follow repo-root `summem`. Rejected `sys.argv[0]` because in-process tests see pytest.
 
 ## Next Step
-- Preflight, then build.
+- Preflight again, then build.

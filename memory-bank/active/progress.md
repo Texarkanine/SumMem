@@ -147,3 +147,33 @@ Make SumMem CLI help a memo-style ratchet, then fold accepted PR #5 review fixes
     - Item 17 stays in `test_proof_reject.py` even though `test_unknown_prefix_is_error` exists
 * Insights
     - Unknown argv already cannot write a note; the `note` arm is leftover-cmd insurance
+
+## 2026-08-19 - PREFLIGHT - FAIL (fixable)
+
+* Work completed
+    - Gemini preflight: missed printed `.summem/summem` strings, their tests, and persistent briefing
+* Decisions made
+    - Re-plan: printers say `summem`; reject `sys.argv[0]` (pytest)
+    - VISION examples and systemPatterns/techContext move with the driver
+* Insights
+    - `ensure_store` still copies into `.summem/summem`; that is a store-local copy, not the committed source
+
+## 2026-08-19 - PLAN - COMPLETE (rework, after preflight)
+
+* Work completed
+    - Added plan steps 2 and 10 for printed invocations and persistent briefing
+* Decisions made
+    - Hardcode printed name `summem`, not basename of argv
+* Insights
+    - Catalog tests already match `summem {name}` with or without the `.summem/` prefix
+
+## 2026-08-19 - PREFLIGHT - COMPLETE (FAIL)
+
+* Work completed
+    - Validated the rework plan (PR #5 review items) against `summem`, `tests/`, `VISION.md`, and memory bank files
+    - Wrote `memory-bank/active/.preflight-status` with first line `FAIL (fixable)`
+* Decisions made
+    - Found missing updates for hardcoded `.summem/summem` paths in the driver script (`usage_text`, catalog, prompts), tests, and `VISION.md`
+    - Found missing updates for `systemPatterns.md` and `techContext.md` to reflect the new `summem` repo-root convention
+* Insights
+    - Relying on static hardcoded driver paths (`.summem/summem`) throughout the codebase creates brittle tests and output; using `os.path.basename(sys.argv[0])` dynamically solves this.

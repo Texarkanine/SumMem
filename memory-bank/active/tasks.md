@@ -20,6 +20,7 @@ Fold accepted PR #5 review items into the driver, tests, and VISION. Driver stay
 - `chmod`-independent unreadable `.tree` → wake prints one pack line
 - CLI `nap` of two syntactically valid unknown ids on an initialized store → nonzero, no new payloads
 - CLI leftover: `note` still writes; an unknown token still does not write a note (argparse invalid choice)
+- Printed invocations (`usage_text`, `catalog_text`, `fold_request`) name `summem`, not `.summem/summem`
 
 ### Test Infrastructure
 
@@ -39,7 +40,16 @@ Fold accepted PR #5 review items into the driver, tests, and VISION. Driver stay
 3. Write tests and run red: `SCRIPT.is_file()` and `SCRIPT == ROOT / "summem"`; collection still fails today
 4. Write code and run green: both `SCRIPT` assignments and their docstrings
 
-### 2. Recall searches the store, degrades on bad trees — executable
+### 2. Printed invocations say `summem` — executable
+
+- Files: `summem` (`usage_text`, `catalog_text`, `fold_request`), `tests/test_fold.py`, `tests/test_scopes.py`, `tests/test_proof_scopes.py`
+
+1. Stub tests: none new; edit the existing path asserts
+2. Stub interface: none
+3. Write tests and run red: `Run: summem nap `, `summem wake --path pkg`; old `.summem/summem` asserts fail once production strings change
+4. Write code and run green: those three printers use `summem`. Do **not** use `sys.argv[0]`: `main()` is called in-process and argv[0] is pytest. `ensure_store` still copies the driver to each store's `.summem/summem`
+
+### 3. Recall searches the store, degrades on bad trees — executable
 
 - Files: `summem` (`recall_text`), `tests/test_recall.py`
 
@@ -48,7 +58,7 @@ Fold accepted PR #5 review items into the driver, tests, and VISION. Driver stay
 3. Write tests and run red: `WAKE_LINES=4` and 11 loose notes, `recall n0` nonempty; planted `{not json` `.tree` + `recall_text` returns without raising
 4. Write code and run green: iterate `list_view` + `format_wake_line`, then tree children; wrap `loads_tree` in `_TREE_PARSE_ERRORS` and skip
 
-### 3. Zoom degrades on unreadable trees — executable
+### 4. Zoom degrades on unreadable trees — executable
 
 - Files: `summem` (`zoom_text`), `tests/test_zoom.py`
 
@@ -57,7 +67,7 @@ Fold accepted PR #5 review items into the driver, tests, and VISION. Driver stay
 3. Write tests and run red: two-note nap, `.tree` bytes `{not json`, `zoom_text` raises `ValueError`, message has no traceback/store paths
 4. Write code and run green: both `loads_tree` sites in `zoom_text` use `try/except _TREE_PARSE_ERRORS` → `ValueError("unreadable pack")`
 
-### 4. Fold prompt uses `ENTRY_CHARS` — executable
+### 5. Fold prompt uses `ENTRY_CHARS` — executable
 
 - Files: `summem` (`fold_request`), `tests/test_fold.py`
 
@@ -66,7 +76,7 @@ Fold accepted PR #5 review items into the driver, tests, and VISION. Driver stay
 3. Write tests and run red: config `ENTRY_CHARS = 140`, over-budget pair, prompt contains `140` and not `280`
 4. Write code and run green: `fold_request` formats `knobs(parent)["ENTRY_CHARS"]`; keep existing 280 asserts (default)
 
-### 5. Test accuracy — executable
+### 6. Test accuracy — executable
 
 - Files: `tests/test_nap.py`, `tests/test_wake_expand.py`, `tests/test_zipper.py`, `tests/test_proof_reject.py`
 
@@ -79,7 +89,7 @@ Fold accepted PR #5 review items into the driver, tests, and VISION. Driver stay
     - rename `test_cli_nap_overlapping_ids_exits_0_without_concat` → `…_exits_1_…`
     - implement the new reject test (behavior already in `resolve_id`; test is the change)
 
-### 6. Explicit `note` arm; drop dead `present` guard — executable
+### 7. Explicit `note` arm; drop dead `present` guard — executable
 
 - Files: `summem` (`main`), `tests/test_cli.py`
 
@@ -88,14 +98,14 @@ Fold accepted PR #5 review items into the driver, tests, and VISION. Driver stay
 3. Write tests and run red: `main(["raw invocation of random stuff"])` nonzero, `notes/` empty if a repo exists; `main(["note", "ok"])` still writes
 4. Write code and run green: `if args.cmd == "note":` wraps the write path; any other leftover `cmd` writes usage and returns 2. Remove `present` check; `write_nap` after `resolve_id`
 
-### 7. Same-children comment — prose/policy
+### 8. Same-children comment — prose/policy
 
 - Files: `tests/test_nap.py`
 - No tests: prose/policy artifact
 
 1. One comment above the cross-repo `write_nap`: ids match because both repos wrote the same text at the same timestamps
 
-### 8. VISION wording — prose/policy
+### 9. VISION wording — prose/policy
 
 - Files: `VISION.md`
 - No tests: prose/policy artifact
@@ -103,6 +113,15 @@ Fold accepted PR #5 review items into the driver, tests, and VISION. Driver stay
 1. Scopes: outside a repository every store command fails, including `start`. `start <dir>` is the no-walk-up exception **inside** a repository
 2. Drop “or an explicit config command”
 3. One root auto-create rule: git root on first `wake`, `note`, `nap`, `zoom`, or `recall`; other paths only via `start`. Align the Onboarding sentence and the Empty-packages invariant
+4. Example invocations use `summem`, not `.summem/summem`. Keep the fact that `ensure_store` copies the driver into a store's `.summem/summem`
+
+### 10. Persistent briefing — prose/policy
+
+- Files: `memory-bank/systemPatterns.md`, `memory-bank/techContext.md`
+- No tests: prose/policy artifact
+
+1. Committed driver is repo-root `summem`. Tests load that path. Each store may hold a copy at `.summem/summem`
+2. Do not rewrite archives or ROADMAP in this task
 
 ## Technology Validation
 
@@ -120,12 +139,14 @@ No new technology - validation not required
 - `fold_request(repo, n)` tests do not pass `ENTRY_CHARS`; read `knobs(parent)` inside `fold_request`
 - Recall output shape: print `format_wake_line` for every matching view row so caption tests still see `folded pair`
 - Item 19: unknown tokens already die in argparse; the new arm is so a future leftover `cmd` cannot fall through to `args.text`
+- Printed help still says `.summem/summem` after the driver move: change those three printers in step 2; catalog tests already match `summem {name}` either way
 
 ## Pre-Mortem
 
 - Plan treats item 17 as uncovered CLI reject, but `test_unknown_prefix_is_error` already exists: keep the proof-file case anyway (empty initialized store, `_payload_files`); do not delete the cli test
 - Aligning auto-create docs to “any store command” contradicts older “wake or note only” in `productContext.md`: VISION follows the code (honest); persistent reconcile after QA
 - Monkeypatching `Path.read_bytes` is too wide and breaks unrelated reads: patch only when `self` equals the target tree path
+- Using `sys.argv[0]` for the printed name (preflight advisory) would make in-process tests print `pytest`: already rejected in step 2
 
 ## Status
 
