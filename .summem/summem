@@ -426,21 +426,22 @@ def wake_text(parent) -> str:
     return "\n".join(lines) + "\n"
 
 
-def oldest_adjacent(nodes: list[ViewNode]) -> tuple[str, str] | None:
-    """Return the ids of the two oldest view nodes, or None."""
-    if len(nodes) < 2:
-        return None
-    return nodes[0].id, nodes[1].id
+def equal_grain_pair(nodes: list[ViewNode]) -> tuple[str, str] | None:
+    """Return the oldest adjacent same-leaf-count file ids, or None."""
+    for i in range(len(nodes) - 1):
+        if nodes[i].leaves == nodes[i + 1].leaves:
+            return nodes[i].id, nodes[i + 1].id
+    return None
 
 
 def fold_request(parent, wake_lines: int | None = None) -> str:
-    """Return a request to nap the oldest adjacent pair when over *wake_lines*."""
+    """Return a request to nap the oldest equal-grain pair when over *wake_lines*."""
     if wake_lines is None:
         wake_lines = WAKE_LINES
     nodes = list_view(parent)
     if len(nodes) <= wake_lines:
         return ""
-    pair = oldest_adjacent(nodes)
+    pair = equal_grain_pair(nodes)
     if pair is None:
         return ""
     return f"{pair[0]} {pair[1]}\n"
@@ -528,6 +529,7 @@ def main(argv: list[str] | None = None) -> int:
         except ValueError as exc:
             sys.stderr.write(f"{exc}\n")
             return 1
+        sys.stdout.write(fold_request(parent, WAKE_LINES))
         return 0
     if args.cmd == "zoom":
         if is_range_token(args.id):

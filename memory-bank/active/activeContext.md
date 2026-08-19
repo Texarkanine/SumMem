@@ -6,7 +6,11 @@
 ## What Was Done
 - Entered L3 build after preflight PASS
 - Creative lock remains unlink plus in-memory right-edge expand; fold_request stays file-count
-- Starting unit 1: carry-stable nap names
+- Carry-stable stems inherit the left child's `{stamp}-{rand}`
+- Equal-grain picker plus catch-up after nap; `oldest_adjacent` is gone
 
 ## Next Step
-- TDD unit 2 (equal-grain picker and catch-up), then wake expand, then contract wording
+- TDD unit 3 (in-memory wake expand), then contract wording
+
+## Next Step
+- TDD unit 3 (in-memory wake expand), then contract wording
