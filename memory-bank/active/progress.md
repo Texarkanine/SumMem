@@ -17,3 +17,13 @@ Clean-cut `.tree` JSON (`c` / `type: note|nap`, no `v`) and undated wake lines, 
 * Insights
     - `k` next to `kids` was the original hole; full-word `type` removes that clash without compact-key theater
     - A `type` field is a discriminator, not a reason to switch to XML
+
+## 2026-08-19 - PLAN - COMPLETE
+
+* Work completed
+    - Wrote Level 2 TDD plan in `tasks.md` (codec, wake lines, contract prose)
+* Decisions made
+    - Catalog dates in `store_stats` stay; only `format_wake_line` drops the day
+    - Zipper `{"v":1}` fixture stays; missing `c` still fails the parse
+* Insights
+    - Only `test_codec.py` byte-locks JSON; nap/zoom/zipper compare through `dumps_tree` or behavior
