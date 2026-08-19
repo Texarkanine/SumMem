@@ -36,3 +36,14 @@ Make SumMem CLI help a memo-style ratchet: bare invocation lists every command�
     - Advisories are for the builder: `argv is None`, stdout vs stderr, footer/`--help` asserts, characterization tests already green, do not collide with `catalog_text`
 * Insights
     - Today `main([])` is argparse’s `{wake,note,…}` usage on stderr (rc 2); `main(["-h", "wake"])` reprints top-level help; `main(["wake", "-h"])` already shows `--path`
+
+## 2026-08-19 - BUILD - COMPLETE
+
+* Work completed
+    - `usage_text()` memo-style catalog; argv intercept; `--path` help on subparsers
+    - 6 new tests in `tests/test_cli.py`; 183 pytest passed
+* Decisions made
+    - Missing command → catalog on stderr, rc 2; `-h` → catalog on stdout, rc 0
+    - `-h <command>` rewritten to `[command, "--help"]` without mutating the caller’s list
+* Insights
+    - `parse_args(argv)` would have thrown away the rewrite; it has to be `parse_args(args_list)`

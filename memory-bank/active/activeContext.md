@@ -1,12 +1,19 @@
 # Active Context
 
 ## Current Task: cli-help
-**Phase:** PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Level 2 plan: memo-style `usage_text()` catalog; `main` intercepts empty / `-h` / `-h <cmd>` before argparse; tests in `tests/test_cli.py` assert tokens not the poem.
-- Inspiration: bare `~/.optmem/memo` copy-paste lines and a `--path` footer. Do not copy `No such command: -h`.
-- Preflight: PASS WITH ADVISORY. Plan stands; builder should normalize `argv is None`, pin stdout/stderr, and not collide with `catalog_text`.
+- Memo-style `usage_text()` catalog; `main` intercepts empty / `-h` / `-h <command>` before argparse via `_cli_argv` (copy; `None` → `sys.argv[1:]`); `parse_args(args_list)`.
+- `--path` help string: "aim at this file or directory".
+- Six tests in `tests/test_cli.py`. Full suite 183 passed.
+
+## Files
+- `/home/mobaxterm/git/SumMem/.summem/summem`
+- `/home/mobaxterm/git/SumMem/tests/test_cli.py`
+
+## Deviations
+- Added `_cli_argv` (not named in the plan) so `argv is None` cannot catalog every `__main__` invocation, per preflight advisory 1.
 
 ## Next Step
-- Build
+- QA

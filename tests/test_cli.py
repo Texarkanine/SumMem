@@ -223,3 +223,76 @@ def test_nap_accepts_prefix_of_identical_notes(tmp_path, monkeypatch, capsys):
     view = m.list_view(repo)
     assert len(view) == 1
     assert view[0].kind == "nap"
+
+
+def test_bare_invocation_prints_command_catalog(capsys):
+    """main([]) prints a catalog of every command; --path on all but start."""
+    m = load_summem()
+    catalog = m.usage_text()
+    assert m.main([]) != 0
+    captured = capsys.readouterr()
+    text = captured.out + captured.err
+    assert catalog in text
+    lines = {name: ln for ln in catalog.splitlines() for name in ("wake", "note", "nap", "zoom", "recall", "start") if f"summem {name}" in ln}
+    for name in ("wake", "note", "nap", "zoom", "recall"):
+        assert name in lines
+        assert "--path" in lines[name]
+    assert "start" in lines
+    assert "--path" not in lines["start"]
+
+
+def test_help_flag_prints_catalog(capsys):
+    """-h and --help print the catalog and exit 0."""
+    m = load_summem()
+    catalog = m.usage_text()
+    for flag in ("-h", "--help"):
+        assert m.main([flag]) == 0
+        captured = capsys.readouterr()
+        text = captured.out + captured.err
+        assert catalog in text
+        assert captured.out
+    assert "PWD" in catalog
+    assert "--path" in catalog
+    assert "file" in catalog.lower() or "directory" in catalog.lower()
+
+
+def test_help_before_command_prints_command_help(capsys):
+    """-h wake prints wake help including --path, not top-level-only usage."""
+    m = load_summem()
+    assert m.main(["-h", "wake"]) == 0
+    captured = capsys.readouterr()
+    text = captured.out + captured.err
+    assert "--path" in text
+    assert "{wake,note" not in text
+
+
+def test_command_help_still_shows_path(capsys):
+    """wake -h still shows --path."""
+    m = load_summem()
+    assert m.main(["wake", "-h"]) == 0
+    captured = capsys.readouterr()
+    text = captured.out + captured.err
+    assert "--path" in text
+
+
+def test_start_help_omits_path(capsys):
+    """start -h does not list --path."""
+    m = load_summem()
+    assert m.main(["start", "-h"]) == 0
+    captured = capsys.readouterr()
+    text = captured.out + captured.err
+    assert "--path" not in text
+
+
+def test_catalog_omits_store_paths_and_git(capsys):
+    """Catalog mentions neither notes/, naps/, nor git, and still shows --path."""
+    m = load_summem()
+    catalog = m.usage_text()
+    assert m.main([]) != 0
+    captured = capsys.readouterr()
+    text = catalog + captured.out + captured.err
+    assert "notes/" not in text
+    assert "naps/" not in text
+    assert "git" not in text.lower()
+    assert "--path" in catalog
+    assert "summem wake" in catalog

@@ -37,6 +37,8 @@ Replace argparse’s top-level `{wake,note,…} ...` dead end with a memo-style 
 3. Write tests and run red: assert command names and `--path` placement; `main(["-h"])` returns 0; `main([])` nonzero; `main(["-h", "wake"])` includes `--path` and does not equal the old top-level-only usage; catalog has no `notes/`, `naps/`, or `git`; assert tokens and structure, not the full catalog poem
 4. Write code and run green: `usage_text()` returns a memo-style catalog (`.summem/summem <cmd> [args]`, one line each, `--path` in brackets on every command except `start`, footer for `--path` like memo’s `--global` paragraph). `main` inspects argv **before** `parse_args`: empty → catalog, nonzero; `-h`/`--help` alone → catalog, 0; `-h`/`--help` plus a known command → rewrite to `[command, "--help", ...]`; subparser `--path` gets a one-line help string. Do not treat `-h` as an unknown command.
 
+**Build:** done. `_cli_argv` copies argv (`None` → `sys.argv[1:]`); `parse_args(args_list)` so `-h wake` rewrite is not discarded.
+
 ## Technology Validation
 
 No new technology - validation not required
@@ -66,6 +68,6 @@ No new technology - validation not required
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
-- [ ] Build
+- [x] Preflight
+- [x] Build
 - [ ] QA
