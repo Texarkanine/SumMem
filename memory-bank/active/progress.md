@@ -31,3 +31,17 @@ Addressing: `start`, `--path` walk-up, root-wake catalog, per-store config, firs
 * Insights
     - `find_store_parent` stays the `.git` locator; `resolve_parent` is the first-`.summem/` walk
     - A `--path` that is not an existing directory walks from its parent, so `fee.ts` does not have to exist yet
+
+## 2026-08-19 - PREFLIGHT - COMPLETE (PASS)
+
+* Work completed
+    - Validated all five executable units against the brief, `VISION.md`, the current single-script implementation, and existing pytest conventions
+    - Confirmed each unit explicitly orders test stubs, interface stubs, red tests, implementation, and green tests
+    - Expanded the plan's tests for `--path` routing on `nap`, `zoom`, and `recall`, per-store `ENTRY_CHARS`, and folded catalog note counts
+* Decisions made
+    - Keep the Level 2 design and proceed to build; no creative phase or rearchitecture is needed
+    - Thread configured `ENTRY_CHARS` through CLI and writer validation so values above or below the default behave consistently
+    - Add a name-only `store_stats` helper so catalog counts use encoded nap grain without loading child-store content or creating an index
+* Insights
+    - Counting loose note files would report zero after a complete fold, so catalog count must include each distinct nap stem's encoded leaf count
+    - Merely adding `ENTRY_CHARS` to CLI prevalidation is insufficient because `write_note` and `write_nap` validate again against the module default

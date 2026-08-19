@@ -1,12 +1,13 @@
 # Active Context
 
 ## Current Task: scopes
-**Phase:** PLAN - COMPLETE
+**Phase:** PREFLIGHT - COMPLETE (PASS)
 
 ## What Was Done
-- Classified scopes as Level 2.
-- Wrote the L2 plan in `tasks.md`: resolve walk-up, `start`, `--path`, per-store `knobs`, root-wake catalog, proofs 7-8.
-- Mapped red tests to `tests/test_scopes.py`, `tests/test_proof_scopes.py`, and inversions of `test_path_flag_is_unknown` and `test_config_toml_is_not_read`.
+- Validated the L2 plan against `projectbrief.md`, `VISION.md`, current implementation boundaries, and test conventions.
+- Confirmed test-before-code ordering for all five executable units.
+- Amended coverage for `nap`/`zoom`/`recall --path`, per-store `ENTRY_CHARS`, and folded catalog note grain.
+- Added the content-free `store_stats` design so root catalog metadata does not load child memories.
 
 ## Next Step
-- Preflight validation runs next.
+- Preflight passed; proceed to `/niko-build`.
