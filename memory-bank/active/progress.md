@@ -50,3 +50,18 @@ Zipper-heal overlapping nap leaf-sets after merge so the next `note` or `nap` re
     - `list_view` calls `ensure_store`, so anything `ensure_store` creates is created by `wake` — a lock file there quietly makes a read-only command a writer
     - A real store commits `.summem/`, so ignoring the lock in this repository's `.gitignore` protects the development tree and nothing a user has
     - The crash-safety argument for containment-first does not hold: a parent `.tree` contains its children's leaves verbatim, so undoing a partial split cannot lose a leaf
+
+## 2026-08-19 - PLAN - COMPLETE (replan after preflight FAIL)
+
+* Work completed
+    - Rewrote `projectbrief.md` and `tasks.md` to the locked design only
+    - Deleted stale `.preflight-status` so it cannot gate the new plan
+* Decisions made
+    - `fcntl.flock` the `naps/` directory; no lock file; nothing to commit or push
+    - ⊆ only: `{A,B}` next to `{A,B,C,D}` keeps the coarse pack
+    - Crash order stays write-children-then-unlink-parent; recovery is ⊆ retry, not a containment pass
+    - Kept from the failed preflight: nap-required overlap guard, `heal_view` action list, `NapChild.id` stem, all-kids rematerialize, progress measure, three `productContext.md` lock sentences
+* Insights
+    - A builder who reads issue #3 will still see "containment"; the plan states once not to build it
+    - `list_view` calls `ensure_store`, so the lock must not be created there or `wake` becomes a writer
+
