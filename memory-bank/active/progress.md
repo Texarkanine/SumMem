@@ -80,3 +80,14 @@ Cap `wake` at `WAKE_LINES`, print short dated lines, keep full hashes on disk, a
     - QA PASS - proceed to /niko-reflect
 * Insights
     - Deduplicating the id list via `dict.fromkeys` cleanly preserved order while fixing the prefix issue.
+
+## 2026-08-19 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-wake-listing.md`
+    - One sentence on `systemPatterns.md`: prefix uniqueness is among distinct ids
+* Decisions made
+    - Archive waits for `/niko-archive`
+* Insights
+    - Plan "two matches is an error" meant two distinct ids; the view list is not that set
+

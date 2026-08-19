@@ -44,7 +44,7 @@ Note names carry writer time in UTC. Nap names carry the leftmost child's `{stam
 
 ## Wake prints dated lines, never positional ranges
 
-A range such as `#16-31` is a picture of one listing and a lie after the next merge. Wake prints `YYYY-MM-DD: text` for a note and `YYYY-MM-DD xN <prefix>: caption` for a pack. `nap` and `zoom` accept the unique prefix of a content id they can already name; a command that looks like a range is rejected. Filenames and `.tree` identity stay 64 hex. A content id names leaves, not a unique view row: two notes with the same text share an id, and adjacency must keep both.
+A range such as `#16-31` is a picture of one listing and a lie after the next merge. Wake prints `YYYY-MM-DD: text` for a note and `YYYY-MM-DD xN <prefix>: caption` for a pack. `nap` and `zoom` accept the unique prefix of a content id they can already name; a command that looks like a range is rejected. Filenames and `.tree` identity stay 64 hex. A content id names leaves, not a unique view row: two notes with the same text share an id, and adjacency must keep both. Prefix uniqueness is among distinct ids, not view-row count; a repeated id is still that one prefix.
 
 ## Payloads are write-once; captions are the honest conflict
 

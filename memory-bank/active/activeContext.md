@@ -1,21 +1,14 @@
 # Active Context
 
 ## Current Task: wake-listing
-**Phase:** QA - COMPLETE (PASS)
+**Phase:** REFLECT - COMPLETE
 
 ## What Was Done
-- Verified resolution of the duplicate content identity regression
-- Confirmed tests pass correctly
-- Audited implementation against DRY, KISS, and YAGNI principles
-
-## Files
-- `/home/mobaxterm/git/SumMem/.summem/summem`
-- `/home/mobaxterm/git/SumMem/tests/test_wake.py`
-- `/home/mobaxterm/git/SumMem/tests/test_fold.py`
-- `/home/mobaxterm/git/SumMem/tests/test_cli.py`
+- Reflection written: `memory-bank/active/reflection/reflection-wake-listing.md`
+- `systemPatterns.md`: prefix uniqueness is among distinct ids
 
 ## Decisions
-- QA PASS - proceed to /niko-reflect
+- Standing contract: a repeated content id is one prefix, not an ambiguous clash
 
 ## Next Step
-- Run `/niko-reflect`
+- Operator: `/niko-archive`
