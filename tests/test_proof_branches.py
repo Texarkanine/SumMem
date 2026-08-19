@@ -49,7 +49,7 @@ def test_two_branch_packs_merge_then_nap_neighbors(tmp_path, monkeypatch):
     monkeypatch.setattr(m, "WAKE_LINES", 1)
     wake = m.wake_text(main)
     assert len(wake.splitlines()) == 1
-    assert " x8 " in wake
+    assert "x8 " in wake
     assert "both packs" in wake
     nap_id = m.list_view(main)[0].id
     zoom_reaches(main, nap_id, "A0")

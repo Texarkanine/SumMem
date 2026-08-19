@@ -59,3 +59,15 @@ Clean-cut `.tree` JSON (`c` / `type: note|nap`, no `v`) and undated wake lines, 
     - The plan correctly addresses all requirements and is ready for the Build phase
 * Insights
     - The replan successfully addressed the previous fixable findings
+
+## 2026-08-19 - BUILD - COMPLETE
+
+* Work completed
+    - Codec emits `{c, type:note|nap}`; unknown fields ignored; missing/unknown `type` is `ValueError`
+    - Wake lines undated; notes are caption-only; packs are `xN <prefix>: caption`
+    - Updated VISION.md and systemPatterns.md
+    - 177 pytest passed
+* Decisions made
+    - Proof tests that locked `" xN "` / `YYYY-MM-DD: text` were rewritten like the other wake assertions
+* Insights
+    - Old pack lines had a date, so grain was `" xN "` with a leading space; undated lines start with `xN `

@@ -186,8 +186,8 @@ def test_nap_prints_remaining_ones_not_parent_plus_one(tmp_path, monkeypatch, ca
     nodes = m.list_view(repo)
     assert m.main(["nap", nodes[0].id, nodes[1].id, "pair"]) == 0
     out = capsys.readouterr().out
-    assert "  2026-01-01: c\n" in out
-    assert "  2026-01-01: d\n" in out
+    assert "  c\n" in out
+    assert "  d\n" in out
     assert "Run: .summem/summem nap " in out
     assert "Invent nothing." in out
 
@@ -219,8 +219,8 @@ def test_over_budget_note_requests_equal_grain_ones(tmp_path, monkeypatch, capsy
     out = capsys.readouterr().out
     assert "Compress these two into one line of at most 280 characters." in out
     assert "Invent nothing." in out
-    assert "  2026-01-01: alpha\n" in out
-    assert "  2026-01-01: beta\n" in out
+    assert "  alpha\n" in out
+    assert "  beta\n" in out
     assert 'Run: .summem/summem nap ' in out
     assert '"<your line>"' in out
     pa = m.short_id(ids[0], ids)
@@ -266,8 +266,8 @@ def test_fold_request_mentions_remaining(tmp_path, monkeypatch):
         m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
     out = m.fold_request(repo, 3)
     assert "1 compression remains after this one." in out
-    assert "  2026-01-01: a\n" in out
-    assert "  2026-01-01: b\n" in out
+    assert "  a\n" in out
+    assert "  b\n" in out
 
 
 def test_fold_request_identical_notes_use_short_prefix(tmp_path, monkeypatch):

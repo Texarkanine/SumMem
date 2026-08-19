@@ -138,7 +138,7 @@ Git-add date is the wrong clock. Git does not store “when this path entered th
 
 A nap file’s sort key is the **minimum child time**, not “when we compacted.” If the nap sorted as “now,” Monday’s block would jump to the front of wake and temporal bias would invert. The script names the file from the children. The agent does not invent the name.
 
-Wake never prints positional ranges such as `#16-31`. Agents copy whatever looks like an id; those digits are a picture of one listing and become a lie after the next merge. Wake prints a dated line: a note is `YYYY-MM-DD: text`; a pack is `YYYY-MM-DD xN <prefix>: caption`. The prefix is the shortest unique hex of the leaf-set id, at least 8 characters. Stored filenames and `.tree` identity stay 64 hex. `nap` and `zoom` accept that unique prefix. Over budget, `note` and `nap` print an OptMem-style `Run:` prompt; `wake` does not. A command that looks like a range is rejected.
+Wake never prints positional ranges such as `#16-31`. Agents copy whatever looks like an id; those digits are a picture of one listing and become a lie after the next merge. Wake prints a note as `text` and a pack as `xN <prefix>: caption`. The prefix is the shortest unique hex of the leaf-set id, at least 8 characters. Stored filenames and `.tree` identity stay 64 hex. `nap` and `zoom` accept that unique prefix. Over budget, `note` and `nap` print an OptMem-style `Run:` prompt; `wake` does not. A command that looks like a range is rejected.
 
 ## Identifiers and hashing
 
@@ -152,9 +152,10 @@ Same children → same id → same `.tree` bytes. Different sentence → same id
 
 Canonical `.tree` bytes are UTF-8 JSON: `sort_keys=True`, `separators=(',', ':')`, `ensure_ascii=False`, exactly one trailing newline. Schema:
 
-- Tree object: `v` (integer `1`), `kids` (array)
-- Note child: `k`=`n`, `name` (filename only), `text` (note text, no terminator)
-- Nap child: `k`=`p`, `id` (leaf-set hex of the original notes), `sum` (caption), `tree` (nested tree object)
+- Tree object: `c` (array). Unknown fields ignored. No version key.
+- Note child: `type`=`note`, `name` (filename only), `text` (note text, no terminator)
+- Nap child: `type`=`nap`, `id` (leaf-set hex of the original notes), `sum` (caption), `tree` (nested tree object)
+- Missing or unsupported `type` is an error. Do not infer kind from other keys.
 
 Hashing is **inside the script**, SHA-256 from the language stdlib. First backend: Python 3 `hashlib`. Do not call `sha256sum` or `openssl` (PATH lottery). Do not use `git hash-object` (SHA-1 vs SHA-256 depends on the repo). The id must not change because the operator’s git was upgraded.
 
@@ -294,7 +295,7 @@ These look optional and are not.
 
 **Knobs live in the store.** Not in the environment. Missing config means script defaults.
 
-**Wake prints dated lines, never positional ranges.**
+**Wake prints undated lines, never positional ranges.**
 
 **Personal and machine facts stay out of the repo.**
 

@@ -97,7 +97,7 @@ def test_lone_note_does_not_split(tmp_path, monkeypatch):
     monkeypatch.setattr(m, "WAKE_LINES", 32)
     lines = [line for line in m.wake_text(repo).splitlines() if line]
     assert len(lines) == 1
-    assert lines[0].endswith(": solo")
+    assert lines[0] == "solo"
 
 
 def test_expand_writes_nothing(tmp_path, monkeypatch):

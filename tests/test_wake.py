@@ -34,19 +34,19 @@ def test_wake_lists_two_notes_sorted_by_filename(tmp_path):
     m.write_note(repo, "first", earlier, Random(1))
     lines = m.wake_text(repo).splitlines()
     assert len(lines) == 2
-    assert lines[0].endswith(": first")
-    assert lines[1].endswith(": second")
+    assert lines[0] == "first"
+    assert lines[1] == "second"
 
 
-def test_wake_line_is_date_and_text_for_a_note(tmp_path):
-    """A note wake line is YYYY-MM-DD: text, dated from the filename, with no hash."""
+def test_wake_line_is_text_for_a_note(tmp_path):
+    """A note wake line is the text, with no date and no hash."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     now = datetime(2026, 8, 18, 12, 30, 5, tzinfo=UTC)
     path = m.write_note(repo, "hello", now, Random(42))
     os.utime(path, (0, 0))
     line = m.wake_text(repo).splitlines()[0]
-    assert line == "2026-08-18: hello"
+    assert line == "hello"
     assert len(m.list_view(repo)[0].id) == 64
 
 
@@ -100,8 +100,8 @@ def test_wake_mixed_view_sorts_by_filename(tmp_path, monkeypatch):
     lines = m.wake_text(repo).splitlines()
     assert len(lines) == 2
     prefix = m.short_id(m.list_view(repo)[0].id, [node.id for node in m.list_view(repo)])
-    assert lines[0] == f"2026-01-01 x2 {prefix}: pair"
-    assert lines[1] == "2026-01-01: gamma"
+    assert lines[0] == f"x2 {prefix}: pair"
+    assert lines[1] == "gamma"
 
 
 def test_wake_missing_sum_prints_id_and_grain_without_caption(tmp_path, monkeypatch):
@@ -118,7 +118,7 @@ def test_wake_missing_sum_prints_id_and_grain_without_caption(tmp_path, monkeypa
     monkeypatch.setattr(m, "WAKE_LINES", 1)
     out = m.wake_text(repo)
     prefix = m.short_id(leafset, [leafset])
-    assert out == f"2026-01-01 x2 {prefix}:\n"
+    assert out == f"x2 {prefix}:\n"
     assert "pair" not in out
 
 
@@ -136,7 +136,7 @@ def test_wake_conflict_sum_omits_caption(tmp_path, monkeypatch):
     monkeypatch.setattr(m, "WAKE_LINES", 1)
     out = m.wake_text(repo)
     prefix = m.short_id(leafset, [leafset])
-    assert out == f"2026-01-01 x2 {prefix}:\n"
+    assert out == f"x2 {prefix}:\n"
     assert "pair" not in out
 
 
@@ -158,8 +158,8 @@ def test_wake_does_not_call_loads_tree(tmp_path, monkeypatch):
     assert "pair" in out
 
 
-def test_wake_pack_line_is_date_grain_prefix_caption(tmp_path, monkeypatch):
-    """A pack wake line is YYYY-MM-DD xN prefix: caption."""
+def test_wake_pack_line_is_grain_prefix_caption(tmp_path, monkeypatch):
+    """A pack wake line is xN prefix: caption."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
@@ -169,18 +169,18 @@ def test_wake_pack_line_is_date_grain_prefix_caption(tmp_path, monkeypatch):
     monkeypatch.setattr(m, "WAKE_LINES", 1)
     nap_id = m.list_view(repo)[0].id
     prefix = m.short_id(nap_id, [nap_id])
-    assert m.wake_text(repo) == f"2026-01-01 x2 {prefix}: pair\n"
+    assert m.wake_text(repo) == f"x2 {prefix}: pair\n"
 
 
 def test_wake_prints_at_most_wake_lines_newest(tmp_path, monkeypatch):
-    """Eleven notes at WAKE_LINES=4 print the newest four date lines, no hashes."""
+    """Eleven notes at WAKE_LINES=4 print the newest four texts, no hashes."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     for i in range(11):
         m.write_note(repo, f"n{i}", datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
     monkeypatch.setattr(m, "WAKE_LINES", 4)
     lines = m.wake_text(repo).splitlines()
-    assert lines == [f"2026-01-01: n{i}" for i in range(7, 11)]
+    assert lines == [f"n{i}" for i in range(7, 11)]
     assert all(len(part) != 64 for line in lines for part in line.split())
 
 

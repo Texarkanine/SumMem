@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 
+import pytest
 from conftest import load_summem
 
 
@@ -58,7 +59,7 @@ def test_dumps_tree_one_note_exact_bytes():
     m = load_summem()
     tree = m.Tree(kids=[m.NoteChild(name="20260101T000000Z-aaaaaaaaaaaaaaaa", text="hello")])
     expected = (
-        b'{"kids":[{"k":"n","name":"20260101T000000Z-aaaaaaaaaaaaaaaa","text":"hello"}],"v":1}\n'
+        b'{"c":[{"name":"20260101T000000Z-aaaaaaaaaaaaaaaa","text":"hello","type":"note"}]}\n'
     )
     assert m.dumps_tree(tree) == expected
 
@@ -72,7 +73,7 @@ def test_dumps_tree_keeps_chinese_not_uescaped():
     assert b"\\u4f60" not in raw
     assert raw.endswith(b"\n")
     as_text = raw.decode("utf-8").rstrip("\n")
-    assert json.loads(as_text)["kids"][0]["text"] == "你好"
+    assert json.loads(as_text)["c"][0]["text"] == "你好"
 
 
 def test_dumps_tree_nested_nap_exact_bytes():
@@ -89,10 +90,10 @@ def test_dumps_tree_nested_nap_exact_bytes():
     )
     outer = m.Tree(kids=[m.NapChild(id=nid, sum="caption", tree=inner)])
     expected = (
-        '{"kids":[{"id":"'
+        '{"c":[{"id":"'
         + nid
-        + '","k":"p","sum":"caption","tree":{"kids":[{"k":"n","name":"a","text":"alpha"},'
-        '{"k":"n","name":"b","text":"beta"}],"v":1}}],"v":1}\n'
+        + '","sum":"caption","tree":{"c":[{"name":"a","text":"alpha","type":"note"},'
+        '{"name":"b","text":"beta","type":"note"}]},"type":"nap"}]}\n'
     ).encode("utf-8")
     assert m.dumps_tree(outer) == expected
 
@@ -115,3 +116,41 @@ def test_loads_tree_round_trip():
         ]
     )
     assert m.loads_tree(m.dumps_tree(outer)) == outer
+
+
+def test_loads_tree_ignores_unknown_fields():
+    """loads_tree ignores unknown keys, including leftover v and kids beside c."""
+    m = load_summem()
+    tree = m.Tree(kids=[m.NoteChild(name="n1", text="hello")])
+    payload = {
+        "c": [{"name": "n1", "text": "hello", "type": "note", "extra": True}],
+        "v": 1,
+        "kids": [],
+        "noise": 0,
+    }
+    raw = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8") + b"\n"
+    assert m.loads_tree(raw) == tree
+
+
+def test_loads_tree_rejects_kids_key_without_c():
+    """loads_tree of kids/v without c raises."""
+    m = load_summem()
+    with pytest.raises((KeyError, ValueError)):
+        m.loads_tree(b'{"kids":[],"v":1}\n')
+
+
+def test_loads_tree_rejects_child_missing_type():
+    """loads_tree of a child object without type raises."""
+    m = load_summem()
+    with pytest.raises(ValueError):
+        m.loads_tree(b'{"c":[{"name":"n1","text":"hello"}]}\n')
+
+
+def test_loads_tree_rejects_unknown_type():
+    """loads_tree of a child with type pack raises; it does not become a nap."""
+    m = load_summem()
+    raw = (
+        b'{"c":[{"id":"ab","sum":"s","tree":{"c":[]},"type":"pack"}]}\n'
+    )
+    with pytest.raises(ValueError):
+        m.loads_tree(raw)

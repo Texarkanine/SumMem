@@ -59,10 +59,9 @@ class NoteChild:
 
 @dataclass(frozen=True)
 class Tree:
-    """Canonical tree: versioned list of note and nap children."""
+    """Canonical tree: list of note and nap children."""
 
     kids: list[NoteChild | NapChild]
-    v: int = 1
 
 
 @dataclass(frozen=True)
@@ -107,12 +106,12 @@ def _tree_dict(tree: Tree) -> dict:
     kids = []
     for child in tree.kids:
         if isinstance(child, NoteChild):
-            kids.append({"k": "n", "name": child.name, "text": child.text})
+            kids.append({"type": "note", "name": child.name, "text": child.text})
         else:
             kids.append(
-                {"k": "p", "id": child.id, "sum": child.sum, "tree": _tree_dict(child.tree)}
+                {"type": "nap", "id": child.id, "sum": child.sum, "tree": _tree_dict(child.tree)}
             )
-    return {"v": tree.v, "kids": kids}
+    return {"c": kids}
 
 
 def dumps_tree(tree: Tree) -> bytes:
@@ -123,14 +122,17 @@ def dumps_tree(tree: Tree) -> bytes:
 
 def _tree_from_dict(obj: dict) -> Tree:
     kids: list[NoteChild | NapChild] = []
-    for child in obj["kids"]:
-        if child["k"] == "n":
+    for child in obj["c"]:
+        kind = child.get("type")
+        if kind == "note":
             kids.append(NoteChild(name=child["name"], text=child["text"]))
-        else:
+        elif kind == "nap":
             kids.append(
                 NapChild(id=child["id"], sum=child["sum"], tree=_tree_from_dict(child["tree"]))
             )
-    return Tree(v=obj["v"], kids=kids)
+        else:
+            raise ValueError("unknown tree child type")
+    return Tree(kids=kids)
 
 
 _TREE_PARSE_ERRORS = (
@@ -824,13 +826,12 @@ def resolve_id(token: str, ids: list[str]) -> str:
 
 def format_wake_line(node, ids: list[str]) -> str:
     """Return one wake line for *node* using unique prefixes from *ids*."""
-    day = _day_from_stamp(node.stamp)
     if node.kind == "note" or node.leaves <= 1:
-        return f"{day}: {node.caption}"
+        return node.caption
     prefix = short_id(node.id, ids)
     if node.caption:
-        return f"{day} x{node.leaves} {prefix}: {node.caption}"
-    return f"{day} x{node.leaves} {prefix}:"
+        return f"x{node.leaves} {prefix}: {node.caption}"
+    return f"x{node.leaves} {prefix}:"
 
 
 def wake_text(parent) -> str:
