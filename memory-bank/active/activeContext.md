@@ -4,7 +4,7 @@
 **Phase:** BUILD - IN-PROGRESS
 
 ## What Was Done
-- Unit 1 green: `leaf_digests`, `_nap_stem`, `rematerialize_child` (skip overwrite). Helpers only; no CLI wiring.
+- Units 1–2 green: leaf-sets/rematerialize and `heal_view` zipper (subset-drop, split-smaller, skip note-note and unreadable packs).
 
 ## Next Step
-- Unit 2: `heal_view` zipper loop (TDD).
+- Unit 3: `write_nap` overlap and unreadable-pack guards (TDD).

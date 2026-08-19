@@ -357,6 +357,50 @@ def rematerialize_child(parent, child: NoteChild | NapChild) -> None:
         _replace_bytes(sum_path, note_file_bytes(child.sum))
 
 
+_HEAL_PASS_LIMIT = 10_000
+
+
+def _first_overlap(
+    nodes: list[ViewNode],
+) -> tuple[ViewNode, ViewNode, set[str], set[str]] | None:
+    sets = [leaf_digests(node) for node in nodes]
+    for i, left in enumerate(nodes):
+        for j in range(i + 1, len(nodes)):
+            right = nodes[j]
+            left_set, right_set = sets[i], sets[j]
+            if left_set is None or right_set is None:
+                continue
+            if left.kind == "note" and right.kind == "note":
+                continue
+            if left_set.isdisjoint(right_set):
+                continue
+            if left.leaves <= right.leaves:
+                return left, right, left_set, right_set
+            return right, left, right_set, left_set
+    return None
+
+
+def heal_view(parent) -> None:
+    """Zipper overlapping view packs until a pass cannot mutate."""
+    for _ in range(_HEAL_PASS_LIMIT):
+        found = _first_overlap(list_view(parent))
+        if found is None:
+            return
+        smaller, _other, small_set, other_set = found
+        if small_set <= other_set:
+            _unlink_node(smaller)
+            continue
+        if other_set <= small_set:
+            _unlink_node(other)
+            continue
+        child, _digests = _as_child(smaller)
+        if not isinstance(child, NapChild):
+            return
+        for kid in child.tree.kids:
+            rematerialize_child(parent, kid)
+        _unlink_node(smaller)
+
+
 def _as_child(node: ViewNode) -> tuple[NoteChild | NapChild, list[str]]:
     if node.kind == "note":
         child, digest = _note_child(node)
