@@ -27,11 +27,12 @@ Binary `nap <id-a> <id-b>` still folds two adjacent view nodes the agent named. 
 1. Address [Texarkanine/SumMem#1](https://github.com/Texarkanine/SumMem/issues/1): equal-grain fold so rebuild stays `O(log n)`.
 2. Keep binary `nap <id-a> <id-b> "…"`. Do not invent a second identity. Do not nap `k` children at once. The CLI table does not grow.
 3. Change which pair is requested: only two adjacent view nodes with the same leaf count. Two 1s → 2, two 8s → 16. Never 16+1.
-4. Catch-up is a chain, not one request per later `note`. After a successful `nap`, if the view is still over `WAKE_LINES`, print the next equal-grain pair. `note` still prints at most one pair after a write.
-5. Wake stays wait-free. Boundedness comes from the files on disk being a short tree, not from wake truncating or refusing.
-6. Production fold tests refuse a 16+1 request and accept two 8s. Proof 4's in-pack left-spines may remain a test helper; pack sizes in the squash proof must be reachable under equal-grain (powers of two, plus remainder).
-7. Surgical contract updates: `VISION.md` "simpler equivalent" (oldest two / oldest *k*) is no longer the long-term fold; the year-later diagram is the fold rule. `ROADMAP.md` Later distinguishes equal-grain / short tree (this issue) from full aligned cover as a wake pretty-printer (still Later).
-8. Binary `nap`, leaf-set identity, write-once `.tree`, wait-free wake, and "zoom is a property of `HEAD`" do not change.
+4. Nap filenames carry the leftmost child's `{stamp}-{rand}` so same-second files keep view order. Leaf-set id stays identity, not the sort field. Inherit that prefix from the left child's filename; do not open `.tree` to sort. Stem is `{stamp}-{rand}-{leafset}-{leaves}`.
+5. Catch-up is a chain, not one request per later `note`. After a successful `nap`, if the view is still over `WAKE_LINES`, print the next equal-grain pair. `note` still prints at most one pair after a write.
+6. Wake stays wait-free. Boundedness comes from the files on disk being a short tree, not from wake truncating or refusing.
+7. Production fold tests refuse a 16+1 request and accept two 8s. Proof 4's in-pack left-spines may remain a test helper; pack sizes in the squash proof must be reachable under equal-grain (powers of two, plus remainder).
+8. Surgical contract updates: `VISION.md` nap stems and "simpler equivalent" (oldest two / oldest *k*); the year-later diagram is the fold rule. `ROADMAP.md` Later distinguishes equal-grain / short tree (this issue) from full aligned cover as a wake pretty-printer (still Later).
+9. Binary `nap`, leaf-set identity, write-once `.tree`, wait-free wake, and "zoom is a property of `HEAD`" do not change.
 
 ## Constraints
 
@@ -46,9 +47,10 @@ Binary `nap <id-a> <id-b>` still folds two adjacent view nodes the agent named. 
 
 ## Acceptance Criteria
 
-1. A long stream of `note` + requested `nap`s produces view grains that are powers of two (plus a remainder of unmerged 1s), not one nap of size `T - WAKE_LINES + 1`.
-2. Depth of the oldest pack is `O(log leaves)`, not `O(leaves)`.
-3. Falling `k` pairs behind can be caught in one agent turn (`O(k)` sequential equal-grain naps, `k` on the order of a cover burst, not `O(T)`).
-4. The request printer never names 16+1. It does name two adjacent 8s.
-5. Binary `nap`, leaf-set identity, write-once `.tree`, wait-free wake, and zoom-from-`HEAD` still hold. First proofs 2, 3, 5, and 6 still pass. Proof 4 still squash-clones and zooms originals, with power-of-two pack sizes.
-6. No redaction command ships. No flatten. No aligned `[0, 8192)` rebuild after merge.
+1. A long stream of `note` + requested `nap`s produces view grains that are powers of two (plus a remainder of unmerged 1s), not one nap of size `T - WAKE_LINES + 1`. This holds when many notes share one UTC second.
+2. Four notes in the same second, nap of the two oldest → view grains `[2, 1, 1]` in that order. The parent stays in the left child's slot.
+3. Depth of the oldest pack is `O(log leaves)`, not `O(leaves)`.
+4. Falling `k` pairs behind can be caught in one agent turn (`O(k)` sequential equal-grain naps, `k` on the order of a cover burst, not `O(T)`).
+5. The request printer never names 16+1. It does name two adjacent 8s.
+6. Binary `nap`, leaf-set identity, write-once `.tree`, wait-free wake, and zoom-from-`HEAD` still hold. First proofs 2, 3, 5, and 6 still pass. Proof 4 still squash-clones and zooms originals, with power-of-two pack sizes.
+7. No redaction command ships. No flatten. No aligned `[0, 8192)` rebuild after merge.

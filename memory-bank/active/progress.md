@@ -45,3 +45,18 @@ Change fold requests from oldest-two left-fold to equal-grain pairs, emit a catc
 * Insights
     - Minimum child time is not enough to preserve a folded interval when note timestamps tie; the leaf-set hash can move the parent between surviving notes
     - `zoom_reaches` bounds breadth-first work, not hop depth, so it cannot prove the logarithmic-depth acceptance criterion
+
+## 2026-08-18 - PLAN - COMPLETE (replan after preflight FAIL)
+
+* Work completed
+    - Rewrote the L2 plan: carry-stable nap names first, then equal-grain picker, catch-up, proof 4 packs, contract wording
+    - Added same-second `[2, 1, 1]` and 24-note same-second stream as the regression that failed preflight
+    - Updated `projectbrief.md` with the filename order-key requirement
+* Decisions made
+    - Stem is `{stamp}-{rand}-{leafset}-{leaves}`; `{stamp}-{rand}` copied from the left child's filename
+    - Stay Level 2; no creative phase
+    - Depth is max NoteChild depth in `.tree`; `zoom_reaches` stays a reachability check
+* Insights
+    - Tests that used `split("-")[1]` as leafset must move to `[-2]` in the same unit as the stem change
+    - A mixed-time long stream would not catch the stall; the hard case is one UTC second
+
