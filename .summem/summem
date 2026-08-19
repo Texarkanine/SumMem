@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import random
+import re
 import shutil
 import sys
 from dataclasses import dataclass
@@ -121,6 +122,7 @@ def loads_tree(data: bytes) -> Tree:
 
 
 ENTRY_CHARS = 280
+WAKE_LINES = 32
 
 CONFIG_TEMPLATE = """\
 # SumMem per-store knobs. Missing names mean script defaults.
@@ -411,6 +413,59 @@ def wake_text(parent) -> str:
     return "\n".join(lines) + "\n"
 
 
+def oldest_adjacent(nodes: list[ViewNode]) -> tuple[str, str] | None:
+    """Return the ids of the two oldest view nodes, or None."""
+    if len(nodes) < 2:
+        return None
+    return nodes[0].id, nodes[1].id
+
+
+def fold_request(parent, wake_lines: int | None = None) -> str:
+    """Return a request to nap the oldest adjacent pair when over *wake_lines*."""
+    if wake_lines is None:
+        wake_lines = WAKE_LINES
+    nodes = list_view(parent)
+    if len(nodes) <= wake_lines:
+        return ""
+    pair = oldest_adjacent(nodes)
+    if pair is None:
+        return ""
+    return f"{pair[0]} {pair[1]}\n"
+
+
+def _note_children(tree: Tree):
+    for child in tree.kids:
+        if isinstance(child, NoteChild):
+            yield child
+        else:
+            yield from _note_children(child.tree)
+
+
+def recall_text(parent, pattern: str) -> str:
+    """Return matching view lines and nested original notes for *pattern*."""
+    rx = re.compile(pattern)
+    lines = []
+    seen: set[str] = set()
+    for line in wake_text(parent).splitlines():
+        if rx.search(line):
+            lines.append(line)
+            seen.add(line)
+    for node in list_view(parent):
+        if node.kind != "nap" or node.tree_path is None or not node.tree_path.is_file():
+            continue
+        for child in _note_children(loads_tree(node.tree_path.read_bytes())):
+            if not rx.search(child.text):
+                continue
+            cid = leafset_id([note_digest(note_file_bytes(child.text))])
+            line = f"{cid}  {child.text}"
+            if line not in seen:
+                lines.append(line)
+                seen.add(line)
+    if not lines:
+        return ""
+    return "\n".join(lines) + "\n"
+
+
 def is_range_token(token: str) -> bool:
     """Return True if *token* is a positional range rather than a content id."""
     if token.startswith("#"):
@@ -440,6 +495,8 @@ def main(argv: list[str] | None = None) -> int:
     nap.add_argument("caption")
     zoom = sub.add_parser("zoom")
     zoom.add_argument("id")
+    recall = sub.add_parser("recall")
+    recall.add_argument("pattern")
     try:
         args = parser.parse_args(argv)
     except SystemExit as exc:
@@ -469,11 +526,19 @@ def main(argv: list[str] | None = None) -> int:
             sys.stderr.write(f"{exc}\n")
             return 1
         return 0
+    if args.cmd == "recall":
+        try:
+            sys.stdout.write(recall_text(parent, args.pattern))
+        except re.error:
+            sys.stderr.write("invalid pattern\n")
+            return 2
+        return 0
     try:
         write_note(parent, args.text, datetime.now(timezone.utc), random.SystemRandom())
     except ValueError as exc:
         sys.stderr.write(f"{exc}\n")
         return 1
+    sys.stdout.write(fold_request(parent, WAKE_LINES))
     return 0
 
 

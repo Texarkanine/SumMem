@@ -255,6 +255,6 @@ No new technology — validation not required. Same shebang, stdlib, pytest, `uv
   - [x] 1. Proof 5 and CLI reject
   - [x] 2. Proofs 2–3, binary nap, pair view, wake, zoom
   - [x] 3. Proofs 4 and 6, nap-of-naps
-  - [ ] 4. Recall and over-budget note
+  - [x] 4. Recall and over-budget note
   - [ ] 5. Surgical VISION.md paths
 - [ ] QA
