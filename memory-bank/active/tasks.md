@@ -40,7 +40,7 @@ Fold accepted PR #5 review items into the driver, tests, and VISION. Driver stay
 
 1. Stub tests: add `test_script_is_repo_root_driver` in `tests/test_cli.py` (empty)
 2. Stub interface: none (path constant only)
-3. Write tests and run red: `SCRIPT.is_file()` and `SCRIPT == ROOT / "summem"`; collection still fails today
+3. Write tests and run red: `SCRIPT == ROOT / "summem"` (a local untracked `.summem/summem` may exist, so collection can succeed today; the equality is the red)
 4. Write code and run green: both `SCRIPT` assignments and their docstrings
 
 ### 2. Printed invocations say `summem` — executable
@@ -65,10 +65,10 @@ Fold accepted PR #5 review items into the driver, tests, and VISION. Driver stay
 
 - Files: `summem` (`zoom_text`), `tests/test_zoom.py`
 
-1. Stub tests: `test_zoom_unreadable_tree_is_value_error`, `test_cli_zoom_malformed_tree_returns_1`, `test_cli_zoom_oserror_returns_1` in `tests/test_zoom.py`
+1. Stub tests: `test_zoom_unreadable_tree_is_unreadable_pack` in `tests/test_zoom.py`; `test_cli_zoom_malformed_tree_returns_1`, `test_cli_zoom_oserror_returns_1`, `test_cli_zoom_nested_id_skips_sibling_bad_tree` in `tests/test_cli.py` (CLI arms live there)
 2. Stub interface: none
-3. Write tests and run red: `{not json` → `zoom_text` raises `ValueError`; CLI `zoom` of that nap → rc 1, no `Traceback`/`notes/`/`naps/`/`git`; monkeypatch `read_bytes` on that tree to `OSError` → same CLI asserts
-4. Write code and run green: both `loads_tree` sites in `zoom_text` use `try/except _TREE_PARSE_ERRORS` → `ValueError("unreadable pack")`. CLI already maps `ValueError` to rc 1
+3. Write tests and run red: `{not json` → `zoom_text` raises `ValueError` matching `unreadable pack` (today it leaks the JSON parser message because `JSONDecodeError` is a `ValueError`); CLI same message, rc 1, no traceback/store paths; `read_bytes` → `OSError` same CLI asserts; zoom a nested id while another view nap has a bad tree → still prints the child (today the second `loads_tree` raises first)
+4. Write code and run green: both `loads_tree` sites in `zoom_text` use `try/except _TREE_PARSE_ERRORS` → `ValueError("unreadable pack")` on the target pack, `continue` on a sibling pack in the nested walk. CLI already maps `ValueError` to rc 1
 
 ### 5. Fold prompt uses `ENTRY_CHARS` — executable
 

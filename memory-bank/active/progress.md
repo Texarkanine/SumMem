@@ -186,6 +186,25 @@ Make SumMem CLI help a memo-style ratchet, then fold accepted PR #5 review fixes
 * Insights
     - In-process `zoom_text` tests do not prove `main` sanitizes stderr; CLI cases do
 
+## 2026-08-19 - PREFLIGHT - FAIL (fixable)
+
+* Work completed
+    - Opus preflight: malformed-JSON zoom already raises ValueError (JSONDecodeError subclass); second loads_tree site untested
+* Decisions made
+    - Assert `unreadable pack`, not merely ValueError
+    - Add nested-id + sibling-bad-tree CLI case; put CLI zoom tests in `test_cli.py`
+* Insights
+    - A local untracked `.summem/summem` can make collection succeed; SCRIPT equality is still red
+
+## 2026-08-19 - PLAN - COMPLETE (rework, after third preflight)
+
+* Work completed
+    - Tightened step 4 so the JSON wrap and the nested walk have real reds
+* Decisions made
+    - Sibling bad tree continues; target bad tree is `unreadable pack`
+* Insights
+    - Leaked parser text is why “raises ValueError” is not a red
+
 ## 2026-08-19 - PREFLIGHT - COMPLETE (FAIL)
 
 * Work completed

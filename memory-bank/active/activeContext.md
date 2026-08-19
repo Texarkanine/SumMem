@@ -1,10 +1,10 @@
 # Active Context
 
 ## Current Task: cli-help
-**Phase:** PREFLIGHT - COMPLETE (FAIL (fixable))
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Re-validated the revised plan. Prior driver-path findings are resolved, but `usage_text()` lacks a planned red assertion and zoom lacks CLI coverage for both malformed and unreadable trees.
+- Second re-plan: catalog prefix red test, CLI zoom malformed/OSError, `CLI_NAME`.
 
 ## Next Step
-- Revise those two test steps, then run Preflight again.
+- Preflight again, then build.
