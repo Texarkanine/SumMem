@@ -5,7 +5,9 @@
 
 ## What Was Done
 - Help ratchet plus rework: store commands require a repository; help does not.
-- QA PASS. Persistent files: productContext and systemPatterns now state the no-repo failure.
+- QA PASS. Persistent files updated. Draft PR [#5](https://github.com/Texarkanine/SumMem/pull/5) on `initialdev`.
+- Driver moved to repo-root [`summem`](summem); `dogfood/` sample store added.
 
 ## Next Step
-- Operator may delete `memory-bank/active/` (Level 1 has no archive)
+- Review/merge PR #5. Delete `memory-bank/active/` when satisfied (L1 has no archive).
+- Operator local `.summem/naps` are old-schema; re-fold or delete before `zoom`/`recall`.
