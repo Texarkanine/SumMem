@@ -9,7 +9,7 @@ from pathlib import Path
 from random import Random
 
 from conftest import load_summem
-from gitutil import init_repo, zoom_reaches
+from gitutil import assert_unique_cover, init_repo, reaches, zoom_reaches
 
 UTC = timezone.utc
 
@@ -87,18 +87,6 @@ def _fold_balanced(m, repo, texts, caption, start):
     return remaining[0]
 
 
-def _assert_unique_cover(m, repo):
-    nodes = m.list_view(repo)
-    rows = [(n, m.leaf_digests(n)) for n in nodes]
-    for i, (a, sa) in enumerate(rows):
-        for b, sb in rows[i + 1 :]:
-            if sa is None or sb is None:
-                continue
-            if a.kind == "note" and b.kind == "note":
-                continue
-            assert sa.isdisjoint(sb), (a.name, b.name, sa & sb)
-
-
 def _sum_sentences(m, repo) -> set[str]:
     found: set[str] = set()
     naps = repo / ".summem" / "naps"
@@ -113,7 +101,7 @@ def _sum_sentences(m, repo) -> set[str]:
         if path.suffix == ".tree" and path.is_file() and not path.name.startswith("."):
             try:
                 tree = m.loads_tree(path.read_bytes())
-            except (OSError, UnicodeError, ValueError, KeyError, TypeError, AttributeError):
+            except m._TREE_PARSE_ERRORS:
                 continue
             pending = [tree]
             while pending:
@@ -123,27 +111,6 @@ def _sum_sentences(m, repo) -> set[str]:
                         found.add(kid.sum)
                         pending.append(kid.tree)
     return found
-
-
-def _reaches(m, repo, sentence: str) -> bool:
-    pending = [n.id for n in m.list_view(repo)]
-    seen: set[str] = set()
-    while pending:
-        cid = pending.pop()
-        if cid in seen:
-            continue
-        seen.add(cid)
-        try:
-            out = m.zoom_text(repo, cid)
-        except ValueError:
-            continue
-        if sentence in out:
-            return True
-        for line in out.splitlines():
-            child = line.split()[0]
-            if child != cid:
-                pending.append(child)
-    return False
 
 
 def test_leaf_digests_of_note_is_its_digest(tmp_path):
@@ -272,7 +239,7 @@ def test_heal_ab_vs_abcd_keeps_coarse_pack(tmp_path):
     assert [n.leaves for n in nodes] == [4]
     assert nodes[0].id == parent.id
     assert not any(cd_id in name for name in _payload_names(repo))
-    assert _reaches(m, repo, "A") and _reaches(m, repo, "D")
+    assert reaches(m, repo, "A") and reaches(m, repo, "D")
 
 
 def test_heal_parent_plus_children_keeps_parent(tmp_path):
@@ -310,9 +277,9 @@ def test_heal_parent_plus_children_plus_neighbor_resplits(tmp_path):
     )
     _plant_nap(m, repo, [ab, ce], "abce")
     m.heal_view(repo)
-    _assert_unique_cover(m, repo)
+    assert_unique_cover(m, repo)
     for sentence in ("A", "B", "C", "D", "E"):
-        assert _reaches(m, repo, sentence)
+        assert reaches(m, repo, sentence)
 
 
 def test_heal_abd_vs_abe_unique_cover(tmp_path):
@@ -332,9 +299,9 @@ def test_heal_abd_vs_abe_unique_cover(tmp_path):
     _plant_nap(m, repo, [ab_child, e_note], ab_child.sum)
     before_sums = _sum_sentences(m, repo)
     m.heal_view(repo)
-    _assert_unique_cover(m, repo)
+    assert_unique_cover(m, repo)
     for sentence in ("A", "B", "D", "E"):
-        assert _reaches(m, repo, sentence)
+        assert reaches(m, repo, sentence)
     assert len(_note_names(repo)) < 4
     after_sums = set()
     for path in (repo / ".summem" / "naps").glob("*.sum"):
@@ -378,10 +345,10 @@ def test_heal_disjoint_is_noop(tmp_path):
     before = _payload_names(repo)
     m.heal_view(repo)
     assert _payload_names(repo) == before
-    _assert_unique_cover(m, repo)
+    assert_unique_cover(m, repo)
 
 
-def test_heal_odd_arity_finishes_under_iteration_cap(tmp_path):
+def test_heal_odd_arity_finishes_under_iteration_cap(tmp_path, monkeypatch):
     """A one-kid or three-kid nap finishes without hanging."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
@@ -402,11 +369,12 @@ def test_heal_odd_arity_finishes_under_iteration_cap(tmp_path):
             raise AssertionError("heal did not terminate")
         return real(parent)
 
-    m.list_view = wrapped
+    monkeypatch.setattr(m, "list_view", wrapped)
     m.heal_view(repo)
     assert calls["n"] <= 50
-    assert _reaches(m, repo, "solo")
-    assert _reaches(m, repo, "t1")
+    monkeypatch.setattr(m, "list_view", real)
+    assert reaches(m, repo, "solo")
+    assert reaches(m, repo, "t1")
 
 
 def test_heal_malformed_overlapping_nap_skipped(tmp_path):
@@ -572,7 +540,7 @@ def test_cli_nap_overlapping_ids_exits_0_without_concat(tmp_path, monkeypatch):
             text = text[:-1]
         sum_texts.append(text)
     assert "concat-caption" not in sum_texts
-    _assert_unique_cover(m, repo)
+    assert_unique_cover(m, repo)
 
 
 def test_cli_note_text_inside_nap_exits_0_no_loose_note(tmp_path, monkeypatch):

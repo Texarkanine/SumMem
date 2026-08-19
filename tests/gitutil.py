@@ -73,3 +73,38 @@ def zoom_reaches(cwd: Path, start_id: str, sentence: str, bound: int = 200) -> N
             if child != cid:
                 pending.append(child)
     raise AssertionError(f"did not reach {sentence!r}")
+
+
+def assert_unique_cover(m, repo) -> None:
+    """Fail unless every nap/note pair in the view has disjoint leaf-sets. Two notes may share a digest."""
+    nodes = m.list_view(repo)
+    rows = [(n, m.leaf_digests(n)) for n in nodes]
+    for i, (a, sa) in enumerate(rows):
+        for b, sb in rows[i + 1 :]:
+            if sa is None or sb is None:
+                continue
+            if a.kind == "note" and b.kind == "note":
+                continue
+            assert sa.isdisjoint(sb), (a.name, b.name, sa & sb)
+
+
+def reaches(m, repo, sentence: str) -> bool:
+    """Return True if in-process zoom from any view id can reach *sentence*."""
+    pending = [n.id for n in m.list_view(repo)]
+    seen: set[str] = set()
+    while pending:
+        cid = pending.pop()
+        if cid in seen:
+            continue
+        seen.add(cid)
+        try:
+            out = m.zoom_text(repo, cid)
+        except ValueError:
+            continue
+        if sentence in out:
+            return True
+        for line in out.splitlines():
+            child = line.split()[0]
+            if child != cid:
+                pending.append(child)
+    return False

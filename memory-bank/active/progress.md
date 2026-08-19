@@ -134,4 +134,16 @@ Zipper-heal overlapping nap leaf-sets after merge so the next `note` or `nap` re
     - A whole-repo AST scan for statements after `continue`/`break`/`return`/`raise` found exactly one hit, and it was the one that mattered - cheap enough to be worth running before every QA pass
     - `_HEAL_PASS_LIMIT` is production code the plan did not ask for and no test reaches; it converts a would-be hang into a silent overlapping store
 
+## 2026-08-19 - BUILD - COMPLETE (QA rework)
+
+* Work completed
+    - Made the two-branch merge proof's unique-cover assert reachable by sharing `assert_unique_cover` and `reaches` from `tests/gitutil.py`
+    - Restored `list_view` after the odd-arity cap patch; removed dead NapChild return and silent `_HEAL_PASS_LIMIT`; shared `_TREE_PARSE_ERRORS`
+    - 134 pytest passed
+* Decisions made
+    - Heal loops until a pass cannot mutate; hang detection stays in the odd-arity test
+    - Finding 8 (`VISION.md` proof 6 wording) deferred to reflection
+* Insights
+    - The flagship proof failed open because it copied a helper and then indented the copy under `continue`; sharing the helper is the actual fix, not a one-line dedent in a duplicate
+
 

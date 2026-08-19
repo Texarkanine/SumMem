@@ -1,30 +1,27 @@
 # Active Context
 
 ## Current Task: zipper-heal
-**Phase:** BUILD - IN-PROGRESS (QA rework)
+**Phase:** BUILD - COMPLETE (QA rework)
 
 ## What Was Done
-- Built zipper-heal to the locked plan: `leaf_digests` / rematerialize, `heal_view` (⊆ drop, split-smaller, skip note-note and unreadable packs), `write_nap` overlap/`unreadable pack` guards, `fcntl.flock` on `naps/`, CLI `note`/`nap` heal after `require_entry`, wait-free wake.
-- Surgical contract wording in `VISION.md`, `memory-bank/systemPatterns.md`, `memory-bank/productContext.md`. Aligned `cover(T)` stays Later.
+- QA rework on the two-branch merge proof: unique cover is asserted via `tests/gitutil.py::assert_unique_cover` (the skip of note-note pairs no longer swallows the disjoint check). Sentence reachability uses `reaches` once per store, not nested in the pair scan.
+- Promoted `_assert_unique_cover` and `_reaches` from `tests/test_zipper.py` into `tests/gitutil.py` so zipper tests and the merge proof share one implementation.
+- Odd-arity termination test patches `list_view` with `monkeypatch` and restores the original before zoom.
+- Removed the unreachable `isinstance(child, NapChild)` return in `heal_view` and the unplanned silent `_HEAL_PASS_LIMIT`. Heal loops until a pass cannot mutate; tests still cap via patched `list_view`.
+- Production tree-parse sites share `_TREE_PARSE_ERRORS`.
 
 ## Files created or modified
-- Created: `tests/test_zipper.py`
-- Modified: `.summem/summem`, `tests/test_nap.py`, `tests/test_cli.py`, `tests/test_proof_branches.py`, `VISION.md`, `memory-bank/systemPatterns.md`, `memory-bank/productContext.md`, `memory-bank/active/tasks.md`
+- Modified: `.summem/summem`, `tests/gitutil.py`, `tests/test_proof_branches.py`, `tests/test_zipper.py`, `memory-bank/active/tasks.md`
 
 ## Key implementation decisions
-- First overlapping pair is the first i<j view pair with intersecting leaf-sets, not only adjacent files.
-- Split rematerializes every kid of the smaller pack, then unlinks the parent.
-- `with_store_lock` opens `naps/` and `flock` `LOCK_EX`; closing the fd releases. No lock file.
-- CLI `nap` heals first; `write_nap` runs only if both ids still resolve.
+- Unique-cover and in-process zoom helpers live in `gitutil` so a proof cannot drift from the zipper tests.
+- Production heal has no iteration ceiling. Termination is the lexicographic measure; the odd-arity test is the hang alarm.
 
 ## Deviations from plan
-- `8+2+1` at `WAKE_LINES=2` lists three files (at/over budget does not shrink). Under-budget expand is asserted at budget 4 (four lines). The plan's "two lines via expand" conflicted with existing expand tests and `VISION.md`.
+- None new. Dropped `_HEAL_PASS_LIMIT` (advisory: unplanned silent failure). Finding 8 (`VISION.md` proof 6 still names disjoint packs) left for reflection.
 
 ## Integration test results
-- `uv run --python 3.11 --with pytest pytest`: 134 passed (33 new). No project linter or packager.
-
-## QA result
-- FAIL, fixable in build. See "QA Findings" in `tasks.md`. Suite is green (134 passed) and the implementation matches the plan; the blocking finding is that the two-branch merge proof's `assert sa.isdisjoint(sb)` follows a `continue` and can never run, leaving acceptance criterion 1's "unique cover" untested.
+- `uv run --python 3.11 --with pytest pytest`: 134 passed. No project linter or packager.
 
 ## Next Step
-- `/niko-build` to fix the QA findings.
+- QA review.

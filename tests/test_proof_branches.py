@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 from random import Random
 
 from conftest import load_summem
-from gitutil import fold_ids, git, init_repo, zoom_reaches
+from gitutil import assert_unique_cover, fold_ids, git, init_repo, reaches, zoom_reaches
 
 UTC = timezone.utc
 
@@ -92,22 +92,6 @@ def test_two_branch_overlapping_packs_heal_on_next_mutate(tmp_path, monkeypatch)
     assert merged_e.returncode == 0
     monkeypatch.chdir(repo)
     assert m.main(["note", "later"]) == 0
-    nodes = m.list_view(repo)
-    rows = [(n, m.leaf_digests(n)) for n in nodes]
-    for i, (a, sa) in enumerate(rows):
-        for b, sb in rows[i + 1 :]:
-            if sa is None or sb is None:
-                continue
-            if a.kind == "note" and b.kind == "note":
-                continue
-                assert sa.isdisjoint(sb), (a.name, b.name)
-        for sentence in ("A", "B", "D", "E"):
-            reached = False
-            for node in m.list_view(repo):
-                try:
-                    zoom_reaches(repo, node.id, sentence)
-                    reached = True
-                    break
-                except AssertionError:
-                    continue
-            assert reached, sentence
+    assert_unique_cover(m, repo)
+    for sentence in ("A", "B", "D", "E"):
+        assert reaches(m, repo, sentence), sentence

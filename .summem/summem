@@ -131,6 +131,17 @@ def _tree_from_dict(obj: dict) -> Tree:
     return Tree(v=obj["v"], kids=kids)
 
 
+_TREE_PARSE_ERRORS = (
+    OSError,
+    UnicodeError,
+    json.JSONDecodeError,
+    KeyError,
+    TypeError,
+    ValueError,
+    AttributeError,
+)
+
+
 def loads_tree(data: bytes) -> Tree:
     """Parse canonical tree bytes into a Tree."""
     return _tree_from_dict(json.loads(data.decode("utf-8")))
@@ -320,15 +331,7 @@ def leaf_digests(node: ViewNode) -> set[str] | None:
         return None
     try:
         return set(_digests_of_tree(loads_tree(node.tree_path.read_bytes())))
-    except (
-        OSError,
-        UnicodeError,
-        json.JSONDecodeError,
-        KeyError,
-        TypeError,
-        ValueError,
-        AttributeError,
-    ):
+    except _TREE_PARSE_ERRORS:
         return None
 
 
@@ -358,9 +361,6 @@ def rematerialize_child(parent, child: NoteChild | NapChild) -> None:
         _replace_bytes(sum_path, note_file_bytes(child.sum))
 
 
-_HEAL_PASS_LIMIT = 10_000
-
-
 def _first_overlap(
     nodes: list[ViewNode],
 ) -> tuple[ViewNode, ViewNode, set[str], set[str]] | None:
@@ -383,20 +383,18 @@ def _first_overlap(
 
 def heal_view(parent) -> None:
     """Zipper overlapping view packs until a pass cannot mutate."""
-    for _ in range(_HEAL_PASS_LIMIT):
+    while True:
         found = _first_overlap(list_view(parent))
         if found is None:
             return
-        smaller, _other, small_set, other_set = found
+        smaller, other, small_set, other_set = found
         if small_set <= other_set:
             _unlink_node(smaller)
             continue
         if other_set <= small_set:
-            _unlink_node(_other)
+            _unlink_node(other)
             continue
         child, _digests = _as_child(smaller)
-        if not isinstance(child, NapChild):
-            return
         for kid in child.tree.kids:
             rematerialize_child(parent, kid)
         _unlink_node(smaller)
@@ -421,15 +419,7 @@ def _as_child(node: ViewNode) -> tuple[NoteChild | NapChild, list[str]]:
         raise ValueError("unknown id")
     try:
         inner = loads_tree(node.tree_path.read_bytes())
-    except (
-        OSError,
-        UnicodeError,
-        json.JSONDecodeError,
-        KeyError,
-        TypeError,
-        ValueError,
-        AttributeError,
-    ):
+    except _TREE_PARSE_ERRORS:
         raise ValueError("unreadable pack") from None
     return NapChild(id=node.id, sum=node.caption, tree=inner), _digests_of_tree(inner)
 
@@ -578,7 +568,7 @@ def _prepare_nap(row: ProjectedNode) -> ProjectedNode:
         return replace(row, tree_attempted=True)
     try:
         tree = loads_tree(row.tree_path.read_bytes())
-    except (OSError, UnicodeError, json.JSONDecodeError, KeyError, TypeError, ValueError, AttributeError):
+    except _TREE_PARSE_ERRORS:
         return replace(row, tree_attempted=True)
     return replace(row, tree=tree, tree_attempted=True)
 

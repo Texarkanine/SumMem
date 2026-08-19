@@ -235,6 +235,15 @@ Result: **FAIL** (fixable in build; no replan needed). 134 tests pass; the imple
 
 - The build's `8+2+1` at `WAKE_LINES=2` listing three lines is correct. The plan's "two lines via expand" contradicted `VISION.md` ("When files meet or exceed the budget, wake lists files"), and the build followed the contract, asserting 3 lines at budget 2 and expansion at budget 4. Requirement 6's second sentence ("Wake projection still bounds the listing") is literally unmet, but it was unmet before this task and is not this task's defect.
 
+## QA Rework
+
+- [x] 1. Unique-cover assert reachable: `assert_unique_cover` / `reaches` live in `tests/gitutil.py`; merge proof and zipper tests share them
+- [x] 2. Reachability loop is once per store, not nested in the pair scan
+- [x] 3. Odd-arity cap uses `monkeypatch` and restores `list_view` before zoom
+- [x] 4. Dead `isinstance(child, NapChild)` return removed; heal loops until a pass cannot mutate (no silent `_HEAL_PASS_LIMIT`)
+- [x] 5. `_TREE_PARSE_ERRORS` is the shared parse-except tuple
+- Finding 8 (`VISION.md` proof 6 still says disjoint packs) left for reflection
+
 ## Status
 
 - [x] Component analysis complete
