@@ -1,4 +1,4 @@
-"""CLI: wake and note only."""
+"""CLI: wake, note, and nap arity."""
 
 from __future__ import annotations
 
@@ -27,11 +27,23 @@ def test_note_subcommand_writes_and_wake_reads(tmp_path, monkeypatch, capsys):
     assert len(out.splitlines()) == 1
 
 
-def test_nap_is_unknown(tmp_path, monkeypatch):
-    """Unknown command nap exits nonzero."""
+def test_nap_one_id_rejected(tmp_path, monkeypatch, capsys):
+    """nap with one id exits nonzero without calling nap an unknown command."""
     m = load_summem()
     monkeypatch.chdir(init_repo(tmp_path / "r"))
-    assert m.main(["nap"]) != 0
+    assert m.main(["nap", "a" * 64]) != 0
+    err = capsys.readouterr().err.lower()
+    assert "invalid choice" not in err
+
+
+def test_nap_three_ids_rejected(tmp_path, monkeypatch, capsys):
+    """nap with three ids and a caption exits nonzero without calling nap an unknown command."""
+    m = load_summem()
+    monkeypatch.chdir(init_repo(tmp_path / "r"))
+    ids = ["a" * 64, "b" * 64, "c" * 64]
+    assert m.main(["nap", *ids, "caption"]) != 0
+    err = capsys.readouterr().err.lower()
+    assert "invalid choice" not in err
 
 
 def test_path_flag_is_unknown(tmp_path, monkeypatch):

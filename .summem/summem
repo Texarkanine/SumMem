@@ -182,6 +182,14 @@ def wake_text(parent) -> str:
     return "\n".join(lines) + "\n"
 
 
+def is_range_token(token: str) -> bool:
+    """Return True if *token* is a positional range rather than a content id."""
+    if token.startswith("#"):
+        return True
+    left, sep, right = token.partition("-")
+    return bool(sep) and left.isdigit() and right.isdigit()
+
+
 def require_python(version_info: tuple[int, ...] = sys.version_info) -> None:
     """Refuse to run on Python older than 3.11."""
     if version_info < (3, 11):
@@ -190,13 +198,17 @@ def require_python(version_info: tuple[int, ...] = sys.version_info) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Run wake or note. Return 0 on success, 2 on usage, 1 on validation."""
+    """Run a SumMem subcommand. Return 0 on success, 2 on usage, 1 on validation."""
     require_python()
     parser = argparse.ArgumentParser(prog="summem")
     sub = parser.add_subparsers(dest="cmd", required=True)
     sub.add_parser("wake")
     note = sub.add_parser("note")
     note.add_argument("text")
+    nap = sub.add_parser("nap")
+    nap.add_argument("id_a")
+    nap.add_argument("id_b")
+    nap.add_argument("caption")
     try:
         args = parser.parse_args(argv)
     except SystemExit as exc:
@@ -205,6 +217,13 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "wake":
         sys.stdout.write(wake_text(parent))
         return 0
+    if args.cmd == "nap":
+        for token in (args.id_a, args.id_b):
+            if is_range_token(token):
+                sys.stderr.write(f"not a content id: {token}\n")
+                return 2
+        sys.stderr.write("unknown id\n")
+        return 1
     try:
         write_note(parent, args.text, datetime.now(timezone.utc), random.SystemRandom())
     except ValueError as exc:
