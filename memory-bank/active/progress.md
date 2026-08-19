@@ -174,3 +174,14 @@ Equal-grain fold requests, carry-stable nap names, and in-memory wake expand so 
 * Insights
     - Applying `tree_attempted` directly to the `ProjectedNode` state cleanly resolves the caching constraint without requiring external trackers.
 
+
+## 2026-08-19 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-equal-grain.md`
+    - Reconciled persistent files: systemPatterns already updated in build; productContext and techContext skipped
+* Decisions made
+    - Do not tick issue #1 in `milestones.md` here; that is `/niko` on re-entry
+* Insights
+    - Decode-only malformed tests left a wait-free hole that QA found by walking a valid nested empty nap
+    - Tombstone superseded creative notes in the same unit as the VISION edit
