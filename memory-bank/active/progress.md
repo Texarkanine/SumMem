@@ -49,3 +49,13 @@ Clean-cut `.tree` JSON (`c` / `type: note|nap`, no `v`) and undated wake lines, 
     - Missing or unsupported child `type` raises `ValueError`
 * Insights
     - Preflight's rewritten plan used the wrong codec names (`dumps_tree` / `Tree.kids`); this replan keeps `dumps_tree` / `Tree.kids` / `.summem/summem`
+
+## 2026-08-19 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Validated the replanned implementation plan against codebase conventions and TDD requirements
+    - Wrote `.preflight-status` with a PASS result
+* Decisions made
+    - The plan correctly addresses all requirements and is ready for the Build phase
+* Insights
+    - The replan successfully addressed the previous fixable findings

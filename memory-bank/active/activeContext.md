@@ -1,13 +1,10 @@
 # Active Context
 
 ## Current Task: tree-schema
-**Phase:** PLAN - COMPLETE (replan after preflight FAIL (fixable))
+**Phase:** PREFLIGHT - COMPLETE (PASS)
 
 ## What Was Done
-
-- Preflight FAIL (fixable): missed `endswith(": …")` wake assertions; no negative tests for child `type`.
-- Replanned: codec rejects missing/unknown `type`; wake unit lists `test_wake.py`, `test_wake_expand.py`, `test_nap.py`, `test_fold.py`.
+- Preflight PASS: validated the replanned implementation plan against codebase conventions and TDD requirements.
 
 ## Next Step
-
-Re-run preflight.
+- Proceed to Build phase.
