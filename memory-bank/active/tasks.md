@@ -37,14 +37,14 @@ graph TD
 - **Fold request** (`equal_grain_pair`, `fold_request`, `main` after `note`/`nap`): first adjacent same-`leaves` file pair; one pair; catch-up after `nap`; keys off file count.
 - **Wake listing** (`wake_text`, new `expand_frontier`): when `len(list_view) < WAKE_LINES`, load the newest expandable nap’s `.tree` and replace it with its two kids until the budget is met or nothing splits.
 - **Zoom / recall**: `zoom` already finds in-tree ids. `recall_text` uses `wake_text`, so it inherits expand. No new resolver for `nap`.
-- **Proofs / helpers** (`tests/test_proof_squash.py`, `tests/gitutil.py` `fold_ids`): pack sizes 64/32/4; CLI wake in proof 4 pinned to 3 lines.
+- **Proofs / helpers** (`tests/test_proof_squash.py`, `tests/test_proof_branches.py`, `tests/test_proof_conflict.py`, `tests/gitutil.py` `fold_ids`): pack sizes 64/32/4; proof wakes that intentionally inspect file-grain captions pin the budget to file count.
 - **Contract** (`VISION.md`, `ROADMAP.md`, `memory-bank/systemPatterns.md`): stems, equal-grain, wake-as-projection.
 
 ### Cross-Module Dependencies
 
 - `wake_text` → `list_view` → optional `loads_tree` on the naps it splits.
 - `fold_request` → `list_view` only. Must not use the expanded frontier, or a short directory would never look over budget and would never look under either in a useful way.
-- Tests that used `wake_text` as a file-id oracle (`tests/test_nap.py` `_ids`, `tests/test_cli.py` after `nap`, several `tests/test_wake.py` line counts, proof 4/6 wake length) must pin `WAKE_LINES` to the file count or switch to `list_view`.
+- Tests that used `wake_text` as a file-id oracle (`tests/test_nap.py` `_ids`, `tests/test_cli.py` after `nap`, several `tests/test_wake.py` line counts, proofs 2/3/4/6 wake expectations) must pin `WAKE_LINES` to the file count or switch to `list_view`.
 
 ### Boundary Changes
 
@@ -88,7 +88,7 @@ graph TD
 - Native 1s fill: two 8-packs plus two later notes, `WAKE_LINES=4` → 4 lines, no `.tree` load (or no split).
 - Expand then zoom: an id from an expanded child line `zoom`s to that child's kids / text.
 - Expand writes nothing: payload name set unchanged.
-- Cannot split a note; cannot split a nap whose `.tree` is missing (print it as one line).
+- Cannot split a note; cannot split a nap whose `.tree` is missing, unreadable, or malformed (print it as one line).
 - Proof 4: 100 notes, helper 64/32/4, squash, clone zooms `n000` / `n064` / `n096`; clone `wake` with `WAKE_LINES=3` is 3 pack lines.
 
 ### Test Infrastructure
@@ -102,6 +102,7 @@ graph TD
 
 - `tests/test_proof_squash.py`: three power-of-two packs survive squash; wake at budget 3 is three lines; zoom originals.
 - `tests/test_proof_branches.py`: two packs merge; `list_view` has two files; a following `write_nap` of those file ids folds them. Pin `WAKE_LINES` to 2 when asserting pack-grain wake, or assert files separately from printed lines.
+- `tests/test_proof_conflict.py`: pin wake to one file-grain line after a two-note nap so caption-conflict assertions continue to inspect the `.sum`, not the expanded leaves.
 - Existing `wake_text`-as-id helpers in `tests/test_nap.py`, `tests/test_view.py`, `tests/test_wake.py`, `tests/test_cli.py`, `tests/test_zoom.py`, `tests/test_recall.py`: switch id harvest to `list_view`, or pin `WAKE_LINES` to current file count, in the expand unit so they do not go red for the wrong reason.
 
 ## Implementation Plan
@@ -124,26 +125,17 @@ graph TD
 3. Write tests and run red: all-ones → two oldest; 16-pack plus later note → `None`; lone 16-pack, `WAKE_LINES=1`, `note` → empty stdout; two 8s plus older 16 → the 8s; `2, 1, 1` → two 1s; two `"same"` → `(id, id)`; 24 same-second notes, `WAKE_LINES=8`, loop `fold_request`+`write_nap` → pow2 files, `len(list_view) <= 8`; 16 ones folded via `equal_grain_pair` → depth `<= 4`; catch-up prints remaining 1s; quiet when at file budget. Delete `test_oldest_adjacent_returns_two_oldest_ids`. Rename the all-ones CLI case to `test_over_budget_note_requests_equal_grain_ones`. Expected red: stub `None`; `nap` prints nothing.
 4. Write code and run green: scan adjacent same `leaves`; `fold_request` uses `equal_grain_pair` and `len(list_view)`; delete `oldest_adjacent`; after successful `write_nap` in `main`, print `fold_request`. Depth helper stays in `tests/test_fold.py`. Re-run `tests/test_fold.py`.
 
-### 3. In-memory wake expand — executable
+### 3. In-memory wake expand and proof adaptations — executable
 
-- Files: `tests/test_wake_expand.py`, `tests/test_wake.py`, `tests/test_nap.py`, `tests/test_cli.py`, `tests/test_view.py`, `tests/test_zoom.py`, `tests/test_recall.py`, `tests/test_proof_branches.py`, `.summem/summem`
+- Files: `tests/test_wake_expand.py`, `tests/test_wake.py`, `tests/test_nap.py`, `tests/test_cli.py`, `tests/test_view.py`, `tests/test_zoom.py`, `tests/test_recall.py`, `tests/test_proof_conflict.py`, `tests/test_proof_squash.py`, `tests/test_proof_branches.py`, `.summem/summem`
 - Creative ref: `memory-bank/active/creative/creative-wake-projection.md` operator amendment
 
-1. Stub tests: empty cases in `tests/test_wake_expand.py` for the four expand behaviors and the write-nothing / missing-tree / zoom-expanded-id cases.
-2. Stub interface: `expand_frontier(nodes: list[ViewNode], budget: int) -> list` returning `nodes` unchanged. Do not change `wake_text` yet.
-3. Write tests and run red: two 8-packs (`fold_ids` of 8+8), `WAKE_LINES=4` → 4 lines, 2 files; `WAKE_LINES=2` → 2 caption lines; two 8s plus two later notes, `WAKE_LINES=4` → 4 file lines; zoom an expanded child id; payload names unchanged; nap without `.tree` does not split. Switch id harvest in the listed existing tests to `list_view` (or pin `WAKE_LINES` to file count) so they stay green when `wake_text` starts expanding. Expected red: stub returns the two 8s when budget is 4.
-4. Write code and run green: `expand_frontier` loops while `len(frontier) < budget`: from the right, find a nap with two kids (load `.tree` once per view-file nap; further splits use the in-memory `NapChild.tree`); replace that slot with two printable rows (note → id/text/1; nap child → id/sum/leaf-count). `wake_text` prints `expand_frontier(list_view(parent), WAKE_LINES)`. Grain and day for a virtual nap child come from its nested notes (`len` of note descendants; min `NoteChild.name` stamp). Do not write files. Do not change `write_nap` lookup. Re-run `tests/test_wake_expand.py` and the files whose id harvest changed.
+1. Stub tests: empty cases in `tests/test_wake_expand.py` for under-budget repeated right-edge expand, at-budget no-expand, native-note fill, lone-note no-split, write-nothing, missing-tree fallback, malformed-tree fallback, and zoom-expanded-id.
+2. Stub interface: add an immutable `ProjectedNode` row carrying `id`, `kind`, `caption`, `leaves`, `stamp`, and optional in-memory `tree`; add `expand_frontier(nodes: list[ViewNode], budget: int) -> list[ProjectedNode]` returning a direct projection of `nodes`. Do not change `wake_text` yet. This keeps storage `ViewNode` separate from virtual rows, so `write_nap` cannot accidentally accept an in-tree-only child.
+3. Write tests and adapt impacted tests before production code, then run red: two 8-packs (`fold_ids` of 8+8), `WAKE_LINES=4` → 4 lines, 2 files; `WAKE_LINES=2` → 2 caption lines; two 8s plus two later notes, `WAKE_LINES=4` → 4 file lines; a lone note does not split; zoom an expanded child id; payload names unchanged; a nap with missing or malformed `.tree` does not split. Switch id harvest in the listed existing tests to `list_view` (or pin `WAKE_LINES` to file count). In `tests/test_proof_conflict.py`, pin post-nap wakes to one line. In `tests/test_proof_branches.py`, pin the two-pack wake to two lines. In `tests/test_proof_squash.py`, make packs from `ids[0:64]`, `ids[64:96]`, `ids[96:100]`, inspect clone wake through the loaded module with `WAKE_LINES=3`, assert grains 64/32/4, and zoom `n000` / `n064` / `n096`. Expected red: the new expand tests still receive the unsplit file frontier.
+4. Write code and run green: `expand_frontier` loops while `len(frontier) < budget`: from the right, find a nap with two kids (load each view-file `.tree` at most once; catch read and decode/shape failures and leave that row unsplittable; further splits use `NapChild.tree`); replace that slot with two `ProjectedNode`s (note → id/text/1; nap child → id/sum/leaf-count). `wake_text` prints `expand_frontier(list_view(parent), WAKE_LINES)`. Grain and day for a virtual nap child come from its nested notes (`len` of note descendants; min `NoteChild.name` stamp). Do not write files. Do not change `write_nap` lookup. Re-run every file listed in this unit, then the full suite.
 
-### 4. Proof 4 helper packs — executable
-
-- Files: `tests/test_proof_squash.py`
-
-1. Stub tests: none new. Modify `test_three_packs_squash_clone_zooms_originals`.
-2. Stub interface: none.
-3. Write tests and run red: not expected to go red if the clone `wake` is invoked with `WAKE_LINES=3` (monkeypatch the loaded script or `main` after setting `m.WAKE_LINES = 3`). Slices `ids[0:64]`, `ids[64:96]`, `ids[96:100]`; grains 64/32/4; zoom `n000` / `n064` / `n096`. Run `tests/test_proof_squash.py`, then the full suite.
-4. Write code and run green: no production change.
-
-### 5. Contract wording — prose/policy
+### 4. Contract wording — prose/policy
 
 - Files: `VISION.md`, `ROADMAP.md`, `memory-bank/systemPatterns.md`
 - No tests: prose/policy artifact
@@ -167,6 +159,7 @@ No new technology - validation not required
 - Always-split-rightmost only yields ~`log2(leaves)` extra lines: the loop must split the rightmost **expandable** node repeatedly (including new kids) until `len == budget`.
 - Proof 4/6 line counts: pin `WAKE_LINES` to the intended pack listing; do not treat expand as a proof failure.
 - Missing `.tree`: that node will not split; wake still prints the file line. Wait-free.
+- Malformed or unreadable `.tree`: treat it like missing during wake expansion; never turn a projection attempt into “cannot wake.”
 - Expanded ids are not nappable: document in VISION; `fold_request` only names files. Do not add a virtual-id writer in this milestone.
 - Same-second file order still needs the carry-stable stem (unit 1). Expand uses tree kid order, not filenames.
 
@@ -176,7 +169,24 @@ No new technology - validation not required
 - Plan failed because we shipped “notes stay”: operator locked unlink. Covered by the creative amendment.
 - Plan failed because we only split once: unit 3 requires four lines from two 8s, which needs more than one split of the right 8.
 - Plan failed because proof 4 still expected 3 wake lines at default 32: pin budget 3 in that test.
+- Plan failed because caption-conflict proofs silently expanded the conflicted nap: pin those post-nap wakes to one file line before implementing expand.
 - Plan failed because we taught `nap` virtual ids: out of scope; do not add it when a test looks convenient.
+
+## Preflight Report
+
+### Findings
+
+- **Resolved blocking — TDD ordering:** Proof 4’s wake adaptation was scheduled after production expansion. It now runs in unit 3 before production code with every other impacted test adaptation.
+- **Resolved blocking — downstream impact:** `tests/test_proof_conflict.py` also requires file-grain wake after a nap. It is now included and pinned to one line where caption behavior is under test.
+- **Resolved major — wait-free wake:** Expansion now explicitly treats unreadable, malformed, and missing `.tree` payloads as unsplittable and plans regression coverage.
+- **Resolved advisory — projection boundary:** A dedicated immutable `ProjectedNode` keeps in-memory child rows out of the storage-facing `ViewNode` and `write_nap` path.
+
+### Validation
+
+- TDD ordering is explicit for every executable unit; prose-only contract edits correctly owe no tests.
+- File locations, names, one-script architecture, content identity, binary nap contract, and unlink behavior match established conventions.
+- Requirements and acceptance criteria map to concrete tests and implementation steps, including proofs 2/3/4/6 and the full-suite gate.
+- No duplicate expansion utility or competing identity/resolver exists in the current script.
 
 ## Status
 
@@ -186,6 +196,6 @@ No new technology - validation not required
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
+- [x] Preflight
 - [ ] Build
 - [ ] QA

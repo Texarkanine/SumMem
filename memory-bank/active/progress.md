@@ -103,3 +103,17 @@ Equal-grain fold requests, carry-stable nap names, and in-memory wake expand so 
     - Tests that harvest ids from `wake_text` become wrong the moment wake expands; they must use `list_view` or a pinned budget
     - New 1s are what turn expand back off — the directory meets the knob again
 
+## 2026-08-18 - PREFLIGHT - COMPLETE (PASS)
+
+* Work completed
+    - Validated the L3 wake-expand plan against the script, every affected wake consumer, proof tests, architectural conventions, requirements, and TDD ordering
+    - Moved Proof 4 adaptation into the test-first expansion unit and added the omitted caption-conflict proof adaptations
+    - Added missing, malformed, and unreadable tree fallback coverage to preserve wait-free wake
+    - Added an immutable projection-row boundary so virtual expanded ids cannot leak into storage-facing nap lookup
+* Decisions made
+    - Pass the build gate after incorporating all blocking findings into `tasks.md`
+    - Keep file-grain proof assertions explicit by pinning `WAKE_LINES`; wake behavior tests exercise expansion separately
+* Insights
+    - Proofs 2 and 3 inspect post-nap captions and would otherwise expand to leaves under the default budget
+    - Tree expansion needs a representation distinct from `ViewNode` because virtual children are printable and zoomable but deliberately not nappable
+

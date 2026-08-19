@@ -1,12 +1,13 @@
 # Active Context
 
 ## Current Task: equal-grain
-**Phase:** PLAN - COMPLETE (L3 — wake expand)
+**Phase:** PREFLIGHT - COMPLETE (PASS)
 
 ## What Was Done
-- Locked operator design: `nap` unlinks; wake expands the newest nap in memory when file count `< WAKE_LINES`
-- Equal-grain requests and carry-stable stems stay; `fold_request` still keys off files
-- Re-leveled to L3; brief and plan rewritten
+- Validated the L3 plan against code, tests, proofs, contracts, conventions, and per-unit TDD ordering
+- Amended unit 3 so all affected tests, including proofs 2/3/4/6, adapt before production expansion
+- Added wait-free malformed-tree coverage and a dedicated immutable projection-row boundary
+- Recorded `PASS` in `.preflight-status`
 
 ## Next Step
-- `/niko-preflight` (L3 auto-spawn after plan)
+- `/niko-build`
