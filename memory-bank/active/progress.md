@@ -27,3 +27,25 @@ Clean-cut `.tree` JSON (`c` / `type: note|nap`, no `v`) and undated wake lines, 
     - Zipper `{"v":1}` fixture stays; missing `c` still fails the parse
 * Insights
     - Only `test_codec.py` byte-locks JSON; nap/zoom/zipper compare through `dumps_tree` or behavior
+
+## 2026-08-19 - PREFLIGHT - COMPLETE (FAIL (fixable))
+
+* Work completed
+    - Validated the plan against the codec, wake formatter, all affected test suites, and canonical documents
+    - Reordered the existing codec steps so tests run red before `Tree.v` changes
+    - Wrote `.preflight-status` with the fixable findings and advisory
+* Decisions made
+    - Planning must add stale wake assertions in `tests/test_wake_expand.py` and `tests/test_wake.py`
+    - Planning must explicitly test and reject missing or unsupported child `type` discriminators
+* Insights
+    - The schema and wake changes are correctly centralized, but the listed wake test files do not cover every old formatting assertion
+
+## 2026-08-19 - PLAN - COMPLETE (replan)
+
+* Work completed
+    - Folded preflight findings into `tasks.md`: extra wake assertions, missing/unknown `type` tests, no `else`→nap
+* Decisions made
+    - Enumerate `endswith(": …")` in `test_wake.py`, `test_wake_expand.py`, and `test_nap.py`, not only `YYYY-MM-DD` literals
+    - Missing or unsupported child `type` raises `ValueError`
+* Insights
+    - Preflight's rewritten plan used the wrong codec names (`dumps_tree` / `Tree.kids`); this replan keeps `dumps_tree` / `Tree.kids` / `.summem/summem`

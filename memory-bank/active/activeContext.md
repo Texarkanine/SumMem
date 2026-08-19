@@ -1,13 +1,13 @@
 # Active Context
 
 ## Current Task: tree-schema
-**Phase:** PLAN - COMPLETE
+**Phase:** PLAN - COMPLETE (replan after preflight FAIL (fixable))
 
 ## What Was Done
 
-- Level 2 plan: codec first (TDD golden bytes + ignore-unknown + reject `kids`-only), then undated `format_wake_line`, then VISION/systemPatterns prose.
-- XML declined; JSON `type` discriminator.
+- Preflight FAIL (fixable): missed `endswith(": …")` wake assertions; no negative tests for child `type`.
+- Replanned: codec rejects missing/unknown `type`; wake unit lists `test_wake.py`, `test_wake_expand.py`, `test_nap.py`, `test_fold.py`.
 
 ## Next Step
 
-Preflight validation (subagent).
+Re-run preflight.
