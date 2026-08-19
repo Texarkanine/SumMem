@@ -257,4 +257,7 @@ No new technology — validation not required. Same shebang, stdlib, pytest, `uv
   - [x] 3. Proofs 4 and 6, nap-of-naps
   - [x] 4. Recall and over-budget note
   - [x] 5. Surgical VISION.md paths
+- [x] QA — FAIL
+  - [x] Build: preserve multiplicity when adjacent view nodes have the same content id; two identical loose notes currently wake with the same id, and `write_nap(id, id, ...)` rejects them as `not adjacent`
+  - [x] Build: update the canonical `VISION.md` command table from obsolete `nap <id> "…"` syntax to the implemented binary interface with a caption
 - [ ] QA

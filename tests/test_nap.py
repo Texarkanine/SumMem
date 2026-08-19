@@ -267,3 +267,21 @@ def test_napchild_sum_empty_when_child_sum_conflict(tmp_path):
     assert tree.kids[0].sum == ""
     out = m.zoom_text(repo, tree.kids[0].id)
     assert "a1" in out and "a2" in out
+
+
+def test_nap_two_identical_notes_by_repeated_id(tmp_path):
+    """Two adjacent notes with the same text share an id and can still be napped."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    ids = _ids(m, repo)
+    assert ids[0] == ids[1]
+    m.write_nap(repo, ids[0], ids[1], "twins")
+    notes = [p for p in (repo / ".summem" / "notes").iterdir() if not p.name.startswith(".")]
+    assert notes == []
+    lines = m.wake_text(repo).splitlines()
+    assert len(lines) == 1
+    assert lines[0].endswith("  twins")
+    assert "(2 notes," in lines[0]
+

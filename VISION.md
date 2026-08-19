@@ -57,9 +57,9 @@ Every command except `start` takes an optional `--path <relative_path>`. The scr
 |---|---|
 | `wake` | Print the decaying document for the resolved store. Do what it prints. Never “cannot wake, go nap first.” If the resolved store is the git root, also print the catalog of every other started store and how to pull one. |
 | `note "…"` | Record one line, at most 280 bytes, in the resolved store. The script assigns time and name. |
-| `nap <id> "…"` | `<id>` is the content id a wake printed. Not a positional range. `--path` selects which store. |
+| `nap <id-a> <id-b> "…"` | Two adjacent content ids a wake printed, plus a caption. Not a positional range. `--path` selects which store. |
 | `recall <regex>` | Search the resolved store word for word. |
-| `zoom <id>` | Open that block into its two halves, down to raw notes. Same id as `nap`. |
+| `zoom <id>` | Open that block into its two halves, down to raw notes. A content id a wake printed. |
 | `start <dir>` | Create a store **in that directory** (no walk-up) and write a default config. Operator command; agents run it only when asked to start a package. |
 
 If `note` asks for a nap, the agent does that nap before its next action. Subagents should not `note` as a taste rule so the recent window does not fill with trivia. The store does not depend on that rule.
@@ -138,7 +138,7 @@ Git-add date is the wrong clock. Git does not store “when this path entered th
 
 A nap file’s sort key is the **minimum child time**, not “when we compacted.” If the nap sorted as “now,” Monday’s block would jump to the front of wake and temporal bias would invert. The script names the file from the children. The agent does not invent the name.
 
-Wake never prints positional ranges such as `#16-31`. Agents copy whatever looks like an id; those digits are a picture of one listing and become a lie after the next merge. Wake prints the **content id** and, if useful, grain as prose: `a3f2c1b8  (16 notes, from 2026-03-01)  …`. `nap` and `zoom` accept only that id. A command that looks like a range is rejected.
+Wake never prints positional ranges such as `#16-31`. Agents copy whatever looks like an id; those digits are a picture of one listing and become a lie after the next merge. Wake prints the **content id** and, if useful, grain as prose: `a3f2c1b8  (16 notes, from 2026-03-01)  …`. `nap` accepts two of those ids; `zoom` accepts one. A command that looks like a range is rejected.
 
 ## Identifiers and hashing
 

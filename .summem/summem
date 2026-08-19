@@ -301,18 +301,26 @@ def _unlink_node(node: ViewNode) -> None:
         node.tree_path.unlink()
 
 
+def _adjacent_nodes(nodes: list[ViewNode], id_a: str, id_b: str) -> tuple[ViewNode, ViewNode]:
+    hits_a = [i for i, node in enumerate(nodes) if node.id == id_a]
+    hits_b = [i for i, node in enumerate(nodes) if node.id == id_b]
+    if not hits_a or not hits_b:
+        raise ValueError("unknown id")
+    for ia in hits_a:
+        for ib in hits_b:
+            if ia == ib:
+                continue
+            if abs(ia - ib) == 1:
+                lo, hi = (ia, ib) if ia < ib else (ib, ia)
+                return nodes[lo], nodes[hi]
+    raise ValueError("not adjacent")
+
+
 def write_nap(parent, id_a, id_b, caption):
     """Fold two adjacent view nodes into a nap pair. Return the .sum path."""
     require_entry(caption)
     nodes = list_view(parent)
-    index = {node.id: i for i, node in enumerate(nodes)}
-    if id_a not in index or id_b not in index:
-        raise ValueError("unknown id")
-    ia, ib = index[id_a], index[id_b]
-    if abs(ia - ib) != 1:
-        raise ValueError("not adjacent")
-    lo, hi = (ia, ib) if ia < ib else (ib, ia)
-    left, right = nodes[lo], nodes[hi]
+    left, right = _adjacent_nodes(nodes, id_a, id_b)
     child_l, digs_l = _as_child(left)
     child_r, digs_r = _as_child(right)
     tree = Tree(kids=[child_l, child_r])

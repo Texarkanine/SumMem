@@ -92,3 +92,27 @@ Implement single-store memory: `nap`, `zoom`, `recall`, left-fold of adjacent vi
     - Substring asserts on short tokens (`a1`, `b1`) fire on hex ids; assert wake/zoom field suffixes instead
     - A leftover child `.sum` after unlinking only `.tree` breaks adjacency for the next fold
 
+## 2026-08-18 - BUILD - COMPLETE (QA rework)
+
+* Work completed
+    - Nap lookup keeps every view occurrence of an id so two identical loose notes can be folded as `nap id id caption`
+    - Updated the `VISION.md` command table to `nap <id-a> <id-b> "…"`
+    - 79 pytest green
+* Decisions made
+    - Content id is still leaf content; adjacency walks index pairs and skips `ia == ib` so one node cannot nap itself
+* Insights
+    - A dict keyed by id is wrong for a view that may print the same id twice
+
+
+## 2026-08-18 - QA - COMPLETE (FAIL)
+
+* Work completed
+    - Reviewed the single-store implementation against the project brief, authoritative plan pins, system patterns, and design contract
+    - Re-ran the full Python 3.11 suite: 78 tests passed; the driver also compiled and had no IDE diagnostics
+    - Reproduced a valid two-note view with identical content ids that binary `nap` cannot fold
+* Decisions made
+    - Fail QA and return to Build: `write_nap` collapses duplicate content ids in its lookup and rejects `nap <same-id> <same-id> <caption>` as non-adjacent
+    - Require the canonical `VISION.md` command table to document the implemented two-id `nap` interface
+* Insights
+    - Content ids identify leaf content, not unique view occurrences; adjacency selection must preserve multiplicity rather than use a one-id-to-one-index map
+    - Mechanical checks are green, but the duplicate-id case makes the over-budget fold request non-actionable for a valid store state
