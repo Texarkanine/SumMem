@@ -32,3 +32,21 @@ Zipper-heal overlapping nap leaf-sets after merge so the next `note` or `nap` re
 * Insights
     - Naive ⊆ drop on parent+children would undo a crashed split; the issue’s “drop the extra” means the parent
     - `fold_request` already stays silent when no equal-grain pair exists; the `8+2+1` case is a regression, not a picker rewrite
+
+## 2026-08-19 - PREFLIGHT - COMPLETE (FAIL)
+
+* Work completed
+    - Validated the zipper-heal plan against `.summem/summem`, the 101-test baseline, `VISION.md`, `productContext.md`, and `systemPatterns.md`
+    - Recorded nine findings in `tasks.md` under "Preflight Findings" and amended units 1, 2, 3, 4, and 6 in place
+    - Confirmed TDD ordering is encoded per unit (stub tests → stub interface → red → green) for all five executable units, and that unit 6 is correctly exempt as prose
+* Decisions made
+    - FAIL, fixable rather than rearchitect: three blocking findings, one of which is an open decision the builder must make
+    - Scoped the `write_nap` overlap guard to pairs where at least one side is a nap, so identical-text notes still concat
+    - Removed the planned `.gitignore` substring test as a change-detector
+    - Applied `heal_view` returning its actions, all-kids rematerialize, an explicit progress measure, and `child.id` as the rematerialized stem's leafset
+    - Did not apply the containment-into-⊆ collapse: requirement 8 names containment, so it is the operator's call
+* Insights
+    - The plan contradicted itself between unit 3 and unit 4; the existing suite would have caught it, but only after the build wrote the wrong guard
+    - `list_view` calls `ensure_store`, so anything `ensure_store` creates is created by `wake` — a lock file there quietly makes a read-only command a writer
+    - A real store commits `.summem/`, so ignoring the lock in this repository's `.gitignore` protects the development tree and nothing a user has
+    - The crash-safety argument for containment-first does not hold: a parent `.tree` contains its children's leaves verbatim, so undoing a partial split cannot lose a leaf
