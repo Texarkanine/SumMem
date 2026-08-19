@@ -188,7 +188,7 @@ def test_nap_prints_remaining_ones_not_parent_plus_one(tmp_path, monkeypatch, ca
     out = capsys.readouterr().out
     assert "  c\n" in out
     assert "  d\n" in out
-    assert "Run: .summem/summem nap " in out
+    assert "Run: summem nap " in out
     assert "Invent nothing." in out
 
 
@@ -221,7 +221,7 @@ def test_over_budget_note_requests_equal_grain_ones(tmp_path, monkeypatch, capsy
     assert "Invent nothing." in out
     assert "  alpha\n" in out
     assert "  beta\n" in out
-    assert 'Run: .summem/summem nap ' in out
+    assert 'Run: summem nap ' in out
     assert '"<your line>"' in out
     pa = m.short_id(ids[0], ids)
     pb = m.short_id(ids[1], ids)
@@ -250,7 +250,7 @@ def test_config_toml_wake_lines_is_read(tmp_path, monkeypatch, capsys):
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     assert m.main(["note", "beta"]) == 0
     out = capsys.readouterr().out
-    assert "Run: .summem/summem nap " in out
+    assert "Run: summem nap " in out
     assert "Invent nothing." in out
     notes = [p for p in (repo / ".summem" / "notes").iterdir() if not p.name.startswith(".")]
     assert len(notes) == 2
@@ -283,3 +283,17 @@ def test_fold_request_identical_notes_use_short_prefix(tmp_path, monkeypatch):
     prefix = m.short_id(cid, [cid, cid])
     assert len(prefix) == 8
     assert f"nap {prefix} {prefix} " in out
+
+
+def test_fold_request_uses_config_entry_chars(tmp_path, monkeypatch):
+    """A store ENTRY_CHARS value appears in the fold prompt."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.ensure_store(repo)
+    (repo / ".summem" / "config.toml").write_text("ENTRY_CHARS = 140\n", encoding="utf-8")
+    monkeypatch.setattr(m, "WAKE_LINES", 1)
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    out = m.fold_request(repo, 1)
+    assert "140 characters" in out
+    assert "280 characters" not in out

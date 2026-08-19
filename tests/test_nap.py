@@ -73,6 +73,7 @@ def test_same_children_same_tree_bytes_and_paths(tmp_path):
     _two_notes(m, repo_a)
     _two_notes(m, repo_b)
     ids = _ids(m, repo_a)
+    # Same text and timestamps in both repos → same content ids.
     m.write_nap(repo_a, ids[0], ids[1], "one")
     m.write_nap(repo_b, ids[0], ids[1], "two")
     naps_a = sorted(p.name for p in (repo_a / ".summem" / "naps").iterdir() if not p.name.startswith("."))
@@ -340,7 +341,7 @@ def test_write_nap_note_inside_adjacent_nap_raises(tmp_path):
     """A note whose digest sits in the adjacent nap is overlapping packs."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
-    pa, pb = _two_notes(m, repo)
+    pa, _pb = _two_notes(m, repo)
     ids = _ids(m, repo)
     m.write_nap(repo, ids[0], ids[1], "pair")
     nap = m.list_view(repo)[0]
@@ -352,9 +353,7 @@ def test_write_nap_note_inside_adjacent_nap_raises(tmp_path):
         m.write_nap(repo, nodes[0].id, nodes[1].id, "nope")
     _agent_err(str(caught.value))
     assert _payload_names(repo) == before
-    assert pa.name in _payload_names(repo) or any(
-        n.kind == "note" for n in m.list_view(repo)
-    )
+    assert pa.name in _payload_names(repo)
 
 
 def test_write_nap_disjoint_adjacent_naps_still_concat(tmp_path):

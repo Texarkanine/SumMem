@@ -238,3 +238,15 @@ Make SumMem CLI help a memo-style ratchet, then fold accepted PR #5 review fixes
     - Added an advisory regarding silently skipping unreadable trees in `zoom` and `recall`
 * Insights
     - The revised plan successfully corrects previous missing tests and executable steps for printed driver locations and tree unreadable handling.
+
+## 2026-08-19 - BUILD - COMPLETE (rework)
+
+* Work completed
+    - SCRIPT, `CLI_NAME`, recall/zoom degrade, `ENTRY_CHARS` prompt, test accuracy, explicit `note` arm, VISION + persistent briefing
+    - 197 pytest passed
+* Decisions made
+    - Keep operator wake footer `You are up to speed.`
+    - Skip stderr warnings on unreadable sibling trees (wake-style silent degrade)
+* Insights
+    - CLI wake line-count proofs must include the footer; `wake_text` tests do not
+

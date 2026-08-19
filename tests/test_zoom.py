@@ -110,3 +110,19 @@ def test_ambiguous_prefix_is_error(tmp_path, monkeypatch):
     monkeypatch.setattr(m, "named_ids", lambda _parent: [a, b])
     with pytest.raises(ValueError, match="ambiguous"):
         m.zoom_text(repo, "a3f2c1b8")
+
+
+def test_zoom_unreadable_tree_is_unreadable_pack(tmp_path):
+    """zoom_text on a nap whose .tree is not JSON raises unreadable pack."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    ids = _two_notes(m, repo)
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    nap = m.list_view(repo)[0]
+    nap.tree_path.write_bytes(b"{not json")
+    with pytest.raises(ValueError, match="unreadable pack") as caught:
+        m.zoom_text(repo, nap.id)
+    err = str(caught.value)
+    assert "notes/" not in err
+    assert "naps/" not in err
+    assert "git" not in err

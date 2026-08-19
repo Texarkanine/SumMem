@@ -241,7 +241,8 @@ def test_root_wake_catalogs_other_store(tmp_path, monkeypatch, capsys):
     out = capsys.readouterr().out
     assert "root-note" in out
     assert "pkg" in out
-    assert ".summem/summem wake --path pkg" in out
+    assert "summem wake --path pkg" in out
+    assert ".summem/summem" not in out
     assert "notes/" not in out
     assert "naps/" not in out
     assert "git" not in out
@@ -311,5 +312,5 @@ def test_empty_catalog_adds_no_output(tmp_path, monkeypatch, capsys):
     capsys.readouterr()
     assert m.main(["wake"]) == 0
     out = capsys.readouterr().out
-    assert out == m.wake_text(repo)
+    assert out == m.wake_text(repo) + "You are up to speed.\n"
 

@@ -72,3 +72,13 @@ def test_nap_no_ids_rejected_without_writing(tmp_path):
     assert result.returncode != 0
     assert "invalid choice" not in err.lower()
     assert _payload_files(repo) == []
+
+
+def test_nap_unknown_ids_rejected_without_writing(tmp_path):
+    """Process nap of valid-looking unknown ids writes no store files."""
+    repo = init_repo(tmp_path / "r")
+    result = _run_nap(repo, ["deadbeef", "cafebabe", "caption"])
+    err = result.stderr.decode("utf-8", "replace")
+    assert result.returncode != 0
+    assert "unknown id" in err
+    assert _payload_files(repo) == []

@@ -525,7 +525,7 @@ def test_cli_wake_on_overlapping_head_writes_nothing(tmp_path, monkeypatch):
     assert _payload_names(repo) == before
 
 
-def test_cli_nap_overlapping_ids_exits_0_without_concat(tmp_path, monkeypatch):
+def test_cli_nap_overlapping_ids_exits_1_without_concat(tmp_path, monkeypatch):
     """nap of two overlapping ids exits 1, does not concat, writes no new .sum sentence."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")

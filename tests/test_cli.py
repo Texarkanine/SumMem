@@ -12,7 +12,7 @@ from random import Random
 
 import pytest
 
-from conftest import SCRIPT, load_summem
+from conftest import ROOT, SCRIPT, load_summem
 from gitutil import init_repo
 
 
@@ -25,7 +25,8 @@ def test_note_subcommand_writes_and_wake_reads(tmp_path, monkeypatch, capsys):
     assert m.main(["wake"]) == 0
     out = capsys.readouterr().out
     assert "hello" in out
-    assert len(out.splitlines()) == 1
+    assert "You are up to speed." in out
+    assert out.splitlines()[-1] == "You are up to speed."
 
 
 def test_nap_one_id_rejected(tmp_path, monkeypatch, capsys):
@@ -62,7 +63,7 @@ def test_nap_subcommand_writes_and_wake_reads(tmp_path, monkeypatch, capsys):
     out = capsys.readouterr().out
     assert "pair" in out
     assert "alpha" not in out
-    assert len(out.splitlines()) == 1
+    assert out.splitlines()[-1] == "You are up to speed."
 
 
 def test_path_flag_is_known_on_all_non_start_commands(tmp_path, monkeypatch):
@@ -328,3 +329,110 @@ def test_help_without_repository_still_prints_catalog(tmp_path, monkeypatch, cap
     out = capsys.readouterr().out
     assert "summem wake" in out
     assert "--path" in out
+
+
+def test_script_is_repo_root_driver():
+    """Tests load the committed repo-root summem file."""
+    assert SCRIPT == ROOT / "summem"
+    assert SCRIPT.is_file()
+
+
+def test_catalog_omits_store_driver_path():
+    """usage_text names summem, not .summem/summem."""
+    m = load_summem()
+    catalog = m.usage_text()
+    assert ".summem/summem" not in catalog
+    for line in catalog.splitlines():
+        if " wake " in line or line.endswith(" wake"):
+            assert line.lstrip().startswith("summem wake")
+
+
+def test_unknown_token_does_not_write_a_note(tmp_path, monkeypatch, capsys):
+    """A non-command token is argparse invalid choice and writes no note."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["raw invocation of random stuff"]) != 0
+    err = capsys.readouterr().err
+    assert "invalid choice" in err
+    notes = repo / ".summem" / "notes"
+    written = list(notes.glob("*")) if notes.is_dir() else []
+    assert written == []
+    assert m.main(["note", "ok"]) == 0
+    assert any(p.is_file() and not p.name.startswith(".") for p in notes.iterdir())
+
+
+def test_cli_zoom_malformed_tree_returns_1(tmp_path, monkeypatch, capsys):
+    """CLI zoom of a nap whose .tree is not JSON exits 1 with unreadable pack."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=timezone.utc), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=timezone.utc), Random(2))
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    nap = next(n for n in m.list_view(repo) if n.kind == "nap")
+    nap.tree_path.write_bytes(b"{not json")
+    capsys.readouterr()
+    assert m.main(["zoom", nap.id]) == 1
+    err = capsys.readouterr().err
+    assert "unreadable pack" in err
+    assert "Traceback" not in err
+    assert "notes/" not in err
+    assert "naps/" not in err
+    assert "git" not in err
+
+
+def test_cli_zoom_oserror_returns_1(tmp_path, monkeypatch, capsys):
+    """CLI zoom of a nap whose .tree read raises OSError exits 1 with unreadable pack."""
+    from pathlib import Path
+
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=timezone.utc), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=timezone.utc), Random(2))
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    nap = next(n for n in m.list_view(repo) if n.kind == "nap")
+    tree = nap.tree_path
+    real = Path.read_bytes
+
+    def patched(self):
+        if self == tree:
+            raise OSError("boom")
+        return real(self)
+
+    monkeypatch.setattr(Path, "read_bytes", patched)
+    capsys.readouterr()
+    assert m.main(["zoom", nap.id]) == 1
+    err = capsys.readouterr().err
+    assert "unreadable pack" in err
+    assert "Traceback" not in err
+    assert "notes/" not in err
+    assert "naps/" not in err
+    assert "git" not in err
+
+
+def test_cli_zoom_nested_id_skips_sibling_bad_tree(tmp_path, monkeypatch, capsys):
+    """Zoom of a nested id still works when another view nap has a bad tree."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    m.write_note(repo, "A", datetime(2026, 1, 1, 0, 0, 1, tzinfo=timezone.utc), Random(1))
+    m.write_note(repo, "B", datetime(2026, 1, 1, 0, 0, 2, tzinfo=timezone.utc), Random(2))
+    ab = [n.id for n in m.list_view(repo)]
+    m.write_nap(repo, ab[0], ab[1], "ab")
+    m.write_note(repo, "C", datetime(2026, 1, 1, 0, 0, 3, tzinfo=timezone.utc), Random(3))
+    m.write_note(repo, "D", datetime(2026, 1, 1, 0, 0, 4, tzinfo=timezone.utc), Random(4))
+    notes = [n for n in m.list_view(repo) if n.kind == "note"]
+    m.write_nap(repo, notes[0].id, notes[1].id, "cd")
+    naps = [n for n in m.list_view(repo) if n.kind == "nap"]
+    first, second = naps[0], naps[1]
+    tree = m.loads_tree(second.tree_path.read_bytes())
+    child_id = m.leafset_id([m.note_digest(m.note_file_bytes(tree.kids[0].text))])
+    first.tree_path.write_bytes(b"{not json")
+    capsys.readouterr()
+    assert m.main(["zoom", child_id]) == 0
+    out = capsys.readouterr().out
+    assert tree.kids[0].text in out

@@ -42,4 +42,4 @@ A missing proof is unfinished work, not a reason to drop the criterion.
 - Wake never refuses to print. "Cannot wake, go nap first" is a defect.
 - The agent interface does not mention store files, hashes as paths, or git.
 - A scope is not a package manifest. `start` is how a directory becomes a store.
-- The git root auto-creates on first `wake` or `note`. Other stores appear only via `start`. Outside a repository, store commands fail. Help still prints.
+- The git root auto-creates on first `wake`, `note`, `nap`, `zoom`, or `recall`. Other stores appear only via `start`. Outside a repository, store commands fail. Help still prints.

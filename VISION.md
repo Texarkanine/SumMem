@@ -51,7 +51,7 @@ Git’s job is to merge a directory of files. It is not a timestamp server and n
 
 The interface does not mention store files, hashes as paths, or git. It must stay stable if the backend changes. It does mention `--path`, which is how the agent aims a command at work in the tree.
 
-Every command except `start` takes an optional `--path <relative_path>`. The script walks from that path (or from `$PWD` if the flag is omitted) up to the nearest store and uses that store. `--path` may be a file: `.summem/summem note --path foo/packages/baz/fee.ts "…"` walks from `foo/packages/baz` and lands in `foo/packages/baz` if that directory was `start`ed, else further up, at least to the git root.
+Every command except `start` takes an optional `--path <relative_path>`. The script walks from that path (or from `$PWD` if the flag is omitted) up to the nearest store and uses that store. `--path` may be a file: `summem note --path foo/packages/baz/fee.ts "…"` walks from `foo/packages/baz` and lands in `foo/packages/baz` if that directory was `start`ed, else further up, at least to the git root.
 
 | Command | Contract |
 |---|---|
@@ -68,11 +68,11 @@ No “write a file.” No “sort by git.” A later sqlite backend, or a differ
 
 ## Scopes
 
-A command resolves **one** store: from `--path` if given, otherwise from `$PWD`, walk toward the git root and take the first directory that already has a store. Do not create a store because the agent `note`d from a deep folder or passed a file under one. Outside a repository, store commands fail.
+A command resolves **one** store: from `--path` if given, otherwise from `$PWD`, walk toward the git root and take the first directory that already has a store. Do not create a store because the agent `note`d from a deep folder or passed a file under one. Outside a repository, every store command fails, including `start`.
 
-`start <dir>` is the exception: it creates a store in `<dir>` itself.
+`start <dir>` is the no-walk-up exception inside a repository: it creates a store in `<dir>` itself.
 
-Do not parse `pnpm-workspace.yaml` or any other manifest to decide what a scope is. A Cargo crate, a seed app, or any other kind of monorepo opts in the same way: `.summem/summem start <dir>`.
+Do not parse `pnpm-workspace.yaml` or any other manifest to decide what a scope is. A Cargo crate, a seed app, or any other kind of monorepo opts in the same way: `summem start <dir>`.
 
 Intermediate folders with no store are not scopes. Work there rolls up to the nearest started ancestor, which in a git repo is at least the root.
 
@@ -86,17 +86,17 @@ So SumMem pushes **root**, and makes every other store available to pull.
 
 Session start is still mandatory and once. The first wake must **resolve to the true root** — cwd at the root, or `--path` aimed at the root, not `.` from a package:
 
-> Run `.summem/summem wake` from the repository root (or `.summem/summem wake --path <root-relative>`) before any other tool call.
+> Run `summem wake` from the repository root (or `summem wake --path <root-relative>`) before any other tool call.
 > If you can see a prior **root** SumMem wake in this conversation, do not run the root wake again.
 
 That root wake prints two things:
 
 1. The root store’s decaying document (the push).
-2. A catalog of every other started store: relative path, note count, latest date, and one line of instruction — when you work under that path, `.summem/summem wake --path <that path>` if that store’s wake is not already in this conversation.
+2. A catalog of every other started store: relative path, note count, latest date, and one line of instruction — when you work under that path, `summem wake --path <that path>` if that store’s wake is not already in this conversation.
 
 The catalog is computed by walking the tree for store directories. It is not a committed index file. If in a git repo, it should honor git ignore (not .gitignore - but `git ignore` - this includes .git/info/exclude).
 
-`.summem/summem wake --path foo/packages/baz/fee.ts` pulls **only** the nearest store to that file. It does not reprint root. It does not reprint the full catalog.
+`summem wake --path foo/packages/baz/fee.ts` pulls **only** the nearest store to that file. It does not reprint root. It does not reprint the full catalog.
 
 Child memories are not guaranteed to enter context. A modern agent that can see the catalog and is about to edit `fee.ts` will probably pull. That is the honesty of the design: pull is available and advertised; it is not enforced.
 
@@ -106,13 +106,13 @@ Do not load every started store in the root wake. That is the budget problem `st
 
 The script does not infer a monorepo. A tree ten folders deep whose packages live at layer three is not special until someone says so.
 
-The **git root always auto-creates** on the first `wake` or `note` in that repository: store directory plus a config file filled with the script’s defaults, commented so a human can see every knob. Until someone `start`s another path, every note in the tree rolls up to root. A regular repository stays in that shape and can raise `WAKE_LINES` on the root config to spend the whole reading budget in one place.
+The **git root always auto-creates** on the first `wake`, `note`, `nap`, `zoom`, or `recall` in that repository: store directory plus a config file filled with the script’s defaults, commented so a human can see every knob. Until someone `start`s another path, every note in the tree rolls up to root. A regular repository stays in that shape and can raise `WAKE_LINES` on the root config to spend the whole reading budget in one place.
 
-`.summem/summem start <dir>` writes the same kind of store and default config into that directory. After that, `--path` under it resolves here instead of rolling up. A five-level monorepo starts the five directories that should have their own memory and sets each config tight. Root wake stays one document plus a five-line catalog. Pulling a package is one short document, not five stacked layers and not ten accidental ones.
+`summem start <dir>` writes the same kind of store and default config into that directory. After that, `--path` under it resolves here instead of rolling up. A five-level monorepo starts the five directories that should have their own memory and sets each config tight. Root wake stays one document plus a five-line catalog. Pulling a package is one short document, not five stacked layers and not ten accidental ones.
 
 `start` is how you onboard a package. It is not implied by `package.json`, and it is not implied by `cd`.
 
-If a store exists but its config file is missing or a knob is omitted, the script uses internal defaults. It does not fail, and it does not rewrite the file unless someone runs `start` or an explicit config command.
+If a store exists but its config file is missing or a knob is omitted, the script uses internal defaults. It does not fail, and it does not rewrite the file unless someone runs `start`.
 
 ## Per-store configuration
 
@@ -289,7 +289,7 @@ These look optional and are not.
 
 **No shared mutable index.** Wake is a directory list. An index everyone updates is a log.
 
-**Empty packages stay empty.** A store appears at the git root on first command, or at another path only via `start`. `--path` and `$PWD` walk up. They do not create a store.
+**Empty packages stay empty.** A store appears at the git root on the first `wake`, `note`, `nap`, `zoom`, or `recall`, or at another path only via `start`. `--path` and `$PWD` walk up. They do not create a store.
 
 **Root wake pushes. Other stores pull.** Root wake always includes the catalog. A pull is `wake --path`. Child memory in context is not guaranteed.
 

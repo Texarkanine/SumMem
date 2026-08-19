@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from random import Random
@@ -152,14 +151,18 @@ def test_unreadable_tree_does_not_split(tmp_path, monkeypatch):
     nodes = m.list_view(repo)
     m.write_nap(repo, nodes[0].id, nodes[1].id, "pair")
     tree = next((repo / ".summem" / "naps").glob("*.tree"))
-    os.chmod(tree, 0o000)
+    real = Path.read_bytes
+
+    def patched(self):
+        if self == tree:
+            raise PermissionError
+        return real(self)
+
+    monkeypatch.setattr(Path, "read_bytes", patched)
     monkeypatch.setattr(m, "WAKE_LINES", 4)
-    try:
-        lines = [line for line in m.wake_text(repo).splitlines() if line]
-        assert len(lines) == 1
-        assert "pair" in lines[0]
-    finally:
-        os.chmod(tree, 0o644)
+    lines = [line for line in m.wake_text(repo).splitlines() if line]
+    assert len(lines) == 1
+    assert "pair" in lines[0]
 
 
 def test_nested_empty_nap_child_does_not_split(tmp_path, monkeypatch):

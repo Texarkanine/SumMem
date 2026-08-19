@@ -10,11 +10,11 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / ".summem" / "summem"
+SCRIPT = ROOT / "summem"
 
 
 def load_summem():
-    """Load `.summem/summem` via SourceFileLoader (no .py suffix)."""
+    """Load repo-root `summem` via SourceFileLoader (no .py suffix)."""
     loader = SourceFileLoader("summem", str(SCRIPT))
     spec = importlib.util.spec_from_loader("summem", loader)
     if spec is None or spec.loader is None:
