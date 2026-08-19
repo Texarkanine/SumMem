@@ -68,3 +68,16 @@ Addressing: `start`, `--path` walk-up, root-wake catalog, per-store config, firs
 * Insights
     - The implementation perfectly aligns with the design in `VISION.md` and requires no further documentation updates.
 
+## 2026-08-19 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-scopes.md`
+    - Persistent-file reconcile: skip all three (addressing contracts already recorded)
+* Decisions made
+    - Did not edit `VISION.md`; proofs 7-8 were already the contract
+    - Next step is `/niko` (scopes was the last `file-backend` milestone)
+* Insights
+    - Duplicate pytest names collect only the last function; leftover empty stubs shadow filled tests
+    - Preflight's coverage amendments were the ones that mattered
+
+

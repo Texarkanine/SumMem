@@ -1,13 +1,11 @@
 # Active Context
 
 ## Current Task: scopes
-**Phase:** QA - COMPLETE (PASS)
+**Phase:** REFLECT - COMPLETE
 
 ## What Was Done
-- Performed semantic review of the implementation against the original plan and `VISION.md`.
-- Generated QA report in `.qa-validation-status`.
-- Verified that `catalog_text` and `store_stats` are implemented simply and without eager loading.
-- Verified that `resolve_parent` correctly walks up the tree.
+- Wrote `memory-bank/active/reflection/reflection-scopes.md`.
+- Reconciled persistent files: no surgical updates (walk-up, catalog, `start`, and per-store config were already the standing briefing).
 
 ## Next Step
-- QA PASSED - proceed to `/niko-reflect`
+- Run `/niko` to continue to the next milestone.
