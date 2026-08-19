@@ -4,7 +4,7 @@
 **Phase:** BUILD - IN-PROGRESS
 
 ## What Was Done
-- Preflight PASS. Entering build: leaf-sets/rematerialize, heal_view zipper, write_nap overlap guards, naps/ flock + CLI, contract wording.
+- Unit 1 green: `leaf_digests`, `_nap_stem`, `rematerialize_child` (skip overwrite). Helpers only; no CLI wiring.
 
 ## Next Step
-- Execute the implementation plan in `tasks.md` in order, TDD per unit.
+- Unit 2: `heal_view` zipper loop (TDD).

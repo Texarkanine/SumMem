@@ -308,6 +308,55 @@ def _note_children(tree: Tree):
             yield from _note_children(child.tree)
 
 
+def leaf_digests(node: ViewNode) -> set[str] | None:
+    """Return the leaf digest set of *node*, or None if a nap pack is unreadable."""
+    if node.kind == "note":
+        try:
+            return {note_digest(node.path.read_bytes())}
+        except OSError:
+            return None
+    if node.tree_path is None or not node.tree_path.is_file():
+        return None
+    try:
+        return set(_digests_of_tree(loads_tree(node.tree_path.read_bytes())))
+    except (
+        OSError,
+        UnicodeError,
+        json.JSONDecodeError,
+        KeyError,
+        TypeError,
+        ValueError,
+        AttributeError,
+    ):
+        return None
+
+
+def _nap_stem(child: NapChild) -> str:
+    """Return `{leftmost-seq}-{child.id}-{leaves}` for a rematerialized NapChild."""
+    leftmost = next(_note_children(child.tree))
+    leaves = len(_digests_of_tree(child.tree))
+    return f"{_seq_prefix(leftmost.name)}-{child.id}-{leaves}"
+
+
+def rematerialize_child(parent, child: NoteChild | NapChild) -> None:
+    """Copy *child* bytes into the store without overwriting an existing dest."""
+    store = ensure_store(parent)
+    if isinstance(child, NoteChild):
+        dest = store / "notes" / child.name
+        if dest.exists():
+            return
+        _replace_bytes(dest, note_file_bytes(child.text))
+        return
+    stem = _nap_stem(child)
+    naps = store / "naps"
+    tree_path = naps / f"{stem}.tree"
+    sum_path = naps / f"{stem}.sum"
+    if not tree_path.exists():
+        _replace_bytes(tree_path, dumps_tree(child.tree))
+    if not sum_path.exists():
+        _replace_bytes(sum_path, note_file_bytes(child.sum))
+
+
 def _as_child(node: ViewNode) -> tuple[NoteChild | NapChild, list[str]]:
     if node.kind == "note":
         child, digest = _note_child(node)

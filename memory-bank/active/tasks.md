@@ -137,6 +137,12 @@ None - implementation approach is clear.
 
 ## Implementation Plan
 
+- [x] 1. Leaf-sets and rematerialize
+- [ ] 2. Zipper and heal_view
+- [ ] 3. write_nap guards
+- [ ] 4. flock naps/ and CLI heal
+- [ ] 5. Contract wording
+
 ### 1. Leaf-sets and rematerialize — executable
 
 - Files: `.summem/summem`, `tests/test_zipper.py`
