@@ -207,6 +207,26 @@ No new technology - validation not required. `fcntl.flock` is stdlib on this POS
 - **We finished exploding `{A,B,C,D}` because `{A,B}` was on disk:** unit 2's coarse-pack case.
 - **This is actually L4:** identity and CLI table do not change. Stay L3.
 
+## Preflight Findings
+
+Result: **FAIL — fixable plan revision required.** The amended ⊆ and `naps/` directory-lock design is consistent with the Project Brief and existing architecture, and the 101-test baseline passes.
+
+### Blocking
+
+1. **Unit 5 violates test-first ordering.** It schedules merge, crash-window, and budget-silence tests after units 2–4 have implemented the behavior and says they “should already be green,” while its preceding step says to run them red. Move each acceptance test into the executable unit that implements its behavior, before that unit's production code, or place all acceptance tests in a pre-implementation test unit after the interfaces are stubbed.
+2. **The claimed termination measure is false.** Splitting a binary nap increases view-file count by one and removes one reachable nap root, so `view file count + internal nodes` can stay equal; odd arity can increase it. Use the lexicographic measure `(total reachable nap nodes, view file count)`: a split reduces the first component, while a subset drop either reduces the first component or leaves it equal and reduces the second.
+3. **Malformed `.tree` handling is incomplete and based on a false existing-behavior claim.** `_as_child` currently lets parse exceptions escape; it does not return `unknown id as today`. Specify and test the CLI/direct-`write_nap` behavior for a selected malformed nap so the command does not traceback or leak store internals, then order the parser/error implementation after the red test.
+4. **The stubbed return type is undefined.** Unit 2 requires `heal_view(parent) -> list[Action]`, but no `Action` interface is stubbed or defined anywhere. Define and stub the action type explicitly, or remove the diagnostic return value and assert the resulting store state instead.
+
+### Required Regression Coverage
+
+1. Validate the `nap` caption before healing. As written, CLI `nap` heals first and relies on `write_nap` to reject an invalid caption afterward, changing the store on a command that existing behavior rejects before reading the view. Add a red CLI test that an invalid caption leaves an overlapping store unchanged, then call `require_entry` before the lock/heal sequence.
+2. State that `with_store_lock` bootstraps the store before opening `naps/`, and that its critical section covers the full mutating sequence through `fold_request`. This preserves first-use `note`/`nap` behavior and the one-invocation lock contract.
+
+### Advisory
+
+- **Accretive simplification:** remove the action-list return unless a production consumer needs it. Store-state and zoom assertions already establish the observable contract; avoiding a test-only action API reduces surface area and eliminates the undefined `Action` type.
+
 ## Status
 
 - [x] Component analysis complete
@@ -215,6 +235,6 @@ No new technology - validation not required. `fcntl.flock` is stdlib on this POS
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
+- [x] Preflight
 - [ ] Build
 - [ ] QA

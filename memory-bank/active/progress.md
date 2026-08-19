@@ -65,3 +65,17 @@ Zipper-heal overlapping nap leaf-sets after merge so the next `note` or `nap` re
     - A builder who reads issue #3 will still see "containment"; the plan states once not to build it
     - `list_view` calls `ensure_store`, so the lock must not be created there or `wake` becomes a writer
 
+## 2026-08-19 - PREFLIGHT - COMPLETE (FAIL)
+
+* Work completed
+    - Validated the amended plan against `.summem/summem`, all affected test infrastructure, `VISION.md`, `productContext.md`, and the 101-test passing baseline
+    - Confirmed the ⊆-only zipper, `naps/` directory flock, nap-required overlap guard, wait-free wake boundary, file locations, and contract update surfaces now align
+    - Recorded four blocking findings, two required regression details, and one simplification advisory in `tasks.md`
+* Decisions made
+    - FAIL, fixable by `/niko-plan`: unit 5 places acceptance tests after their implementation, the termination measure is not decreasing, malformed selected naps have no specified safe error path, and `Action` is undefined
+    - Invalid nap captions must be validated before heal so a rejected command does not mutate an overlapping store
+    - The smartest simplification is to remove the test-only action return unless production needs it
+* Insights
+    - The correct termination argument is lexicographic: splitting reduces reachable nap nodes; subset dropping reduces reachable nap nodes or view-file count
+    - `_as_child` currently propagates malformed-tree parse exceptions, so “unknown id as today” is not codebase reality
+

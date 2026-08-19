@@ -1,11 +1,12 @@
 # Active Context
 
 ## Current Task: zipper-heal
-**Phase:** PLAN - COMPLETE
+**Phase:** PREFLIGHT - COMPLETE (FAIL)
 
 ## What Was Done
-- Replanned after preflight FAIL: flock `naps/` (no lock file); ⊆ only (no containment pass); `write_nap` guard requires a nap
-- Operator locked both design calls. Builder-facing plan no longer carries the rejected alternatives
+- Confirmed the amended ⊆-only zipper and `naps/` directory-lock design now match the Project Brief, architecture, and passing 101-test baseline
+- Blocked build on four fixable plan defects: unit 5 is not test-first, the termination metric is false, malformed selected naps lack a safe error contract, and `Action` is undefined
+- Required invalid nap captions to be validated before healing and first-use store bootstrap to be explicit inside the lock helper
 
 ## Next Step
-- Preflight to validate the amended plan, then wait for `/niko-build`
+- Run `/niko-plan` to revise the findings in `tasks.md`, then re-run `/niko-preflight`
