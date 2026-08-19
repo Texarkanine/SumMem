@@ -113,3 +113,14 @@ Clean-cut `.tree` JSON (`c` / `type: note|nap`, no `v`) and undated wake lines, 
     - Accept the implementation as-is; the remaining four findings are non-blocking advisories already recorded in `tasks.md`
 * Insights
     - The surgical QA rework resolved the only acceptance blocker without changing executable behavior
+
+## 2026-08-19 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-tree-schema.md`
+    - Reconciled persistent files (systemPatterns already current; product/tech skipped)
+* Decisions made
+    - Do not regenerate the repo's `.summem/naps` as part of this task
+* Insights
+    - Proof tests hid the date as a leading space in `" xN "`
+    - A briefing file that restates a contract twice must be updated in both places
