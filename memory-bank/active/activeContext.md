@@ -1,13 +1,12 @@
 # Active Context
 
 ## Current Task: equal-grain
-**Phase:** PLAN - COMPLETE (replan after preflight FAIL)
+**Phase:** PLAN - COMPLETE (L3 — wake expand)
 
 ## What Was Done
-- Replanned: nap stem `{stamp}-{rand}-{leafset}-{leaves}` inherits the left child's sequence prefix; equal-grain picker; catch-up after `nap`; proof 4 packs 64/32/4
-- Pinned filename-only `_seq_prefix` (no `.tree` sort, no descendant min-scan)
-- Corrected 16+1 CLI (lone 16-pack) and depth (`.tree` NoteChild depth, not `zoom_reaches` bound)
-- Same-second 24-note stream is the long-stream regression
+- Locked operator design: `nap` unlinks; wake expands the newest nap in memory when file count `< WAKE_LINES`
+- Equal-grain requests and carry-stable stems stay; `fold_request` still keys off files
+- Re-leveled to L3; brief and plan rewritten
 
 ## Next Step
-- `/niko-preflight` on the replanned equal-grain plan (do not `/niko-build` until PASS)
+- `/niko-preflight` (L3 auto-spawn after plan)

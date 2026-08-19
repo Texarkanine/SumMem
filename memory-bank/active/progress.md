@@ -1,8 +1,8 @@
 # Progress
 
-Change fold requests from oldest-two left-fold to equal-grain pairs, emit a catch-up nap after each write while over budget, and rewrite proof 4's pack sizes so production fold matches the year-later short tree.
+Equal-grain fold requests, carry-stable nap names, and in-memory wake expand so `WAKE_LINES` is a view-time projection while `nap` still unlinks.
 
-**Complexity:** Level 2
+**Complexity:** Level 3
 
 ## 2026-08-18 - COMPLEXITY-ANALYSIS - COMPLETE
 
@@ -59,4 +59,47 @@ Change fold requests from oldest-two left-fold to equal-grain pairs, emit a catc
 * Insights
     - Tests that used `split("-")[1]` as leafset must move to `[-2]` in the same unit as the stem change
     - A mixed-time long stream would not catch the stall; the hard case is one UTC second
+
+## 2026-08-18 - PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+
+* Work completed
+    - Revalidated TDD ordering, conventions, dependency impacts, conflicts, requirement coverage, and test quality against the current script and tests
+    - Confirmed left-child `{stamp}-{rand}` inheritance preserves the folded interval under same-second notes and equal-grain requests bound sequential fold depth logarithmically
+    - Amended unit 1 to update `list_view` for `_parse_nap_stem`'s new four-tuple
+* Decisions made
+    - Pass the build gate; the replan addresses all three blockers from the first preflight
+    - Keep non-adjacent merge healing outside this milestone because it conflicts with the adjacent-only binary nap contract
+* Insights
+    - The stem migration affects both filename assertions and production tuple unpacking
+    - The deterministic same-second stream is the load-bearing regression because mixed timestamps conceal interval reordering
+
+## 2026-08-18 - CREATIVE - COMPLETE (wake-projection)
+
+* Work completed
+    - Explored how to keep `WAKE_LINES` as a view-time projection after the operator rejected burn-the-lens fold
+    - Compared notes-stay + wake cover, unlink + explode `.tree`, and keep-nap-layers / unlink-notes
+    - Wrote `memory-bank/active/creative/creative-wake-projection.md`
+    - Revoked the equal-grain preflight PASS (`FAIL` in `.preflight-status`)
+* Decisions made
+    - Notes stay. `nap` writes captions only. Wake covers the note sequence. `WAKE_LINES` is not an argument to unlink
+    - Year-later compactness is printed-line count, not inode count
+    - Equal-grain film plan is not a build; next is `/niko-plan`
+* Insights
+    - `VISION.md` already required missing summaries to degrade to finer grain; unlink made that impossible
+    - Cheap wake and deleted children cannot both serve an arbitrary later budget
+
+## 2026-08-18 - PLAN - COMPLETE (wake expand)
+
+* Work completed
+    - Re-leveled to L3: wake projection plus equal-grain is multiple components
+    - Operator locked unlink + in-memory right-edge expand (not notes-stay)
+    - Rewrote `projectbrief.md` and `tasks.md`; amended the creative doc
+* Decisions made
+    - `fold_request` uses file count; `wake_text` uses `expand_frontier` when files `<` budget
+    - Split the rightmost expandable nap until the budget fills, not one split
+    - `nap` stays file-ids only; `zoom` already resolves expanded ids
+    - Proof 4/6 pin `WAKE_LINES` when they assert pack-grain listings
+* Insights
+    - Tests that harvest ids from `wake_text` become wrong the moment wake expands; they must use `list_view` or a pinned budget
+    - New 1s are what turn expand back off — the directory meets the knob again
 
