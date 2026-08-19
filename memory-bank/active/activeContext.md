@@ -1,11 +1,11 @@
 # Active Context
 
 ## Current Task: cli-help
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Intent: memo-style ratchet help so `--path` is obvious from the first invocation; `summem -h wake` must open wake help.
-- Complexity: Level 2. Self-contained CLI help in `.summem/summem` plus tests. No store, identity, or addressing change.
+- Level 2 plan: memo-style `usage_text()` catalog; `main` intercepts empty / `-h` / `-h <cmd>` before argparse; tests in `tests/test_cli.py` assert tokens not the poem.
+- Inspiration: bare `~/.optmem/memo` copy-paste lines and a `--path` footer. Do not copy `No such command: -h`.
 
 ## Next Step
-- Load Level 2 plan
+- Preflight
