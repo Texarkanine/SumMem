@@ -1,8 +1,8 @@
 # Progress
 
-Make SumMem CLI help a memo-style ratchet, then require a repository for store commands.
+Make SumMem CLI help a memo-style ratchet, then fold accepted PR #5 review fixes into the same task.
 
-**Complexity:** Level 1
+**Complexity:** Level 2
 
 ## 2026-08-19 - COMPLEXITY-ANALYSIS - COMPLETE
 
@@ -125,3 +125,13 @@ Make SumMem CLI help a memo-style ratchet, then require a repository for store c
     - Deterministic tests (monkeypatch unreadable `.tree`); accurate test names; VISION must not mislead
 * Insights
     - `./dogfood/.summem/summem "raw invocation of random stuff"` already prints argparse invalid choice; the 19 fear is leftover-cmd-as-note, not unknown-token-as-note
+
+## 2026-08-19 - COMPLEXITY-ANALYSIS - COMPLETE (rework)
+
+* Work completed
+    - Classified the PR #5 review punch list as Level 2
+* Decisions made
+    - Not L1: driver, tests, and VISION move together
+    - Not L3: no design fork; each item names the change
+* Insights
+    - Item 19 is an explicit `note` arm so fallthrough cannot write a note; argparse already rejects unknown tokens
