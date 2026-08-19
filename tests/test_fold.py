@@ -268,3 +268,18 @@ def test_fold_request_mentions_remaining(tmp_path, monkeypatch):
     assert "1 compression remains after this one." in out
     assert "  2026-01-01: a\n" in out
     assert "  2026-01-01: b\n" in out
+
+
+def test_fold_request_identical_notes_use_short_prefix(tmp_path, monkeypatch):
+    """Two identical notes over budget emit 8-hex prefixes, not 64-hex ids."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.setattr(m, "WAKE_LINES", 1)
+    m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    cid = m.list_view(repo)[0].id
+    out = m.fold_request(repo, 1)
+    assert cid not in out
+    prefix = m.short_id(cid, [cid, cid])
+    assert len(prefix) == 8
+    assert f"nap {prefix} {prefix} " in out

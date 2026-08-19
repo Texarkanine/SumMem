@@ -800,7 +800,8 @@ def write_note(parent, text, now, rng, entry_chars: int | None = None):
 
 
 def short_id(cid: str, ids: list[str], floor: int = 8) -> str:
-    """Return a unique prefix of *cid* among *ids*, at least *floor* hex characters."""
+    """Return a unique prefix of *cid* among distinct *ids*, at least *floor* hex characters."""
+    ids = list(dict.fromkeys(ids))
     n = min(max(floor, 1), len(cid))
     while n < len(cid):
         prefix = cid[:n]
@@ -812,6 +813,7 @@ def short_id(cid: str, ids: list[str], floor: int = 8) -> str:
 
 def resolve_id(token: str, ids: list[str]) -> str:
     """Return the unique id in *ids* that *token* prefixes. Raise ValueError if none or many."""
+    ids = list(dict.fromkeys(ids))
     matches = [item for item in ids if item.startswith(token)]
     if len(matches) == 1:
         return matches[0]

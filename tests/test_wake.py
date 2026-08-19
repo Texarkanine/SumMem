@@ -231,3 +231,20 @@ def test_resolve_id_rejects_ambiguous_or_unknown_prefix():
     with pytest.raises(ValueError):
         m.resolve_id("deadbeef", [a, b])
 
+
+def test_short_id_is_8_hex_when_id_repeats():
+    """A repeated content id still shortens to 8 hex; uniqueness is among distinct ids."""
+    m = load_summem()
+    cid = "a3f2c1b8" + "ab" * 28
+    other = "b3f2c1b8" + "cd" * 28
+    assert m.short_id(cid, [cid, cid, other]) == "a3f2c1b8"
+
+
+def test_resolve_id_accepts_prefix_when_id_repeats():
+    """resolve_id treats a repeated content id as one identity, not an ambiguous clash."""
+    m = load_summem()
+    cid = "a3f2c1b8" + "ab" * 28
+    other = "b3f2c1b8" + "cd" * 28
+    assert m.resolve_id("a3f2c1b8", [cid, cid, other]) == cid
+    assert m.resolve_id(cid, [cid, cid]) == cid
+

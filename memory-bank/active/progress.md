@@ -59,3 +59,13 @@ Cap `wake` at `WAKE_LINES`, print short dated lines, keep full hashes on disk, a
 * Insights
     - Prefix uniqueness is uniqueness among distinct content identities, not view-row multiplicity
     - Two identical adjacent notes currently emit full 64-character ids, then `resolve_id` rejects that same id as ambiguous
+
+## 2026-08-19 - BUILD - COMPLETE (re-run)
+
+* Work completed
+    - `short_id` / `resolve_id` unique among distinct ids
+    - Regression tests: unit prefix, fold prompt, CLI nap of identical notes
+* Decisions made
+    - Duplicate view rows with one content id are one identity for prefix purposes
+* Insights
+    - Tests that expected `short_id()` output encoded the bug; assertions on length 8 caught it
