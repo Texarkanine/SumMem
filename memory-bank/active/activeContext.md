@@ -1,12 +1,12 @@
 # Active Context
 
 ## Current Task: scopes
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Advanced L4 `file-backend`: marked issue #3 complete; deleted zipper-heal ephemeral files (preserved `milestones.md`, `projectbrief.md`, `reflection/`).
 - Classified scopes as Level 2.
-- Wrote a new `projectbrief.md` scoped to `start`, `--path` walk-up, root-wake catalog, per-store config, and proofs 7-8.
+- Wrote the L2 plan in `tasks.md`: resolve walk-up, `start`, `--path`, per-store `knobs`, root-wake catalog, proofs 7-8.
+- Mapped red tests to `tests/test_scopes.py`, `tests/test_proof_scopes.py`, and inversions of `test_path_flag_is_unknown` and `test_config_toml_is_not_read`.
 
 ## Next Step
-- Load the Level 2 workflow and execute the plan phase.
+- Preflight validation runs next.
