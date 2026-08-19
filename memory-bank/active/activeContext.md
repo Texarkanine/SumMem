@@ -10,4 +10,4 @@
 - Same-second 24-note stream is the long-stream regression
 
 ## Next Step
-- Ponytail consult on this plan, then `/niko-preflight` when ready
+- `/niko-preflight` on the replanned equal-grain plan (do not `/niko-build` until PASS)
