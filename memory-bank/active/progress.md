@@ -17,3 +17,18 @@ Zipper-heal overlapping nap leaf-sets after merge so the next `note` or `nap` re
 * Insights
     - Proof 6 assumed disjoint packs; equal-grain made the overlapping-prefix case the compaction hole rather than a flatten-to-leaves escape
     - Operator already locked remainder grain, local flock, and "do not zipper inside wake" in the issue; plan still owns crash-file choreography and how overlap is detected
+
+## 2026-08-19 - PLAN - COMPLETE
+
+* Work completed
+    - Wrote the L3 zipper-heal plan in `tasks.md`: leaf-sets/rematerialize, containment+heal, `write_nap` overlap guard, flock+CLI, merge/crash/budget tests, contract wording
+    - Mapped red tests to `tests/test_zipper.py` plus extensions of `test_nap.py` and `test_proof_branches.py`
+* Decisions made
+    - No creative phase
+    - Skip note-note pairs so identical-text ingest files stay
+    - Split only the smaller pack; containment unlinks parent before subset-drop
+    - `heal_view` is CLI-called, not inside `write_note`/`write_nap`; vanished nap ids are success
+    - Stay Level 3
+* Insights
+    - Naive ⊆ drop on parent+children would undo a crashed split; the issue’s “drop the extra” means the parent
+    - `fold_request` already stays silent when no equal-grain pair exists; the `8+2+1` case is a regression, not a picker rewrite

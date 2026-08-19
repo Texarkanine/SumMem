@@ -1,11 +1,11 @@
 # Active Context
 
 ## Current Task: zipper-heal
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Advanced L4 `file-backend`: marked issue #1 (equal-grain) complete; deleted equal-grain `tasks.md` / `activeContext.md` / `progress.md` / `creative/` / `.qa-validation-status` / `.preflight-status`
-- Classified issue #3 (zipper-heal overlapping nap leaf-sets) as Level 3
+- Classified issue #3 as Level 3 and wrote the zipper-heal plan: containment then smaller-against-other, skip note-note, overlap guard in `write_nap`, local flock on `note`/`nap` only
+- No creative phase: the issue plus operator locks were enough; containment-before-subset is a plan rule so crash retry cannot keep the parent and drop children
 
 ## Next Step
-- Load the Level 3 workflow and enter plan
+- Preflight to validate the plan, then wait for `/niko-build`
