@@ -1,10 +1,10 @@
 # Active Context
 
 ## Current Task: zipper-heal
-**Phase:** PREFLIGHT - COMPLETE (PASS)
+**Phase:** BUILD - IN-PROGRESS
 
 ## What Was Done
-- Preflight validated the amended plan with 0 blocking findings or conflicts. Plan passed all validation steps and respects TDD ordering and architectural constraints.
+- Preflight PASS. Entering build: leaf-sets/rematerialize, heal_view zipper, write_nap overlap guards, naps/ flock + CLI, contract wording.
 
 ## Next Step
-- Wait for `/niko-build` to begin code implementation.
+- Execute the implementation plan in `tasks.md` in order, TDD per unit.
