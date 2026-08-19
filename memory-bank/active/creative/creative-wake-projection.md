@@ -107,6 +107,8 @@ Further expand walks the in-memory kids, not only the rightmost node once. `fold
 
 ## Implementation Notes
 
+The operator amendment above is the locked choice. The notes below describe the rejected first pass.
+
 - `write_nap` writes the parent pair and leaves children on disk. Fold is caption, not compaction.
 - Wake’s input is the sorted `notes/` list (T, order). It does not treat `naps/` as the sequence. A nap is a caption lookup: same leaf-set id as a chosen tile → print that `.sum` (or degrade if the caption is missing or conflict-marked).
 - The cut is OptMem-shaped: aligned power-of-two tiles of the note sequence, leftover budget on the right. A missing tile caption degrades to finer existing files (smaller naps whose leaf sets partition the tile, or the notes). That may print more than `WAKE_LINES`. That is wait-free, not a defect.

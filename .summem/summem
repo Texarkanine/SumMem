@@ -97,6 +97,7 @@ class ProjectedNode:
     stamp: str
     tree: Tree | None = None
     tree_path: Path | None = None
+    tree_attempted: bool = False
 
 
 def _tree_dict(tree: Tree) -> dict:
@@ -435,38 +436,48 @@ def expand_frontier(nodes: list[ViewNode], budget: int) -> list[ProjectedNode]:
     ]
     while len(frontier) < budget:
         idx = -1
-        loaded: ProjectedNode | None = None
+        kids: list[ProjectedNode] | None = None
         for i in range(len(frontier) - 1, -1, -1):
-            candidate = _expandable_row(frontier[i])
-            if candidate is not None:
+            row = _prepare_nap(frontier[i])
+            frontier[i] = row
+            split = _split_kids(row)
+            if split is not None:
                 idx = i
-                loaded = candidate
+                kids = split
                 break
-        if loaded is None or loaded.tree is None:
+        if kids is None:
             break
-        kids = [_projected_child(child) for child in loaded.tree.kids]
         frontier = [*frontier[:idx], *kids, *frontier[idx + 1 :]]
     return frontier
 
 
-def _expandable_row(row: ProjectedNode) -> ProjectedNode | None:
-    if row.kind != "nap":
-        return None
-    loaded = row
-    if loaded.tree is None:
-        if loaded.tree_path is None or not loaded.tree_path.is_file():
-            return None
-        try:
-            tree = loads_tree(loaded.tree_path.read_bytes())
-        except (OSError, UnicodeError, json.JSONDecodeError, KeyError, TypeError, ValueError, AttributeError):
-            return None
-        loaded = replace(loaded, tree=tree)
-    if loaded.tree is None or len(loaded.tree.kids) != 2:
-        return None
-    return loaded
+def _prepare_nap(row: ProjectedNode) -> ProjectedNode:
+    if row.kind != "nap" or row.tree_attempted:
+        return row
+    if row.tree is not None:
+        return replace(row, tree_attempted=True)
+    if row.tree_path is None or not row.tree_path.is_file():
+        return replace(row, tree_attempted=True)
+    try:
+        tree = loads_tree(row.tree_path.read_bytes())
+    except (OSError, UnicodeError, json.JSONDecodeError, KeyError, TypeError, ValueError, AttributeError):
+        return replace(row, tree_attempted=True)
+    return replace(row, tree=tree, tree_attempted=True)
 
 
-def _projected_child(child: NoteChild | NapChild) -> ProjectedNode:
+def _split_kids(row: ProjectedNode) -> list[ProjectedNode] | None:
+    try:
+        if row.tree is None or len(row.tree.kids) != 2:
+            return None
+        kids = [_projected_child(child) for child in row.tree.kids]
+    except (TypeError, ValueError, AttributeError, KeyError):
+        return None
+    if any(kid is None for kid in kids):
+        return None
+    return kids
+
+
+def _projected_child(child: NoteChild | NapChild) -> ProjectedNode | None:
     if isinstance(child, NoteChild):
         return ProjectedNode(
             id=leafset_id([note_digest(note_file_bytes(child.text))]),
@@ -476,6 +487,8 @@ def _projected_child(child: NoteChild | NapChild) -> ProjectedNode:
             stamp=child.name.split("-")[0],
         )
     notes = list(_note_children(child.tree))
+    if not notes:
+        return None
     return ProjectedNode(
         id=child.id,
         kind="nap",

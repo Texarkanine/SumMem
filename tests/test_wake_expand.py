@@ -162,6 +162,55 @@ def test_unreadable_tree_does_not_split(tmp_path, monkeypatch):
         os.chmod(tree, 0o644)
 
 
+def test_nested_empty_nap_child_does_not_split(tmp_path, monkeypatch):
+    """A valid JSON tree with a nap child that has no notes prints as one line."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    nodes = m.list_view(repo)
+    m.write_nap(repo, nodes[0].id, nodes[1].id, "pair")
+    tree_path = next((repo / ".summem" / "naps").glob("*.tree"))
+    tree_path.write_bytes(
+        m.dumps_tree(
+            m.Tree(
+                kids=[
+                    m.NoteChild(name="20260101T000001Z-aaaaaaaaaaaaaaaa", text="alpha"),
+                    m.NapChild(id="0" * 64, sum="empty", tree=m.Tree(kids=[])),
+                ]
+            )
+        )
+    )
+    monkeypatch.setattr(m, "WAKE_LINES", 4)
+    lines = [line for line in m.wake_text(repo).splitlines() if line]
+    assert len(lines) == 1
+    assert "pair" in lines[0]
+
+
+def test_malformed_tree_is_loaded_at_most_once(tmp_path, monkeypatch):
+    """A failed file-backed .tree load is not retried during the same wake."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    _two_eights(m, repo)
+    nodes = m.list_view(repo)
+    right = nodes[-1]
+    assert right.tree_path is not None
+    bad = b"{not json\n"
+    right.tree_path.write_bytes(bad)
+    real = m.loads_tree
+    seen: list[bytes] = []
+
+    def counted(data: bytes):
+        seen.append(data)
+        return real(data)
+
+    monkeypatch.setattr(m, "loads_tree", counted)
+    monkeypatch.setattr(m, "WAKE_LINES", 4)
+    lines = [line for line in m.wake_text(repo).splitlines() if line]
+    assert len(lines) == 4
+    assert seen.count(bad) == 1
+
+
 def test_zoom_expanded_child_id(tmp_path, monkeypatch):
     """An id printed by expand can be zoomed to that child's kids or text."""
     m = load_summem()

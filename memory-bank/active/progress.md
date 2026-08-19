@@ -148,3 +148,17 @@ Equal-grain fold requests, carry-stable nap names, and in-memory wake expand so 
     - Decode-level malformed coverage is insufficient; projection must validate semantic tree invariants before replacing the file row
     - The immutable projected row boundary is sound, but it needs an explicit attempted/unsplittable state to preserve the one-load contract
 
+## 2026-08-19 - BUILD - COMPLETE (rework after QA FAIL)
+
+* Work completed
+    - Nested nap children with no notes no longer raise from `wake_text`; the parent file line prints
+    - Failed file-backed `.tree` loads are recorded on `ProjectedNode.tree_attempted` so each payload is parsed at most once per wake
+    - `VISION.md` temporal bias now names aligned cover as later and equal-grain plus right-edge expand as this milestone
+    - Creative implementation notes labeled as the rejected first pass
+    - Full suite: 101 passed
+* Decisions made
+    - `_split_kids` must project both children before replacing a row; a None child means unsplittable, not a crash
+    - Cache attempts on the projected row rather than a side map, so the one-load contract lives with the frontier
+* Insights
+    - Decode-level `loads_tree` exceptions never saw a valid JSON tree whose nested nap had zero notes
+

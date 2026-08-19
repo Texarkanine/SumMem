@@ -195,9 +195,9 @@ There is no shared index file, no `LOG.txt`, and no `manifest` that every `note`
 
 ## Temporal bias
 
-Wake uses OptMem’s cover: tile the sorted sequence with aligned power-of-two blocks; keep a block whole when it is small relative to its age; spend leftover budget on the present. Recent notes stay one file each. Ancient notes appear as one `.sum`.
+OptMem’s aligned cover — tile the sorted sequence with aligned power-of-two blocks; keep a block whole when it is small relative to its age; spend leftover budget on the present — is later. After a long-lived merge, this backend does not rebuild `[0, 8192)` over interleaved leaves.
 
-A simpler equivalent: if **file** count exceeds `WAKE_LINES`, request the oldest adjacent pair with the same leaf count. Never 16+1. The agent naps that pair; children leave the directory. `WAKE_LINES` is how many lines wake prints. When files are fewer than the budget, wake splits the newest expandable nap in memory. When files meet or exceed the budget, wake lists files. It does not write children back. Catch-up after `nap` prints the next equal-grain pair if the directory is still over budget.
+This milestone: if **file** count exceeds `WAKE_LINES`, request the oldest adjacent pair with the same leaf count. Never 16+1. The agent naps that pair; children leave the directory. `WAKE_LINES` is how many lines wake prints. When files are fewer than the budget, wake splits the newest expandable nap in memory. When files meet or exceed the budget, wake lists files. It does not write children back. Catch-up after `nap` prints the next equal-grain pair if the directory is still over budget.
 
 Wake is wait-free. A missing or conflict-marked `.sum` still counts as a view node: wake prints the content id and grain, skips the caption, and does not refuse. It does not open `.tree` to list an at-or-over-budget directory. It may open `.tree` to expand an under-budget directory; a missing, unreadable, or malformed `.tree` means that node will not split. Zoom still reads `.tree`. Ten agents must not serialize on “cannot wake.”
 
