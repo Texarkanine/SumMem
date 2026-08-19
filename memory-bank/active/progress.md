@@ -227,3 +227,14 @@ Make SumMem CLI help a memo-style ratchet, then fold accepted PR #5 review fixes
 * Insights
     - Existing `"summem wake"` catalog coverage also matches `.summem/summem wake`, so it cannot drive the planned prefix change
     - A direct malformed-tree `zoom_text()` test does not prove CLI rc/stderr behavior or the separate `OSError` path
+
+## 2026-08-19 - PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+
+* Work completed
+    - Re-validated the revised PR #5 rework plan against the driver, affected tests, VISION, and persistent briefing
+    - Wrote `memory-bank/active/.preflight-status` with first line `PASS WITH ADVISORY`
+* Decisions made
+    - Plan is acceptable as-is; TDD order is correct; no change-detector strike; no in-phase plan edits
+    - Added an advisory regarding silently skipping unreadable trees in `zoom` and `recall`
+* Insights
+    - The revised plan successfully corrects previous missing tests and executable steps for printed driver locations and tree unreadable handling.

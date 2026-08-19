@@ -1,10 +1,11 @@
 # Active Context
 
 ## Current Task: cli-help
-**Phase:** PLAN - COMPLETE
+**Phase:** PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
 
 ## What Was Done
-- Second re-plan: catalog prefix red test, CLI zoom malformed/OSError, `CLI_NAME`.
+- Preflight validation passed. TDD steps and compliance are correct.
+- Left an advisory on adding a warning for unreadable tree packs.
 
 ## Next Step
-- Preflight again, then build.
+- Run `/niko-build` to implement the plan.
