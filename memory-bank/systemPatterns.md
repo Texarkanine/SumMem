@@ -52,7 +52,7 @@ Fold writes a new pair. Children leave the view only after the parent payload ex
 
 ## Wake is wait-free
 
-A missing caption degrades to children or raw notes. Writers must not serialize on "cannot wake."
+A missing or conflict-marked caption degrades to the content id and grain. Wake does not open `.tree`. Writers must not serialize on "cannot wake."
 
 ## Root pushes; other stores pull
 

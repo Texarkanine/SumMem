@@ -1,4 +1,4 @@
-"""CLI: wake, note, and nap arity."""
+"""CLI: wake, note, nap, zoom, and recall."""
 
 from __future__ import annotations
 

@@ -76,3 +76,19 @@ Implement single-store memory: `nap`, `zoom`, `recall`, left-fold of adjacent vi
     - `VISION.md`'s `naps/<leafset>.sum` contradicts its own “sort key is the minimum child time” and “wake never needs to open a fat `.tree`”; the filename edit resolves the document, it does not shrink the contract
     - Naming naps by minimum child time is what keeps a pack's notes adjacent while it folds, so the left-fold never has to reach across a pack boundary
     - Grain in the filename turns proof 4's weakest assertion (“three lines”) into a direct `40/30/30` check
+
+## 2026-08-18 - BUILD - COMPLETE
+
+* Work completed
+    - Implemented single-store on `.summem/summem`: binary `nap`, pair-aware view, mixed wake, zoom, recall, over-budget fold request
+    - Proofs 2–6 plus ingest baseline: 78 pytest, `uv run --python 3.11 --with pytest pytest`
+    - Surgical `VISION.md` nap filenames and missing-caption wake; `ROADMAP.md` Phase 2 now matches two-id `nap` and request-not-auto-nap
+* Decisions made
+    - Conflict-marker check is `"<" * 7` so the copied driver does not contain seven chevrons (proof 1 scans every store file)
+    - `zoom` of an id not in the view searches nested `.tree` payloads; proofs 4 and 6 need that after children are unlinked
+    - `init_repo` uses `git init -b main` so squash proofs can check out `main`
+    - Over-budget `note` prints the two oldest ids and does not call `write_nap`
+* Insights
+    - Substring asserts on short tokens (`a1`, `b1`) fire on hex ids; assert wake/zoom field suffixes instead
+    - A leftover child `.sum` after unlinking only `.tree` breaks adjacency for the next fold
+

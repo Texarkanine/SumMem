@@ -55,12 +55,12 @@ graph TD
 
 **Build**
 
-- `nap <id>` and `zoom <id>` on content ids only. A positional range, or no id, is rejected
+- `nap <id-a> <id-b>` and `zoom <id>` on content ids only. A positional range, one id, three ids, or no id, is rejected
 - Nap pair: `.sum` caption, `.tree` canonical payload. Identity is the leaf set, not the sentence
 - A child may be a raw note or another nap. Fold writes a new pair. Children leave the view only after the parent payload exists on disk
-- `wake` of the current view (loose notes plus `.sum` files), wait-free. A missing or conflict-marked caption degrades; it does not block
+- `wake` of the current view (loose notes plus nap pairs), wait-free. A missing or conflict-marked caption degrades; it does not block
 - `recall` of the view, and of original sentences inside `.tree` files
-- Left-fold when the view is over `WAKE_LINES`: nap the oldest adjacent view nodes. That is enough decay for the proofs. Aligned power-of-two `cover(T, budget)` is later
+- Left-fold when the view is over `WAKE_LINES`: request the oldest adjacent view nodes. That is enough decay for the proofs. Aligned power-of-two `cover(T, budget)` is later
 
 **Gates:** first proofs 2, 3, 4, 5, and 6.
 

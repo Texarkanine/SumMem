@@ -146,7 +146,7 @@ The content id is a digest of the **leaves**, never of the summary sentence.
 
 1. For each original note, SHA-256 of the file bytes (UTF-8 text plus one trailing newline), lowercase hex.
 2. Sort those hex digests as ASCII and concatenate them with **no delimiter**.
-3. SHA-256 of that ASCII join → the leaf-set id, which is also the filename stem of `.sum` and `.tree`.
+3. SHA-256 of that ASCII join → the leaf-set id. It is identity, not the whole filename. Nap files are `{minStamp}-{leafset}-{leaves}.sum|.tree`.
 
 Same children → same id → same `.tree` bytes. Different sentence → same id, different `.sum`.
 
@@ -170,12 +170,14 @@ Notes are immutable. There is no edit. A retraction is a new note. Rewriting a n
 
 ### Naps
 
-Nap is file collection. The script compresses a sealed set of children into two files named by the **leaf-set hash** (a digest of the original notes, not of the summary text):
+Nap is file collection. The script compresses a sealed set of children into two files. Identity is the **leaf-set hash** (a digest of the original notes, not of the summary text). Sequence and grain live in the same name so wake never opens `.tree`:
 
 | File | Bytes | Role |
 |---|---|---|
-| `naps/<leafset>.sum` | One line, ≤280 bytes | What wake prints. Two wordings of the same leaves may differ. |
-| `naps/<leafset>.tree` | Canonical dump of the children | What zoom and word-for-word recall need after squash. Same children → same bytes. |
+| `naps/<minStamp>-<leafset>-<leaves>.sum` | One line, ≤280 bytes | What wake prints. Two wordings of the same leaves may differ. |
+| `naps/<minStamp>-<leafset>-<leaves>.tree` | Canonical dump of the children | What zoom and word-for-word recall need after squash. Same children → same bytes. |
+
+`minStamp` is the minimum child UTC (`YYYYMMDDTHHMMSSZ`), the sort key. `leafset` is identity. `leaves` is the original-note count wake prints as grain.
 
 A child is a raw note or another nap. The `.tree` stores **full bodies** of immediate children. If a child is itself a nap, that body includes *its* `.tree`. One file that represents 40 original notes contains those 40 sentences. After squash, a clone of `main` that only has three nap pairs can still zoom to the originals. The content is in `HEAD`, not in `commit^`.
 
@@ -185,7 +187,7 @@ Uncommitted delete is data loss, not archaeology. The script must not drop child
 
 ### View versus payload
 
-Wake lists the current view: loose notes plus current `.sum` files, sorted by the sequence key. It never needs to open a fat `.tree`.
+Wake lists the current view: loose notes plus nap stems (a `.sum`, a `.tree`, or both), sorted by the sequence key. It never needs to open a fat `.tree`.
 
 Recall of everyday use is `sort | cat` of the view, with `.sum` standing in for napped children. Recall that must see original sentences reads `.tree` files as well. That is still the tree at `HEAD`, not `git log`.
 
@@ -197,7 +199,7 @@ Wake uses OptMem’s cover: tile the sorted sequence with aligned power-of-two b
 
 A simpler equivalent if the directory is already folded from the left: if the view has more files than `WAKE_LINES`, nap the oldest two (or oldest *k*) into one file named by minimum child time. Detail decays because old files have been merged more times.
 
-Wake is wait-free. A missing `.sum` means split to children or print raw notes. Ten agents must not serialize on “cannot wake.”
+Wake is wait-free. A missing or conflict-marked `.sum` still counts as a view node: wake prints the content id and grain, skips the caption, and does not open `.tree`. Zoom still reads `.tree`. Ten agents must not serialize on “cannot wake.”
 
 ## Concurrency and merge
 
