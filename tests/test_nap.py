@@ -200,3 +200,70 @@ def test_nap_rejects_unknown_id(tmp_path):
     assert "naps/" not in err
     assert "git" not in err
     assert _payload_names(repo) == before
+
+
+def test_nap_of_two_naps_nests_napchild_and_unions_digests(tmp_path):
+    """A nap of two naps stores NapChild nodes and the union of original digests."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    texts = ["a1", "a2", "b1", "b2"]
+    for i, text in enumerate(texts, start=1):
+        m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
+    ids = _ids(m, repo)
+    m.write_nap(repo, ids[0], ids[1], "pack-a")
+    m.write_nap(repo, ids[2], ids[3], "pack-b")
+    nap_ids = _ids(m, repo)
+    m.write_nap(repo, nap_ids[0], nap_ids[1], "both")
+    trees = list((repo / ".summem" / "naps").glob("*.tree"))
+    assert len(trees) == 1
+    tree = m.loads_tree(trees[0].read_bytes())
+    assert len(tree.kids) == 2
+    assert all(isinstance(kid, m.NapChild) for kid in tree.kids)
+    digests = [m.note_digest(m.note_file_bytes(text)) for text in texts]
+    assert trees[0].name.split("-")[1] == m.leafset_id(digests)
+    assert {kid.sum for kid in tree.kids} == {"pack-a", "pack-b"}
+    out = m.zoom_text(repo, tree.kids[0].id)
+    suffixes = [line.split("  ", 1)[1] for line in out.splitlines()]
+    assert suffixes == ["a1", "a2"]
+
+
+def test_napchild_sum_empty_when_child_sum_missing(tmp_path):
+    """Napping a child whose .sum is missing stores an empty NapChild.sum."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "a1", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "a2", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    m.write_note(repo, "b1", datetime(2026, 1, 1, 0, 0, 3, tzinfo=UTC), Random(3))
+    m.write_note(repo, "b2", datetime(2026, 1, 1, 0, 0, 4, tzinfo=UTC), Random(4))
+    ids = _ids(m, repo)
+    m.write_nap(repo, ids[0], ids[1], "pack-a")
+    m.write_nap(repo, ids[2], ids[3], "pack-b")
+    sums = sorted((repo / ".summem" / "naps").glob("*.sum"))
+    sums[0].unlink()
+    nap_ids = _ids(m, repo)
+    m.write_nap(repo, nap_ids[0], nap_ids[1], "both")
+    tree = m.loads_tree(next((repo / ".summem" / "naps").glob("*.tree")).read_bytes())
+    assert tree.kids[0].sum == ""
+    out = m.zoom_text(repo, tree.kids[0].id)
+    assert "a1" in out and "a2" in out
+
+
+def test_napchild_sum_empty_when_child_sum_conflict(tmp_path):
+    """Napping a child whose .sum is conflict-marked stores an empty NapChild.sum."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "a1", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "a2", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    m.write_note(repo, "b1", datetime(2026, 1, 1, 0, 0, 3, tzinfo=UTC), Random(3))
+    m.write_note(repo, "b2", datetime(2026, 1, 1, 0, 0, 4, tzinfo=UTC), Random(4))
+    ids = _ids(m, repo)
+    m.write_nap(repo, ids[0], ids[1], "pack-a")
+    m.write_nap(repo, ids[2], ids[3], "pack-b")
+    sums = sorted((repo / ".summem" / "naps").glob("*.sum"))
+    sums[0].write_text("<" * 7 + " HEAD\npack-a\n=======\nother\n>>>>>>>\n", encoding="utf-8")
+    nap_ids = _ids(m, repo)
+    m.write_nap(repo, nap_ids[0], nap_ids[1], "both")
+    tree = m.loads_tree(next((repo / ".summem" / "naps").glob("*.tree")).read_bytes())
+    assert tree.kids[0].sum == ""
+    out = m.zoom_text(repo, tree.kids[0].id)
+    assert "a1" in out and "a2" in out

@@ -66,3 +66,22 @@ def test_zoom_unknown_id_omits_store_paths_and_git(tmp_path):
     assert "notes/" not in err
     assert "naps/" not in err
     assert "git" not in err
+
+
+def test_zoom_nap_of_naps_prints_two_children_not_leaves(tmp_path):
+    """Zoom of a nap-of-naps prints two child ids and captions, not all original texts."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    for i, text in enumerate(["a1", "a2", "b1", "b2"], start=1):
+        m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
+    ids = [line.split()[0] for line in m.wake_text(repo).splitlines() if line]
+    m.write_nap(repo, ids[0], ids[1], "pack-a")
+    m.write_nap(repo, ids[2], ids[3], "pack-b")
+    nap_ids = [line.split()[0] for line in m.wake_text(repo).splitlines() if line]
+    m.write_nap(repo, nap_ids[0], nap_ids[1], "both")
+    parent_id = m.wake_text(repo).splitlines()[0].split()[0]
+    out = m.zoom_text(repo, parent_id)
+    lines = out.splitlines()
+    assert len(lines) == 2
+    captions = [line.split("  ", 1)[1] for line in lines]
+    assert captions == ["pack-a", "pack-b"]

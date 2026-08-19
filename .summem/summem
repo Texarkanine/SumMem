@@ -269,6 +269,36 @@ def _note_child(node: ViewNode) -> tuple[NoteChild, str]:
     return NoteChild(name=node.name, text=node.caption), note_digest(raw)
 
 
+def _digests_of_tree(tree: Tree) -> list[str]:
+    out: list[str] = []
+    for child in tree.kids:
+        if isinstance(child, NoteChild):
+            out.append(note_digest(note_file_bytes(child.text)))
+        else:
+            out.extend(_digests_of_tree(child.tree))
+    return out
+
+
+def _as_child(node: ViewNode) -> tuple[NoteChild | NapChild, list[str]]:
+    if node.kind == "note":
+        child, digest = _note_child(node)
+        return child, [digest]
+    if node.tree_path is None or not node.tree_path.is_file():
+        raise ValueError("unknown id")
+    inner = loads_tree(node.tree_path.read_bytes())
+    return NapChild(id=node.id, sum=node.caption, tree=inner), _digests_of_tree(inner)
+
+
+def _unlink_node(node: ViewNode) -> None:
+    if node.kind == "note":
+        node.path.unlink()
+        return
+    if node.sum_path is not None and node.sum_path.is_file():
+        node.sum_path.unlink()
+    if node.tree_path is not None and node.tree_path.is_file():
+        node.tree_path.unlink()
+
+
 def write_nap(parent, id_a, id_b, caption):
     """Fold two adjacent view nodes into a nap pair. Return the .sum path."""
     require_entry(caption)
@@ -281,10 +311,10 @@ def write_nap(parent, id_a, id_b, caption):
         raise ValueError("not adjacent")
     lo, hi = (ia, ib) if ia < ib else (ib, ia)
     left, right = nodes[lo], nodes[hi]
-    child_l, dig_l = _note_child(left)
-    child_r, dig_r = _note_child(right)
+    child_l, digs_l = _as_child(left)
+    child_r, digs_r = _as_child(right)
     tree = Tree(kids=[child_l, child_r])
-    digests = [dig_l, dig_r]
+    digests = digs_l + digs_r
     leafset = leafset_id(digests)
     leaves = len(digests)
     stem = f"{min(left.stamp, right.stamp)}-{leafset}-{leaves}"
@@ -293,8 +323,8 @@ def write_nap(parent, id_a, id_b, caption):
     sum_path = naps / f"{stem}.sum"
     _replace_bytes(tree_path, dumps_tree(tree))
     _replace_bytes(sum_path, note_file_bytes(caption))
-    left.path.unlink()
-    right.path.unlink()
+    _unlink_node(left)
+    _unlink_node(right)
     return sum_path
 
 
@@ -317,9 +347,24 @@ def _zoom_kids(tree: Tree) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _find_in_tree(tree: Tree, cid: str) -> NapChild | str | None:
+    for child in tree.kids:
+        if isinstance(child, NoteChild):
+            if leafset_id([note_digest(note_file_bytes(child.text))]) == cid:
+                return child.text
+            continue
+        if child.id == cid:
+            return child
+        found = _find_in_tree(child.tree, cid)
+        if found is not None:
+            return found
+    return None
+
+
 def zoom_text(parent, cid: str) -> str:
     """Return one-level zoom of *cid*, or raise ValueError if unknown."""
-    for node in list_view(parent):
+    nodes = list_view(parent)
+    for node in nodes:
         if node.id != cid:
             continue
         if node.kind == "note":
@@ -327,6 +372,15 @@ def zoom_text(parent, cid: str) -> str:
         if node.tree_path is None or not node.tree_path.is_file():
             raise ValueError("unknown id")
         return _zoom_kids(loads_tree(node.tree_path.read_bytes()))
+    for node in nodes:
+        if node.kind != "nap" or node.tree_path is None or not node.tree_path.is_file():
+            continue
+        found = _find_in_tree(loads_tree(node.tree_path.read_bytes()), cid)
+        if found is None:
+            continue
+        if isinstance(found, str):
+            return f"{cid}  {found}\n"
+        return _zoom_kids(found.tree)
     raise ValueError("unknown id")
 
 
