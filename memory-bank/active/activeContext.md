@@ -1,11 +1,11 @@
 # Active Context
 
-## Current Task: single-store
-**Phase:** REFLECT - COMPLETE
+## Current Task: equal-grain
+**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
 
 ## What Was Done
-- Wrote `memory-bank/active/reflection/reflection-single-store.md`
-- Recorded that content ids name leaves, not unique view rows, in `systemPatterns.md`
+- Advanced L4 `file-backend`: marked single-store complete; deleted sub-run `tasks.md`, `activeContext.md`, `progress.md`, `.qa-validation-status`, `.preflight-status`; preserved `milestones.md`, `projectbrief.md` (then replaced with this sub-run's brief), and `reflection/`
+- Classified milestone 3 (issue #1 equal-grain fold) as Level 2
 
 ## Next Step
-- Run `/niko`: tick single-store complete, then classify issue #1 (now in `milestones.md` before scopes)
+- Load the Level 2 workflow and execute the plan phase

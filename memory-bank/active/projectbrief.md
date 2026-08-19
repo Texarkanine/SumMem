@@ -2,65 +2,53 @@
 
 ## User Story
 
-As an agent working in a git repository, I want a script that naps sealed blocks into one-line captions, zooms those captions back to original sentences, and recalls remembered text word for word, so that a fresh clone of `main` after squash can still open every sentence the view still owes.
+As an agent working in a git repository, I want fold requests to name two adjacent view nodes of the same leaf count, and a short sequential nap chain while the view is over budget, so that `HEAD` stays a short power-of-two tree and rebuild, zoom, and later surgery stay `O(log n)` in the number of leaves.
 
 ## Use-Case(s)
 
-### Compact a sealed block
+### Over-budget note
 
-An agent supplies a one-line summary for a sealed block the script already identified. The script writes a nap pair keyed by leaf set, not by the sentence. Children leave the view only after the parent payload exists on disk.
+An agent records a note that pushes the view over `WAKE_LINES`. The script writes the note and prints one equal-grain pair (two adjacent 1s, or two adjacent 8s, never 16+1). It does not write a nap. It does not refuse to wake.
 
-### Session start (root, mixed view)
+### Catch-up chain
 
-An agent wakes the repository's root memory once and reads the current view: loose notes plus nap captions, each with a content id. A missing or conflict-marked caption degrades. Wake never refuses to print.
+The agent naps the requested pair. If the view is still over `WAKE_LINES`, that `nap` prints the next equal-grain pair. The agent does them in sequence in one turn. Falling a handful of pairs behind is `O(k)` naps, not `O(T)`.
 
-### Open a summary
+### Long stream
 
-An agent runs `zoom` with a content id from wake and reads the block's two halves, down to raw notes. After squash onto `main`, a clone of the tip still zooms to originals.
+A long stream of `note` plus requested `nap`s leaves view grains that are powers of two, plus a remainder of unmerged 1s. It does not leave one nap of size `T - WAKE_LINES + 1`. Depth of the oldest pack is `O(log leaves)`.
 
-### Search remembered text
+### Explicit nap after merge
 
-An agent runs `recall` and searches the view word for word, including original sentences stored inside nap payloads.
-
-### Concurrent nappers
-
-Two writers nap the same leaves with different sentences. Git conflicts on the caption only. Either resolution still wakes and zooms. Two writers nap disjoint leaves: two pairs, no conflict.
+Binary `nap <id-a> <id-b>` still folds two adjacent view nodes the agent named. After a long-lived merge, the agent may nap adjacent packs. The request printer does not re-tile interleaved leaves into an aligned `[0, 8192)`.
 
 ## Requirements
 
-1. Implement Phase 2 (single-store memory) of the first file backend as specified in `VISION.md` and sequenced in `ROADMAP.md`.
-2. Extend the existing shebang driver at `.summem/summem`. Do not add a package, hatchling, `src/` layout, a root-level `summem`, or a second identity scheme. Call `leafset_id` and `dumps_tree` already in that file. The Sequence section's 8-character id is a picture, not the contract.
-3. `nap <id-a> <id-b> "…"` accepts exactly two adjacent content ids a wake printed, plus a caption. `zoom <id>` accepts one id. A positional range, one id to `nap`, three ids, or no id, is rejected.
-4. A nap is a pair: `.sum` caption (one line, at most 280 UTF-8 bytes) and `.tree` canonical payload. Identity is the leaf set, not the sentence. Same children produce the same id and the same payload bytes. Different wording produces the same id and a different caption.
-5. A child may be a raw note or another nap. Fold writes a new pair. Children leave the view only after the parent payload exists on disk. Do not implement "nap only raw notes" and extend later. Proof 6 needs nap-of-naps.
-6. `wake` prints the current view (loose notes plus nap pairs), wait-free. A missing or conflict-marked caption degrades to the content id without a caption; it does not block. Wake does not open `.tree`.
-7. `recall` searches the view, and original sentences inside `.tree` files.
-8. When the view is over `WAKE_LINES`, left-fold: nap the oldest adjacent view nodes. That is enough decay for the proofs. Aligned power-of-two `cover(T, budget)` is later.
-9. Satisfy first proofs 2, 3, 4, 5, and 6 in `VISION.md`. Internal order: identity and conflict (2, 3, 5) before volume and longevity (4, 6).
-10. Agents never write store files. Wake listings and errors do not mention `notes/`, `naps/`, hashes as paths, or git.
+1. Address [Texarkanine/SumMem#1](https://github.com/Texarkanine/SumMem/issues/1): equal-grain fold so rebuild stays `O(log n)`.
+2. Keep binary `nap <id-a> <id-b> "…"`. Do not invent a second identity. Do not nap `k` children at once. The CLI table does not grow.
+3. Change which pair is requested: only two adjacent view nodes with the same leaf count. Two 1s → 2, two 8s → 16. Never 16+1.
+4. Catch-up is a chain, not one request per later `note`. After a successful `nap`, if the view is still over `WAKE_LINES`, print the next equal-grain pair. `note` still prints at most one pair after a write.
+5. Wake stays wait-free. Boundedness comes from the files on disk being a short tree, not from wake truncating or refusing.
+6. Production fold tests refuse a 16+1 request and accept two 8s. Proof 4's in-pack left-spines may remain a test helper; pack sizes in the squash proof must be reachable under equal-grain (powers of two, plus remainder).
+7. Surgical contract updates: `VISION.md` "simpler equivalent" (oldest two / oldest *k*) is no longer the long-term fold; the year-later diagram is the fold rule. `ROADMAP.md` Later distinguishes equal-grain / short tree (this issue) from full aligned cover as a wake pretty-printer (still Later).
+8. Binary `nap`, leaf-set identity, write-once `.tree`, wait-free wake, and "zoom is a property of `HEAD`" do not change.
 
 ## Constraints
 
-1. Out of this milestone: `start`, `--path`, root catalog, committed config knobs, cover, and every item under `ROADMAP.md` "Later".
-2. Missing config still means script defaults. This milestone does not parse `config.toml` and does not import `tomllib` unless a default must be read from disk — it must not.
-3. No actor, lease, lock, shared mutable index, or custom merge driver.
-4. Sequence is in the filename, not in `git log`. A nap file's sort key is the minimum child time, not when compaction ran. Zoom is a property of `HEAD`.
-5. Wake never refuses to print.
-6. Personal and machine facts stay out of the repository.
-7. Store directory is `.summem/` (not `.mem/`). The driver is `.summem/summem`. Do not overwrite an existing driver. Nested stores later are data only.
-8. Hashing is SHA-256 from `hashlib`. Do not call `sha256sum`, `openssl`, or `git hash-object`.
-9. First proofs 1, 7, and 8 belong to other milestones. Do not re-implement ingest. Do not implement scopes.
-10. A missing piece of `VISION.md` is unfinished work, not a reason to shrink the contract.
-11. This is milestone 2 of L4 `file-backend`. Do not mark that L4 complete.
-12. Tests live outside the script. The product stays one file.
-13. This repo is not a store until a hook binds the driver. Do not commit this tree's `config.toml` / `notes/` / `naps/`.
+1. Out of this milestone: redaction (no sibling script, no history rewrite, no new agent verb), flatten-to-leaves, full OptMem `cover(T, budget)`, scopes (`start`, `--path`, catalog), pack-size cap, harness hooks, and every other `ROADMAP.md` Later item.
+2. Do not reopen single-store from zero. `write_nap`, `zoom`, `recall`, and proofs 2, 3, and 5 stay.
+3. Do not add a package, hatchling, `src/` layout, a root-level `summem`, or a second identity scheme. Extend `.summem/summem`.
+4. Missing config still means script defaults. This milestone does not parse `config.toml`.
+5. Agents never write store files. Wake listings and errors do not mention `notes/`, `naps/`, hashes as paths, or git.
+6. This is a sub-run of L4 `file-backend`. Do not mark that L4 complete. Do not start issue #2 (prompt) from this L4.
+7. Tests live outside the script. The product stays one file.
+8. A missing piece of `VISION.md` is unfinished work, not a reason to shrink the contract.
 
 ## Acceptance Criteria
 
-1. First proof 2: both `nap` the same pair with different sentences. One conflict, on `.sum` only. Either resolution wakes and zooms.
-2. First proof 3: plant conflict markers in a `.sum`. Wake skips that caption. Zoom still prints the leaves.
-3. First proof 4: one hundred notes on a branch, fold to three naps, squash onto `main`. A fresh clone of `main` can `zoom` to an original sentence. `git log` of the branch is gone.
-4. First proof 5: `nap` with a positional range, or with no content id, is rejected.
-5. First proof 6: two long-lived branches with disjoint packs merge clean. Wake prints both at pack grain. A following nap folds the two oldest neighbors into one parent.
-6. `.summem/summem` exposes `wake`, `note`, `nap`, `zoom`, and `recall`. It still does not expose `start` or `--path`.
-7. Nap-of-naps uses the same `leafset_id` / `dumps_tree` contract ingest froze, including nested `.tree` bytes.
+1. A long stream of `note` + requested `nap`s produces view grains that are powers of two (plus a remainder of unmerged 1s), not one nap of size `T - WAKE_LINES + 1`.
+2. Depth of the oldest pack is `O(log leaves)`, not `O(leaves)`.
+3. Falling `k` pairs behind can be caught in one agent turn (`O(k)` sequential equal-grain naps, `k` on the order of a cover burst, not `O(T)`).
+4. The request printer never names 16+1. It does name two adjacent 8s.
+5. Binary `nap`, leaf-set identity, write-once `.tree`, wait-free wake, and zoom-from-`HEAD` still hold. First proofs 2, 3, 5, and 6 still pass. Proof 4 still squash-clones and zooms originals, with power-of-two pack sizes.
+6. No redaction command ships. No flatten. No aligned `[0, 8192)` rebuild after merge.
