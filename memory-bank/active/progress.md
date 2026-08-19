@@ -59,3 +59,15 @@ Make SumMem CLI help a memo-style ratchet: bare invocation lists every commandâ€
     - Accepted `_cli_argv` as a necessary, small deviation that preserves normal `main()` invocation and caller input
 * Insights
     - The handwritten catalog and pre-argparse dispatch remain narrow and aligned with the intended first-invocation help ratchet
+
+## 2026-08-19 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-cli-help.md`
+    - Surgical `systemPatterns.md`: top-level help is `usage_text()`, not argparse
+* Decisions made
+    - productContext skip: no new audience or use case
+    - techContext skip: still one shebang and the same pytest runner
+* Insights
+    - `parse_args(argv)` discards a `-h <command>` rewrite; the copy has to reach parse
+    - A flag that never appears on the first usage line is invisible, even when the code is shipped
