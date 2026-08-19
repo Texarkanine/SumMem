@@ -1,11 +1,11 @@
 # Active Context
 
-## Current Task: equal-grain
-**Phase:** REFLECT - COMPLETE
+## Current Task: zipper-heal
+**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
 
 ## What Was Done
-- Reflected on equal-grain: stems, picker, in-memory expand, contract wording; QA FAIL then rework then PASS; 101 tests
-- Persistent files: systemPatterns already carried the fold/expand briefing from build; productContext and techContext unchanged
+- Advanced L4 `file-backend`: marked issue #1 (equal-grain) complete; deleted equal-grain `tasks.md` / `activeContext.md` / `progress.md` / `creative/` / `.qa-validation-status` / `.preflight-status`
+- Classified issue #3 (zipper-heal overlapping nap leaf-sets) as Level 3
 
 ## Next Step
-- Run `/niko` to continue to the next milestone
+- Load the Level 3 workflow and enter plan
