@@ -69,3 +69,14 @@ Cap `wake` at `WAKE_LINES`, print short dated lines, keep full hashes on disk, a
     - Duplicate view rows with one content id are one identity for prefix purposes
 * Insights
     - Tests that expected `short_id()` output encoded the bug; assertions on length 8 caught it
+
+## 2026-08-19 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Verified resolution of the duplicate content identity regression
+    - Confirmed tests pass correctly
+    - Audited implementation against DRY, KISS, and YAGNI principles
+* Decisions made
+    - QA PASS - proceed to /niko-reflect
+* Insights
+    - Deduplicating the id list via `dict.fromkeys` cleanly preserved order while fixing the prefix issue.

@@ -1,11 +1,12 @@
 # Active Context
 
 ## Current Task: wake-listing
-**Phase:** BUILD - COMPLETE (PASS)
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
-- Prefix uniqueness is among distinct content ids, not view-row count
-- Identical adjacent notes print/accept the same 8-hex prefix; `nap` still folds both rows
+- Verified resolution of the duplicate content identity regression
+- Confirmed tests pass correctly
+- Audited implementation against DRY, KISS, and YAGNI principles
 
 ## Files
 - `/home/mobaxterm/git/SumMem/.summem/summem`
@@ -14,7 +15,7 @@
 - `/home/mobaxterm/git/SumMem/tests/test_cli.py`
 
 ## Decisions
-- `list(dict.fromkeys(ids))` inside `short_id` and `resolve_id`; view still keeps both rows
+- QA PASS - proceed to /niko-reflect
 
 ## Next Step
-- QA subagent
+- Run `/niko-reflect`
