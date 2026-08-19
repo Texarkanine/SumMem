@@ -130,4 +130,9 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA - FAIL
+
+## QA Findings
+
+- **Blocking — duplicate content ids break the short-prefix contract.** `short_id` counts duplicate rows instead of distinct content ids, so two adjacent identical notes produce 64-character ids in the nap prompt. `resolve_id` likewise treats the same full id appearing twice as ambiguous, so the emitted command cannot nap that valid pair. This violates the no-full-hash prompt requirement, unique-prefix acceptance, and the established invariant that identical notes share an id but remain nappable.
+- Build must rerun to deduplicate content identities for prefix shortening and resolution, with CLI-level regression coverage for identical-note prompts and naps.

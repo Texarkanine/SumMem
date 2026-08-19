@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: wake-listing
-**Phase:** BUILD - COMPLETE (PASS)
+**Phase:** QA - COMPLETE (FAIL)
 
 ## What Was Done
 - Unique prefix (`short_id` / `resolve_id`), dated wake lines, `WAKE_LINES` cap, OptMem-style `fold_request`
@@ -31,4 +31,5 @@
 - Stored id stays 64 hex; print/accept unique prefix (floor 8)
 
 ## Next Step
-- QA subagent
+- Rerun Build to deduplicate content identities in `short_id` and `resolve_id`
+- Add CLI-level regression coverage for prompting and napping two identical notes

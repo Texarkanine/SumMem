@@ -47,3 +47,15 @@ Cap `wake` at `WAKE_LINES`, print short dated lines, keep full hashes on disk, a
     - Overlapping `nap` after heal exits 1 (`unknown id`) instead of silent 0
 * Insights
     - Catalog grain `(N notes` is a different surface from wake pack `xN`
+
+## 2026-08-19 - QA - COMPLETE (FAIL)
+
+* Work completed
+    - Reviewed the implementation against the Level 2 plan, project brief, and system invariants
+    - Confirmed the full suite passes: 169 tests
+    - Reproduced a blocking duplicate-content-id regression outside the existing suite
+* Decisions made
+    - QA failed; Build must rerun
+* Insights
+    - Prefix uniqueness is uniqueness among distinct content identities, not view-row multiplicity
+    - Two identical adjacent notes currently emit full 64-character ids, then `resolve_id` rejects that same id as ambiguous
