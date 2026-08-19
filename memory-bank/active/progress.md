@@ -1,8 +1,8 @@
 # Progress
 
-Make SumMem CLI help a memo-style ratchet: bare invocation lists every command’s shape including `--path`; `-h <command>` opens that command’s help.
+Make SumMem CLI help a memo-style ratchet, then require a repository for store commands.
 
-**Complexity:** Level 2
+**Complexity:** Level 1
 
 ## 2026-08-19 - COMPLEXITY-ANALYSIS - COMPLETE
 
@@ -82,3 +82,11 @@ Make SumMem CLI help a memo-style ratchet: bare invocation lists every command�
     - Error text must not say “git”
 * Insights
     - The no-repo path was one `return cur` plus a VISION parenthetical; it was not a second mode
+
+## 2026-08-19 - COMPLEXITY-ANALYSIS - COMPLETE (rework)
+
+* Work completed
+    - Classified the repository-required supplement as Level 1
+* Decisions made
+    - Store commands error when `find_store_parent` finds no `.git`; help does not
+    - L1: skip plan and preflight; go to build
