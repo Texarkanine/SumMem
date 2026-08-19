@@ -113,3 +113,15 @@ Make SumMem CLI help a memo-style ratchet, then require a repository for store c
     - Advisories only: `systemPatterns.md` does not yet restate the no-repo failure; wake/start/`-h` tests cover the distinct paths
 * Insights
     - `start` could not ride `resolve_parent`; the repo check has to aim at the target (or its parent) or it would mkdir first
+
+## 2026-08-19 - REWORK INITIATED
+
+* Work completed
+    - Operator folded PR #5 review items into cli-help instead of archiving
+* Decisions made
+    - Fix judge items 1, 2, 5, 6, 8, 9, 10, 11, 13, 14, 15, 17, 18, 19, and the item 21 comment
+    - Driver stays at repo-root `summem`; `dogfood/` remains a toy store; root `.summem/` stays reserved
+    - Unknown argv already fails argparse; `note` must still be an explicit branch so fallthrough cannot write a note
+    - Deterministic tests (monkeypatch unreadable `.tree`); accurate test names; VISION must not mislead
+* Insights
+    - `./dogfood/.summem/summem "raw invocation of random stuff"` already prints argparse invalid choice; the 19 fear is leftover-cmd-as-note, not unknown-token-as-note
