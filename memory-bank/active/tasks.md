@@ -88,6 +88,15 @@ No new technology - validation not required
 - Unknown `type` still becomes a nap via `else`: `test_loads_tree_rejects_unknown_type` plus an explicit `ValueError` branch (no nap fallback).
 - Proofs fail on payload identity: they compare via `dumps_tree` or behavior, not old literals (only `test_codec.py` byte-locks). No extra step.
 
+## QA Findings
+
+- **FAIL (blocking)**: `memory-bank/systemPatterns.md` line 55 still says a missing caption "degrades to date, grain, and unique prefix". Line 45 of the same file now says wake is undated. Drop "date, " from line 55; `VISION.md` is already correct.
+- Advisory: `.summem/naps/*.tree` in this repo are old-schema, so `zoom` on the project's own memory fails. Sanctioned by constraint 1; regenerate or remove the store.
+- Advisory: `zoom_text` does not catch `_TREE_PARSE_ERRORS`, so an unparseable `.tree` exits with a traceback. Pre-existing; out of scope.
+- Advisory: a `leaves == 1` pack with no caption now prints an empty line. Not reachable from fold or zipper.
+- Advisory: `test_loads_tree_rejects_kids_key_without_c` accepts `(KeyError, ValueError)` where the code raises `KeyError`.
+- Codec, wake formatting, and all six acceptance criteria otherwise verified. 177 pytest passed. No KISS/DRY/YAGNI or integrity violations.
+
 ## Status
 
 - [x] Initialization complete

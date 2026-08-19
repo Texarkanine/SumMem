@@ -71,3 +71,34 @@ Clean-cut `.tree` JSON (`c` / `type: note|nap`, no `v`) and undated wake lines, 
     - Proof tests that locked `" xN "` / `YYYY-MM-DD: text` were rewritten like the other wake assertions
 * Insights
     - Old pack lines had a date, so grain was `" xN "` with a leading space; undated lines start with `xN `
+
+## 2026-08-19 - QA - COMPLETE (FAIL)
+
+* Work completed
+    - QA found `systemPatterns.md` wait-free sentence still mentioned date
+* Decisions made
+    - Drop "date, " from that sentence; re-run QA
+* Insights
+    - One briefing file can contradict itself when only the heading/section was updated
+
+## 2026-08-19 - BUILD - COMPLETE (QA fix)
+
+* Work completed
+    - Wait-free caption degradation in `systemPatterns.md` no longer names a date
+* Decisions made
+    - Match VISION: grain and unique prefix, no date
+* Insights
+    - None
+
+## 2026-08-19 - QA - COMPLETE (FAIL)
+
+* Work completed
+    - Reviewed the build diff against the plan, brief, and acceptance criteria; re-ran the suite (177 passed)
+    - Swept the tree for stale `kids`/`k`/`v` and `YYYY-MM-DD` contract prose
+    - Wrote `.qa-validation-status` with one blocking finding and four advisories
+* Decisions made
+    - `systemPatterns.md` contradicting itself on wake dates blocks acceptance; Build must make the one-line fix
+    - The dead on-disk store, the `zoom` traceback, the grain-1 empty line, and the loose exception assertion are advisories, not blockers
+* Insights
+    - Wake's undated contract is stated in two places in `systemPatterns.md`; the "Wake is wait-free" section repeats it and was missed
+    - The repo dogfoods SumMem, so a clean-cut schema change silently kills the project's own memory even when every test passes
