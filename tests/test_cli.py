@@ -64,11 +64,17 @@ def test_nap_subcommand_writes_and_wake_reads(tmp_path, monkeypatch, capsys):
     assert len(out.splitlines()) == 1
 
 
-def test_path_flag_is_unknown(tmp_path, monkeypatch):
-    """Unknown flag --path exits nonzero."""
+def test_path_flag_is_known_on_all_non_start_commands(tmp_path, monkeypatch):
+    """--path is accepted on wake, note, nap, zoom, and recall, and rejected on start."""
     m = load_summem()
     monkeypatch.chdir(init_repo(tmp_path / "r"))
-    assert m.main(["wake", "--path", "."]) != 0
+    fake = "a" * 64
+    assert m.main(["wake", "--path", "."]) == 0
+    assert m.main(["note", "--path", ".", "hello"]) == 0
+    assert m.main(["nap", "--path", ".", fake, fake, "pair"]) == 0
+    assert m.main(["zoom", "--path", ".", fake]) != 2
+    assert m.main(["recall", "--path", ".", "hello"]) == 0
+    assert m.main(["start", "pkg", "--path", "."]) != 0
 
 
 def test_note_without_text_fails(tmp_path, monkeypatch):

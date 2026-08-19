@@ -45,3 +45,15 @@ Addressing: `start`, `--path` walk-up, root-wake catalog, per-store config, firs
 * Insights
     - Counting loose note files would report zero after a complete fold, so catalog count must include each distinct nap stem's encoded leaf count
     - Merely adding `ENTRY_CHARS` to CLI prevalidation is insufficient because `write_note` and `write_nap` validate again against the module default
+
+## 2026-08-19 - BUILD - COMPLETE
+
+* Work completed
+    - Implemented scopes: `is_store` / `resolve_parent`, `start`, `--path`, `knobs`, `store_stats` / `catalog_text`
+    - 156 pytest passed (22 new)
+* Decisions made
+    - Catalog appends in `main` for git-root resolution; `wake_text` is unchanged
+    - `store_stats` never calls `ensure_store` or opens captions/payloads
+* Insights
+    - Two functions with the same name in a test module mean pytest only collects the last; leftover empty stubs shadowed filled catalog tests until they were deleted
+

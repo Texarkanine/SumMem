@@ -11,7 +11,9 @@ import os
 import random
 import re
 import shutil
+import subprocess
 import sys
+import tomllib
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
@@ -153,6 +155,7 @@ WAKE_LINES = 32
 CONFIG_TEMPLATE = """\
 # SumMem per-store knobs. Missing names mean script defaults.
 # ENTRY_CHARS = 280
+# WAKE_LINES = 32
 """
 
 
@@ -172,6 +175,35 @@ def find_store_parent(cwd):
     return cur
 
 
+def is_store(directory):
+    """Return True if *directory* already contains a `.summem/` store."""
+    return (Path(directory) / ".summem").is_dir()
+
+
+def resolve_parent(cwd, path_arg=None):
+    """Return the parent directory of the store that *cwd* / *path_arg* resolve to.
+
+    *path_arg* is a `--path` value or None for `$PWD`. An existing directory is
+    the walk start. Any other path, including a missing file, walks from its
+    parent. Walk toward the git root and take the first `is_store`. If none,
+    return the git root when in git, else the walk start.
+    """
+    origin = Path(cwd).resolve()
+    if path_arg is not None:
+        p = Path(path_arg)
+        if not p.is_absolute():
+            p = origin / p
+        p = p.resolve()
+        origin = p if p.is_dir() else p.parent
+    root = find_store_parent(origin)
+    for candidate in (origin, *origin.parents):
+        if is_store(candidate):
+            return candidate
+        if candidate == root:
+            break
+    return root
+
+
 def ensure_store(parent):
     """Create the store under *parent* if missing. Never overwrite an existing driver."""
     store = Path(parent) / ".summem"
@@ -187,13 +219,122 @@ def ensure_store(parent):
     return store
 
 
-def require_entry(text: str) -> None:
+def knobs(parent):
+    """Return WAKE_LINES and ENTRY_CHARS for the store under *parent*."""
+    defaults = {"WAKE_LINES": WAKE_LINES, "ENTRY_CHARS": ENTRY_CHARS}
+    config = Path(parent) / ".summem" / "config.toml"
+    try:
+        data = tomllib.loads(config.read_text(encoding="utf-8"))
+        result = dict(defaults)
+        if "WAKE_LINES" in data:
+            result["WAKE_LINES"] = int(data["WAKE_LINES"])
+        if "ENTRY_CHARS" in data:
+            result["ENTRY_CHARS"] = int(data["ENTRY_CHARS"])
+        return result
+    except (OSError, UnicodeDecodeError, tomllib.TOMLDecodeError, TypeError, ValueError, AttributeError):
+        return defaults
+
+
+def store_stats(parent) -> tuple[int, str | None]:
+    """Return note grain and latest date from store filenames. Does not create a store."""
+    store = Path(parent) / ".summem"
+    count = 0
+    stamps: list[str] = []
+    notes = store / "notes"
+    if notes.is_dir():
+        for path in notes.iterdir():
+            if not path.is_file() or path.name.startswith("."):
+                continue
+            stamp = _note_stamp(path.name)
+            if stamp is None:
+                continue
+            count += 1
+            stamps.append(stamp)
+    naps = store / "naps"
+    seen: set[str] = set()
+    if naps.is_dir():
+        for path in naps.iterdir():
+            if not path.is_file() or path.name.startswith("."):
+                continue
+            if path.suffix not in (".sum", ".tree"):
+                continue
+            if path.stem in seen:
+                continue
+            parsed = _parse_nap_stem(path.stem)
+            if parsed is None:
+                continue
+            seen.add(path.stem)
+            stamp, _, _, leaves = parsed
+            count += leaves
+            stamps.append(stamp)
+    latest = _day_from_stamp(max(stamps)) if stamps else None
+    return count, latest
+
+
+def _note_stamp(name: str) -> str | None:
+    parts = name.split("-")
+    if len(parts) != 2:
+        return None
+    stamp, rand = parts
+    if len(stamp) != 16 or len(rand) != 16:
+        return None
+    if any(c not in "0123456789abcdef" for c in rand):
+        return None
+    return stamp
+
+
+def _ignored_store(git_root: Path, store_dir: Path) -> bool:
+    rel = store_dir.relative_to(git_root).as_posix()
+    result = subprocess.run(
+        ["git", "check-ignore", "-q", "--", rel],
+        cwd=git_root,
+        capture_output=True,
+    )
+    return result.returncode == 0
+
+
+def catalog_text(git_root, resolved_parent) -> str:
+    """Return root-wake catalog of other started stores, or empty."""
+    root = Path(git_root).resolve()
+    if Path(resolved_parent).resolve() != root:
+        return ""
+    found: list[Path] = []
+    for dirpath, dirnames, _filenames in os.walk(root, followlinks=False):
+        dirnames[:] = [name for name in dirnames if name != ".git"]
+        if ".summem" not in dirnames:
+            continue
+        parent = Path(dirpath)
+        dirnames.remove(".summem")
+        if parent.resolve() == root:
+            continue
+        store_dir = parent / ".summem"
+        if _ignored_store(root, store_dir):
+            continue
+        found.append(parent)
+    found.sort()
+    lines: list[str] = []
+    for parent in found:
+        rel = parent.relative_to(root).as_posix()
+        count, latest = store_stats(parent)
+        grain = "1 note" if count == 1 else f"{count} notes"
+        if latest:
+            lines.append(f"{rel}  ({grain}, latest {latest})")
+        else:
+            lines.append(f"{rel}  ({grain})")
+        lines.append(f".summem/summem wake --path {rel}")
+    if not lines:
+        return ""
+    return "\n".join(lines) + "\n"
+
+
+def require_entry(text: str, entry_chars: int | None = None) -> None:
     """Reject empty, multi-line, or over-long one-line entries."""
+    limit = ENTRY_CHARS if entry_chars is None else entry_chars
     if text == "":
         raise ValueError("note is empty")
     if "\n" in text or "\r" in text:
         raise ValueError("note must be one line")
-    if len(text.encode("utf-8")) > ENTRY_CHARS:
+    if len(text.encode("utf-8")) > limit:
         raise ValueError("note is too long")
 
 
@@ -449,9 +590,9 @@ def _adjacent_nodes(nodes: list[ViewNode], id_a: str, id_b: str) -> tuple[ViewNo
     raise ValueError("not adjacent")
 
 
-def write_nap(parent, id_a, id_b, caption):
+def write_nap(parent, id_a, id_b, caption, entry_chars: int | None = None):
     """Fold two adjacent view nodes into a nap pair. Return the .sum path."""
-    require_entry(caption)
+    require_entry(caption, entry_chars)
     nodes = list_view(parent)
     left, right = _adjacent_nodes(nodes, id_a, id_b)
     child_l, digs_l = _as_child(left)
@@ -607,10 +748,10 @@ def _projected_child(child: NoteChild | NapChild) -> ProjectedNode | None:
     )
 
 
-def write_note(parent, text, now, rng):
+def write_note(parent, text, now, rng, entry_chars: int | None = None):
     """Validate *text*, write one immutable note under *parent*, return its path."""
     require_utc(now)
-    require_entry(text)
+    require_entry(text, entry_chars)
     notes = ensure_store(parent) / "notes"
     name = f"{now.strftime('%Y%m%dT%H%M%SZ')}-{rng.randbytes(8).hex()}"
     dest = notes / name
@@ -621,7 +762,7 @@ def write_note(parent, text, now, rng):
 def wake_text(parent) -> str:
     """Return the wait-free listing of the mixed view under *parent*, or empty."""
     lines = []
-    for node in expand_frontier(list_view(parent), WAKE_LINES):
+    for node in expand_frontier(list_view(parent), knobs(parent)["WAKE_LINES"]):
         day = _day_from_stamp(node.stamp)
         if node.kind == "note":
             lines.append(f"{node.id}  (1 note, from {day})  {node.caption}")
@@ -700,7 +841,7 @@ def main(argv: list[str] | None = None) -> int:
     require_python()
     parser = argparse.ArgumentParser(prog="summem")
     sub = parser.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("wake")
+    wake = sub.add_parser("wake")
     note = sub.add_parser("note")
     note.add_argument("text")
     nap = sub.add_parser("nap")
@@ -711,13 +852,30 @@ def main(argv: list[str] | None = None) -> int:
     zoom.add_argument("id")
     recall = sub.add_parser("recall")
     recall.add_argument("pattern")
+    start = sub.add_parser("start")
+    start.add_argument("dir")
+    for parser_with_path in (wake, note, nap, zoom, recall):
+        parser_with_path.add_argument("--path")
     try:
         args = parser.parse_args(argv)
     except SystemExit as exc:
         return 0 if exc.code is None else int(exc.code)
-    parent = find_store_parent(Path.cwd())
+    if args.cmd == "start":
+        target = Path(args.dir)
+        if not target.is_absolute():
+            target = Path.cwd() / target
+        target.mkdir(parents=True, exist_ok=True)
+        ensure_store(target)
+        return 0
+    parent = resolve_parent(Path.cwd(), args.path)
+    k = knobs(parent)
     if args.cmd == "wake":
-        sys.stdout.write(wake_text(parent))
+        doc = wake_text(parent)
+        cat = catalog_text(find_store_parent(parent), parent)
+        if doc and cat:
+            sys.stdout.write(doc + "\n" + cat)
+        else:
+            sys.stdout.write(doc + cat)
         return 0
     if args.cmd == "nap":
         for token in (args.id_a, args.id_b):
@@ -725,7 +883,7 @@ def main(argv: list[str] | None = None) -> int:
                 sys.stderr.write(f"not a content id: {token}\n")
                 return 2
         try:
-            require_entry(args.caption)
+            require_entry(args.caption, k["ENTRY_CHARS"])
         except ValueError as exc:
             sys.stderr.write(f"{exc}\n")
             return 1
@@ -734,8 +892,8 @@ def main(argv: list[str] | None = None) -> int:
             heal_view(parent)
             present = {node.id for node in list_view(parent)}
             if args.id_a in present and args.id_b in present:
-                write_nap(parent, args.id_a, args.id_b, args.caption)
-            return fold_request(parent, WAKE_LINES)
+                write_nap(parent, args.id_a, args.id_b, args.caption, k["ENTRY_CHARS"])
+            return fold_request(parent, k["WAKE_LINES"])
 
         try:
             out = with_store_lock(parent, nap_locked)
@@ -762,7 +920,7 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         return 0
     try:
-        require_entry(args.text)
+        require_entry(args.text, k["ENTRY_CHARS"])
     except ValueError as exc:
         sys.stderr.write(f"{exc}\n")
         return 1
@@ -770,9 +928,9 @@ def main(argv: list[str] | None = None) -> int:
     rng = random.SystemRandom()
 
     def note_locked():
-        write_note(parent, args.text, now, rng)
+        write_note(parent, args.text, now, rng, k["ENTRY_CHARS"])
         heal_view(parent)
-        return fold_request(parent, WAKE_LINES)
+        return fold_request(parent, k["WAKE_LINES"])
 
     try:
         out = with_store_lock(parent, note_locked)

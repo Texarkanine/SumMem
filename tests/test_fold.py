@@ -233,18 +233,18 @@ def test_default_wake_lines_is_32():
     assert m.WAKE_LINES == 32
 
 
-def test_config_toml_is_not_read(tmp_path, monkeypatch, capsys):
-    """A committed config.toml WAKE_LINES value is ignored; the constant is used."""
+def test_config_toml_wake_lines_is_read(tmp_path, monkeypatch, capsys):
+    """A committed config.toml WAKE_LINES value is the store's budget."""
     m = load_summem()
-    assert not hasattr(m, "tomllib")
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     m.ensure_store(repo)
     (repo / ".summem" / "config.toml").write_text("WAKE_LINES = 1\n", encoding="utf-8")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     assert m.main(["note", "beta"]) == 0
-    out = capsys.readouterr().out
-    assert out == ""
+    out = capsys.readouterr().out.strip()
+    parts = out.split()
+    assert len(parts) == 2
     notes = [p for p in (repo / ".summem" / "notes").iterdir() if not p.name.startswith(".")]
     assert len(notes) == 2
     assert list((repo / ".summem" / "naps").glob("*.sum")) == []

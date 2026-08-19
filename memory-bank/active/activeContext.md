@@ -1,13 +1,27 @@
 # Active Context
 
 ## Current Task: scopes
-**Phase:** PREFLIGHT - COMPLETE (PASS)
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Validated the L2 plan against `projectbrief.md`, `VISION.md`, current implementation boundaries, and test conventions.
-- Confirmed test-before-code ordering for all five executable units.
-- Amended coverage for `nap`/`zoom`/`recall --path`, per-store `ENTRY_CHARS`, and folded catalog note grain.
-- Added the content-free `store_stats` design so root catalog metadata does not load child memories.
+- Implemented resolve walk-up, `start`, `--path` on wake/note/nap/zoom/recall, per-store `knobs`, and root-wake catalog.
+- 156 pytest passed (22 new). Proofs 7-8 live in `tests/test_proof_scopes.py`.
+
+## Files
+- `/home/mobaxterm/git/SumMem/.summem/summem`
+- `/home/mobaxterm/git/SumMem/tests/test_scopes.py`
+- `/home/mobaxterm/git/SumMem/tests/test_proof_scopes.py`
+- `/home/mobaxterm/git/SumMem/tests/test_cli.py`
+- `/home/mobaxterm/git/SumMem/tests/test_fold.py`
+
+## Decisions
+- `catalog_text` appends in `main` when the resolved store is the git root; `wake_text` stays the decaying document.
+- `knobs` fills omitted names from module constants so `monkeypatch.setattr(m, "WAKE_LINES", …)` still applies.
+- `git check-ignore` targets the `.summem` directory, not `notes/`.
+- `store_stats` counts filename grain only: each note is 1, each nap stem uses its encoded leaf count.
+
+## Deviations
+- None from the locked plan. Duplicate empty stub names that shadowed filled tests were deleted during TDD.
 
 ## Next Step
-- Preflight passed; proceed to `/niko-build`.
+- QA review runs next.
