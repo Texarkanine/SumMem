@@ -217,3 +217,24 @@ No new technology - validation not required
 - [x] Preflight
 - [x] Build
 - [x] QA (FAIL — Build rerun required)
+- [x] Build (rework)
+- [x] QA (PASS)
+
+## QA Report (Rework)
+
+### Findings
+
+- `_prepare_nap` and `_split_kids` correctly separate the I/O and semantic validation steps for projection, maintaining the `ProjectedNode` boundary.
+- `tree_attempted` implements the one-load cache per node directly on the row, preventing redundant parses of malformed files during the expand loop without requiring a separate cache object.
+- `VISION.md` cleanly distinguishes the current equal-grain and right-edge projection milestone from the deferred aligned-cover milestone.
+- Creative docs correctly contextualize the previous notes as the rejected first pass.
+- No over-engineering or leftover artifacts observed. Code adheres to KISS and DRY. Tests added ensure completeness.
+
+### Validation
+
+- Full suite: 101 passed.
+- Targeted malformed-tree probe passes successfully.
+
+### Result
+
+- **PASS.**

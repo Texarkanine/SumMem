@@ -1,13 +1,14 @@
 # Active Context
 
 ## Current Task: equal-grain
-**Phase:** BUILD - COMPLETE (rework after QA FAIL)
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
-- First build: carry-stable stems, equal-grain picker, in-memory expand, contract wording; 99 passed
-- QA FAIL: nested empty nap child crashed wake; failed `.tree` loads retried; VISION still claimed aligned cover
-- Rework: `tree_attempted` one-load cache, `_split_kids` semantic fallback, VISION later-vs-now, creative notes labeled rejected first pass
-- Full suite: 101 passed
+- Performed QA on the reworked build that implemented `tree_attempted` one-load cache and `_split_kids` semantic fallback.
+- Confirmed that `VISION.md` distinguishes the aligned-cover from the current milestone.
+- Confirmed that creative notes are labeled as rejected first pass.
+- Verified adherence to KISS, DRY, YAGNI, Completeness, Regression, Integrity, and Documentation.
+- Output QA PASS.
 
 ## Next Step
-- Re-run `/niko-qa`
+- Run `/niko-reflect`

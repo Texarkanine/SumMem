@@ -162,3 +162,15 @@ Equal-grain fold requests, carry-stable nap names, and in-memory wake expand so 
 * Insights
     - Decode-level `loads_tree` exceptions never saw a valid JSON tree whose nested nap had zero notes
 
+## 2026-08-19 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Reviewed the reworked implementation against the L3 plan, project brief, and QA rework requirements.
+    - Verified that `_prepare_nap` and `_split_kids` separate the I/O and semantic validation steps properly.
+    - Confirmed `tree_attempted` cache mechanism efficiently prevents redundant parsing.
+    - Checked `VISION.md` and creative docs for accurate architectural reflections.
+* Decisions made
+    - Pass QA for the reworked build. No further modifications to the implementation are needed.
+* Insights
+    - Applying `tree_attempted` directly to the `ProjectedNode` state cleanly resolves the caching constraint without requiring external trackers.
+
