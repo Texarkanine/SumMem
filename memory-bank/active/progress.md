@@ -127,3 +127,14 @@ Implement single-store memory: `nap`, `zoom`, `recall`, left-fold of adjacent vi
     - The implementation is acceptable as-is. PASS.
 * Insights
     - The fix in `_adjacent_nodes` correctly handles the edge case of identical adjacent notes without introducing complexity.
+
+## 2026-08-18 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote the single-store reflection
+    - Reconciled `systemPatterns.md`: content id is leaf identity, not a unique view row; `nap` takes two ids
+* Decisions made
+    - `productContext.md` and `techContext.md` needed no edit: the product picture and stack did not change
+* Insights
+    - Duplicate-content notes are a Phase 1 identity meeting a Phase 2 unique-id assumption; QA saw it because the plan never wrote that assumption down
+

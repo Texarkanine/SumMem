@@ -44,7 +44,7 @@ Note names carry writer time in UTC. Nap names carry the minimum child time, not
 
 ## Wake prints content ids, never positional ranges
 
-A range such as `#16-31` is a picture of one listing and a lie after the next merge. `nap` and `zoom` accept only the content id a wake printed. A command that looks like a range is rejected.
+A range such as `#16-31` is a picture of one listing and a lie after the next merge. `nap` accepts two content ids a wake printed; `zoom` accepts one. A command that looks like a range is rejected. A content id names leaves, not a unique view row: two notes with the same text print the same id, and adjacency must keep both.
 
 ## Payloads are write-once; captions are the honest conflict
 
