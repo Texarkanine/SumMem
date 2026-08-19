@@ -30,3 +30,18 @@ Change fold requests from oldest-two left-fold to equal-grain pairs, emit a catc
 * Insights
     - A long-stream test that only asserts powers of two is vacuous on a `None` stub (all 1s); it must also bound view length and require a real fold
     - Depth must fold via `equal_grain_pair`, not `fold_ids`, or a correct picker still sees a left spine
+
+## 2026-08-18 - PREFLIGHT - COMPLETE (FAIL)
+
+* Work completed
+    - Validated the plan's TDD ordering, conventions, dependency impacts, existing implementations, requirements, and proof touchpoints
+    - Reproduced same-second parent reordering: four notes can become grains `[1, 2, 1]` after one adjacent fold
+    - Reproduced an over-budget equal-grain stall: 24 same-second notes at budget 8 stopped at 12 view nodes with no adjacent equal pair
+    - Recorded the failed gate and required replanning in `tasks.md` and `.preflight-status`
+* Decisions made
+    - Block build because the planned policy does not guarantee a short bounded view for supported same-second notes
+    - Require `/niko-plan` to design a carry-stable nap sequence key before implementation
+    - Require the 16+1 CLI setup and depth assertion to be corrected during replanning
+* Insights
+    - Minimum child time is not enough to preserve a folded interval when note timestamps tie; the leaf-set hash can move the parent between surviving notes
+    - `zoom_reaches` bounds breadth-first work, not hop depth, so it cannot prove the logarithmic-depth acceptance criterion

@@ -1,12 +1,14 @@
 # Active Context
 
 ## Current Task: equal-grain
-**Phase:** PLAN - COMPLETE
+**Phase:** PREFLIGHT - COMPLETE (FAIL)
 
 ## What Was Done
-- Classified issue #1 as Level 2
-- Wrote the L2 plan: equal-grain picker, sequential catch-up after `nap`, proof 4 helper packs 64/32/4, surgical VISION/ROADMAP/systemPatterns wording
-- Pinned sequential emit (not a snapshot list), request-only 16+1 refusal, and deletion of `oldest_adjacent`
+- Validated TDD ordering, conventions, dependencies, conflicts, and requirement coverage
+- Reproduced same-second parent movement: an adjacent fold can turn four equal-time notes into `[1, 2, 1]`
+- Reproduced a 24-note equal-grain stream stalling at 12 nodes with `WAKE_LINES=8`
+- Found two test-plan defects: the 16+1 CLI setup actually creates 16+1+1, and `zoom_reaches` cannot measure hop depth
+- Wrote `FAIL` to `.preflight-status` and recorded concrete rearchitecture guidance in `tasks.md`
 
 ## Next Step
-- Preflight validation runs automatically
+- Run `/niko-plan` to design a carry-stable nap sequence key and correct the affected tests; `/niko-build` is blocked

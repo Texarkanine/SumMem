@@ -104,6 +104,35 @@ No new technology - validation not required
 - Plan failed because proof 4 still encodes 40/30/30 and QA reads that as the product: unit 3 plus VISION squash listing.
 - Plan failed because `nap` stayed silent and catch-up was still one request per later `note`: unit 2.
 
+## Preflight Report
+
+**Result:** FAIL — rearchitecture required
+
+### Blocking Findings
+
+1. **Same-second folds do not preserve adjacency.** Notes explicitly tie-break equal timestamps by the random suffix, but a nap replaces that suffix with its leaf-set hash. Folding two adjacent same-second notes can therefore move the parent elsewhere in the sorted view. A four-note reproduction produced grains `[1, 2, 1]`; a 24-note equal-grain simulation at `WAKE_LINES=8` stopped over budget with 12 grains: `[2, 4, 2, 4, 2, 1, 2, 1, 2, 1, 2, 1]`. No adjacent equal-grain pair remained. The planned picker and catch-up chain therefore do not guarantee the Project Brief's short-tree or bounded-view outcome under an already-supported input.
+2. **The planned 16+1 CLI test constructs 16+1+1.** Unit 1 says to build a 16-pack plus one note and then run `main(["note", ...])`. The command writes another note before requesting a pair, so a correct picker returns the adjacent 1+1 pair instead of empty output. The red test would reject the required implementation.
+3. **The depth assertion has no valid implementation path.** `zoom_reaches` bounds total breadth-first nodes visited, not zoom hops or maximum tree depth. Calling it with a bound of four cannot establish `O(log leaves)` and can reject a balanced tree depending on the target. The revised plan must assert the maximum nested nap-to-note depth directly, while retaining a separate CLI zoom reachability check.
+
+### Passed Checks
+
+- Units 1 and 2 encode tests before production code; unit 3 is a test-only proof fixture update; unit 4 correctly omits tests for prose and policy.
+- Proposed files and the one-file product layout match `systemPatterns.md` and `techContext.md`.
+- `write_nap` remains the general adjacent-pair primitive, preserving explicit unequal-grain post-merge naps and existing leaf-set identity.
+- Proof 4's 64/32/4 slices are compatible with its intentionally left-spined helper, and the full-suite checkpoint accounts for proofs 2, 3, 5, and 6.
+- No overlapping production fold policy or new dependency is proposed.
+
+### Required Replanning
+
+- Define a carry-stable sequence key for naps so replacing adjacent children leaves the parent at the left child's position even when timestamps tie; update the filename/parser contract, view ordering, and same-second regression tests together.
+- Correct the 16+1 test setup by starting from a lone 16-pack before the CLI `note`, or test `fold_request` directly on a prebuilt 16+1 view.
+- Replace the proposed `zoom_reaches` hop bound with a direct maximum-tree-depth assertion and a separate `zoom_reaches` reachability assertion.
+- Update the stale `tests/test_fold.py` module wording and retained test name so they describe equal-grain requests rather than the removed left-fold policy.
+
+### Radical Innovation Advisory
+
+Carry the lexicographically earliest original note order key in every nap filename, independently of leaf-set identity. A concrete shape is `<stamp>-<leftmost-note-rand>-<leafset>-<leaves>`: notes already provide `<stamp>-<rand>`, and a parent inherits the minimum descendant key. Sorting by that explicit key keeps a new parent in the replaced interval without opening `.tree`, preserves wait-free wake, and remains deterministic for the same leaf set. This changes the on-disk naming/parser contract and raises the design surface beyond the current Level 2 plan, so preflight did not apply it.
+
 ## Status
 
 - [x] Initialization complete
@@ -111,6 +140,6 @@ No new technology - validation not required
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
+- [x] Preflight (FAIL — rearchitecture required)
 - [ ] Build
 - [ ] QA
