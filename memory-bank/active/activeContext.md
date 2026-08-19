@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: zipper-heal
-**Phase:** QA - COMPLETE (FAIL)
+**Phase:** BUILD - IN-PROGRESS (QA rework)
 
 ## What Was Done
 - Built zipper-heal to the locked plan: `leaf_digests` / rematerialize, `heal_view` (⊆ drop, split-smaller, skip note-note and unreadable packs), `write_nap` overlap/`unreadable pack` guards, `fcntl.flock` on `naps/`, CLI `note`/`nap` heal after `require_entry`, wait-free wake.
