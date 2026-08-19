@@ -146,4 +146,16 @@ Zipper-heal overlapping nap leaf-sets after merge so the next `note` or `nap` re
 * Insights
     - The flagship proof failed open because it copied a helper and then indented the copy under `continue`; sharing the helper is the actual fix, not a one-line dedent in a duplicate
 
+## 2026-08-19 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Reviewed the QA rework diff against the original plan and previous QA findings.
+    - Verified `assert_unique_cover` and `reaches` are shared and correctly used in `tests/test_proof_branches.py`.
+    - Verified `_HEAL_PASS_LIMIT` and the dead `NapChild` branch were removed from `heal_view`.
+    - Verified `_TREE_PARSE_ERRORS` is shared across `.summem/summem`.
+* Decisions made
+    - PASS. The implementation is acceptable as-is.
+* Insights
+    - The rework successfully addressed all blocking and advisory findings without introducing new regressions.
+
 

@@ -244,6 +244,20 @@ Result: **FAIL** (fixable in build; no replan needed). 134 tests pass; the imple
 - [x] 5. `_TREE_PARSE_ERRORS` is the shared parse-except tuple
 - Finding 8 (`VISION.md` proof 6 still says disjoint packs) left for reflection
 
+## QA Findings (Rework)
+
+Result: **PASS**. The implementation is acceptable as-is. All previous QA findings have been addressed correctly.
+
+### Findings
+
+- **KISS**: `while True` replaces the arbitrary `_HEAL_PASS_LIMIT` limit, simplifying the code.
+- **DRY**: `assert_unique_cover` and `reaches` are shared in `tests/gitutil.py`. `_TREE_PARSE_ERRORS` is shared in `.summem/summem`.
+- **YAGNI**: Dead `isinstance(child, NapChild)` branch removed.
+- **Completeness**: Reachability loop and unique cover assert are now correctly executed.
+- **Regression**: None. Tests pass.
+- **Integrity**: No magic numbers or hardcoded shortcuts.
+- **Documentation**: Finding 8 is left for reflection.
+
 ## Status
 
 - [x] Component analysis complete
@@ -254,4 +268,4 @@ Result: **FAIL** (fixable in build; no replan needed). 134 tests pass; the imple
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
