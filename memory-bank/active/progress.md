@@ -79,3 +79,19 @@ Zipper-heal overlapping nap leaf-sets after merge so the next `note` or `nap` re
     - The correct termination argument is lexicographic: splitting reduces reachable nap nodes; subset dropping reduces reachable nap nodes or view-file count
     - `_as_child` currently propagates malformed-tree parse exceptions, so “unknown id as today” is not codebase reality
 
+## 2026-08-19 - PLAN - COMPLETE (replan after second preflight FAIL)
+
+* Work completed
+    - Rewrote `tasks.md` as the locked design plus the accepted encoding fixes; removed the findings appendix
+    - Deleted stale `.preflight-status`
+* Decisions made
+    - `heal_view` returns `None`; tests assert store state and zoom
+    - Termination is lexicographic `(reachable nap nodes, view file count)`
+    - Malformed `.tree`: heal skips; `write_nap`/CLI raise `ValueError("unreadable pack")` with no traceback or paths
+    - CLI `require_entry` before lock; `with_store_lock` calls `ensure_store` and holds through `fold_request`
+    - Merge, crash, and budget tests live in units 2 and 4 as red tests before production code
+* Insights
+    - A split can keep `view files + internal nodes` unchanged; reachable nap nodes is the component that drops
+    - Invalid caption after heal would mutate an overlapping store that today's CLI leaves alone
+
+
