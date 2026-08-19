@@ -1,11 +1,11 @@
 # Active Context
 
 ## Current Task: wake-listing
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Operator locked wake budget, nap prompts on `note`/`nap` only, short wake lines, git-style unique prefixes.
-- Classified Level 2: one CLI, one driver, listing/prompt contract. Not a new store identity.
+- Level 2 plan: prefix helper, capped short wake lines, OptMem fold prompt, prefix on nap/zoom, invert proofs + VISION
+- Five implementation units, TDD each
 
 ## Next Step
-- Plan phase: TDD map and linear steps, then preflight.
+- Preflight, then build if PASS

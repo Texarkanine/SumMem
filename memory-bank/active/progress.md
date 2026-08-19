@@ -14,3 +14,14 @@ Cap `wake` at `WAKE_LINES`, print short dated lines, keep full hashes on disk, a
     - `xN` grain on packs only; 8-hex unique prefix; SHA-256 stays on disk
 * Insights
     - Two bare hashes after `note` are not OptMem; the prompt is the interface
+
+## 2026-08-19 - PLAN - COMPLETE
+
+* Work completed
+    - Linear TDD plan: unique prefix, wake format+cap, fold prompt, nap/zoom resolve, proof/VISION invert
+* Decisions made
+    - Over-budget wake slices newest `WAKE_LINES` files and does not expand `.tree`
+    - Prompt `Run:` uses `.summem/summem nap <prefix> <prefix> "<your line>"`
+    - Nested zoom resolves among view ids plus ids `zoom_text` already walks
+* Insights
+    - Empty `fold_request` when grain cannot pair (8+2+1) plus a hard wake cap is the accepted non-cover
