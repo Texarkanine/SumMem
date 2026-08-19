@@ -21,7 +21,7 @@ Sequential. No parallel milestones.
 - [x] Implement ingest: Python 3 CLI, git-root store auto-create, `note` and wait-free `wake` of loose notes, first proof 1, freeze store layout and leaf-set hashing
 - [x] Implement single-store memory: `nap`, `zoom`, `recall`, left-fold of adjacent view nodes, first proofs 2-6
 - [x] Address issue #1 - https://github.com/Texarkanine/SumMem/issues/1
-- [ ] Address issue #3 - https://github.com/Texarkanine/SumMem/issues/3
+- [x] Address issue #3 - https://github.com/Texarkanine/SumMem/issues/3
 - [ ] Implement scopes: `start`, `--path` walk-up, root-wake catalog, per-store config, first proofs 7-8
 
 ## Scope estimates

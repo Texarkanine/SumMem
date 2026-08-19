@@ -1,12 +1,12 @@
 # Active Context
 
-## Current Task: zipper-heal
-**Phase:** REFLECT - COMPLETE
+## Current Task: scopes
+**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
 
 ## What Was Done
-- Wrote `memory-bank/active/reflection/reflection-zipper-heal.md`.
-- Reconciled persistent files: no surgical updates (standing contracts for wait-free wake, mutate-time zipper, and same-machine `naps/` flock were already recorded in the original build).
-- Finding 8 (`VISION.md` First proof item 6 still names disjoint packs) recorded as a process insight, not a VISION edit.
+- Advanced L4 `file-backend`: marked issue #3 complete; deleted zipper-heal ephemeral files (preserved `milestones.md`, `projectbrief.md`, `reflection/`).
+- Classified scopes as Level 2.
+- Wrote a new `projectbrief.md` scoped to `start`, `--path` walk-up, root-wake catalog, per-store config, and proofs 7-8.
 
 ## Next Step
-- Run `/niko` to continue to the next milestone.
+- Load the Level 2 workflow and execute the plan phase.
