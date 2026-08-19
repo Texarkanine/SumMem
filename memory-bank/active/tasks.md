@@ -90,7 +90,7 @@ No new technology - validation not required
 
 ## QA Findings
 
-- **FAIL (blocking)**: `memory-bank/systemPatterns.md` line 55 still says a missing caption "degrades to date, grain, and unique prefix". Line 45 of the same file now says wake is undated. Drop "date, " from line 55; `VISION.md` is already correct.
+- **PASS**: The prior blocker is fixed: `memory-bank/systemPatterns.md` now consistently describes undated wake output.
 - Advisory: `.summem/naps/*.tree` in this repo are old-schema, so `zoom` on the project's own memory fails. Sanctioned by constraint 1; regenerate or remove the store.
 - Advisory: `zoom_text` does not catch `_TREE_PARSE_ERRORS`, so an unparseable `.tree` exits with a traceback. Pre-existing; out of scope.
 - Advisory: a `leaves == 1` pack with no caption now prints an empty line. Not reachable from fold or zipper.
@@ -106,4 +106,4 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA

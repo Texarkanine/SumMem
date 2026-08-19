@@ -102,3 +102,14 @@ Clean-cut `.tree` JSON (`c` / `type: note|nap`, no `v`) and undated wake lines, 
 * Insights
     - Wake's undated contract is stated in two places in `systemPatterns.md`; the "Wake is wait-free" section repeats it and was missed
     - The repo dogfoods SumMem, so a clean-cut schema change silently kills the project's own memory even when every test passes
+
+## 2026-08-19 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Re-reviewed the complete implementation and QA rework against the plan, brief, acceptance criteria, and established patterns
+    - Confirmed the prior documentation contradiction is fixed and the codec, wake formatter, tests, and canonical documentation agree
+    - Re-ran the full suite: 177 pytest tests passed
+* Decisions made
+    - Accept the implementation as-is; the remaining four findings are non-blocking advisories already recorded in `tasks.md`
+* Insights
+    - The surgical QA rework resolved the only acceptance blocker without changing executable behavior

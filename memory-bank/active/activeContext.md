@@ -1,13 +1,13 @@
 # Active Context
 
 ## Current Task: tree-schema
-**Phase:** BUILD - COMPLETE (QA rework)
+**Phase:** REFLECT - COMPLETE
 
 ## What Was Done
 
-- QA FAIL: `systemPatterns.md` wait-free sentence still said degradation includes a date.
-- Dropped "date, " so it matches VISION (grain and unique prefix only).
+- Reflection written. Persistent files: productContext skip; techContext skip; systemPatterns already updated in build (undated wake + wait-free).
+- QA PASS. Ready to archive.
 
 ## Next Step
 
-Re-run QA.
+Run `/niko-archive` to archive this standalone task.
