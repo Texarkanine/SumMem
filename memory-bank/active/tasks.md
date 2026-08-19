@@ -146,4 +146,4 @@ No new technology - validation not required. `tomllib` is stdlib on the existing
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
