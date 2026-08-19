@@ -84,3 +84,69 @@ def test_wake_skips_dot_prefixed_temp_file(tmp_path):
     assert "orphan" not in out
     lines = [p.name for p in (repo / ".summem" / "notes").iterdir()]
     assert leftover.name in lines
+
+
+def test_wake_mixed_view_sorts_by_filename(tmp_path):
+    """A nap and a later loose note sort by filename; grain comes from the name."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    m.write_note(repo, "gamma", datetime(2026, 1, 1, 0, 0, 3, tzinfo=UTC), Random(3))
+    ids = [line.split()[0] for line in m.wake_text(repo).splitlines() if line]
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    lines = m.wake_text(repo).splitlines()
+    assert len(lines) == 2
+    assert "(2 notes, from 2026-01-01)  pair" in lines[0]
+    assert lines[1].endswith("  gamma")
+    assert "(1 note, from 2026-01-01)" in lines[1]
+
+
+def test_wake_missing_sum_prints_id_and_grain_without_caption(tmp_path):
+    """Missing .sum: wake prints id and grain, not a caption, and does not refuse."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    ids = [line.split()[0] for line in m.wake_text(repo).splitlines() if line]
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    sums = list((repo / ".summem" / "naps").glob("*.sum"))
+    leafset = sums[0].name.split("-")[1]
+    sums[0].unlink()
+    out = m.wake_text(repo)
+    assert out == f"{leafset}  (2 notes, from 2026-01-01)\n"
+    assert "pair" not in out
+
+
+def test_wake_conflict_sum_omits_caption(tmp_path):
+    """A .sum containing <<<<<<< omits the caption and still prints id and grain."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    ids = [line.split()[0] for line in m.wake_text(repo).splitlines() if line]
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    sums = list((repo / ".summem" / "naps").glob("*.sum"))
+    leafset = sums[0].name.split("-")[1]
+    sums[0].write_text("<<<<<<< HEAD\npair\n=======\nother\n>>>>>>>\n", encoding="utf-8")
+    out = m.wake_text(repo)
+    assert out == f"{leafset}  (2 notes, from 2026-01-01)\n"
+    assert "pair" not in out
+
+
+def test_wake_does_not_call_loads_tree(tmp_path, monkeypatch):
+    """Wake never opens .tree: loads_tree is not called."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    ids = [line.split()[0] for line in m.wake_text(repo).splitlines() if line]
+    m.write_nap(repo, ids[0], ids[1], "pair")
+
+    def boom(*_args, **_kwargs):
+        raise AssertionError("loads_tree")
+
+    monkeypatch.setattr(m, "loads_tree", boom)
+    out = m.wake_text(repo)
+    assert "pair" in out
+

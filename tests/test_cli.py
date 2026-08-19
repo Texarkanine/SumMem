@@ -46,6 +46,23 @@ def test_nap_three_ids_rejected(tmp_path, monkeypatch, capsys):
     assert "invalid choice" not in err
 
 
+def test_nap_subcommand_writes_and_wake_reads(tmp_path, monkeypatch, capsys):
+    """main(['nap', id_a, id_b, caption]) folds two notes; wake prints the caption."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["note", "alpha"]) == 0
+    assert m.main(["note", "beta"]) == 0
+    assert m.main(["wake"]) == 0
+    ids = [line.split()[0] for line in capsys.readouterr().out.splitlines() if line]
+    assert m.main(["nap", ids[0], ids[1], "pair"]) == 0
+    assert m.main(["wake"]) == 0
+    out = capsys.readouterr().out
+    assert "pair" in out
+    assert "alpha" not in out
+    assert len(out.splitlines()) == 1
+
+
 def test_path_flag_is_unknown(tmp_path, monkeypatch):
     """Unknown flag --path exits nonzero."""
     m = load_summem()

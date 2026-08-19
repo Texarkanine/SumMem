@@ -104,6 +104,19 @@ def test_existing_driver_is_not_overwritten(tmp_path):
     assert driver.read_bytes() == b"NOPE"
 
 
+def test_ensure_store_creates_naps_dir(tmp_path):
+    """ensure_store creates naps/ and does not overwrite an existing driver."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    driver = repo / ".summem" / "summem"
+    driver.parent.mkdir()
+    driver.write_bytes(b"NOPE")
+    m.ensure_store(repo)
+    assert (repo / ".summem" / "naps").is_dir()
+    assert driver.read_bytes() == b"NOPE"
+
+
+
 def test_note_name_uses_injected_utc_clock_and_rand(tmp_path):
     """Note names use the injected UTC clock and rng bytes."""
     m = load_summem()

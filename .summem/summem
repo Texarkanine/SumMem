@@ -70,6 +70,21 @@ class NapChild:
     tree: Tree
 
 
+@dataclass(frozen=True)
+class ViewNode:
+    """One wait-free view entry: a loose note or a nap stem."""
+
+    id: str
+    name: str
+    kind: str
+    caption: str
+    leaves: int
+    stamp: str
+    path: Path
+    sum_path: Path | None = None
+    tree_path: Path | None = None
+
+
 def _tree_dict(tree: Tree) -> dict:
     kids = []
     for child in tree.kids:
@@ -133,6 +148,7 @@ def ensure_store(parent):
     """Create the store under *parent* if missing. Never overwrite an existing driver."""
     store = Path(parent) / ".summem"
     (store / "notes").mkdir(parents=True, exist_ok=True)
+    (store / "naps").mkdir(parents=True, exist_ok=True)
     driver = store / "summem"
     if not driver.exists():
         shutil.copy2(Path(__file__).resolve(), driver)
@@ -143,30 +159,60 @@ def ensure_store(parent):
     return store
 
 
-def write_note(parent, text, now, rng):
-    """Validate *text*, write one immutable note under *parent*, return its path."""
-    require_utc(now)
+def require_entry(text: str) -> None:
+    """Reject empty, multi-line, or over-long one-line entries."""
     if text == "":
         raise ValueError("note is empty")
     if "\n" in text or "\r" in text:
         raise ValueError("note must be one line")
     if len(text.encode("utf-8")) > ENTRY_CHARS:
         raise ValueError("note is too long")
-    notes = ensure_store(parent) / "notes"
-    name = f"{now.strftime('%Y%m%dT%H%M%SZ')}-{rng.randbytes(8).hex()}"
-    dest = notes / name
-    tmp = notes / f".tmp-{os.urandom(8).hex()}"
-    tmp.write_bytes(note_file_bytes(text))
+
+
+def _replace_bytes(dest: Path, data: bytes) -> None:
+    tmp = dest.parent / f".tmp-{os.urandom(8).hex()}"
+    tmp.write_bytes(data)
     os.replace(tmp, dest)
-    return dest
 
 
-def wake_text(parent) -> str:
-    """Return the wait-free listing of loose notes under *parent*, or empty."""
-    notes = ensure_store(parent) / "notes"
-    lines = []
-    paths = sorted(p for p in notes.iterdir() if p.is_file() and not p.name.startswith("."))
-    for path in paths:
+def _parse_nap_stem(stem: str) -> tuple[str, str, int] | None:
+    stamp, sep, rest = stem.partition("-")
+    if not sep:
+        return None
+    leafset, sep, leaves_s = rest.partition("-")
+    if not sep or len(stamp) != 16 or len(leafset) != 64 or not leaves_s.isdigit():
+        return None
+    if any(c not in "0123456789abcdef" for c in leafset):
+        return None
+    return stamp, leafset, int(leaves_s)
+
+
+def _nap_caption(sum_path: Path | None) -> str:
+    if sum_path is None or not sum_path.is_file():
+        return ""
+    try:
+        text = sum_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return ""
+    if "<" * 7 in text:
+        return ""
+    if text.endswith("\n"):
+        text = text[:-1]
+    return text
+
+
+def _day_from_stamp(stamp: str) -> str:
+    return f"{stamp[0:4]}-{stamp[4:6]}-{stamp[6:8]}"
+
+
+def list_view(parent) -> list[ViewNode]:
+    """Return mixed view nodes sorted by filename."""
+    store = ensure_store(parent)
+    nodes: list[ViewNode] = []
+    notes = store / "notes"
+    for path in notes.iterdir():
+        if not path.is_file() or path.name.startswith("."):
+            continue
         try:
             raw = path.read_bytes()
             text = raw.decode("utf-8")
@@ -174,9 +220,138 @@ def wake_text(parent) -> str:
             continue
         if text.endswith("\n"):
             text = text[:-1]
-        cid = leafset_id([note_digest(raw)])
-        day = f"{path.name[0:4]}-{path.name[4:6]}-{path.name[6:8]}"
-        lines.append(f"{cid}  (1 note, from {day})  {text}")
+        stamp = path.name.split("-")[0]
+        nodes.append(
+            ViewNode(
+                id=leafset_id([note_digest(raw)]),
+                name=path.name,
+                kind="note",
+                caption=text,
+                leaves=1,
+                stamp=stamp,
+                path=path,
+            )
+        )
+    stems: dict[str, dict[str, Path]] = {}
+    naps = store / "naps"
+    for path in naps.iterdir():
+        if not path.is_file() or path.name.startswith("."):
+            continue
+        if path.suffix not in (".sum", ".tree"):
+            continue
+        stems.setdefault(path.stem, {})[path.suffix] = path
+    for stem, files in stems.items():
+        parsed = _parse_nap_stem(stem)
+        if parsed is None:
+            continue
+        stamp, leafset, leaves = parsed
+        sum_path = files.get(".sum")
+        tree_path = files.get(".tree")
+        nodes.append(
+            ViewNode(
+                id=leafset,
+                name=stem,
+                kind="nap",
+                caption=_nap_caption(sum_path),
+                leaves=leaves,
+                stamp=stamp,
+                path=tree_path or sum_path or naps / stem,
+                sum_path=sum_path,
+                tree_path=tree_path,
+            )
+        )
+    nodes.sort(key=lambda node: node.name)
+    return nodes
+
+
+def _note_child(node: ViewNode) -> tuple[NoteChild, str]:
+    raw = node.path.read_bytes()
+    return NoteChild(name=node.name, text=node.caption), note_digest(raw)
+
+
+def write_nap(parent, id_a, id_b, caption):
+    """Fold two adjacent view nodes into a nap pair. Return the .sum path."""
+    require_entry(caption)
+    nodes = list_view(parent)
+    index = {node.id: i for i, node in enumerate(nodes)}
+    if id_a not in index or id_b not in index:
+        raise ValueError("unknown id")
+    ia, ib = index[id_a], index[id_b]
+    if abs(ia - ib) != 1:
+        raise ValueError("not adjacent")
+    lo, hi = (ia, ib) if ia < ib else (ib, ia)
+    left, right = nodes[lo], nodes[hi]
+    child_l, dig_l = _note_child(left)
+    child_r, dig_r = _note_child(right)
+    tree = Tree(kids=[child_l, child_r])
+    digests = [dig_l, dig_r]
+    leafset = leafset_id(digests)
+    leaves = len(digests)
+    stem = f"{min(left.stamp, right.stamp)}-{leafset}-{leaves}"
+    naps = ensure_store(parent) / "naps"
+    tree_path = naps / f"{stem}.tree"
+    sum_path = naps / f"{stem}.sum"
+    _replace_bytes(tree_path, dumps_tree(tree))
+    _replace_bytes(sum_path, note_file_bytes(caption))
+    left.path.unlink()
+    right.path.unlink()
+    return sum_path
+
+
+def _zoom_note_line(text: str) -> str:
+    cid = leafset_id([note_digest(note_file_bytes(text))])
+    return f"{cid}  {text}"
+
+
+def _zoom_kids(tree: Tree) -> str:
+    lines = []
+    for child in tree.kids:
+        if isinstance(child, NoteChild):
+            lines.append(_zoom_note_line(child.text))
+        elif child.sum:
+            lines.append(f"{child.id}  {child.sum}")
+        else:
+            lines.append(child.id)
+    if not lines:
+        return ""
+    return "\n".join(lines) + "\n"
+
+
+def zoom_text(parent, cid: str) -> str:
+    """Return one-level zoom of *cid*, or raise ValueError if unknown."""
+    for node in list_view(parent):
+        if node.id != cid:
+            continue
+        if node.kind == "note":
+            return f"{node.id}  {node.caption}\n"
+        if node.tree_path is None or not node.tree_path.is_file():
+            raise ValueError("unknown id")
+        return _zoom_kids(loads_tree(node.tree_path.read_bytes()))
+    raise ValueError("unknown id")
+
+
+def write_note(parent, text, now, rng):
+    """Validate *text*, write one immutable note under *parent*, return its path."""
+    require_utc(now)
+    require_entry(text)
+    notes = ensure_store(parent) / "notes"
+    name = f"{now.strftime('%Y%m%dT%H%M%SZ')}-{rng.randbytes(8).hex()}"
+    dest = notes / name
+    _replace_bytes(dest, note_file_bytes(text))
+    return dest
+
+
+def wake_text(parent) -> str:
+    """Return the wait-free listing of the mixed view under *parent*, or empty."""
+    lines = []
+    for node in list_view(parent):
+        day = _day_from_stamp(node.stamp)
+        if node.kind == "note":
+            lines.append(f"{node.id}  (1 note, from {day})  {node.caption}")
+        elif node.caption:
+            lines.append(f"{node.id}  ({node.leaves} notes, from {day})  {node.caption}")
+        else:
+            lines.append(f"{node.id}  ({node.leaves} notes, from {day})")
     if not lines:
         return ""
     return "\n".join(lines) + "\n"
@@ -209,6 +384,8 @@ def main(argv: list[str] | None = None) -> int:
     nap.add_argument("id_a")
     nap.add_argument("id_b")
     nap.add_argument("caption")
+    zoom = sub.add_parser("zoom")
+    zoom.add_argument("id")
     try:
         args = parser.parse_args(argv)
     except SystemExit as exc:
@@ -222,8 +399,22 @@ def main(argv: list[str] | None = None) -> int:
             if is_range_token(token):
                 sys.stderr.write(f"not a content id: {token}\n")
                 return 2
-        sys.stderr.write("unknown id\n")
-        return 1
+        try:
+            write_nap(parent, args.id_a, args.id_b, args.caption)
+        except ValueError as exc:
+            sys.stderr.write(f"{exc}\n")
+            return 1
+        return 0
+    if args.cmd == "zoom":
+        if is_range_token(args.id):
+            sys.stderr.write(f"not a content id: {args.id}\n")
+            return 2
+        try:
+            sys.stdout.write(zoom_text(parent, args.id))
+        except ValueError as exc:
+            sys.stderr.write(f"{exc}\n")
+            return 1
+        return 0
     try:
         write_note(parent, args.text, datetime.now(timezone.utc), random.SystemRandom())
     except ValueError as exc:
