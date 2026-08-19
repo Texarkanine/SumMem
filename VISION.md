@@ -68,7 +68,7 @@ No “write a file.” No “sort by git.” A later sqlite backend, or a differ
 
 ## Scopes
 
-A command resolves **one** store: from `--path` if given, otherwise from `$PWD`, walk toward the git root (or stop at `$PWD` if not in git) and take the first directory that already has a store. Do not create a store because the agent `note`d from a deep folder or passed a file under one.
+A command resolves **one** store: from `--path` if given, otherwise from `$PWD`, walk toward the git root and take the first directory that already has a store. Do not create a store because the agent `note`d from a deep folder or passed a file under one. Outside a repository, store commands fail.
 
 `start <dir>` is the exception: it creates a store in `<dir>` itself.
 

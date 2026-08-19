@@ -1,11 +1,16 @@
 # Active Context
 
 ## Current Task: cli-help
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Rework: require a repository; strip the cwd fallback. Help still prints without one.
-- Complexity: Level 1. Single component (`find_store_parent` / store commands). L1 skips plan and preflight.
+- Rework: no repository → store commands exit 1 with “not in a repository.” Help still prints.
+- 3 new tests; 186 pytest passed.
+
+## Files
+- `/home/mobaxterm/git/SumMem/.summem/summem`
+- `/home/mobaxterm/git/SumMem/tests/test_cli.py`
+- `/home/mobaxterm/git/SumMem/VISION.md`
 
 ## Next Step
-- Build
+- QA

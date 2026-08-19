@@ -296,3 +296,35 @@ def test_catalog_omits_store_paths_and_git(capsys):
     assert "git" not in text.lower()
     assert "--path" in catalog
     assert "summem wake" in catalog
+
+
+def test_wake_without_repository_errors(tmp_path, monkeypatch, capsys):
+    """wake outside a repository exits 1, names repository, and creates no store."""
+    m = load_summem()
+    monkeypatch.chdir(tmp_path)
+    assert m.main(["wake"]) == 1
+    err = capsys.readouterr().err
+    assert "repository" in err.lower()
+    assert "git" not in err.lower()
+    assert not (tmp_path / ".summem").exists()
+
+
+def test_start_without_repository_errors(tmp_path, monkeypatch, capsys):
+    """start outside a repository exits 1 and does not create a store."""
+    m = load_summem()
+    monkeypatch.chdir(tmp_path)
+    assert m.main(["start", "pkg"]) == 1
+    err = capsys.readouterr().err
+    assert "repository" in err.lower()
+    assert "git" not in err.lower()
+    assert not (tmp_path / "pkg" / ".summem").exists()
+
+
+def test_help_without_repository_still_prints_catalog(tmp_path, monkeypatch, capsys):
+    """-h still prints the catalog when cwd is not a repository."""
+    m = load_summem()
+    monkeypatch.chdir(tmp_path)
+    assert m.main(["-h"]) == 0
+    out = capsys.readouterr().out
+    assert "summem wake" in out
+    assert "--path" in out

@@ -90,3 +90,14 @@ Make SumMem CLI help a memo-style ratchet, then require a repository for store c
 * Decisions made
     - Store commands error when `find_store_parent` finds no `.git`; help does not
     - L1: skip plan and preflight; go to build
+
+## 2026-08-19 - BUILD - COMPLETE (rework)
+
+* Work completed
+    - `find_store_parent` raises; start probes before mkdir; VISION fallback struck
+    - 3 tests in `tests/test_cli.py`; 186 pytest passed
+* Decisions made
+    - Error text is `not in a repository` (no “git”)
+    - Help remains wait-free of a repository so the ratchet still works from `/tmp`
+* Insights
+    - `start` never called `find_store_parent`; it had to probe the target (or its parent) before creating directories

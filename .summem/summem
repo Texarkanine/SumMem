@@ -169,12 +169,15 @@ def require_utc(now):
 
 
 def find_store_parent(cwd):
-    """Walk from *cwd* to the first directory that contains .git, else *cwd*."""
+    """Walk from *cwd* to the first directory that contains .git.
+
+    Raise ValueError if no repository is found.
+    """
     cur = Path(cwd).resolve()
     for candidate in (cur, *cur.parents):
         if (candidate / ".git").exists():
             return candidate
-    return cur
+    raise ValueError("not in a repository")
 
 
 def is_store(directory):
@@ -187,8 +190,8 @@ def resolve_parent(cwd, path_arg=None):
 
     *path_arg* is a `--path` value or None for `$PWD`. An existing directory is
     the walk start. Any other path, including a missing file, walks from its
-    parent. Walk toward the git root and take the first `is_store`. If none,
-    return the git root when in git, else the walk start.
+    parent.     Walk toward the git root and take the first `is_store`. If none,
+    return the git root. Raise ValueError if there is no repository.
     """
     origin = Path(cwd).resolve()
     if path_arg is not None:
@@ -932,7 +935,7 @@ def require_python(version_info: tuple[int, ...] = sys.version_info) -> None:
 def usage_text() -> str:
     """Return the top-level command catalog printed by missing command and -h."""
     return """\
-SumMem: shared decaying memory for agents in a repository.
+SumMem: shared memory for agents in a repository.
 
   .summem/summem wake    [--path PATH]                    print this store's view
   .summem/summem note    [--path PATH] TEXT               record one line
@@ -996,10 +999,20 @@ def main(argv: list[str] | None = None) -> int:
         target = Path(args.dir)
         if not target.is_absolute():
             target = Path.cwd() / target
+        probe = target if target.exists() else target.parent
+        try:
+            find_store_parent(probe)
+        except ValueError as exc:
+            sys.stderr.write(f"{exc}\n")
+            return 1
         target.mkdir(parents=True, exist_ok=True)
         ensure_store(target)
         return 0
-    parent = resolve_parent(Path.cwd(), args.path)
+    try:
+        parent = resolve_parent(Path.cwd(), args.path)
+    except ValueError as exc:
+        sys.stderr.write(f"{exc}\n")
+        return 1
     k = knobs(parent)
     if args.cmd == "wake":
         doc = wake_text(parent)
