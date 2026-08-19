@@ -36,3 +36,7 @@ Someone runs `.summem/summem -h wake` (help flag before the command). They get w
 3. `.summem/summem -h wake` and `.summem/summem wake -h` both print wake help that includes `--path`.
 4. `.summem/summem start -h` does not list `--path`.
 5. Existing CLI behavior tests still pass.
+
+## Rework
+
+Fold in: SumMem only makes sense in a repository. Strip the no-repo fallback (`find_store_parent` returning the walk start). `wake`, `note`, `nap`, `zoom`, `recall`, and `start` error when there is no repository. Help (`summem`, `-h`, `<command> -h`) still prints without one — that is the ratchet. Error text says “repository,” not “git,” and does not name store files. Strike VISION’s “or stop at `$PWD` if not in git.”

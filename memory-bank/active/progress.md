@@ -71,3 +71,14 @@ Make SumMem CLI help a memo-style ratchet: bare invocation lists every command�
 * Insights
     - `parse_args(argv)` discards a `-h <command>` rewrite; the copy has to reach parse
     - A flag that never appears on the first usage line is invisible, even when the code is shipped
+
+## 2026-08-19 - REWORK INITIATED
+
+* Work completed
+    - Operator folded a follow-up into cli-help instead of archiving: require a repository, strip the cwd fallback
+* Decisions made
+    - Not in a repository is an error for store commands, not a silent store in `$PWD`
+    - Help still works without a repository so the ratchet does not depend on being in one
+    - Error text must not say “git”
+* Insights
+    - The no-repo path was one `return cur` plus a VISION parenthetical; it was not a second mode
