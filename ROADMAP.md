@@ -60,7 +60,7 @@ graph TD
 - A child may be a raw note or another nap. Fold writes a new pair. Children leave the view only after the parent payload exists on disk
 - `wake` of the current view (loose notes plus nap pairs), wait-free. A missing or conflict-marked caption degrades; it does not block
 - `recall` of the view, and of original sentences inside `.tree` files
-- Left-fold when the view is over `WAKE_LINES`: request the oldest adjacent view nodes. That is enough decay for the proofs. Aligned power-of-two `cover(T, budget)` is later
+- Equal-grain fold requests when **file** count exceeds `WAKE_LINES`: the oldest adjacent same-grain pair, never 16+1. Catch-up after `nap`. `WAKE_LINES` is how many lines wake prints. When the directory is shorter, wake expands the newest nap in memory and does not write children back. Full aligned `cover(T)` after merge is later, not this expand
 
 **Gates:** first proofs 2, 3, 4, 5, and 6.
 
@@ -90,7 +90,7 @@ Not required to call the file backend done:
 
 - A second backend (sqlite or otherwise). The CLI table in `VISION.md` stays put
 - Harness hooks. They may nag; they are not how memory loads
-- Full OptMem aligned cover, if left-fold plus view files is already enough
+- Full OptMem aligned cover after merge. Equal-grain file requests plus in-memory wake expand are not that rebuild
 - Pack-size cap, unless a `.tree` approaches a host blob warning
 - Shipping the agent prompt or Cursor rule that makes root wake mandatory
 - A filled `README.md`

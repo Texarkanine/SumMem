@@ -11,7 +11,7 @@ import random
 import re
 import shutil
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -83,6 +83,19 @@ class ViewNode:
     stamp: str
     path: Path
     sum_path: Path | None = None
+    tree_path: Path | None = None
+
+
+@dataclass(frozen=True)
+class ProjectedNode:
+    """One printed wake row: a view file or an in-memory expanded child."""
+
+    id: str
+    kind: str
+    caption: str
+    leaves: int
+    stamp: str
+    tree: Tree | None = None
     tree_path: Path | None = None
 
 
@@ -286,6 +299,14 @@ def _digests_of_tree(tree: Tree) -> list[str]:
     return out
 
 
+def _note_children(tree: Tree):
+    for child in tree.kids:
+        if isinstance(child, NoteChild):
+            yield child
+        else:
+            yield from _note_children(child.tree)
+
+
 def _as_child(node: ViewNode) -> tuple[NoteChild | NapChild, list[str]]:
     if node.kind == "note":
         child, digest = _note_child(node)
@@ -399,6 +420,72 @@ def zoom_text(parent, cid: str) -> str:
     raise ValueError("unknown id")
 
 
+def expand_frontier(nodes: list[ViewNode], budget: int) -> list[ProjectedNode]:
+    """Return a printed frontier of *nodes*, expanding naps while shorter than *budget*."""
+    frontier = [
+        ProjectedNode(
+            id=node.id,
+            kind=node.kind,
+            caption=node.caption,
+            leaves=node.leaves,
+            stamp=node.stamp,
+            tree_path=node.tree_path,
+        )
+        for node in nodes
+    ]
+    while len(frontier) < budget:
+        idx = -1
+        loaded: ProjectedNode | None = None
+        for i in range(len(frontier) - 1, -1, -1):
+            candidate = _expandable_row(frontier[i])
+            if candidate is not None:
+                idx = i
+                loaded = candidate
+                break
+        if loaded is None or loaded.tree is None:
+            break
+        kids = [_projected_child(child) for child in loaded.tree.kids]
+        frontier = [*frontier[:idx], *kids, *frontier[idx + 1 :]]
+    return frontier
+
+
+def _expandable_row(row: ProjectedNode) -> ProjectedNode | None:
+    if row.kind != "nap":
+        return None
+    loaded = row
+    if loaded.tree is None:
+        if loaded.tree_path is None or not loaded.tree_path.is_file():
+            return None
+        try:
+            tree = loads_tree(loaded.tree_path.read_bytes())
+        except (OSError, UnicodeError, json.JSONDecodeError, KeyError, TypeError, ValueError, AttributeError):
+            return None
+        loaded = replace(loaded, tree=tree)
+    if loaded.tree is None or len(loaded.tree.kids) != 2:
+        return None
+    return loaded
+
+
+def _projected_child(child: NoteChild | NapChild) -> ProjectedNode:
+    if isinstance(child, NoteChild):
+        return ProjectedNode(
+            id=leafset_id([note_digest(note_file_bytes(child.text))]),
+            kind="note",
+            caption=child.text,
+            leaves=1,
+            stamp=child.name.split("-")[0],
+        )
+    notes = list(_note_children(child.tree))
+    return ProjectedNode(
+        id=child.id,
+        kind="nap",
+        caption=child.sum,
+        leaves=len(notes),
+        stamp=min(note.name.split("-")[0] for note in notes),
+        tree=child.tree,
+    )
+
+
 def write_note(parent, text, now, rng):
     """Validate *text*, write one immutable note under *parent*, return its path."""
     require_utc(now)
@@ -413,7 +500,7 @@ def write_note(parent, text, now, rng):
 def wake_text(parent) -> str:
     """Return the wait-free listing of the mixed view under *parent*, or empty."""
     lines = []
-    for node in list_view(parent):
+    for node in expand_frontier(list_view(parent), WAKE_LINES):
         day = _day_from_stamp(node.stamp)
         if node.kind == "note":
             lines.append(f"{node.id}  (1 note, from {day})  {node.caption}")
@@ -445,14 +532,6 @@ def fold_request(parent, wake_lines: int | None = None) -> str:
     if pair is None:
         return ""
     return f"{pair[0]} {pair[1]}\n"
-
-
-def _note_children(tree: Tree):
-    for child in tree.kids:
-        if isinstance(child, NoteChild):
-            yield child
-        else:
-            yield from _note_children(child.tree)
 
 
 def recall_text(parent, pattern: str) -> str:

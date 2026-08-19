@@ -130,10 +130,10 @@ graph TD
 - Files: `tests/test_wake_expand.py`, `tests/test_wake.py`, `tests/test_nap.py`, `tests/test_cli.py`, `tests/test_view.py`, `tests/test_zoom.py`, `tests/test_recall.py`, `tests/test_proof_conflict.py`, `tests/test_proof_squash.py`, `tests/test_proof_branches.py`, `.summem/summem`
 - Creative ref: `memory-bank/active/creative/creative-wake-projection.md` operator amendment
 
-1. Stub tests: empty cases in `tests/test_wake_expand.py` for under-budget repeated right-edge expand, at-budget no-expand, native-note fill, lone-note no-split, write-nothing, missing-tree fallback, malformed-tree fallback, and zoom-expanded-id.
-2. Stub interface: add an immutable `ProjectedNode` row carrying `id`, `kind`, `caption`, `leaves`, `stamp`, and optional in-memory `tree`; add `expand_frontier(nodes: list[ViewNode], budget: int) -> list[ProjectedNode]` returning a direct projection of `nodes`. Do not change `wake_text` yet. This keeps storage `ViewNode` separate from virtual rows, so `write_nap` cannot accidentally accept an in-tree-only child.
-3. Write tests and adapt impacted tests before production code, then run red: two 8-packs (`fold_ids` of 8+8), `WAKE_LINES=4` → 4 lines, 2 files; `WAKE_LINES=2` → 2 caption lines; two 8s plus two later notes, `WAKE_LINES=4` → 4 file lines; a lone note does not split; zoom an expanded child id; payload names unchanged; a nap with missing or malformed `.tree` does not split. Switch id harvest in the listed existing tests to `list_view` (or pin `WAKE_LINES` to file count). In `tests/test_proof_conflict.py`, pin post-nap wakes to one line. In `tests/test_proof_branches.py`, pin the two-pack wake to two lines. In `tests/test_proof_squash.py`, make packs from `ids[0:64]`, `ids[64:96]`, `ids[96:100]`, inspect clone wake through the loaded module with `WAKE_LINES=3`, assert grains 64/32/4, and zoom `n000` / `n064` / `n096`. Expected red: the new expand tests still receive the unsplit file frontier.
-4. Write code and run green: `expand_frontier` loops while `len(frontier) < budget`: from the right, find a nap with two kids (load each view-file `.tree` at most once; catch read and decode/shape failures and leave that row unsplittable; further splits use `NapChild.tree`); replace that slot with two `ProjectedNode`s (note → id/text/1; nap child → id/sum/leaf-count). `wake_text` prints `expand_frontier(list_view(parent), WAKE_LINES)`. Grain and day for a virtual nap child come from its nested notes (`len` of note descendants; min `NoteChild.name` stamp). Do not write files. Do not change `write_nap` lookup. Re-run every file listed in this unit, then the full suite.
+1. [x] Stub tests: empty cases in `tests/test_wake_expand.py` for under-budget repeated right-edge expand, at-budget no-expand, native-note fill, lone-note no-split, write-nothing, missing-tree fallback, malformed-tree fallback, and zoom-expanded-id.
+2. [x] Stub interface: add an immutable `ProjectedNode` row carrying `id`, `kind`, `caption`, `leaves`, `stamp`, and optional in-memory `tree`; add `expand_frontier(nodes: list[ViewNode], budget: int) -> list[ProjectedNode]` returning a direct projection of `nodes`. Do not change `wake_text` yet. This keeps storage `ViewNode` separate from virtual rows, so `write_nap` cannot accidentally accept an in-tree-only child.
+3. [x] Write tests and adapt impacted tests before production code, then run red: two 8-packs (`fold_ids` of 8+8), `WAKE_LINES=4` → 4 lines, 2 files; `WAKE_LINES=2` → 2 caption lines; two 8s plus two later notes, `WAKE_LINES=4` → 4 file lines; a lone note does not split; zoom an expanded child id; payload names unchanged; a nap with missing or malformed `.tree` does not split. Switch id harvest in the listed existing tests to `list_view` (or pin `WAKE_LINES` to file count). In `tests/test_proof_conflict.py`, pin post-nap wakes to one line. In `tests/test_proof_branches.py`, pin the two-pack wake to two lines. In `tests/test_proof_squash.py`, make packs from `ids[0:64]`, `ids[64:96]`, `ids[96:100]`, inspect clone wake through the loaded module with `WAKE_LINES=3`, assert grains 64/32/4, and zoom `n000` / `n064` / `n096`. Expected red: the new expand tests still receive the unsplit file frontier.
+4. [x] Write code and run green: `expand_frontier` loops while `len(frontier) < budget`: from the right, find a nap with two kids (load each view-file `.tree` at most once; catch read and decode/shape failures and leave that row unsplittable; further splits use `NapChild.tree`); replace that slot with two `ProjectedNode`s (note → id/text/1; nap child → id/sum/leaf-count). `wake_text` prints `expand_frontier(list_view(parent), WAKE_LINES)`. Grain and day for a virtual nap child come from its nested notes (`len` of note descendants; min `NoteChild.name` stamp). Do not write files. Do not change `write_nap` lookup. Re-run every file listed in this unit, then the full suite.
 
 ### 4. Contract wording — prose/policy
 
@@ -141,13 +141,13 @@ graph TD
 - No tests: prose/policy artifact
 - Creative ref: operator amendment — lens is expand, film is unlink
 
-1. Nap files `{minStamp}-{rand}-{leafset}-{leaves}`. `minStamp`+`rand` is the leftmost order key.
-2. Temporal bias / simpler equivalent: equal-grain **file** requests, never 16+1. `WAKE_LINES` is how many lines wake prints. When files are fewer than the budget, wake splits the newest nap in memory. When files meet or exceed the budget, wake lists files. It does not write children back.
-3. “Wake never opens `.tree`” becomes: wake does not open `.tree` to list an at-or-over-budget directory; it may open `.tree` to expand an under-budget directory. Missing `.sum` still does not block.
-4. Year-later: directory file count stays on the order of the budget; printed lines follow the knob. The 8192/2048/512 picture is the on-disk tree, which wake may crack on the right.
-5. Squash listing 40/30/30 → 64/32/4.
-6. `ROADMAP.md` Phase 2: equal-grain requests plus wake expand. Later: full aligned `cover(T)` after merge, not this expand.
-7. `systemPatterns.md`: one briefing sentence — fold requests are equal-grain and unlink; wake may expand in memory when the directory is short.
+1. [x] Nap files `{minStamp}-{rand}-{leafset}-{leaves}`. `minStamp`+`rand` is the leftmost order key.
+2. [x] Temporal bias / simpler equivalent: equal-grain **file** requests, never 16+1. `WAKE_LINES` is how many lines wake prints. When files are fewer than the budget, wake splits the newest nap in memory. When files meet or exceed the budget, wake lists files. It does not write children back.
+3. [x] “Wake never opens `.tree`” becomes: wake does not open `.tree` to list an at-or-over-budget directory; it may open `.tree` to expand an under-budget directory. Missing `.sum` still does not block.
+4. [x] Year-later: directory file count stays on the order of the budget; printed lines follow the knob. The 8192/2048/512 picture is the on-disk tree, which wake may crack on the right.
+5. [x] Squash listing 40/30/30 → 64/32/4.
+6. [x] `ROADMAP.md` Phase 2: equal-grain requests plus wake expand. Later: full aligned `cover(T)` after merge, not this expand.
+7. [x] `systemPatterns.md`: one briefing sentence — fold requests are equal-grain and unlink; wake may expand in memory when the directory is short.
 
 ## Technology Validation
 
@@ -197,5 +197,5 @@ No new technology - validation not required
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
 - [x] Preflight
-- [ ] Build
+- [x] Build
 - [ ] QA

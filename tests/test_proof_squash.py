@@ -2,19 +2,17 @@
 
 from __future__ import annotations
 
-import subprocess
-import sys
 from datetime import datetime, timedelta, timezone
 from random import Random
 
-from conftest import SCRIPT, load_summem
+from conftest import load_summem
 from gitutil import fold_ids, git, init_repo, zoom_reaches
 
 UTC = timezone.utc
 
 
-def test_three_packs_squash_clone_zooms_originals(tmp_path):
-    """100 notes folded as 40/30/30, squashed to main; a clone zooms one original per pack."""
+def test_three_packs_squash_clone_zooms_originals(tmp_path, monkeypatch):
+    """100 notes folded as 64/32/4, squashed to main; a clone zooms one original per pack."""
     m = load_summem()
     main = init_repo(tmp_path / "main")
     git(["checkout", "-b", "packed"], main)
@@ -26,9 +24,9 @@ def test_three_packs_squash_clone_zooms_originals(tmp_path):
         git(["commit", "-m", text], main)
     ids = [node.id for node in m.list_view(main) if node.kind == "note"]
     assert len(ids) == 100
-    fold_ids(m, main, ids[0:40], "A")
-    fold_ids(m, main, ids[40:70], "B")
-    fold_ids(m, main, ids[70:100], "C")
+    fold_ids(m, main, ids[0:64], "A")
+    fold_ids(m, main, ids[64:96], "B")
+    fold_ids(m, main, ids[96:100], "C")
     git(["add", "-A"], main)
     git(["commit", "-m", "three naps"], main)
     git(["checkout", "main"], main)
@@ -37,22 +35,18 @@ def test_three_packs_squash_clone_zooms_originals(tmp_path):
     git(["commit", "-m", "squash packs"], main)
     clone = tmp_path / "clone"
     git(["clone", str(main), str(clone)], main)
-    wake = subprocess.run(
-        [sys.executable, str(SCRIPT), "wake"],
-        cwd=clone,
-        capture_output=True,
-        check=True,
-    )
-    out = wake.stdout.decode("utf-8")
+    monkeypatch.setattr(m, "WAKE_LINES", 3)
+    out = m.wake_text(clone)
     lines = [line for line in out.splitlines() if line]
     assert len(lines) == 3
     grains = [line.split("  ", 1)[1] for line in lines]
-    assert any(g.startswith("(40 notes,") for g in grains)
-    assert sum(1 for g in grains if g.startswith("(30 notes,")) == 2
-    nap_ids = [line.split()[0] for line in lines]
+    assert any(g.startswith("(64 notes,") for g in grains)
+    assert any(g.startswith("(32 notes,") for g in grains)
+    assert any(g.startswith("(4 notes,") for g in grains)
+    nap_ids = [node.id for node in m.list_view(clone)]
     zoom_reaches(clone, nap_ids[0], "n000")
-    zoom_reaches(clone, nap_ids[1], "n040")
-    zoom_reaches(clone, nap_ids[2], "n070")
+    zoom_reaches(clone, nap_ids[1], "n064")
+    zoom_reaches(clone, nap_ids[2], "n096")
     log = git(["log", "--pretty=%s"], clone).stdout.decode("utf-8")
     assert "n000" not in log
     assert "n040" not in log

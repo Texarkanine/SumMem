@@ -11,7 +11,7 @@ from gitutil import fold_ids, git, init_repo, zoom_reaches
 UTC = timezone.utc
 
 
-def test_two_branch_packs_merge_then_nap_neighbors(tmp_path):
+def test_two_branch_packs_merge_then_nap_neighbors(tmp_path, monkeypatch):
     """Two disjoint packs merge clean; wake is two lines; nap of those ids zooms both sides."""
     m = load_summem()
     main = init_repo(tmp_path / "main")
@@ -41,10 +41,12 @@ def test_two_branch_packs_merge_then_nap_neighbors(tmp_path):
     merged_b = git(["merge", "--no-edit", "side-b"], main)
     assert merged_a.returncode == 0
     assert merged_b.returncode == 0
+    monkeypatch.setattr(m, "WAKE_LINES", 2)
     lines = [line for line in m.wake_text(main).splitlines() if line]
     assert len(lines) == 2
-    ids = [line.split()[0] for line in lines]
+    ids = [node.id for node in m.list_view(main)]
     parent = m.write_nap(main, ids[0], ids[1], "both packs")
+    monkeypatch.setattr(m, "WAKE_LINES", 1)
     wake = m.wake_text(main)
     assert len(wake.splitlines()) == 1
     assert "(8 notes," in wake

@@ -14,7 +14,7 @@ UTC = timezone.utc
 def _nap_two(m, repo):
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
-    ids = [line.split()[0] for line in m.wake_text(repo).splitlines() if line]
+    ids = [node.id for node in m.list_view(repo)]
     m.write_nap(repo, ids[0], ids[1], "pair")
     return ids
 
@@ -56,7 +56,7 @@ def test_view_sorts_notes_and_naps_by_filename(tmp_path):
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
     m.write_note(repo, "gamma", datetime(2026, 1, 1, 0, 0, 3, tzinfo=UTC), Random(3))
-    ids = [line.split()[0] for line in m.wake_text(repo).splitlines() if line]
+    ids = [node.id for node in m.list_view(repo)]
     m.write_nap(repo, ids[0], ids[1], "pair")
     nodes = m.list_view(repo)
     assert [node.kind for node in nodes] == ["nap", "note"]

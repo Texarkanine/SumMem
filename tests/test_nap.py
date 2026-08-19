@@ -21,7 +21,7 @@ def _two_notes(m, repo, a="alpha", b="beta"):
 
 
 def _ids(m, repo):
-    return [line.split()[0] for line in m.wake_text(repo).splitlines() if line]
+    return [node.id for node in m.list_view(repo)]
 
 
 def _payload_names(repo: Path) -> set[str]:
@@ -34,7 +34,7 @@ def _payload_names(repo: Path) -> set[str]:
     return names
 
 
-def test_nap_two_adjacent_notes_writes_pair_and_unlinks(tmp_path):
+def test_nap_two_adjacent_notes_writes_pair_and_unlinks(tmp_path, monkeypatch):
     """Two adjacent notes become one nap pair; both notes are gone."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
@@ -58,6 +58,7 @@ def test_nap_two_adjacent_notes_writes_pair_and_unlinks(tmp_path):
     assert sum_path.read_bytes() == b"pair\n"
     assert not pa.exists()
     assert not pb.exists()
+    monkeypatch.setattr(m, "WAKE_LINES", 1)
     lines = m.wake_text(repo).splitlines()
     assert lines == [f"{leafset}  (2 notes, from 2026-01-01)  pair"]
 
@@ -268,7 +269,7 @@ def test_napchild_sum_empty_when_child_sum_conflict(tmp_path):
     assert "a1" in out and "a2" in out
 
 
-def test_nap_two_identical_notes_by_repeated_id(tmp_path):
+def test_nap_two_identical_notes_by_repeated_id(tmp_path, monkeypatch):
     """Two adjacent notes with the same text share an id and can still be napped."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
@@ -279,6 +280,7 @@ def test_nap_two_identical_notes_by_repeated_id(tmp_path):
     m.write_nap(repo, ids[0], ids[1], "twins")
     notes = [p for p in (repo / ".summem" / "notes").iterdir() if not p.name.startswith(".")]
     assert notes == []
+    monkeypatch.setattr(m, "WAKE_LINES", 1)
     lines = m.wake_text(repo).splitlines()
     assert len(lines) == 1
     assert lines[0].endswith("  twins")

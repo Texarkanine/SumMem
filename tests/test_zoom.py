@@ -16,7 +16,7 @@ UTC = timezone.utc
 def _two_notes(m, repo):
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
-    return [line.split()[0] for line in m.wake_text(repo).splitlines() if line]
+    return [node.id for node in m.list_view(repo)]
 
 
 def test_zoom_two_note_nap_prints_both_texts(tmp_path):
@@ -25,7 +25,7 @@ def test_zoom_two_note_nap_prints_both_texts(tmp_path):
     repo = init_repo(tmp_path / "r")
     ids = _two_notes(m, repo)
     m.write_nap(repo, ids[0], ids[1], "pair")
-    nap_id = m.wake_text(repo).splitlines()[0].split()[0]
+    nap_id = m.list_view(repo)[0].id
     out = m.zoom_text(repo, nap_id)
     lines = out.splitlines()
     assert len(lines) == 2
@@ -41,7 +41,7 @@ def test_zoom_conflict_sum_still_prints_leaves(tmp_path):
     m.write_nap(repo, ids[0], ids[1], "pair")
     sums = list((repo / ".summem" / "naps").glob("*.sum"))
     sums[0].write_text("<<<<<<< HEAD\npair\n=======\nother\n>>>>>>>\n", encoding="utf-8")
-    nap_id = m.wake_text(repo).splitlines()[0].split()[0]
+    nap_id = m.list_view(repo)[0].id
     out = m.zoom_text(repo, nap_id)
     assert "alpha" in out
     assert "beta" in out
@@ -52,7 +52,7 @@ def test_zoom_loose_note_id_prints_the_note(tmp_path):
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "hello", datetime(2026, 1, 1, tzinfo=UTC), Random(0))
-    cid = m.wake_text(repo).splitlines()[0].split()[0]
+    cid = m.list_view(repo)[0].id
     assert m.zoom_text(repo, cid) == f"{cid}  hello\n"
 
 
@@ -74,12 +74,12 @@ def test_zoom_nap_of_naps_prints_two_children_not_leaves(tmp_path):
     repo = init_repo(tmp_path / "r")
     for i, text in enumerate(["a1", "a2", "b1", "b2"], start=1):
         m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
-    ids = [line.split()[0] for line in m.wake_text(repo).splitlines() if line]
+    ids = [node.id for node in m.list_view(repo)]
     m.write_nap(repo, ids[0], ids[1], "pack-a")
     m.write_nap(repo, ids[2], ids[3], "pack-b")
-    nap_ids = [line.split()[0] for line in m.wake_text(repo).splitlines() if line]
+    nap_ids = [node.id for node in m.list_view(repo)]
     m.write_nap(repo, nap_ids[0], nap_ids[1], "both")
-    parent_id = m.wake_text(repo).splitlines()[0].split()[0]
+    parent_id = m.list_view(repo)[0].id
     out = m.zoom_text(repo, parent_id)
     lines = out.splitlines()
     assert len(lines) == 2

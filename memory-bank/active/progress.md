@@ -117,3 +117,20 @@ Equal-grain fold requests, carry-stable nap names, and in-memory wake expand so 
     - Proofs 2 and 3 inspect post-nap captions and would otherwise expand to leaves under the default budget
     - Tree expansion needs a representation distinct from `ViewNode` because virtual children are printable and zoomable but deliberately not nappable
 
+## 2026-08-19 - BUILD - COMPLETE
+
+* Work completed
+    - Carry-stable nap stems `{stamp}-{rand}-{leafset}-{leaves}` inherit the left child's sequence prefix
+    - Equal-grain fold requests replace oldest-adjacent; catch-up prints after a successful `nap`; `oldest_adjacent` is gone
+    - In-memory right-edge wake expand via `ProjectedNode` / `expand_frontier`; `write_nap` still unlinks files only
+    - Proof 4 packs are 64/32/4; proofs 2/3/6 pin file-grain `WAKE_LINES`
+    - Contract wording in `VISION.md`, `ROADMAP.md`, and `systemPatterns.md`
+    - Full suite: 99 passed
+* Decisions made
+    - `ProjectedNode` carries optional `tree_path` so a file-backed nap can load `.tree` once without leaking into `write_nap`
+    - Proof wakes that must see captions use the loaded module plus a pinned budget; subprocess cannot monkeypatch `WAKE_LINES`
+    - Unreadable `.tree` is its own wait-free case next to missing and malformed
+* Insights
+    - Same-second `[1, 2, 1]` reproduced on the old stem and disappeared once the parent kept the left child's `{stamp}-{rand}`
+    - Tests that harvested nap ids from `wake_text` would have gone red for expand, not for the writer; `list_view` is the file oracle
+

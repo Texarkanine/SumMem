@@ -53,9 +53,10 @@ def test_nap_subcommand_writes_and_wake_reads(tmp_path, monkeypatch, capsys):
     monkeypatch.chdir(repo)
     assert m.main(["note", "alpha"]) == 0
     assert m.main(["note", "beta"]) == 0
-    assert m.main(["wake"]) == 0
-    ids = [line.split()[0] for line in capsys.readouterr().out.splitlines() if line]
+    ids = [node.id for node in m.list_view(repo)]
     assert m.main(["nap", ids[0], ids[1], "pair"]) == 0
+    monkeypatch.setattr(m, "WAKE_LINES", 1)
+    capsys.readouterr()
     assert m.main(["wake"]) == 0
     out = capsys.readouterr().out
     assert "pair" in out

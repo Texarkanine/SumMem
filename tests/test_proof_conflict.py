@@ -22,16 +22,17 @@ def _run(args, cwd, check=True):
     return result
 
 
-def test_same_pair_two_captions_conflict_only_on_sum(tmp_path):
+def test_same_pair_two_captions_conflict_only_on_sum(tmp_path, monkeypatch):
     """Two nappers of the same pair conflict on .sum only; both resolutions wake and zoom."""
+    m = load_summem()
+    monkeypatch.setattr(m, "WAKE_LINES", 1)
     main = init_repo(tmp_path / "main")
     _run([sys.executable, str(SCRIPT), "note", "alpha"], main)
     _run([sys.executable, str(SCRIPT), "note", "beta"], main)
     _run(["git", "add", ".summem"], main)
     _run(["git", "commit", "-m", "two notes"], main)
 
-    wake = _run([sys.executable, str(SCRIPT), "wake"], main)
-    ids = [line.split()[0] for line in wake.stdout.decode("utf-8").splitlines() if line]
+    ids = [node.id for node in m.list_view(main)]
     assert len(ids) == 2
 
     wt_a = tmp_path / "wt-a"
@@ -59,7 +60,7 @@ def test_same_pair_two_captions_conflict_only_on_sum(tmp_path):
 
     def check_resolution(which, expected, forbidden):
         _run(["git", "checkout", f"--{which}", "--", sumfile], wt_a)
-        wake_out = _run([sys.executable, str(SCRIPT), "wake"], wt_a).stdout.decode("utf-8")
+        wake_out = m.wake_text(wt_a)
         assert expected in wake_out
         assert forbidden not in wake_out
         nap_id = wake_out.splitlines()[0].split()[0]
@@ -71,16 +72,17 @@ def test_same_pair_two_captions_conflict_only_on_sum(tmp_path):
     check_resolution("theirs", "theirs caption", "ours caption")
 
 
-def test_planted_conflict_markers_wake_skips_caption_zoom_prints_leaves(tmp_path):
+def test_planted_conflict_markers_wake_skips_caption_zoom_prints_leaves(tmp_path, monkeypatch):
     """Planted <<<<<<< in a .sum: wake omits the caption; zoom still prints the leaves."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
-    ids = [line.split()[0] for line in m.wake_text(repo).splitlines() if line]
+    ids = [node.id for node in m.list_view(repo)]
     m.write_nap(repo, ids[0], ids[1], "secret caption")
     sums = list((repo / ".summem" / "naps").glob("*.sum"))
     sums[0].write_text("<<<<<<< HEAD\nsecret caption\n=======\nother\n>>>>>>>\n", encoding="utf-8")
+    monkeypatch.setattr(m, "WAKE_LINES", 1)
     wake = m.wake_text(repo)
     assert "secret caption" not in wake
     assert "<<<<<<<" not in wake

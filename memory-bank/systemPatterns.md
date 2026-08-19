@@ -40,7 +40,7 @@ Two notes are two paths. There is no next id and no shared index. A nap's identi
 
 ## Sequence is in the filename
 
-Note names carry writer time in UTC. Nap names carry the minimum child time, not when compaction ran. Git-add date, squash commit time, and `git log` are the wrong clock.
+Note names carry writer time in UTC. Nap names carry the leftmost child's `{stamp}-{rand}`, not when compaction ran. Git-add date, squash commit time, and `git log` are the wrong clock.
 
 ## Wake prints content ids, never positional ranges
 
@@ -52,7 +52,7 @@ Fold writes a new pair. Children leave the view only after the parent payload ex
 
 ## Wake is wait-free
 
-A missing or conflict-marked caption degrades to the content id and grain. Wake does not open `.tree`. Writers must not serialize on "cannot wake."
+A missing or conflict-marked caption degrades to the content id and grain. Wake does not open `.tree` to list an at-or-over-budget directory. It may open `.tree` to expand an under-budget directory. Writers must not serialize on "cannot wake." Fold requests are equal-grain adjacent files and still unlink; wake may expand in memory when the directory is short.
 
 ## Root pushes; other stores pull
 
