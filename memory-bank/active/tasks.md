@@ -139,7 +139,7 @@ None - implementation approach is clear.
 
 - [x] 1. Leaf-sets and rematerialize
 - [x] 2. Zipper and heal_view
-- [ ] 3. write_nap guards
+- [x] 3. write_nap guards
 - [ ] 4. flock naps/ and CLI heal
 - [ ] 5. Contract wording
 

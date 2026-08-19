@@ -286,3 +286,120 @@ def test_nap_two_identical_notes_by_repeated_id(tmp_path, monkeypatch):
     assert lines[0].endswith("  twins")
     assert "(2 notes," in lines[0]
 
+
+def _agent_err(err: str) -> None:
+    assert "notes/" not in err
+    assert "naps/" not in err
+    assert "git" not in err
+
+
+def test_write_nap_overlapping_adjacent_naps_raises(tmp_path):
+    """Adjacent naps whose leaf-sets intersect raise before writing a parent."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.ensure_store(repo)
+    shared = m.NoteChild(name="20260101T000002Z-bbbbbbbbbbbbbbbb", text="B")
+    left = m.NapChild(
+        id=m.leafset_id(
+            [m.note_digest(m.note_file_bytes("A")), m.note_digest(m.note_file_bytes("B"))]
+        ),
+        sum="ab",
+        tree=m.Tree(
+            kids=[
+                m.NoteChild(name="20260101T000001Z-aaaaaaaaaaaaaaaa", text="A"),
+                shared,
+            ]
+        ),
+    )
+    right = m.NapChild(
+        id=m.leafset_id(
+            [m.note_digest(m.note_file_bytes("B")), m.note_digest(m.note_file_bytes("C"))]
+        ),
+        sum="bc",
+        tree=m.Tree(
+            kids=[
+                shared,
+                m.NoteChild(name="20260101T000003Z-cccccccccccccccc", text="C"),
+            ]
+        ),
+    )
+    m.rematerialize_child(repo, left)
+    m.rematerialize_child(repo, right)
+    ids = _ids(m, repo)
+    before = _payload_names(repo)
+    with pytest.raises(ValueError, match="overlapping packs") as caught:
+        m.write_nap(repo, ids[0], ids[1], "nope")
+    _agent_err(str(caught.value))
+    assert _payload_names(repo) == before
+
+
+def test_write_nap_note_inside_adjacent_nap_raises(tmp_path):
+    """A note whose digest sits in the adjacent nap is overlapping packs."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    pa, pb = _two_notes(m, repo)
+    ids = _ids(m, repo)
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    nap = m.list_view(repo)[0]
+    tree = m.loads_tree(nap.tree_path.read_bytes())
+    m.rematerialize_child(repo, tree.kids[0])
+    nodes = m.list_view(repo)
+    before = _payload_names(repo)
+    with pytest.raises(ValueError, match="overlapping packs") as caught:
+        m.write_nap(repo, nodes[0].id, nodes[1].id, "nope")
+    _agent_err(str(caught.value))
+    assert _payload_names(repo) == before
+    assert pa.name in _payload_names(repo) or any(
+        n.kind == "note" for n in m.list_view(repo)
+    )
+
+
+def test_write_nap_disjoint_adjacent_naps_still_concat(tmp_path):
+    """Disjoint adjacent naps still unlink and concat."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    texts = ["a1", "a2", "b1", "b2"]
+    for i, text in enumerate(texts, start=1):
+        m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
+    ids = _ids(m, repo)
+    m.write_nap(repo, ids[0], ids[1], "pack-a")
+    m.write_nap(repo, ids[2], ids[3], "pack-b")
+    nap_ids = _ids(m, repo)
+    m.write_nap(repo, nap_ids[0], nap_ids[1], "both")
+    trees = list((repo / ".summem" / "naps").glob("*.tree"))
+    assert len(trees) == 1
+    tree = m.loads_tree(trees[0].read_bytes())
+    assert all(isinstance(kid, m.NapChild) for kid in tree.kids)
+
+
+def test_write_nap_identical_text_notes_still_concat(tmp_path):
+    """Two identical-text notes still concat; the overlap guard requires a nap."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    ids = _ids(m, repo)
+    m.write_nap(repo, ids[0], ids[1], "twins")
+    notes = [p for p in (repo / ".summem" / "notes").iterdir() if not p.name.startswith(".")]
+    assert notes == []
+    trees = list((repo / ".summem" / "naps").glob("*.tree"))
+    assert len(trees) == 1
+
+
+def test_write_nap_malformed_tree_raises_unreadable_pack(tmp_path):
+    """A selected nap whose .tree is malformed raises ValueError without store paths."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    _two_notes(m, repo)
+    ids = _ids(m, repo)
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    m.write_note(repo, "gamma", datetime(2026, 1, 1, 0, 0, 3, tzinfo=UTC), Random(3))
+    nap = next(n for n in m.list_view(repo) if n.kind == "nap")
+    note = next(n for n in m.list_view(repo) if n.kind == "note")
+    nap.tree_path.write_bytes(b"{not json")
+    before = _payload_names(repo)
+    with pytest.raises(ValueError, match="unreadable pack") as caught:
+        m.write_nap(repo, nap.id, note.id, "nope")
+    _agent_err(str(caught.value))
+    assert _payload_names(repo) == before
+

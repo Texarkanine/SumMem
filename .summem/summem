@@ -407,7 +407,18 @@ def _as_child(node: ViewNode) -> tuple[NoteChild | NapChild, list[str]]:
         return child, [digest]
     if node.tree_path is None or not node.tree_path.is_file():
         raise ValueError("unknown id")
-    inner = loads_tree(node.tree_path.read_bytes())
+    try:
+        inner = loads_tree(node.tree_path.read_bytes())
+    except (
+        OSError,
+        UnicodeError,
+        json.JSONDecodeError,
+        KeyError,
+        TypeError,
+        ValueError,
+        AttributeError,
+    ):
+        raise ValueError("unreadable pack") from None
     return NapChild(id=node.id, sum=node.caption, tree=inner), _digests_of_tree(inner)
 
 
@@ -443,6 +454,8 @@ def write_nap(parent, id_a, id_b, caption):
     left, right = _adjacent_nodes(nodes, id_a, id_b)
     child_l, digs_l = _as_child(left)
     child_r, digs_r = _as_child(right)
+    if (set(digs_l) & set(digs_r)) and (left.kind == "nap" or right.kind == "nap"):
+        raise ValueError("overlapping packs")
     tree = Tree(kids=[child_l, child_r])
     digests = digs_l + digs_r
     leafset = leafset_id(digests)

@@ -4,7 +4,7 @@
 **Phase:** BUILD - IN-PROGRESS
 
 ## What Was Done
-- Units 1–2 green: leaf-sets/rematerialize and `heal_view` zipper (subset-drop, split-smaller, skip note-note and unreadable packs).
+- Units 1–3 green: zipper helpers, `heal_view`, `write_nap` overlap/`unreadable pack` guards.
 
 ## Next Step
-- Unit 3: `write_nap` overlap and unreadable-pack guards (TDD).
+- Unit 4: `with_store_lock` flock of `naps/` and CLI heal (TDD).
