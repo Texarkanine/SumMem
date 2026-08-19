@@ -47,3 +47,15 @@ Make SumMem CLI help a memo-style ratchet: bare invocation lists every commandâ€
     - `-h <command>` rewritten to `[command, "--help"]` without mutating the callerâ€™s list
 * Insights
     - `parse_args(argv)` would have thrown away the rewrite; it has to be `parse_args(args_list)`
+
+## 2026-08-19 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Reviewed the CLI-help implementation against the Level 2 plan, project brief, and system patterns
+    - Checked KISS, DRY, YAGNI, completeness, regression, integrity, and documentation
+    - Ran the complete pytest suite: 183 passed
+* Decisions made
+    - Accepted the implementation as-is with no blocking findings
+    - Accepted `_cli_argv` as a necessary, small deviation that preserves normal `main()` invocation and caller input
+* Insights
+    - The handwritten catalog and pre-argparse dispatch remain narrow and aligned with the intended first-invocation help ratchet
