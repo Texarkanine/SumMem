@@ -1,10 +1,10 @@
 # Active Context
 
 ## Current Task: cli-help
-**Phase:** PLAN - COMPLETE
+**Phase:** PREFLIGHT - COMPLETE (FAIL (fixable))
 
 ## What Was Done
-- Re-planned after preflight FAIL: printed invocations and persistent files follow repo-root `summem`. Rejected `sys.argv[0]` because in-process tests see pytest.
+- Re-validated the revised plan. Prior driver-path findings are resolved, but `usage_text()` lacks a planned red assertion and zoom lacks CLI coverage for both malformed and unreadable trees.
 
 ## Next Step
-- Preflight again, then build.
+- Revise those two test steps, then run Preflight again.

@@ -21,6 +21,9 @@ Fold accepted PR #5 review items into the driver, tests, and VISION. Driver stay
 - CLI `nap` of two syntactically valid unknown ids on an initialized store → nonzero, no new payloads
 - CLI leftover: `note` still writes; an unknown token still does not write a note (argparse invalid choice)
 - Printed invocations (`usage_text`, `catalog_text`, `fold_request`) name `summem`, not `.summem/summem`
+- Bare/`-h` catalog does not contain `.summem/summem`
+- CLI `zoom` of a nap whose `.tree` is malformed JSON → rc 1, no traceback, no store paths
+- CLI `zoom` of a nap whose `.tree` read raises `OSError` → rc 1, no traceback, no store paths
 
 ### Test Infrastructure
 
@@ -44,10 +47,10 @@ Fold accepted PR #5 review items into the driver, tests, and VISION. Driver stay
 
 - Files: `summem` (`usage_text`, `catalog_text`, `fold_request`), `tests/test_fold.py`, `tests/test_scopes.py`, `tests/test_proof_scopes.py`
 
-1. Stub tests: none new; edit the existing path asserts
-2. Stub interface: none
-3. Write tests and run red: `Run: summem nap `, `summem wake --path pkg`; old `.summem/summem` asserts fail once production strings change
-4. Write code and run green: those three printers use `summem`. Do **not** use `sys.argv[0]`: `main()` is called in-process and argv[0] is pytest. `ensure_store` still copies the driver to each store's `.summem/summem`
+1. Stub tests: add `test_catalog_omits_store_driver_path` in `tests/test_cli.py`; edit fold/scope path asserts
+2. Stub interface: add `CLI_NAME = "summem"` next to `_COMMANDS`
+3. Write tests and run red: `usage_text()` has no `.summem/summem` and catalog lines start with `  summem `; `Run: summem nap `; `summem wake --path pkg`
+4. Write code and run green: `usage_text`, `catalog_text`, and `fold_request` compose from `CLI_NAME`. Do **not** use `sys.argv[0]`. `ensure_store` still copies the driver to each store's `.summem/summem`
 
 ### 3. Recall searches the store, degrades on bad trees — executable
 
@@ -62,10 +65,10 @@ Fold accepted PR #5 review items into the driver, tests, and VISION. Driver stay
 
 - Files: `summem` (`zoom_text`), `tests/test_zoom.py`
 
-1. Stub tests: `test_zoom_unreadable_tree_is_value_error`
+1. Stub tests: `test_zoom_unreadable_tree_is_value_error`, `test_cli_zoom_malformed_tree_returns_1`, `test_cli_zoom_oserror_returns_1` in `tests/test_zoom.py`
 2. Stub interface: none
-3. Write tests and run red: two-note nap, `.tree` bytes `{not json`, `zoom_text` raises `ValueError`, message has no traceback/store paths
-4. Write code and run green: both `loads_tree` sites in `zoom_text` use `try/except _TREE_PARSE_ERRORS` → `ValueError("unreadable pack")`
+3. Write tests and run red: `{not json` → `zoom_text` raises `ValueError`; CLI `zoom` of that nap → rc 1, no `Traceback`/`notes/`/`naps/`/`git`; monkeypatch `read_bytes` on that tree to `OSError` → same CLI asserts
+4. Write code and run green: both `loads_tree` sites in `zoom_text` use `try/except _TREE_PARSE_ERRORS` → `ValueError("unreadable pack")`. CLI already maps `ValueError` to rc 1
 
 ### 5. Fold prompt uses `ENTRY_CHARS` — executable
 

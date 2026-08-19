@@ -167,6 +167,25 @@ Make SumMem CLI help a memo-style ratchet, then fold accepted PR #5 review fixes
 * Insights
     - Catalog tests already match `summem {name}` with or without the `.summem/` prefix
 
+## 2026-08-19 - PREFLIGHT - FAIL (fixable)
+
+* Work completed
+    - GPT preflight: catalog prefix has no red test; zoom CLI cases incomplete
+* Decisions made
+    - Add `test_catalog_omits_store_driver_path`; add CLI zoom malformed + OSError cases
+    - Accept `CLI_NAME = "summem"` as the one printed name
+* Insights
+    - `"summem wake" in catalog` is already true of `.summem/summem wake`
+
+## 2026-08-19 - PLAN - COMPLETE (rework, after second preflight)
+
+* Work completed
+    - Tightened steps 2 and 4 so the catalog prefix and CLI zoom have reds
+* Decisions made
+    - One `CLI_NAME` constant feeds the three printers
+* Insights
+    - In-process `zoom_text` tests do not prove `main` sanitizes stderr; CLI cases do
+
 ## 2026-08-19 - PREFLIGHT - COMPLETE (FAIL)
 
 * Work completed
@@ -177,3 +196,15 @@ Make SumMem CLI help a memo-style ratchet, then fold accepted PR #5 review fixes
     - Found missing updates for `systemPatterns.md` and `techContext.md` to reflect the new `summem` repo-root convention
 * Insights
     - Relying on static hardcoded driver paths (`.summem/summem`) throughout the codebase creates brittle tests and output; using `os.path.basename(sys.argv[0])` dynamically solves this.
+
+## 2026-08-19 - PREFLIGHT - COMPLETE (FAIL)
+
+* Work completed
+    - Re-validated the revised PR #5 rework plan against the driver, affected tests, VISION, and persistent briefing
+    - Wrote `memory-bank/active/.preflight-status` with first line `FAIL (fixable)`
+* Decisions made
+    - Prior driver-path, downstream-test, VISION, and persistent-briefing findings are resolved by the revised plan
+    - Build remains gated on explicit red coverage for the `usage_text()` executable-name change and CLI zoom handling of both malformed and unreadable trees
+* Insights
+    - Existing `"summem wake"` catalog coverage also matches `.summem/summem wake`, so it cannot drive the planned prefix change
+    - A direct malformed-tree `zoom_text()` test does not prove CLI rc/stderr behavior or the separate `OSError` path
