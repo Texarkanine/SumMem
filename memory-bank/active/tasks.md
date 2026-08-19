@@ -215,6 +215,6 @@ No new technology - validation not required. `fcntl.flock` is stdlib on this POS
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
+- [x] Preflight
 - [ ] Build
 - [ ] QA
