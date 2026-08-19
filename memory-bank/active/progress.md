@@ -158,4 +158,16 @@ Zipper-heal overlapping nap leaf-sets after merge so the next `note` or `nap` re
 * Insights
     - The rework successfully addressed all blocking and advisory findings without introducing new regressions.
 
+## 2026-08-19 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-zipper-heal.md`
+    - Persistent-file reconcile: skip all three (contracts already recorded during build)
+* Decisions made
+    - Did not edit `VISION.md` First proof item 6; overlapping merge stays a test plus the Long-lived branches paragraph
+    - Next step is `/niko` (L4 `file-backend` still has scopes after issue #3)
+* Insights
+    - Unique-cover proofs must share `tests/gitutil.py`; a copied assert under `continue` fails open
+    - Two preflights were the cost of putting a lock file, an action list, and a production heal ceiling into the plan
+
 
