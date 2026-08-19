@@ -8,4 +8,4 @@
 - Recorded that content ids name leaves, not unique view rows, in `systemPatterns.md`
 
 ## Next Step
-- Run `/niko` to continue to the next milestone (scopes)
+- Run `/niko`: tick single-store complete, then classify issue #1 (now in `milestones.md` before scopes)
