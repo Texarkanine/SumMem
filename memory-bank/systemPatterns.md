@@ -60,7 +60,7 @@ Session start wakes the true root once. That print includes the catalog: walk th
 
 ## Knobs live in the store
 
-Budgets are per-store committed config, not environment variables. Missing names fall back to script defaults. The file is not rewritten unless someone runs `start` or an explicit config command.
+Budgets are per-store committed config, not environment variables. Missing names fall back to script defaults. The file is not rewritten unless someone runs `start`.
 
 ## What this system is not
 

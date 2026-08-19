@@ -250,3 +250,35 @@ Make SumMem CLI help a memo-style ratchet, then fold accepted PR #5 review fixes
 * Insights
     - CLI wake line-count proofs must include the footer; `wake_text` tests do not
 
+## 2026-08-19 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Semantic QA on the review punch list; 197 pytest
+    - Wrote `memory-bank/active/.qa-validation-status` with `PASS`
+* Decisions made
+    - Accepted the implementation; advisory only on a leftover config-command sentence
+* Insights
+    - `systemPatterns.md` still named an explicit config command after VISION dropped it
+
+## 2026-08-19 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-cli-help.md`
+    - Struck the leftover config-command sentence in `systemPatterns.md`
+* Decisions made
+    - productContext and techContext already matched the driver move from build
+* Insights
+    - Asserting `ValueError` is not a red when `JSONDecodeError` already is one
+
+## 2026-08-19 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Reviewed the PR #5 rework against the Level 2 plan, project brief, system patterns, and canonical VISION
+    - Checked KISS, DRY, YAGNI, completeness, regression, integrity, and documentation
+    - Ran the complete pytest suite: 197 passed
+* Decisions made
+    - Accepted the implementation as-is with no blocking semantic findings
+    - Recorded the stale “explicit config command” sentence in `systemPatterns.md` as a nonblocking documentation advisory
+* Insights
+    - Full-view recall and selective bad-tree degradation preserve useful results without making unrelated corruption fatal
+

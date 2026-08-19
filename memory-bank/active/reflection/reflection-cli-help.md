@@ -8,28 +8,28 @@ complexity_level: 2
 
 ## Summary
 
-Bare `summem` and `-h` now print a memo-style command catalog with `--path` on every command except `start`. `summem -h wake` opens wake help. 183 pytest. QA passed first try.
+PR #5 review punch list is in: tests load repo-root `summem`, recall searches the store, zoom/recall degrade on bad trees, the fold prompt uses `ENTRY_CHARS`, `note` is an explicit arm, VISION matches. 197 pytest. QA passed.
 
 ## Requirements vs Outcome
 
-Delivered as asked. Scopes behavior unchanged. `-h` is help, not memo’s “No such command.” Last click remains argparse subcommand help.
+Delivered the accepted judge items. Kept the operator wake footer (`You are up to speed.`). Did not add stderr warnings for skipped sibling trees.
 
 ## Plan Accuracy
 
-Sequence and files were right. The only extra helper was `_cli_argv`, from a preflight advisory: `argv is None` must become `sys.argv[1:]` before the empty check, and `parse_args` must see the rewritten list or `-h wake` is thrown away.
+Sequence was right once preflight forced a catalog-prefix red and `unreadable pack` (JSONDecodeError is already a ValueError). Three FAIL (fixable) preflights before PASS WITH ADVISORY.
 
 ## Build & QA Observations
 
-TDD red was real on the catalog and on `-h wake`; `wake -h` / `start -h` were already green. QA found nothing blocking.
+TDD reds were real on SCRIPT equality, catalog prefix, loose-note recall, and `unreadable pack`. QA found one leftover “explicit config command” in `systemPatterns.md` — fixed in reflect.
 
 ## Insights
 
 ### Technical
-- Intercepting argv is incomplete unless `parse_args` receives the copy. `parse_args(argv)` discards the `-h <command>` rewrite.
+- `JSONDecodeError` subclasses `ValueError`. A zoom test that only asserts `ValueError` stays green while the CLI still leaks the parser message.
 
 ### Process
-- A shipped `--path` that never appears on the first usage line is invisible. That is how this repo looked like it had not built scopes.
+- Printed invocation strings are a dependency of moving the driver. `"summem wake" in catalog` is already true of `.summem/summem wake`.
 
 ### Million-Dollar Question
 
-If the first invocation had always been a catalog, argparse would never have been the top-level UI. The still-more-elegant version is to format those lines from the same subparser table that parses, so a new command cannot make help lie. This task handwritten `usage_text()` instead; that is the drift surface.
+If the committed driver had always been repo-root `summem`, `CLI_NAME` would have been the only printed name from the first catalog, and tests would have loaded that path. The store-local `.summem/summem` copy would still exist for `ensure_store`. That is what we have now.
