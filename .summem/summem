@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import fcntl
 import hashlib
 import json
 import os
@@ -391,7 +392,7 @@ def heal_view(parent) -> None:
             _unlink_node(smaller)
             continue
         if other_set <= small_set:
-            _unlink_node(other)
+            _unlink_node(_other)
             continue
         child, _digests = _as_child(smaller)
         if not isinstance(child, NapChild):
@@ -399,6 +400,17 @@ def heal_view(parent) -> None:
         for kid in child.tree.kids:
             rematerialize_child(parent, kid)
         _unlink_node(smaller)
+
+
+def with_store_lock(parent, fn):
+    """Run *fn* while holding an exclusive flock on the store's naps/ directory."""
+    store = ensure_store(parent)
+    fd = os.open(store / "naps", os.O_RDONLY)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX)
+        return fn()
+    finally:
+        os.close(fd)
 
 
 def _as_child(node: ViewNode) -> tuple[NoteChild | NapChild, list[str]]:
@@ -723,11 +735,24 @@ def main(argv: list[str] | None = None) -> int:
                 sys.stderr.write(f"not a content id: {token}\n")
                 return 2
         try:
-            write_nap(parent, args.id_a, args.id_b, args.caption)
+            require_entry(args.caption)
         except ValueError as exc:
             sys.stderr.write(f"{exc}\n")
             return 1
-        sys.stdout.write(fold_request(parent, WAKE_LINES))
+
+        def nap_locked():
+            heal_view(parent)
+            present = {node.id for node in list_view(parent)}
+            if args.id_a in present and args.id_b in present:
+                write_nap(parent, args.id_a, args.id_b, args.caption)
+            return fold_request(parent, WAKE_LINES)
+
+        try:
+            out = with_store_lock(parent, nap_locked)
+        except ValueError as exc:
+            sys.stderr.write(f"{exc}\n")
+            return 1
+        sys.stdout.write(out)
         return 0
     if args.cmd == "zoom":
         if is_range_token(args.id):
@@ -747,11 +772,24 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         return 0
     try:
-        write_note(parent, args.text, datetime.now(timezone.utc), random.SystemRandom())
+        require_entry(args.text)
     except ValueError as exc:
         sys.stderr.write(f"{exc}\n")
         return 1
-    sys.stdout.write(fold_request(parent, WAKE_LINES))
+    now = datetime.now(timezone.utc)
+    rng = random.SystemRandom()
+
+    def note_locked():
+        write_note(parent, args.text, now, rng)
+        heal_view(parent)
+        return fold_request(parent, WAKE_LINES)
+
+    try:
+        out = with_store_lock(parent, note_locked)
+    except ValueError as exc:
+        sys.stderr.write(f"{exc}\n")
+        return 1
+    sys.stdout.write(out)
     return 0
 
 

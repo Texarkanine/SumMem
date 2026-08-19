@@ -140,8 +140,8 @@ None - implementation approach is clear.
 - [x] 1. Leaf-sets and rematerialize
 - [x] 2. Zipper and heal_view
 - [x] 3. write_nap guards
-- [ ] 4. flock naps/ and CLI heal
-- [ ] 5. Contract wording
+- [x] 4. flock naps/ and CLI heal
+- [x] 5. Contract wording
 
 ### 1. Leaf-sets and rematerialize — executable
 
@@ -222,5 +222,5 @@ No new technology - validation not required. `fcntl.flock` is stdlib on this POS
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
 - [x] Preflight
-- [ ] Build
+- [x] Build
 - [ ] QA

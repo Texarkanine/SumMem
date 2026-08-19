@@ -54,3 +54,60 @@ def test_two_branch_packs_merge_then_nap_neighbors(tmp_path, monkeypatch):
     zoom_reaches(main, nap_id, "A0")
     zoom_reaches(main, nap_id, "B0")
     assert parent.is_file()
+
+
+def test_two_branch_overlapping_packs_heal_on_next_mutate(tmp_path, monkeypatch):
+    """Two branches nap overlapping-but-unequal packs; merge then CLI note leaves a unique cover."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "main")
+    base = datetime(2026, 1, 1, tzinfo=UTC)
+    m.write_note(repo, "A", base, Random(1))
+    m.write_note(repo, "B", base + timedelta(seconds=1), Random(2))
+    git(["add", "-A"], repo)
+    git(["commit", "-m", "base notes"], repo)
+
+    git(["checkout", "-b", "side-d"], repo)
+    m.write_note(repo, "D", base + timedelta(seconds=2), Random(3))
+    notes = [n for n in m.list_view(repo) if n.kind == "note"]
+    m.write_nap(repo, notes[0].id, notes[1].id, "ab")
+    nodes = m.list_view(repo)
+    m.write_nap(repo, nodes[0].id, nodes[1].id, "abd")
+    git(["add", "-A"], repo)
+    git(["commit", "-m", "pack abd"], repo)
+
+    git(["checkout", "main"], repo)
+    git(["checkout", "-b", "side-e"], repo)
+    m.write_note(repo, "E", base + timedelta(seconds=3), Random(4))
+    notes = [n for n in m.list_view(repo) if n.kind == "note"]
+    m.write_nap(repo, notes[0].id, notes[1].id, "ab")
+    nodes = m.list_view(repo)
+    m.write_nap(repo, nodes[0].id, nodes[1].id, "abe")
+    git(["add", "-A"], repo)
+    git(["commit", "-m", "pack abe"], repo)
+
+    git(["checkout", "main"], repo)
+    merged_d = git(["merge", "--no-edit", "side-d"], repo)
+    merged_e = git(["merge", "--no-edit", "side-e"], repo)
+    assert merged_d.returncode == 0
+    assert merged_e.returncode == 0
+    monkeypatch.chdir(repo)
+    assert m.main(["note", "later"]) == 0
+    nodes = m.list_view(repo)
+    rows = [(n, m.leaf_digests(n)) for n in nodes]
+    for i, (a, sa) in enumerate(rows):
+        for b, sb in rows[i + 1 :]:
+            if sa is None or sb is None:
+                continue
+            if a.kind == "note" and b.kind == "note":
+                continue
+                assert sa.isdisjoint(sb), (a.name, b.name)
+        for sentence in ("A", "B", "D", "E"):
+            reached = False
+            for node in m.list_view(repo):
+                try:
+                    zoom_reaches(repo, node.id, sentence)
+                    reached = True
+                    break
+                except AssertionError:
+                    continue
+            assert reached, sentence

@@ -121,3 +121,26 @@ def test_shebang_and_executable_bit():
     first = SCRIPT.read_text(encoding="utf-8").splitlines()[0]
     assert first == "#!/usr/bin/env python3"
     assert SCRIPT.stat().st_mode & stat.S_IXUSR
+
+
+def test_cli_malformed_tree_returns_1_without_traceback(tmp_path, monkeypatch, capsys):
+    """A malformed .tree via CLI nap returns 1 without a traceback or store paths."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["note", "alpha"]) == 0
+    assert m.main(["note", "beta"]) == 0
+    ids = [node.id for node in m.list_view(repo)]
+    assert m.main(["nap", ids[0], ids[1], "pair"]) == 0
+    assert m.main(["note", "gamma"]) == 0
+    nap = next(n for n in m.list_view(repo) if n.kind == "nap")
+    note = next(n for n in m.list_view(repo) if n.kind == "note")
+    nap.tree_path.write_bytes(b"{not json")
+    capsys.readouterr()
+    assert m.main(["nap", nap.id, note.id, "nope"]) == 1
+    err = capsys.readouterr().err
+    assert "Traceback" not in err
+    assert "unreadable pack" in err
+    assert "notes/" not in err
+    assert "naps/" not in err
+    assert "git" not in err

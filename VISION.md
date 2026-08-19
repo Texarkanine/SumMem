@@ -17,7 +17,7 @@ OptMem’s *store* cannot live in a repository that squash-merges and that unint
 
 The cover function is a pure function of how many notes exist and how many lines you will read. It does not need those files. What git cannot preserve is a single growing log and a single next id.
 
-Identity was doing lock-like work in OptMem: one self, one `flock`, “subagents do not write.” One laptop may run three tasks; a tennex engineer may run ten Codex agents; CI may run two jobs on a PR... all at the same time. Those writers do not share a process or a disk lock. SumMem does not have an actor. It has a grow-only set of facts and a decaying view of that set.
+Identity was doing lock-like work in OptMem: one self, one `flock`, “subagents do not write.” One laptop may run three tasks; a tennex engineer may run ten Codex agents; CI may run two jobs on a PR... all at the same time. Those writers do not share a process or a cross-clone lock. SumMem does not have an actor. It has a grow-only set of facts and a decaying view of that set.
 
 ## Model
 
@@ -199,16 +199,16 @@ OptMem’s aligned cover — tile the sorted sequence with aligned power-of-two 
 
 This milestone: if **file** count exceeds `WAKE_LINES`, request the oldest adjacent pair with the same leaf count. Never 16+1. The agent naps that pair; children leave the directory. `WAKE_LINES` is how many lines wake prints. When files are fewer than the budget, wake splits the newest expandable nap in memory. When files meet or exceed the budget, wake lists files. It does not write children back. Catch-up after `nap` prints the next equal-grain pair if the directory is still over budget.
 
-Wake is wait-free. A missing or conflict-marked `.sum` still counts as a view node: wake prints the content id and grain, skips the caption, and does not refuse. It does not open `.tree` to list an at-or-over-budget directory. It may open `.tree` to expand an under-budget directory; a missing, unreadable, or malformed `.tree` means that node will not split. Zoom still reads `.tree`. Ten agents must not serialize on “cannot wake.”
+Wake is wait-free. A missing or conflict-marked `.sum` still counts as a view node: wake prints the content id and grain, skips the caption, and does not refuse. It does not open `.tree` to list an at-or-over-budget directory. It may open `.tree` to expand an under-budget directory; a missing, unreadable, or malformed `.tree` means that node will not split. Wake does not rewrite the store and does not zipper overlapping packs. Zoom still reads `.tree`. Ten agents must not serialize on “cannot wake.”
 
 ## Concurrency and merge
 
-The concurrency control is git’s tree merge plus add-only distinct paths. Not an actor. Not `flock` across machines. Not a custom merge driver. Not `merge=union`. GitHub’s resolve-conflicts button does not run your driver.
+The concurrency control is git’s tree merge plus add-only distinct paths. Not an actor. Not `flock` across machines. Not a custom merge driver. Not `merge=union`. GitHub’s resolve-conflicts button does not run your driver. Overlapping leaf sets land as two files; the next `note` or `nap` on this machine zippers them. That invocation may `flock` the store’s `naps/` directory. Wake does not wait on it. Git merge remains the cross-clone control.
 
 | Event | Same path? | Result |
 |---|---|---|
 | Two agents each `note` | No | Both files survive. |
-| Two agents nap disjoint leaf sets | No | Two new `.sum`/`.tree` pairs. |
+| Two agents nap overlapping-but-unequal leaf sets | No | Two files. The next `note` or `nap` zippers them. |
 | Two agents nap the same leaves, canonical `.tree`, same sentence | Same paths, same bytes | Git agrees. |
 | Two agents nap the same leaves, different sentence | Same `.sum`, one line differs | Conflict. Take either side, or mash the two sentences into one line. Both are summaries of those leaves. `.tree` should be identical and not conflict. |
 | Alice folds `aa`+`bb` into `aabb` and deletes `aa`/`bb`; Bob did not edit them | New path + deletes | Git takes the deletes. Zoom of `aa` is inside `aabb.tree`. |
@@ -221,13 +221,13 @@ People who do not know the tool will pick “Accept incoming.” If the conflict
 
 ## Long-lived branches
 
-Two feature branches that run for months will each grow their own `.sum`/`.tree` files. If the leaf sets do not overlap, merge onto `main` is a clean union. `HEAD` then holds both pasts.
+Two feature branches that run for months will each grow their own `.sum`/`.tree` files. If the leaf sets do not overlap, merge onto `main` is a clean union. `HEAD` then holds both pasts. If they overlap, merge still lands two files. The next `note` or `nap` zippers them: drop a pack whose leaves are a subset of another view file, rematerialize children of the smaller overlapping pack from `.tree`, keep disjoint siblings. Later adjacent **disjoint** naps still concat. Aligned `cover(T)` stays later.
 
 Wake does **not** rebuild OptMem’s aligned `[0, 8192)` over the interleaved leaves. Those packs were built along each branch’s sequence. After merge they interleave by minimum child time; almost no existing `.sum` would match a cover block of the combined leaf list. Re-covering would demand a storm of naps or dump thousands of raw lines.
 
 The **view file** is the sequence element for fold. Each on-disk `.sum` counts as one file, even if its `.tree` holds thousands of notes. Wake sorts files and prints captions at or over budget. Under budget it may print finer lines from those trees. You are awake immediately.
 
-Later naps fold **adjacent view nodes** — typically January-from-A next to January-from-B — into a new parent: union leaf-set id, canonical concat of the two `.tree` files, one new sentence. The parallel pasts become one cover again, lazily, from the left. Zoom still opens each child until that fold. A pack-size cap may leave two fat siblings forever; wake then prints two old lines instead of one.
+Later naps fold **adjacent view nodes** — typically January-from-A next to January-from-B — into a new parent: union leaf-set id, canonical concat of the two `.tree` files, one new sentence. Concatenation is only for disjoint packs. The parallel pasts become one cover again, lazily, from the left. Zoom still opens each child until that fold. A pack-size cap may leave two fat siblings forever; wake then prints two old lines instead of one.
 
 ## Squash
 

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import subprocess
+import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from random import Random
@@ -494,3 +496,157 @@ def test_same_second_notes_keep_left_child_stem(tmp_path):
     ab = next(n for n in m.list_view(repo) if n.kind == "nap" and n.leaves == 2)
     assert ab.name.startswith(left_seq)
     m.heal_view(repo)
+
+
+def _plant_abd_abe(m, repo):
+    _write_notes(m, repo, ["A", "B", "D"], start=1)
+    ids = [n.id for n in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "ab")
+    ab = next(n for n in m.list_view(repo) if n.kind == "nap")
+    d = next(n for n in m.list_view(repo) if n.kind == "note")
+    m.write_nap(repo, ab.id, d.id, "abd")
+    abd = m.list_view(repo)[0]
+    abd_tree = m.loads_tree(abd.tree_path.read_bytes())
+    e_note = m.NoteChild(name="20260101T000010Z-eeeeeeeeeeeeeeee", text="E")
+    _plant_nap(m, repo, [abd_tree.kids[0], e_note], "abe")
+    return abd
+
+
+def test_cli_note_and_nap_call_heal(tmp_path, monkeypatch, capsys):
+    """main(['note', ...]) and main(['nap', ...]) call heal; wake does not."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    calls = {"n": 0}
+    real = m.heal_view
+
+    def wrapped(parent):
+        calls["n"] += 1
+        return real(parent)
+
+    monkeypatch.setattr(m, "heal_view", wrapped)
+    assert m.main(["note", "hello"]) == 0
+    assert m.main(["note", "world"]) == 0
+    assert calls["n"] == 2
+    ids = [n.id for n in m.list_view(repo)]
+    assert m.main(["nap", ids[0], ids[1], "pair"]) == 0
+    assert calls["n"] == 3
+    calls["n"] = 0
+    capsys.readouterr()
+    assert m.main(["wake"]) == 0
+    assert calls["n"] == 0
+
+
+def test_cli_wake_on_overlapping_head_writes_nothing(tmp_path, monkeypatch):
+    """CLI wake on overlapping HEAD prints and adds no file; wake must not flock."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    _plant_abd_abe(m, repo)
+    before = _payload_names(repo)
+    flocks = {"n": 0}
+    real = m.fcntl.flock
+
+    def wrapped(fd, op):
+        flocks["n"] += 1
+        return real(fd, op)
+
+    monkeypatch.setattr(m.fcntl, "flock", wrapped)
+    assert m.main(["wake"]) == 0
+    assert flocks["n"] == 0
+    assert _payload_names(repo) == before
+
+
+def test_cli_nap_overlapping_ids_exits_0_without_concat(tmp_path, monkeypatch):
+    """nap of two overlapping ids exits 0, does not concat, writes no new .sum sentence."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    _plant_abd_abe(m, repo)
+    ids = [n.id for n in m.list_view(repo)]
+    assert m.main(["nap", ids[0], ids[1], "concat-caption"]) == 0
+    sum_texts = []
+    for path in (repo / ".summem" / "naps").glob("*.sum"):
+        text = path.read_text(encoding="utf-8")
+        if text.endswith("\n"):
+            text = text[:-1]
+        sum_texts.append(text)
+    assert "concat-caption" not in sum_texts
+    _assert_unique_cover(m, repo)
+
+
+def test_cli_note_text_inside_nap_exits_0_no_loose_note(tmp_path, monkeypatch):
+    """note of text already in a nap exits 0; that note does not remain in the view."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    _write_notes(m, repo, ["A", "B"], start=1)
+    ids = [n.id for n in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "ab")
+    assert m.main(["note", "A"]) == 0
+    nodes = m.list_view(repo)
+    assert all(n.kind == "nap" for n in nodes)
+    assert not any(n.kind == "note" and n.caption == "A" for n in nodes)
+
+
+def test_cli_invalid_nap_caption_does_not_heal(tmp_path, monkeypatch):
+    """Invalid nap caption on an overlapping store exits nonzero and leaves payloads unchanged."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    _plant_abd_abe(m, repo)
+    ids = [n.id for n in m.list_view(repo)]
+    before = _payload_names(repo)
+    calls = {"n": 0}
+    real = m.heal_view
+
+    def wrapped(parent):
+        calls["n"] += 1
+        return real(parent)
+
+    monkeypatch.setattr(m, "heal_view", wrapped)
+    assert m.main(["nap", ids[0], ids[1], ""]) != 0
+    assert calls["n"] == 0
+    assert _payload_names(repo) == before
+
+
+def test_identical_notes_nappable_after_heal_view(tmp_path):
+    """Two identical notes stay through heal_view and can still be napped via write_nap."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    _write_notes(m, repo, ["hello", "hello"], start=1)
+    m.heal_view(repo)
+    ids = [n.id for n in m.list_view(repo)]
+    assert len(ids) == 2
+    m.write_nap(repo, ids[0], ids[1], "twins")
+    assert all(n.kind == "nap" for n in m.list_view(repo))
+
+
+def test_with_store_lock_blocks_and_writes_no_lock_file(tmp_path):
+    """A second non-blocking flock of naps/ fails while the lock is held; no lock file appears."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.ensure_store(repo)
+    naps = repo / ".summem" / "naps"
+    probe = (
+        "import fcntl, os, sys\n"
+        "fd = os.open(sys.argv[1], os.O_RDONLY)\n"
+        "try:\n"
+        "    fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)\n"
+        "except BlockingIOError:\n"
+        "    raise SystemExit(2)\n"
+        "raise SystemExit(0)\n"
+    )
+    seen = {}
+
+    def held():
+        result = subprocess.run(
+            [sys.executable, "-c", probe, str(naps)],
+            capture_output=True,
+        )
+        seen["code"] = result.returncode
+        seen["names"] = [p.name for p in (repo / ".summem").rglob("*") if p.is_file()]
+
+    m.with_store_lock(repo, held)
+    assert seen["code"] == 2
+    assert "lock" not in seen["names"]

@@ -6,7 +6,7 @@
 
 - Coding agents that work in a git repository and need a shared, decaying memory of what that tree has learned
 - Operators who decide which directories get their own memory, especially in a monorepo
-- Concurrent writers who do not share a process or a disk lock: several agents on one machine, several jobs on one PR, several worktrees
+- Concurrent writers who do not share a process or a cross-clone lock: several agents on one machine, several jobs on one PR, several worktrees. A same-machine flock of `naps/` on one mutating invocation is not a committed object and is not an actor.
 
 This product is not a single-actor local diary (that is OptMem, including its machine-global store). It is not task-scoped working documentation that is archived when a task ends (that is Niko's `memory-bank/`).
 
@@ -21,7 +21,7 @@ This product is not a single-actor local diary (that is OptMem, including its ma
 
 ## Key Benefits
 
-- Many writers can add facts without a lock or a next-id.
+- Many writers can add facts without a cross-clone lock or a next-id.
 - The view stays bounded as the log grows: recent facts stay verbatim, older facts collapse to one-line summaries.
 - Squash-merge and shallow clones do not erase the sentences a later zoom still owes.
 - Extra memories are opt-in directories, not inferred packages.
@@ -36,7 +36,7 @@ A missing proof is unfinished work, not a reason to drop the criterion.
 ## Key Constraints
 
 - Agents never write the store. They run a script. The script owns every file.
-- There is no actor, lease, or lock. A scope is a directory that opted in.
+- There is no actor, lease, or cross-clone lock. A scope is a directory that opted in. Same-machine flock of `naps/` on one mutating invocation is not a committed object.
 - Personal and machine facts stay out of the repository.
 - SumMem is not Niko's `memory-bank/` and must not be folded into it.
 - Wake never refuses to print. "Cannot wake, go nap first" is a defect.

@@ -52,7 +52,7 @@ Fold writes a new pair. Children leave the view only after the parent payload ex
 
 ## Wake is wait-free
 
-A missing or conflict-marked caption degrades to the content id and grain. Wake does not open `.tree` to list an at-or-over-budget directory. It may open `.tree` to expand an under-budget directory. Writers must not serialize on "cannot wake." Fold requests are equal-grain adjacent files and still unlink; wake may expand in memory when the directory is short.
+A missing or conflict-marked caption degrades to the content id and grain. Wake does not open `.tree` to list an at-or-over-budget directory. It may open `.tree` to expand an under-budget directory. Wake does not open `.tree` to heal overlapping packs; mutating `note` and `nap` may. Writers must not serialize on "cannot wake." Fold requests are equal-grain adjacent files and still unlink; wake may expand in memory when the directory is short.
 
 ## Root pushes; other stores pull
 

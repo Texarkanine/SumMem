@@ -105,4 +105,16 @@ Zipper-heal overlapping nap leaf-sets after merge so the next `note` or `nap` re
 * Insights
     - The implementation plan successfully addresses the overlap edge cases safely using `fcntl.flock` and `heal_view` without deviating from `VISION.md`.
 
+## 2026-08-19 - BUILD - COMPLETE
+
+* Work completed
+    - Implemented zipper-heal: leaf-sets/rematerialize, `heal_view`, `write_nap` overlap and unreadable-pack guards, `naps/` flock, CLI heal, contract wording
+    - 134 pytest passed (33 new)
+* Decisions made
+    - First overlapping pair is scanned in list_view order over all i<j pairs, not only neighbors
+    - At/over-budget wake lists files; the 8+2+1 case does not shrink to two printed lines
+* Insights
+    - Filename `leaves` and actual digest-set size agree on valid packs, so "smaller" by `ViewNode.leaves` matches set cardinality
+    - Same-process `flock` succeeds again; the lock test needs a second process
+
 
