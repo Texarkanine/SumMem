@@ -59,8 +59,10 @@ def test_nap_two_adjacent_notes_writes_pair_and_unlinks(tmp_path, monkeypatch):
     assert not pa.exists()
     assert not pb.exists()
     monkeypatch.setattr(m, "WAKE_LINES", 1)
+    nap = m.list_view(repo)[0]
+    prefix = m.short_id(nap.id, [nap.id])
     lines = m.wake_text(repo).splitlines()
-    assert lines == [f"{leafset}  (2 notes, from 2026-01-01)  pair"]
+    assert lines == [f"2026-01-01 x2 {prefix}: pair"]
 
 
 def test_same_children_same_tree_bytes_and_paths(tmp_path):
@@ -283,8 +285,8 @@ def test_nap_two_identical_notes_by_repeated_id(tmp_path, monkeypatch):
     monkeypatch.setattr(m, "WAKE_LINES", 1)
     lines = m.wake_text(repo).splitlines()
     assert len(lines) == 1
-    assert lines[0].endswith("  twins")
-    assert "(2 notes," in lines[0]
+    assert lines[0].endswith(": twins")
+    assert " x2 " in lines[0]
 
 
 def _agent_err(err: str) -> None:

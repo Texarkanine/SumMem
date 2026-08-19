@@ -56,7 +56,7 @@ def test_under_budget_expands_right_edge_until_budget(tmp_path, monkeypatch):
     nodes = m.list_view(repo)
     assert len(nodes) == 2
     assert len(lines) == 4
-    assert "(8 notes," in lines[0]
+    assert "x8" in lines[0]
 
 
 def test_at_budget_does_not_expand(tmp_path, monkeypatch):
@@ -97,7 +97,7 @@ def test_lone_note_does_not_split(tmp_path, monkeypatch):
     monkeypatch.setattr(m, "WAKE_LINES", 32)
     lines = [line for line in m.wake_text(repo).splitlines() if line]
     assert len(lines) == 1
-    assert lines[0].endswith("  solo")
+    assert lines[0].endswith(": solo")
 
 
 def test_expand_writes_nothing(tmp_path, monkeypatch):
@@ -218,8 +218,8 @@ def test_zoom_expanded_child_id(tmp_path, monkeypatch):
     _two_eights(m, repo)
     monkeypatch.setattr(m, "WAKE_LINES", 4)
     file_ids = {node.id for node in m.list_view(repo)}
-    lines = [line for line in m.wake_text(repo).splitlines() if line]
-    child_ids = [line.split()[0] for line in lines if line.split()[0] not in file_ids]
+    frontier = m.expand_frontier(m.list_view(repo), 4)
+    child_ids = [row.id for row in frontier if row.id not in file_ids]
     assert child_ids
     out = m.zoom_text(repo, child_ids[0])
     assert out

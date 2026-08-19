@@ -6,6 +6,7 @@ import os
 import stat
 import subprocess
 import sys
+from dataclasses import replace
 from datetime import datetime, timezone
 from random import Random
 
@@ -67,12 +68,15 @@ def test_nap_subcommand_writes_and_wake_reads(tmp_path, monkeypatch, capsys):
 def test_path_flag_is_known_on_all_non_start_commands(tmp_path, monkeypatch):
     """--path is accepted on wake, note, nap, zoom, and recall, and rejected on start."""
     m = load_summem()
-    monkeypatch.chdir(init_repo(tmp_path / "r"))
-    fake = "a" * 64
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
     assert m.main(["wake", "--path", "."]) == 0
     assert m.main(["note", "--path", ".", "hello"]) == 0
-    assert m.main(["nap", "--path", ".", fake, fake, "pair"]) == 0
-    assert m.main(["zoom", "--path", ".", fake]) != 2
+    assert m.main(["note", "--path", ".", "world"]) == 0
+    ids = [node.id for node in m.list_view(repo)]
+    assert m.main(["nap", "--path", ".", ids[0], ids[1], "pair"]) == 0
+    nap_id = m.list_view(repo)[0].id
+    assert m.main(["zoom", "--path", ".", nap_id]) != 2
     assert m.main(["recall", "--path", ".", "hello"]) == 0
     assert m.main(["start", "pkg", "--path", "."]) != 0
 
@@ -150,3 +154,50 @@ def test_cli_malformed_tree_returns_1_without_traceback(tmp_path, monkeypatch, c
     assert "notes/" not in err
     assert "naps/" not in err
     assert "git" not in err
+
+
+def test_nap_accepts_unique_prefix(tmp_path, monkeypatch, capsys):
+    """nap accepts unique 8-hex prefixes of two view ids."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=timezone.utc), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=timezone.utc), Random(2))
+    ids = [node.id for node in m.list_view(repo)]
+    pa, pb = m.short_id(ids[0], ids), m.short_id(ids[1], ids)
+    assert m.main(["nap", pa, pb, "pair"]) == 0
+    capsys.readouterr()
+    view = m.list_view(repo)
+    assert len(view) == 1
+    assert view[0].kind == "nap"
+
+
+def test_unknown_prefix_is_error(tmp_path, monkeypatch, capsys):
+    """An unknown nap prefix exits 1 and writes no nap."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=timezone.utc), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=timezone.utc), Random(2))
+    assert m.main(["nap", "deadbeef", "cafebabe", "pair"]) == 1
+    err = capsys.readouterr().err
+    assert "unknown id" in err
+    assert list((repo / ".summem" / "naps").glob("*.sum")) == []
+
+
+def test_ambiguous_prefix_is_error(tmp_path, monkeypatch, capsys):
+    """An 8-hex prefix that matches two view ids exits 1 and writes no nap."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=timezone.utc), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=timezone.utc), Random(2))
+    nodes = m.list_view(repo)
+    a = "aabbccdd" + "0" * 56
+    b = "aabbccdd" + "1" * 56
+    colliding = [replace(nodes[0], id=a), replace(nodes[1], id=b)]
+    monkeypatch.setattr(m, "list_view", lambda _parent: colliding)
+    assert m.main(["nap", "aabbccdd", "aabbccdd", "pair"]) == 1
+    err = capsys.readouterr().err
+    assert "ambiguous" in err
+    assert list((repo / ".summem" / "naps").glob("*.sum")) == []

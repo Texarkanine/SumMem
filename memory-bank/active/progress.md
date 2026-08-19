@@ -36,3 +36,14 @@ Cap `wake` at `WAKE_LINES`, print short dated lines, keep full hashes on disk, a
     - Plan is solid; proceed to build
 * Insights
     - The TDD plan isolates prose/policy from executable units
+
+## 2026-08-19 - BUILD - COMPLETE
+
+* Work completed
+    - Units 1–5: prefix, wake format+cap, fold prompt, nap/zoom resolve, proof/VISION invert
+    - Full suite 169 passed
+* Decisions made
+    - Over-budget 8+2+1 wake prints 2 newest files (not all 3 view files)
+    - Overlapping `nap` after heal exits 1 (`unknown id`) instead of silent 0
+* Insights
+    - Catalog grain `(N notes` is a different surface from wake pack `xN`

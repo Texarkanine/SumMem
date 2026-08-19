@@ -63,7 +63,7 @@ def test_same_pair_two_captions_conflict_only_on_sum(tmp_path, monkeypatch):
         wake_out = m.wake_text(wt_a)
         assert expected in wake_out
         assert forbidden not in wake_out
-        nap_id = wake_out.splitlines()[0].split()[0]
+        nap_id = m.list_view(wt_a)[0].id
         zoom_out = _run([sys.executable, str(SCRIPT), "zoom", nap_id], wt_a).stdout.decode("utf-8")
         assert "alpha" in zoom_out
         assert "beta" in zoom_out
@@ -86,9 +86,10 @@ def test_planted_conflict_markers_wake_skips_caption_zoom_prints_leaves(tmp_path
     wake = m.wake_text(repo)
     assert "secret caption" not in wake
     assert "<<<<<<<" not in wake
-    nap_id = wake.splitlines()[0].split()[0]
+    nap_id = m.list_view(repo)[0].id
     assert len(nap_id) == 64
-    assert "(2 notes, from 2026-01-01)" in wake
+    assert " x2 " in wake
+    assert wake.rstrip().endswith(":")
     zoom = m.zoom_text(repo, nap_id)
     assert "alpha" in zoom
     assert "beta" in zoom

@@ -145,12 +145,11 @@ def test_long_stream_same_second_grains_are_powers_of_two(tmp_path, monkeypatch)
     rng = Random(0)
     for i in range(24):
         m.write_note(repo, f"n{i}", now, rng)
-        while True:
-            req = m.fold_request(repo)
-            if not req:
+        while len(m.list_view(repo)) > 8:
+            pair = m.equal_grain_pair(m.list_view(repo))
+            if pair is None:
                 break
-            left, right = req.split()
-            m.write_nap(repo, left, right, "fold")
+            m.write_nap(repo, pair[0], pair[1], "fold")
     nodes = m.list_view(repo)
     grains = [node.leaves for node in nodes]
     assert len(nodes) <= 8
@@ -187,10 +186,10 @@ def test_nap_prints_remaining_ones_not_parent_plus_one(tmp_path, monkeypatch, ca
     nodes = m.list_view(repo)
     assert m.main(["nap", nodes[0].id, nodes[1].id, "pair"]) == 0
     out = capsys.readouterr().out
-    rest = m.list_view(repo)
-    assert rest[1].id in out
-    assert rest[2].id in out
-    assert rest[0].id not in out
+    assert "  2026-01-01: c\n" in out
+    assert "  2026-01-01: d\n" in out
+    assert "Run: .summem/summem nap " in out
+    assert "Invent nothing." in out
 
 
 def test_nap_prints_nothing_when_at_or_under_budget(tmp_path, monkeypatch, capsys):
@@ -218,8 +217,16 @@ def test_over_budget_note_requests_equal_grain_ones(tmp_path, monkeypatch, capsy
     ids = [node.id for node in m.list_view(repo)]
     assert m.main(["note", "delta"]) == 0
     out = capsys.readouterr().out
-    assert ids[0] in out
-    assert ids[1] in out
+    assert "Compress these two into one line of at most 280 characters." in out
+    assert "Invent nothing." in out
+    assert "  2026-01-01: alpha\n" in out
+    assert "  2026-01-01: beta\n" in out
+    assert 'Run: .summem/summem nap ' in out
+    assert '"<your line>"' in out
+    pa = m.short_id(ids[0], ids)
+    pb = m.short_id(ids[1], ids)
+    assert f"nap {pa} {pb} " in out
+    assert ids[0] not in out
     notes = [p for p in (repo / ".summem" / "notes").iterdir() if not p.name.startswith(".")]
     assert len(notes) == 4
     naps = repo / ".summem" / "naps"
@@ -242,9 +249,22 @@ def test_config_toml_wake_lines_is_read(tmp_path, monkeypatch, capsys):
     (repo / ".summem" / "config.toml").write_text("WAKE_LINES = 1\n", encoding="utf-8")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     assert m.main(["note", "beta"]) == 0
-    out = capsys.readouterr().out.strip()
-    parts = out.split()
-    assert len(parts) == 2
+    out = capsys.readouterr().out
+    assert "Run: .summem/summem nap " in out
+    assert "Invent nothing." in out
     notes = [p for p in (repo / ".summem" / "notes").iterdir() if not p.name.startswith(".")]
     assert len(notes) == 2
     assert list((repo / ".summem" / "naps").glob("*.sum")) == []
+
+
+def test_fold_request_mentions_remaining(tmp_path, monkeypatch):
+    """Five notes at budget 3: fold_request says compressions remain after this one."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.setattr(m, "WAKE_LINES", 3)
+    for i, text in enumerate(("a", "b", "c", "d", "e"), start=1):
+        m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
+    out = m.fold_request(repo, 3)
+    assert "1 compression remains after this one." in out
+    assert "  2026-01-01: a\n" in out
+    assert "  2026-01-01: b\n" in out

@@ -85,3 +85,28 @@ def test_zoom_nap_of_naps_prints_two_children_not_leaves(tmp_path):
     assert len(lines) == 2
     captions = [line.split("  ", 1)[1] for line in lines]
     assert captions == ["pack-a", "pack-b"]
+
+
+def test_zoom_accepts_unique_prefix(tmp_path):
+    """zoom accepts a unique prefix of a pack id."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    ids = _two_notes(m, repo)
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    nap_id = m.list_view(repo)[0].id
+    prefix = m.short_id(nap_id, m.named_ids(repo))
+    out = m.zoom_text(repo, prefix)
+    assert "alpha" in out
+    assert "beta" in out
+
+
+def test_ambiguous_prefix_is_error(tmp_path, monkeypatch):
+    """zoom raises ValueError when a prefix matches two ids."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    _two_notes(m, repo)
+    a = "a3f2c1b8" + "0" * 56
+    b = "a3f2c1b8" + "1" * 56
+    monkeypatch.setattr(m, "named_ids", lambda _parent: [a, b])
+    with pytest.raises(ValueError, match="ambiguous"):
+        m.zoom_text(repo, "a3f2c1b8")

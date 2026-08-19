@@ -6,6 +6,8 @@ import os
 from datetime import datetime, timezone
 from random import Random
 
+import pytest
+
 from conftest import load_summem
 from gitutil import init_repo
 
@@ -32,21 +34,20 @@ def test_wake_lists_two_notes_sorted_by_filename(tmp_path):
     m.write_note(repo, "first", earlier, Random(1))
     lines = m.wake_text(repo).splitlines()
     assert len(lines) == 2
-    assert lines[0].endswith("  first")
-    assert lines[1].endswith("  second")
+    assert lines[0].endswith(": first")
+    assert lines[1].endswith(": second")
 
 
-def test_wake_line_has_full_id_and_grain_date_from_name(tmp_path):
-    """Each wake line has a 64-hex id and a grain date taken from the filename."""
+def test_wake_line_is_date_and_text_for_a_note(tmp_path):
+    """A note wake line is YYYY-MM-DD: text, dated from the filename, with no hash."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     now = datetime(2026, 8, 18, 12, 30, 5, tzinfo=UTC)
     path = m.write_note(repo, "hello", now, Random(42))
     os.utime(path, (0, 0))
-    cid = m.leafset_id([m.note_digest(path.read_bytes())])
     line = m.wake_text(repo).splitlines()[0]
-    assert len(cid) == 64
-    assert line == f"{cid}  (1 note, from 2026-08-18)  hello"
+    assert line == "2026-08-18: hello"
+    assert len(m.list_view(repo)[0].id) == 64
 
 
 def test_wake_output_omits_notes_naps_and_git(tmp_path):
@@ -98,9 +99,9 @@ def test_wake_mixed_view_sorts_by_filename(tmp_path, monkeypatch):
     monkeypatch.setattr(m, "WAKE_LINES", 2)
     lines = m.wake_text(repo).splitlines()
     assert len(lines) == 2
-    assert "(2 notes, from 2026-01-01)  pair" in lines[0]
-    assert lines[1].endswith("  gamma")
-    assert "(1 note, from 2026-01-01)" in lines[1]
+    prefix = m.short_id(m.list_view(repo)[0].id, [node.id for node in m.list_view(repo)])
+    assert lines[0] == f"2026-01-01 x2 {prefix}: pair"
+    assert lines[1] == "2026-01-01: gamma"
 
 
 def test_wake_missing_sum_prints_id_and_grain_without_caption(tmp_path, monkeypatch):
@@ -116,7 +117,8 @@ def test_wake_missing_sum_prints_id_and_grain_without_caption(tmp_path, monkeypa
     sums[0].unlink()
     monkeypatch.setattr(m, "WAKE_LINES", 1)
     out = m.wake_text(repo)
-    assert out == f"{leafset}  (2 notes, from 2026-01-01)\n"
+    prefix = m.short_id(leafset, [leafset])
+    assert out == f"2026-01-01 x2 {prefix}:\n"
     assert "pair" not in out
 
 
@@ -133,7 +135,8 @@ def test_wake_conflict_sum_omits_caption(tmp_path, monkeypatch):
     sums[0].write_text("<<<<<<< HEAD\npair\n=======\nother\n>>>>>>>\n", encoding="utf-8")
     monkeypatch.setattr(m, "WAKE_LINES", 1)
     out = m.wake_text(repo)
-    assert out == f"{leafset}  (2 notes, from 2026-01-01)\n"
+    prefix = m.short_id(leafset, [leafset])
+    assert out == f"2026-01-01 x2 {prefix}:\n"
     assert "pair" not in out
 
 
@@ -153,4 +156,78 @@ def test_wake_does_not_call_loads_tree(tmp_path, monkeypatch):
     monkeypatch.setattr(m, "loads_tree", boom)
     out = m.wake_text(repo)
     assert "pair" in out
+
+
+def test_wake_pack_line_is_date_grain_prefix_caption(tmp_path, monkeypatch):
+    """A pack wake line is YYYY-MM-DD xN prefix: caption."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    monkeypatch.setattr(m, "WAKE_LINES", 1)
+    nap_id = m.list_view(repo)[0].id
+    prefix = m.short_id(nap_id, [nap_id])
+    assert m.wake_text(repo) == f"2026-01-01 x2 {prefix}: pair\n"
+
+
+def test_wake_prints_at_most_wake_lines_newest(tmp_path, monkeypatch):
+    """Eleven notes at WAKE_LINES=4 print the newest four date lines, no hashes."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    for i in range(11):
+        m.write_note(repo, f"n{i}", datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
+    monkeypatch.setattr(m, "WAKE_LINES", 4)
+    lines = m.wake_text(repo).splitlines()
+    assert lines == [f"2026-01-01: n{i}" for i in range(7, 11)]
+    assert all(len(part) != 64 for line in lines for part in line.split())
+
+
+def test_wake_does_not_print_a_nap_request(tmp_path, monkeypatch):
+    """Wake never prints Run: or a nap invocation, even when over budget."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    for i in range(5):
+        m.write_note(repo, f"n{i}", datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
+    monkeypatch.setattr(m, "WAKE_LINES", 2)
+    out = m.wake_text(repo)
+    assert "Run:" not in out
+    assert "nap " not in out
+
+
+def test_short_id_is_8_hex_when_unique():
+    """short_id is 8 hex when that prefix is unique among the given ids."""
+    m = load_summem()
+    cid = "a3f2c1b8" + "ab" * 28
+    other = "b3f2c1b8" + "cd" * 28
+    assert m.short_id(cid, [cid, other]) == "a3f2c1b8"
+
+
+def test_short_id_lengthens_until_unique():
+    """short_id grows past 8 hex when two ids share the floor prefix."""
+    m = load_summem()
+    a = "a3f2c1b8" + "0" * 56
+    b = "a3f2c1b8" + "1" * 56
+    assert m.short_id(a, [a, b]) == "a3f2c1b80"
+    assert m.short_id(b, [a, b]) == "a3f2c1b81"
+
+
+def test_resolve_id_returns_full_id_for_unique_prefix():
+    """resolve_id maps a unique prefix to the full id."""
+    m = load_summem()
+    cid = "a3f2c1b8" + "ab" * 28
+    other = "b3f2c1b8" + "cd" * 28
+    assert m.resolve_id("a3f2c1b8", [cid, other]) == cid
+
+
+def test_resolve_id_rejects_ambiguous_or_unknown_prefix():
+    """resolve_id raises ValueError when the prefix matches none or many ids."""
+    m = load_summem()
+    a = "a3f2c1b8" + "0" * 56
+    b = "a3f2c1b8" + "1" * 56
+    with pytest.raises(ValueError):
+        m.resolve_id("a3f2c1b8", [a, b])
+    with pytest.raises(ValueError):
+        m.resolve_id("deadbeef", [a, b])
 

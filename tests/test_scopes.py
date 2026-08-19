@@ -169,8 +169,10 @@ def test_config_wake_lines_is_per_store(tmp_path, monkeypatch, capsys):
     assert m.main(["note", "root-a"]) == 0
     capsys.readouterr()
     assert m.main(["note", "root-b"]) == 0
-    root_out = capsys.readouterr().out.strip()
-    assert len(root_out.split()) == 2
+    root_out = capsys.readouterr().out
+    assert "Run:" in root_out
+    assert "root-a" in root_out
+    assert "root-b" in root_out
     assert m.main(["note", "--path", "pkg", "pkg-a"]) == 0
     assert m.main(["note", "--path", "pkg", "pkg-b"]) == 0
     pkg_out = capsys.readouterr().out
@@ -220,8 +222,10 @@ def test_monkeypatch_wake_lines_still_applies_when_config_omits_knob(tmp_path, m
     assert m.main(["note", "alpha"]) == 0
     capsys.readouterr()
     assert m.main(["note", "beta"]) == 0
-    out = capsys.readouterr().out.strip()
-    assert len(out.split()) == 2
+    out = capsys.readouterr().out
+    assert "Run:" in out
+    assert "alpha" in out
+    assert "beta" in out
 
 
 def test_root_wake_catalogs_other_store(tmp_path, monkeypatch, capsys):

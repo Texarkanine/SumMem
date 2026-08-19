@@ -42,9 +42,9 @@ Two notes are two paths. There is no next id and no shared index. A nap's identi
 
 Note names carry writer time in UTC. Nap names carry the leftmost child's `{stamp}-{rand}`, not when compaction ran. Git-add date, squash commit time, and `git log` are the wrong clock.
 
-## Wake prints content ids, never positional ranges
+## Wake prints dated lines, never positional ranges
 
-A range such as `#16-31` is a picture of one listing and a lie after the next merge. `nap` accepts two content ids a wake printed; `zoom` accepts one. A command that looks like a range is rejected. A content id names leaves, not a unique view row: two notes with the same text print the same id, and adjacency must keep both.
+A range such as `#16-31` is a picture of one listing and a lie after the next merge. Wake prints `YYYY-MM-DD: text` for a note and `YYYY-MM-DD xN <prefix>: caption` for a pack. `nap` and `zoom` accept the unique prefix of a content id they can already name; a command that looks like a range is rejected. Filenames and `.tree` identity stay 64 hex. A content id names leaves, not a unique view row: two notes with the same text share an id, and adjacency must keep both.
 
 ## Payloads are write-once; captions are the honest conflict
 
@@ -52,7 +52,7 @@ Fold writes a new pair. Children leave the view only after the parent payload ex
 
 ## Wake is wait-free
 
-A missing or conflict-marked caption degrades to the content id and grain. Wake does not open `.tree` to list an at-or-over-budget directory. It may open `.tree` to expand an under-budget directory. Wake does not open `.tree` to heal overlapping packs; mutating `note` and `nap` may. Writers must not serialize on "cannot wake." Fold requests are equal-grain adjacent files and still unlink; wake may expand in memory when the directory is short.
+A missing or conflict-marked caption degrades to date, grain, and unique prefix with no caption. Wake does not open `.tree` to list an at-or-over-budget directory. It may open `.tree` to expand an under-budget directory. Wake does not open `.tree` to heal overlapping packs; mutating `note` and `nap` may. Writers must not serialize on "cannot wake." Fold requests are equal-grain adjacent files and still unlink; wake may expand in memory when the directory is short.
 
 ## Root pushes; other stores pull
 

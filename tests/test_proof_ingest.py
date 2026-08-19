@@ -51,4 +51,6 @@ def test_two_worktrees_note_merge_without_conflict(tmp_path):
     lines = [line for line in out.splitlines() if line]
     assert len(lines) == 2
     for line in lines:
-        assert len(line.split()[0]) == 64
+        day, text = line.split(": ", 1)
+        assert len(day) == 10
+        assert text in ("alpha", "beta")

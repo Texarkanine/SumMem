@@ -39,10 +39,9 @@ def test_three_packs_squash_clone_zooms_originals(tmp_path, monkeypatch):
     out = m.wake_text(clone)
     lines = [line for line in out.splitlines() if line]
     assert len(lines) == 3
-    grains = [line.split("  ", 1)[1] for line in lines]
-    assert any(g.startswith("(64 notes,") for g in grains)
-    assert any(g.startswith("(32 notes,") for g in grains)
-    assert any(g.startswith("(4 notes,") for g in grains)
+    assert any(" x64 " in line for line in lines)
+    assert any(" x32 " in line for line in lines)
+    assert any(" x4 " in line for line in lines)
     nap_ids = [node.id for node in m.list_view(clone)]
     zoom_reaches(clone, nap_ids[0], "n000")
     zoom_reaches(clone, nap_ids[1], "n064")

@@ -647,8 +647,9 @@ def _find_in_tree(tree: Tree, cid: str) -> NapChild | str | None:
     return None
 
 
-def zoom_text(parent, cid: str) -> str:
-    """Return one-level zoom of *cid*, or raise ValueError if unknown."""
+def zoom_text(parent, token: str) -> str:
+    """Return one-level zoom of *token* (full id or unique prefix), or raise ValueError if unknown."""
+    cid = resolve_id(token, named_ids(parent))
     nodes = list_view(parent)
     for node in nodes:
         if node.id != cid:
@@ -670,8 +671,45 @@ def zoom_text(parent, cid: str) -> str:
     raise ValueError("unknown id")
 
 
+def _collect_ids(tree: Tree, ids: list[str]) -> None:
+    for child in tree.kids:
+        if isinstance(child, NoteChild):
+            ids.append(leafset_id([note_digest(note_file_bytes(child.text))]))
+        else:
+            ids.append(child.id)
+            _collect_ids(child.tree, ids)
+
+
+def named_ids(parent) -> list[str]:
+    """Return view ids plus nested tree ids that zoom can already name."""
+    ids: list[str] = []
+    seen: set[str] = set()
+
+    def add(cid: str) -> None:
+        if cid not in seen:
+            seen.add(cid)
+            ids.append(cid)
+
+    for node in list_view(parent):
+        add(node.id)
+        if node.kind != "nap" or node.tree_path is None or not node.tree_path.is_file():
+            continue
+        try:
+            nested: list[str] = []
+            _collect_ids(loads_tree(node.tree_path.read_bytes()), nested)
+        except (OSError, UnicodeDecodeError, ValueError, TypeError, KeyError):
+            continue
+        for cid in nested:
+            add(cid)
+    return ids
+
+
 def expand_frontier(nodes: list[ViewNode], budget: int) -> list[ProjectedNode]:
     """Return a printed frontier of *nodes*, expanding naps while shorter than *budget*."""
+    if budget <= 0:
+        return []
+    if len(nodes) >= budget:
+        nodes = nodes[-budget:]
     frontier = [
         ProjectedNode(
             id=node.id,
@@ -697,6 +735,8 @@ def expand_frontier(nodes: list[ViewNode], budget: int) -> list[ProjectedNode]:
         if kids is None:
             break
         frontier = [*frontier[:idx], *kids, *frontier[idx + 1 :]]
+    if len(frontier) > budget:
+        frontier = frontier[-budget:]
     return frontier
 
 
@@ -759,17 +799,47 @@ def write_note(parent, text, now, rng, entry_chars: int | None = None):
     return dest
 
 
+def short_id(cid: str, ids: list[str], floor: int = 8) -> str:
+    """Return a unique prefix of *cid* among *ids*, at least *floor* hex characters."""
+    n = min(max(floor, 1), len(cid))
+    while n < len(cid):
+        prefix = cid[:n]
+        if sum(1 for item in ids if item.startswith(prefix)) == 1:
+            return prefix
+        n += 1
+    return cid
+
+
+def resolve_id(token: str, ids: list[str]) -> str:
+    """Return the unique id in *ids* that *token* prefixes. Raise ValueError if none or many."""
+    matches = [item for item in ids if item.startswith(token)]
+    if len(matches) == 1:
+        return matches[0]
+    if not matches:
+        raise ValueError("unknown id")
+    raise ValueError("ambiguous id")
+
+
+def format_wake_line(node, ids: list[str]) -> str:
+    """Return one wake line for *node* using unique prefixes from *ids*."""
+    day = _day_from_stamp(node.stamp)
+    if node.kind == "note" or node.leaves <= 1:
+        return f"{day}: {node.caption}"
+    prefix = short_id(node.id, ids)
+    if node.caption:
+        return f"{day} x{node.leaves} {prefix}: {node.caption}"
+    return f"{day} x{node.leaves} {prefix}:"
+
+
 def wake_text(parent) -> str:
     """Return the wait-free listing of the mixed view under *parent*, or empty."""
-    lines = []
-    for node in expand_frontier(list_view(parent), knobs(parent)["WAKE_LINES"]):
-        day = _day_from_stamp(node.stamp)
-        if node.kind == "note":
-            lines.append(f"{node.id}  (1 note, from {day})  {node.caption}")
-        elif node.caption:
-            lines.append(f"{node.id}  ({node.leaves} notes, from {day})  {node.caption}")
-        else:
-            lines.append(f"{node.id}  ({node.leaves} notes, from {day})")
+    nodes = list_view(parent)
+    frontier = expand_frontier(nodes, knobs(parent)["WAKE_LINES"])
+    ids = [item.id for item in nodes]
+    for row in frontier:
+        if row.id not in ids:
+            ids.append(row.id)
+    lines = [format_wake_line(row, ids) for row in frontier]
     if not lines:
         return ""
     return "\n".join(lines) + "\n"
@@ -784,16 +854,36 @@ def equal_grain_pair(nodes: list[ViewNode]) -> tuple[str, str] | None:
 
 
 def fold_request(parent, wake_lines: int | None = None) -> str:
-    """Return a request to nap the oldest equal-grain pair when over *wake_lines*."""
+    """Return an OptMem-style nap prompt for the oldest equal-grain pair when over *wake_lines*."""
     if wake_lines is None:
         wake_lines = WAKE_LINES
     nodes = list_view(parent)
     if len(nodes) <= wake_lines:
         return ""
-    pair = equal_grain_pair(nodes)
-    if pair is None:
+    left = right = None
+    for i in range(len(nodes) - 1):
+        if nodes[i].leaves == nodes[i + 1].leaves:
+            left, right = nodes[i], nodes[i + 1]
+            break
+    if left is None:
         return ""
-    return f"{pair[0]} {pair[1]}\n"
+    ids = [node.id for node in nodes]
+    remain = len(nodes) - 1 - wake_lines
+    extra = ""
+    if remain == 1:
+        extra = "1 compression remains after this one.\n"
+    elif remain > 1:
+        extra = f"{remain} compressions remain after this one.\n"
+    return (
+        "Compress these two into one line of at most 280 characters.\n"
+        "Keep what has lasting effect, drop what does not. Invent nothing.\n"
+        "\n"
+        f"  {format_wake_line(left, ids)}\n"
+        f"  {format_wake_line(right, ids)}\n"
+        "\n"
+        f'Run: .summem/summem nap {short_id(left.id, ids)} {short_id(right.id, ids)} "<your line>"\n'
+        f"{extra}"
+    )
 
 
 def recall_text(parent, pattern: str) -> str:
@@ -890,9 +980,12 @@ def main(argv: list[str] | None = None) -> int:
 
         def nap_locked():
             heal_view(parent)
-            present = {node.id for node in list_view(parent)}
-            if args.id_a in present and args.id_b in present:
-                write_nap(parent, args.id_a, args.id_b, args.caption, k["ENTRY_CHARS"])
+            view_ids = [node.id for node in list_view(parent)]
+            id_a = resolve_id(args.id_a, view_ids)
+            id_b = resolve_id(args.id_b, view_ids)
+            present = set(view_ids)
+            if id_a in present and id_b in present:
+                write_nap(parent, id_a, id_b, args.caption, k["ENTRY_CHARS"])
             return fold_request(parent, k["WAKE_LINES"])
 
         try:

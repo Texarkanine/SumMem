@@ -138,7 +138,7 @@ Git-add date is the wrong clock. Git does not store “when this path entered th
 
 A nap file’s sort key is the **minimum child time**, not “when we compacted.” If the nap sorted as “now,” Monday’s block would jump to the front of wake and temporal bias would invert. The script names the file from the children. The agent does not invent the name.
 
-Wake never prints positional ranges such as `#16-31`. Agents copy whatever looks like an id; those digits are a picture of one listing and become a lie after the next merge. Wake prints the **content id** and, if useful, grain as prose: `a3f2c1b8  (16 notes, from 2026-03-01)  …`. `nap` accepts two of those ids; `zoom` accepts one. A command that looks like a range is rejected.
+Wake never prints positional ranges such as `#16-31`. Agents copy whatever looks like an id; those digits are a picture of one listing and become a lie after the next merge. Wake prints a dated line: a note is `YYYY-MM-DD: text`; a pack is `YYYY-MM-DD xN <prefix>: caption`. The prefix is the shortest unique hex of the leaf-set id, at least 8 characters. Stored filenames and `.tree` identity stay 64 hex. `nap` and `zoom` accept that unique prefix. Over budget, `note` and `nap` print an OptMem-style `Run:` prompt; `wake` does not. A command that looks like a range is rejected.
 
 ## Identifiers and hashing
 
@@ -294,7 +294,7 @@ These look optional and are not.
 
 **Knobs live in the store.** Not in the environment. Missing config means script defaults.
 
-**Wake prints content ids, never positional ranges.**
+**Wake prints dated lines, never positional ranges.**
 
 **Personal and machine facts stay out of the repo.**
 

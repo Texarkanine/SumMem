@@ -394,7 +394,7 @@ def test_heal_malformed_overlapping_nap_skipped(tmp_path):
 
 
 def test_heal_to_8_2_1_empty_fold_request_wake_projects(tmp_path, monkeypatch):
-    """Heal to grains 8,2,1: fold_request is empty at budget 2; wake lists files over budget and expands when short."""
+    """Heal to grains 8,2,1: fold_request is empty at budget 2; wake caps at budget and expands when short."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     _fold_balanced(m, repo, [f"a{i}" for i in range(8)], "eight", start=1)
@@ -408,7 +408,7 @@ def test_heal_to_8_2_1_empty_fold_request_wake_projects(tmp_path, monkeypatch):
     assert m.fold_request(repo, 2) == ""
     monkeypatch.setattr(m, "WAKE_LINES", 2)
     lines = [line for line in m.wake_text(repo).splitlines() if line]
-    assert len(lines) == 3
+    assert len(lines) == 2
     monkeypatch.setattr(m, "WAKE_LINES", 4)
     lines = [line for line in m.wake_text(repo).splitlines() if line]
     assert len(lines) == 4
@@ -526,13 +526,13 @@ def test_cli_wake_on_overlapping_head_writes_nothing(tmp_path, monkeypatch):
 
 
 def test_cli_nap_overlapping_ids_exits_0_without_concat(tmp_path, monkeypatch):
-    """nap of two overlapping ids exits 0, does not concat, writes no new .sum sentence."""
+    """nap of two overlapping ids exits 1, does not concat, writes no new .sum sentence."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     _plant_abd_abe(m, repo)
     ids = [n.id for n in m.list_view(repo)]
-    assert m.main(["nap", ids[0], ids[1], "concat-caption"]) == 0
+    assert m.main(["nap", ids[0], ids[1], "concat-caption"]) == 1
     sum_texts = []
     for path in (repo / ".summem" / "naps").glob("*.sum"):
         text = path.read_text(encoding="utf-8")
