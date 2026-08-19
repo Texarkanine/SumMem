@@ -213,6 +213,28 @@ No new technology - validation not required. `fcntl.flock` is stdlib on this POS
 - **The loop did not terminate:** lex measure plus iteration cap on odd-arity.
 - **This is actually L4:** identity and CLI table do not change. Stay L3.
 
+## QA Findings
+
+Result: **FAIL** (fixable in build; no replan needed). 134 tests pass; the implementation behavior is correct. The blocking finding is a test that cannot fail.
+
+### Blocking
+
+1. **Completeness - the acceptance-criterion assertion is unreachable.** In `tests/test_proof_branches.py::test_two_branch_overlapping_packs_heal_on_next_mutate`, `assert sa.isdisjoint(sb)` sits immediately after a `continue`, so it never executes. An AST scan of `tests/` plus `.summem/summem` finds this is the only unreachable statement in the repository. That assert is the sole check of acceptance criterion 1 and of the test-plan line "Two git branches nap overlapping-but-unequal packs, merge, next mutating command; unique cover" - the `unique cover` half of the flagship proof is untested and cannot go red. The live zoom loop still proves no leaf is lost, and a QA probe of the same scenario confirms heal does produce a disjoint cover, so this is a missing safety net rather than a product defect. Fix: dedent the assert out from under the `continue` so the note-note skip does not swallow it.
+2. **Completeness - the reachability loop is nested one level too deep.** In the same test the `for sentence in ("A", "B", "D", "E")` block is indented inside the outer `for i, (a, sa)` loop, so it re-runs once per view row instead of once. Harmless today, but it obscures the structure that hid finding 1.
+
+### Advisory
+
+3. **DRY - the broken copy is a hand-rolled duplicate of a working helper.** `tests/test_zipper.py` already has `_assert_unique_cover` and `_reaches`; the merge proof reimplements both inline, and the reimplementation is the one that broke. Promote both to `tests/gitutil.py` (the existing shared test-helper module) so the proof reuses the checked implementation.
+4. **YAGNI - dead branch in `heal_view`.** `if not isinstance(child, NapChild): return` is unreachable: a note's leaf-set is a singleton, so an intersecting note is necessarily a subset and is consumed by the ⊆ branch above. If it ever did fire it `return`s, abandoning the whole heal, where `continue` is the only sane behavior.
+5. **Integrity - `_HEAL_PASS_LIMIT = 10_000` is an unplanned silent failure mode.** The plan established termination by the lexicographic measure and put the iteration cap in tests. On exhaustion `heal_view` returns silently, leaving an overlapping store that makes the next `nap` fail with `overlapping packs` and no explanation. No test exercises this constant; the odd-arity test uses its own cap of 50 via a patched `list_view`.
+6. **DRY - the seven-exception tree-parse tuple is duplicated.** `(OSError, UnicodeError, json.JSONDecodeError, KeyError, TypeError, ValueError, AttributeError)` appears verbatim in both `leaf_digests` and `_as_child`, with a third near-copy in `test_zipper.py::_sum_sentences`. A module-level `_TREE_PARSE_ERRORS` would keep the two production sites in agreement by construction.
+7. **Test hygiene - `test_heal_odd_arity_finishes_under_iteration_cap` patches by assignment.** It sets `m.list_view = wrapped` directly instead of using `monkeypatch`, and never restores it. Because `zoom_text` resolves `list_view` as a module global, the trailing `_reaches` calls keep incrementing the counter; a larger fixture would fail with the misleading message "heal did not terminate".
+8. **Documentation - `VISION.md` "First proof" item 6 still says "disjoint packs".** The overlapping-merge case is now the headline behavior of this task and the "Long-lived branches" section covers it, but the proof checklist has no overlapping counterpart. Out of scope for unit 5 as written; noted for reflection.
+
+### Accepted deviation
+
+- The build's `8+2+1` at `WAKE_LINES=2` listing three lines is correct. The plan's "two lines via expand" contradicted `VISION.md` ("When files meet or exceed the budget, wake lists files"), and the build followed the contract, asserting 3 lines at budget 2 and expansion at budget 4. Requirement 6's second sentence ("Wake projection still bounds the listing") is literally unmet, but it was unmet before this task and is not this task's defect.
+
 ## Status
 
 - [x] Component analysis complete

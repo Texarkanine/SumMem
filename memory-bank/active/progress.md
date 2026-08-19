@@ -117,4 +117,21 @@ Zipper-heal overlapping nap leaf-sets after merge so the next `note` or `nap` re
     - Filename `leaves` and actual digest-set size agree on valid packs, so "smaller" by `ViewNode.leaves` matches set cardinality
     - Same-process `flock` succeeds again; the lock test needs a second process
 
+## 2026-08-19 - QA - COMPLETE (FAIL)
+
+* Work completed
+    - Reviewed the build diff (`8ae9833..HEAD`) against the locked plan, `projectbrief.md`, `systemPatterns.md`, and `VISION.md`
+    - Re-ran the suite: 134 passed
+    - AST-scanned `tests/` and `.summem/summem` for unreachable statements; probed the two-branch merge scenario directly to separate test defects from product defects
+    - Recorded two blocking and six advisory findings in `tasks.md` under "QA Findings"
+* Decisions made
+    - FAIL, fixable in build: no replan. The implementation matches the plan and the contract; the blocking finding is a test that cannot go red
+    - `assert sa.isdisjoint(sb)` in the two-branch merge proof is unreachable (it follows a `continue`), so acceptance criterion 1's "unique cover" half is untested
+    - The build's `8+2+1` wake deviation is accepted: the plan contradicted `VISION.md` and the build followed the contract
+* Insights
+    - The behavior is right and the proof is empty: a probe of the same merge scenario confirms heal yields a disjoint cover, so the defect is the absent safety net, not the algorithm
+    - The broken assertion is in a hand-rolled copy of `test_zipper.py`'s `_assert_unique_cover`; the checked original is fine and the duplicate is what rotted, which argues for promoting both helpers into `tests/gitutil.py`
+    - A whole-repo AST scan for statements after `continue`/`break`/`return`/`raise` found exactly one hit, and it was the one that mattered - cheap enough to be worth running before every QA pass
+    - `_HEAL_PASS_LIMIT` is production code the plan did not ask for and no test reaches; it converts a would-be hang into a silent overlapping store
+
 

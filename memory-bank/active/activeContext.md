@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: zipper-heal
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (FAIL)
 
 ## What Was Done
 - Built zipper-heal to the locked plan: `leaf_digests` / rematerialize, `heal_view` (⊆ drop, split-smaller, skip note-note and unreadable packs), `write_nap` overlap/`unreadable pack` guards, `fcntl.flock` on `naps/`, CLI `note`/`nap` heal after `require_entry`, wait-free wake.
@@ -23,5 +23,8 @@
 ## Integration test results
 - `uv run --python 3.11 --with pytest pytest`: 134 passed (33 new). No project linter or packager.
 
+## QA result
+- FAIL, fixable in build. See "QA Findings" in `tasks.md`. Suite is green (134 passed) and the implementation matches the plan; the blocking finding is that the two-branch merge proof's `assert sa.isdisjoint(sb)` follows a `continue` and can never run, leaving acceptance criterion 1's "unique cover" untested.
+
 ## Next Step
-- QA review runs automatically.
+- `/niko-build` to fix the QA findings.
