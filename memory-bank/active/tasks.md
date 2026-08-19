@@ -111,10 +111,10 @@ graph TD
 
 - Files: `tests/test_nap.py`, `tests/test_view.py`, `tests/test_wake.py`, `tests/test_fold.py`, `.summem/summem`
 
-1. Stub tests: empty `test_nap_stem_inherits_left_child_seq_prefix` and `test_same_second_nap_stays_in_left_slot` in `tests/test_fold.py`.
-2. Stub interface: `_seq_prefix(name: str) -> str` returning `""`. Do not change `write_nap` yet.
-3. Write tests and run red: `uv run --python 3.11 --with pytest pytest tests/test_nap.py tests/test_view.py tests/test_wake.py tests/test_fold.py`. Stem `f"{_seq_prefix(left.name)}-{leafset}-2"`; four same-second notes, nap oldest two, `[n.leaves for n in list_view] == [2, 1, 1]`. Change `split("-")[1]`-as-leafset in `tests/test_nap.py`, `tests/test_view.py`, `tests/test_wake.py` to `split("-")[-2]`. Expected red: stems still `{stamp}-{leafset}-{leaves}`.
-4. Write code and run green: `_seq_prefix` is `"-".join(name.split("-")[:2])`; `write_nap` stem `f"{_seq_prefix(left.name)}-{leafset}-{leaves}"`; `_parse_nap_stem` returns `(stamp, rand, leafset, leaves)`; `list_view` unpacks `stamp, _, leafset, leaves = parsed`. Re-run those four files.
+1. [x] Stub tests: empty `test_nap_stem_inherits_left_child_seq_prefix` and `test_same_second_nap_stays_in_left_slot` in `tests/test_fold.py`.
+2. [x] Stub interface: `_seq_prefix(name: str) -> str` returning `""`. Do not change `write_nap` yet.
+3. [x] Write tests and run red: `uv run --python 3.11 --with pytest pytest tests/test_nap.py tests/test_view.py tests/test_wake.py tests/test_fold.py`. Stem `f"{_seq_prefix(left.name)}-{leafset}-2"`; four same-second notes, nap oldest two, `[n.leaves for n in list_view] == [2, 1, 1]`. Change `split("-")[1]`-as-leafset in `tests/test_nap.py`, `tests/test_view.py`, `tests/test_wake.py` to `split("-")[-2]`. Expected red: stems still `{stamp}-{leafset}-{leaves}`.
+4. [x] Write code and run green: `_seq_prefix` is `"-".join(name.split("-")[:2])`; `write_nap` stem `f"{_seq_prefix(left.name)}-{leafset}-{leaves}"`; `_parse_nap_stem` returns `(stamp, rand, leafset, leaves)`; `list_view` unpacks `stamp, _, leafset, leaves = parsed`. Re-run those four files.
 
 ### 2. Equal-grain picker and catch-up — executable
 

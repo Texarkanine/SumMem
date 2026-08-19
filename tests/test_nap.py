@@ -42,8 +42,7 @@ def test_nap_two_adjacent_notes_writes_pair_and_unlinks(tmp_path):
     da = m.note_digest(pa.read_bytes())
     db = m.note_digest(pb.read_bytes())
     leafset = m.leafset_id([da, db])
-    min_stamp = pa.name.split("-")[0]
-    stem = f"{min_stamp}-{leafset}-2"
+    stem = f"{pa.name}-{leafset}-2"
     expected = m.Tree(
         kids=[
             m.NoteChild(name=pa.name, text="alpha"),
@@ -220,7 +219,7 @@ def test_nap_of_two_naps_nests_napchild_and_unions_digests(tmp_path):
     assert len(tree.kids) == 2
     assert all(isinstance(kid, m.NapChild) for kid in tree.kids)
     digests = [m.note_digest(m.note_file_bytes(text)) for text in texts]
-    assert trees[0].name.split("-")[1] == m.leafset_id(digests)
+    assert trees[0].name.split("-")[-2] == m.leafset_id(digests)
     assert {kid.sum for kid in tree.kids} == {"pack-a", "pack-b"}
     out = m.zoom_text(repo, tree.kids[0].id)
     suffixes = [line.split("  ", 1)[1] for line in out.splitlines()]

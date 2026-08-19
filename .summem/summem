@@ -177,16 +177,21 @@ def _replace_bytes(dest: Path, data: bytes) -> None:
     os.replace(tmp, dest)
 
 
-def _parse_nap_stem(stem: str) -> tuple[str, str, int] | None:
-    stamp, sep, rest = stem.partition("-")
-    if not sep:
+def _seq_prefix(name: str) -> str:
+    """Return the {stamp}-{rand} order key from a note or nap filename."""
+    return "-".join(name.split("-")[:2])
+
+
+def _parse_nap_stem(stem: str) -> tuple[str, str, str, int] | None:
+    parts = stem.split("-")
+    if len(parts) != 4:
         return None
-    leafset, sep, leaves_s = rest.partition("-")
-    if not sep or len(stamp) != 16 or len(leafset) != 64 or not leaves_s.isdigit():
+    stamp, rand, leafset, leaves_s = parts
+    if len(stamp) != 16 or len(rand) != 16 or len(leafset) != 64 or not leaves_s.isdigit():
         return None
-    if any(c not in "0123456789abcdef" for c in leafset):
+    if any(c not in "0123456789abcdef" for c in rand + leafset):
         return None
-    return stamp, leafset, int(leaves_s)
+    return stamp, rand, leafset, int(leaves_s)
 
 
 def _nap_caption(sum_path: Path | None) -> str:
@@ -246,7 +251,7 @@ def list_view(parent) -> list[ViewNode]:
         parsed = _parse_nap_stem(stem)
         if parsed is None:
             continue
-        stamp, leafset, leaves = parsed
+        stamp, _, leafset, leaves = parsed
         sum_path = files.get(".sum")
         tree_path = files.get(".tree")
         nodes.append(
@@ -327,7 +332,7 @@ def write_nap(parent, id_a, id_b, caption):
     digests = digs_l + digs_r
     leafset = leafset_id(digests)
     leaves = len(digests)
-    stem = f"{min(left.stamp, right.stamp)}-{leafset}-{leaves}"
+    stem = f"{_seq_prefix(left.name)}-{leafset}-{leaves}"
     naps = ensure_store(parent) / "naps"
     tree_path = naps / f"{stem}.tree"
     sum_path = naps / f"{stem}.sum"

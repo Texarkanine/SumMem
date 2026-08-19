@@ -11,6 +11,34 @@ from gitutil import init_repo
 UTC = timezone.utc
 
 
+def test_nap_stem_inherits_left_child_seq_prefix(tmp_path):
+    """Nap stem is {left.stamp}-{left.rand}-{leafset}-2 from the left child's filename."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    pa = m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    pb = m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    leafset = m.leafset_id([m.note_digest(pa.read_bytes()), m.note_digest(pb.read_bytes())])
+    nodes = m.list_view(repo)
+    m.write_nap(repo, nodes[0].id, nodes[1].id, "pair")
+    stem = f"{m._seq_prefix(pa.name)}-{leafset}-2"
+    naps = repo / ".summem" / "naps"
+    assert (naps / f"{stem}.sum").is_file()
+    assert (naps / f"{stem}.tree").is_file()
+
+
+def test_same_second_nap_stays_in_left_slot(tmp_path):
+    """Four notes in one UTC second: napping the oldest two leaves grains [2, 1, 1]."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    now = datetime(2026, 1, 1, 0, 0, 0, tzinfo=UTC)
+    rng = Random(0)
+    for text in ("a", "b", "c", "d"):
+        m.write_note(repo, text, now, rng)
+    nodes = m.list_view(repo)
+    m.write_nap(repo, nodes[0].id, nodes[1].id, "pair")
+    assert [n.leaves for n in m.list_view(repo)] == [2, 1, 1]
+
+
 def test_oldest_adjacent_returns_two_oldest_ids(tmp_path):
     """oldest_adjacent returns the ids of the two oldest view nodes."""
     m = load_summem()

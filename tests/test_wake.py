@@ -111,7 +111,7 @@ def test_wake_missing_sum_prints_id_and_grain_without_caption(tmp_path):
     ids = [line.split()[0] for line in m.wake_text(repo).splitlines() if line]
     m.write_nap(repo, ids[0], ids[1], "pair")
     sums = list((repo / ".summem" / "naps").glob("*.sum"))
-    leafset = sums[0].name.split("-")[1]
+    leafset = sums[0].name.split("-")[-2]
     sums[0].unlink()
     out = m.wake_text(repo)
     assert out == f"{leafset}  (2 notes, from 2026-01-01)\n"
@@ -127,7 +127,7 @@ def test_wake_conflict_sum_omits_caption(tmp_path):
     ids = [line.split()[0] for line in m.wake_text(repo).splitlines() if line]
     m.write_nap(repo, ids[0], ids[1], "pair")
     sums = list((repo / ".summem" / "naps").glob("*.sum"))
-    leafset = sums[0].name.split("-")[1]
+    leafset = sums[0].name.split("-")[-2]
     sums[0].write_text("<<<<<<< HEAD\npair\n=======\nother\n>>>>>>>\n", encoding="utf-8")
     out = m.wake_text(repo)
     assert out == f"{leafset}  (2 notes, from 2026-01-01)\n"

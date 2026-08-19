@@ -1,13 +1,12 @@
 # Active Context
 
 ## Current Task: equal-grain
-**Phase:** PREFLIGHT - COMPLETE (PASS)
+**Phase:** BUILD - IN-PROGRESS
 
 ## What Was Done
-- Validated the L3 plan against code, tests, proofs, contracts, conventions, and per-unit TDD ordering
-- Amended unit 3 so all affected tests, including proofs 2/3/4/6, adapt before production expansion
-- Added wait-free malformed-tree coverage and a dedicated immutable projection-row boundary
-- Recorded `PASS` in `.preflight-status`
+- Entered L3 build after preflight PASS
+- Creative lock remains unlink plus in-memory right-edge expand; fold_request stays file-count
+- Starting unit 1: carry-stable nap names
 
 ## Next Step
-- `/niko-build`
+- TDD unit 2 (equal-grain picker and catch-up), then wake expand, then contract wording
