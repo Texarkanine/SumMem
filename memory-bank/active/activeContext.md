@@ -1,11 +1,11 @@
 # Active Context
 
 ## Current Task: wake-listing
-**Phase:** PLAN - COMPLETE
+**Phase:** PREFLIGHT - COMPLETE (PASS)
 
 ## What Was Done
-- Level 2 plan: prefix helper, capped short wake lines, OptMem fold prompt, prefix on nap/zoom, invert proofs + VISION
-- Five implementation units, TDD each
+- Validated implementation plan against codebase reality
+- Verified TDD encoding and convention compliance
 
 ## Next Step
-- Preflight, then build if PASS
+- Build: TDD units 1–5
