@@ -8,7 +8,7 @@ The view matches [OptMem](https://github.com/VictorTaelin/OptMem): short notes, 
 
 Ingest is wait-free union: one immutable file per note. Integrate is cooperative: the script may fold a sealed block into a one-line caption plus a self-contained payload, then drop the children from the view. Wake is wait-free: it prints whatever captions exist and never blocks on a missing nap.
 
-A command resolves one store by walking from `--path` or `$PWD` toward the git root and taking the first started directory. Root wake pushes that store's decaying document and a computed catalog of every other started store. A pull (`wake --path`) prints only the nearest store. Child memory in context is advertised, not enforced.
+A command resolves one store by walking from `--path` or `$PWD` toward the git root and taking the first started directory. Outside a repository, store commands fail; help still prints. Root wake pushes that store's decaying document and a computed catalog of every other started store. A pull (`wake --path`) prints only the nearest store. Child memory in context is advertised, not enforced.
 
 `VISION.md` is the design contract. This file is the briefing subset. If the working tree lacks a piece of this model, that is work to build, not a signal that the model is wrong. Change-surface routing lives in `VISION.md` under "Change surfaces".
 

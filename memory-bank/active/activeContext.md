@@ -1,16 +1,11 @@
 # Active Context
 
 ## Current Task: cli-help
-**Phase:** BUILD - COMPLETE
+**Phase:** COMPLETE
 
 ## What Was Done
-- Rework: no repository → store commands exit 1 with “not in a repository.” Help still prints.
-- 3 new tests; 186 pytest passed.
-
-## Files
-- `/home/mobaxterm/git/SumMem/.summem/summem`
-- `/home/mobaxterm/git/SumMem/tests/test_cli.py`
-- `/home/mobaxterm/git/SumMem/VISION.md`
+- Help ratchet plus rework: store commands require a repository; help does not.
+- QA PASS. Persistent files: productContext and systemPatterns now state the no-repo failure.
 
 ## Next Step
-- QA
+- Operator may delete `memory-bank/active/` (Level 1 has no archive)

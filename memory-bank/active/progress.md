@@ -101,3 +101,15 @@ Make SumMem CLI help a memo-style ratchet, then require a repository for store c
     - Help remains wait-free of a repository so the ratchet still works from `/tmp`
 * Insights
     - `start` never called `find_store_parent`; it had to probe the target (or its parent) before creating directories
+
+## 2026-08-19 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Reviewed the repository-required rework against the project-brief Rework section, VISION, and system patterns
+    - Checked KISS, DRY, YAGNI, completeness, regression, integrity, and documentation
+    - Wrote `memory-bank/active/.qa-validation-status` with `PASS`
+* Decisions made
+    - Accepted the implementation as-is: raise in `find_store_parent`, `start` probe-before-mkdir, help still wait-free of a repository
+    - Advisories only: `systemPatterns.md` does not yet restate the no-repo failure; wake/start/`-h` tests cover the distinct paths
+* Insights
+    - `start` could not ride `resolve_parent`; the repo check has to aim at the target (or its parent) or it would mkdir first
