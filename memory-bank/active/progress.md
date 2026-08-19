@@ -134,3 +134,17 @@ Equal-grain fold requests, carry-stable nap names, and in-memory wake expand so 
     - Same-second `[1, 2, 1]` reproduced on the old stem and disappeared once the parent kept the left child's `{stamp}-{rand}`
     - Tests that harvested nap ids from `wake_text` would have gone red for expand, not for the writer; `list_view` is the file oracle
 
+## 2026-08-19 - QA - COMPLETE (FAIL)
+
+* Work completed
+    - Reviewed the implementation against the L3 plan, project brief, creative amendment, system patterns, and contract documents
+    - Ran the full suite successfully: 99 passed
+    - Reproduced a wait-free wake failure with a valid-JSON but semantically malformed nested tree
+* Decisions made
+    - Fail QA because malformed nested tree shapes can escape expansion fallback and raise from `wake_text`
+    - Require Build to cache failed file-backed expansion attempts so each `.tree` is loaded at most once per wake
+    - Require Build to reconcile `VISION.md`'s aligned-cover claim with the implemented right-edge projection and deferred roadmap work
+* Insights
+    - Decode-level malformed coverage is insufficient; projection must validate semantic tree invariants before replacing the file row
+    - The immutable projected row boundary is sound, but it needs an explicit attempted/unsplittable state to preserve the one-load contract
+

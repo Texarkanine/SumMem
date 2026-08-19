@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: equal-grain
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (FAIL)
 
 ## What Was Done
 - Carry-stable nap stems, equal-grain picker plus catch-up, in-memory wake expand, contract wording
@@ -16,4 +16,4 @@
 - Proof 2 post-nap wake is in-process with a pinned budget instead of subprocess `wake`
 
 ## Next Step
-- `/niko-qa`
+- Build rework: wait-free nested-tree fallback, one-load cache, VISION cover vs later

@@ -188,6 +188,24 @@ No new technology - validation not required
 - Requirements and acceptance criteria map to concrete tests and implementation steps, including proofs 2/3/4/6 and the full-suite gate.
 - No duplicate expansion utility or competing identity/resolver exists in the current script.
 
+## QA Report
+
+### Findings
+
+- **Blocking — semantically malformed trees can break wait-free wake:** `_expandable_row` catches decode and shape failures only while loading the root, but `_projected_child` can raise afterward. A valid JSON tree containing a nap child with no note descendants reaches `min()` on an empty sequence, so `wake_text` raises instead of printing the unsplit file row. This violates the explicit missing/unreadable/malformed fallback requirement and requires Build to add semantic validation/fallback plus a regression test.
+- **Blocking — failed file-backed tree loads are not cached:** `expand_frontier` retries an unsplittable file-backed nap on every expansion iteration because the failed result is not recorded in the frontier. This violates the plan's “load each view-file `.tree` at most once” constraint and can repeatedly read and parse a large malformed payload during one wake. Build must cache the attempted/unsplittable state and test the one-load contract.
+- **Blocking — `VISION.md` describes an unimplemented aligned cover:** the contract still says “Wake uses OptMem’s cover” immediately before describing equal-grain file requests and right-edge expansion, while `ROADMAP.md` correctly says full aligned `cover(T)` after merge is later. The architecture contract must distinguish the implemented projection from the deferred aligned cover.
+- **Advisory — the creative document retains rejected implementation notes:** after the operator amendment locks unlink plus in-memory expansion, the later “Implementation Notes” still say notes stay and `write_nap` leaves children on disk. The amendment is authoritative, but the trailing stale section is misleading.
+
+### Validation
+
+- Full suite: `99 passed`.
+- Targeted malformed-tree probe: `wake_text` raised `ValueError: min() arg is an empty sequence`.
+
+### Result
+
+- **FAIL.** Build must rerun to fix the implementation and contract findings before QA is repeated.
+
 ## Status
 
 - [x] Component analysis complete
@@ -198,4 +216,4 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA (FAIL — Build rerun required)
