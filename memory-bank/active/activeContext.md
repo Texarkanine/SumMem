@@ -1,12 +1,12 @@
 # Active Context
 
 ## Current Task: single-store
-**Phase:** BUILD - COMPLETE (QA rework)
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
-- Nap lookup preserves duplicate content ids so two identical adjacent notes can be napped
-- `VISION.md` command table now documents binary `nap <id-a> <id-b> "…"`
-- 79 pytest green
+- Reviewed the QA rework against the project brief and plan pins
+- Verified that `write_nap` now preserves multiplicity for duplicate content ids
+- Verified that `VISION.md` command table was updated to document binary `nap <id-a> <id-b> "…"`
 
 ## Next Step
-- Re-run `/niko-qa`
+- Proceed to `/niko-reflect`

@@ -116,3 +116,14 @@ Implement single-store memory: `nap`, `zoom`, `recall`, left-fold of adjacent vi
 * Insights
     - Content ids identify leaf content, not unique view occurrences; adjacency selection must preserve multiplicity rather than use a one-id-to-one-index map
     - Mechanical checks are green, but the duplicate-id case makes the over-budget fold request non-actionable for a valid store state
+
+## 2026-08-18 - QA - COMPLETE
+
+* Work completed
+    - Reviewed the QA rework against the project brief and plan pins
+    - Verified that `write_nap` now preserves multiplicity for duplicate content ids
+    - Verified that `VISION.md` command table was updated to document binary `nap <id-a> <id-b> "…"`
+* Decisions made
+    - The implementation is acceptable as-is. PASS.
+* Insights
+    - The fix in `_adjacent_nodes` correctly handles the edge case of identical adjacent notes without introducing complexity.
