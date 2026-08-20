@@ -89,3 +89,13 @@ Sunset `VISION.md` and `ROADMAP.md`: drop what is true of the tree or what we bu
     - The implementation is acceptable as-is.
 * Insights
     - The rework successfully addressed all previous QA findings without introducing new issues.
+
+## 2026-08-19 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-docs-sunset.md`
+    - Reconciled persistent files: no further edits
+* Decisions made
+    - Standalone task; next step is `/niko-archive`
+* Insights
+    - Strongest inherited VISION sentences were the ones that failed QA

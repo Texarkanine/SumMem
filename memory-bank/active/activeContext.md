@@ -1,12 +1,11 @@
 # Active Context
 
 ## Current Task: docs-sunset
-**Phase:** QA - COMPLETE (PASS)
+**Phase:** REFLECT COMPLETE
 
 ## What Was Done
-- Reviewed the reworked build implementation against the original plan and QA findings.
-- Verified that all QA findings from the previous run were addressed correctly.
-- Wrote `memory-bank/active/.qa-validation-status` with PASS result.
+- Wrote `memory-bank/active/reflection/reflection-docs-sunset.md`.
+- Persistent-file reconcile: no further edits after build + QA rework.
 
 ## Next Step
-- Proceed to `/niko-reflect`
+- Run `/niko-archive` to create the archive document and finalize.
