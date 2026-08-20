@@ -75,6 +75,12 @@ No new technology - validation not required
 - Plan hard-wraps the shipped file to look nicer: insertion fights destination wrap style (the issue's rejected fix) — step 1 writes `prompt_text()` as-is.
 - Plan treats `init` as dead and removes the print: operators who redirect stdout lose a wrap-safe dump of the same bytes — keep the print, drop the paste instruction.
 
+## QA Result
+
+- PASS: implementation matches the approved plan and established project patterns.
+- Full tox matrix passed: 224 tests on Python 3.11–3.14.
+- Advisory retained from preflight: `init` includes recipe text before the prompt, so whole-output redirection is not prompt-only; the shipped file is the primary onboarding path.
+
 ## Status
 
 - [x] Initialization complete
@@ -84,4 +90,4 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight (PASS WITH ADVISORY; did not take `--raw` / tty split)
 - [x] Build
-- [ ] QA
+- [x] QA (PASS)

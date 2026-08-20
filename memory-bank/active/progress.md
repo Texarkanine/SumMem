@@ -72,3 +72,15 @@ Ship the baked agent prompt as a repository file so onboarding does not depend o
     - Did not take the `--raw` / non-tty advisory
 * Insights
     - The wrap-paste defect was already in this repo's `AGENTS.md`; lockstep restore was the repair
+
+## 2026-08-20 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Reviewed the implementation against the approved plan for KISS, DRY, YAGNI, completeness, regression, integrity, and documentation
+    - Verified the shipped prompt, CLI behavior, activation prefix, and onboarding documentation
+    - Ran the full tox matrix: 224 tests passed on Python 3.11–3.14
+* Decisions made
+    - Accepted the implementation as-is
+    - Retained the preflight redirect advisory as non-blocking because the shipped file is the primary onboarding path
+* Insights
+    - The lockstep test makes `docs/agents-prompt.md` a maintained interface rather than a drifting documentation copy

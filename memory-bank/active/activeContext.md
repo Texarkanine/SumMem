@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: ship-prompt-file
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
 - Shipped `docs/agents-prompt.md` lockstep with `prompt_text()`.
