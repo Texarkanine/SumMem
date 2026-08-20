@@ -191,3 +191,13 @@ Rework: `ensure_store` must not copy the driver. Align the baked prompt, `AGENTS
     - Nested-store driver symlink stays out (preflight advisory, not plan).
 * Insights
     - Striking the copy left `ensure_store` as dirs plus default config, which is the onboarding story: the operator places `.summem/summem`.
+
+## 2026-08-19 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-agents-prompt.md` for the rework.
+    - Reconciled persistent files: `systemPatterns.md` / `techContext.md` already matched; `productContext.md` has no driver-copy claim.
+* Decisions made
+    - Kept catalog-as-command out of this task. Encode the positive invoke path, not a ban that matches it.
+* Insights
+    - Store, driver, and activation are three objects. `ensure_store` copying `__file__` had collapsed the first two.

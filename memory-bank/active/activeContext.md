@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: agents-prompt
-**Phase:** QA - COMPLETE (PASS)
+**Phase:** REFLECT - COMPLETE
 
 ## What Was Done
 - Struck driver copy from `ensure_store`. It still creates `notes/`, `naps/`, and default config. It does not place `.summem/summem`.
@@ -32,4 +32,4 @@
 - Did not include the stray `.gitignore` `__pycache__/` slash fix.
 
 ## Next Step
-- Reflect (`/niko-reflect`).
+- Archive (`/niko-archive`).

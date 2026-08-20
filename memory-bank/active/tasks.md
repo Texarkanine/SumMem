@@ -106,6 +106,7 @@ No new technology - validation not required
 - [x] Preflight (PASS WITH ADVISORY)
 - [x] Build
 - [x] QA (PASS)
+- [x] Reflect
 
 Build units 1–4 done. pytest 205 passed. Composer 2.5 Probe A ran `.summem/summem wake` (then catalog `wake --path dogfood`). Probe B skipped a second root wake. Did not take the nested-store symlink advisory.
 
