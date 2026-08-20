@@ -98,3 +98,14 @@ Instrument Release Please for semantically versioned tags, keep `summem` one fil
     - Advisory: `projectbrief.md` still mentions `--version`; AGENTS.md drift predates this task
 * Next step
     - Operator runs `/niko-reflect`
+
+## 2026-08-20 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-version-tracking.md`
+    - Reconcile: no further persistent-file edits
+* Decisions made
+    - Did not add a command registry; did not treat consumer Actions YAML as product TDD
+* Insights
+    - Store-free commands have several closed lists in briefing, not only the README
+    - Preflight must not demand tests on GitHub Actions that only invoke a third-party action
