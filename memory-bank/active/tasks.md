@@ -79,10 +79,23 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [x] QA - FAIL (rework: tighten commit assertion)
+- [x] Build (rework)
+- [x] QA - PASS
 
 ## QA Findings
 
-- **Blocking:** `test_prompt_text_teaches_git_publish` checks only that `"commit"` appears somewhere in the prompt. The unrelated pre-existing phrase `committed AGENTS.md` satisfies that assertion, so the test stays green if the required `Commit them...` instruction is removed.
-- **Required correction:** Rerun Build and assert the actual commit instruction without locking the entire paragraph, then rerun QA.
-- **Verified:** The implementation itself matches the planned wording and writer boundary; documentation is reconciled; all 208 tests pass.
+### Round 1 - FAIL (resolved)
+
+- **Blocking:** `test_prompt_text_teaches_git_publish` checked only that `"commit"` appeared somewhere in the prompt, which is too loose to protect the instruction.
+- **Correction applied by Build rework:** the test now asserts `commit them` and `own commit`.
+
+### Round 2 - PASS
+
+- **Resolved:** `commit them`, `own commit`, and `git add` each occur only in the publish sentence, so deleting that sentence turns the test red. The prior blocker is closed.
+- **Completeness:** all four acceptance criteria met - publish instruction, writer-only rule, `techContext.md` correction, lockstep and invariant tests.
+- **Regression:** the "script is the only writer" invariant in `systemPatterns.md` and `docs/architecture/index.md` still holds; `git add` does not write store files. CLI output remains silent on git.
+- **Documentation:** `productContext.md` and the architecture change-surface row were narrowed in step with the prompt, so no briefing now contradicts the code.
+- **Integrity:** no debris, no TODOs, no placeholders. The committed `.summem/notes/` entry is a genuine dogfood note consistent with the new `techContext.md` sentence.
+- **Advisory (non-blocking):** `assert "rewrite" in lower` is a weak token; the adjacent `invent filenames` and `the only writer` asserts carry the writer-only contract.
+- **Advisory (non-blocking):** README's "Never edit store files by hand" says nothing about publishing. Out of scope; README defers to `AGENTS.md`.
+- **Tests:** 208 passed.

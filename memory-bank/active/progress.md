@@ -69,3 +69,15 @@ Tweak `prompt_text()` and the committed `AGENTS.md` block so agents `git add` an
     - QA cited `committed AGENTS.md`, which is not in `prompt_text()`. Tighten anyway: a bare `commit` substring is a weak contract.
 * Insights
     - Token asserts need enough words to name the instruction, not so many they lock the paragraph.
+
+## 2026-08-19 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Re-reviewed the implementation against the Level 2 plan and the four acceptance criteria
+    - Confirmed the round-1 blocker is closed: `commit them`, `own commit`, and `git add` occur only in the publish sentence, so deleting it turns the test red
+    - Checked prompt/`AGENTS.md` lockstep, writer-only invariants in `systemPatterns.md` and the atlas, CLI git silence, `.gitignore` against the new `techContext.md` sentence
+    - Ran the complete suite: 208 tests passed on Python 3.11
+* Decisions made
+    - QA PASS. Two advisories recorded, neither blocking: the weak `rewrite` token assert, and README saying nothing about publishing.
+* Insights
+    - The round-1 finding named the wrong witness (`committed AGENTS.md` is not in `prompt_text()`), but the underlying weakness was real: a bare `commit` substring does not name the instruction it guards.
