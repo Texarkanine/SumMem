@@ -10,7 +10,6 @@ import json
 import os
 import random
 import re
-import shutil
 import subprocess
 import sys
 import tomllib
@@ -154,9 +153,10 @@ def loads_tree(data: bytes) -> Tree:
 ENTRY_CHARS = 280
 WAKE_LINES = 32
 CLI_NAME = "summem"
+AGENT_BIN = ".summem/summem"
 
 CONFIG_TEMPLATE = """\
-# SumMem per-store knobs. Missing names mean script defaults.
+# SumMem per-store settings. Missing values take the script's defaults.
 # ENTRY_CHARS = 280
 # WAKE_LINES = 32
 """
@@ -211,14 +211,10 @@ def resolve_parent(cwd, path_arg=None):
 
 
 def ensure_store(parent):
-    """Create the store under *parent* if missing. Never overwrite an existing driver."""
+    """Create notes/, naps/, and default config under *parent* if missing. Does not place the driver."""
     store = Path(parent) / ".summem"
     (store / "notes").mkdir(parents=True, exist_ok=True)
     (store / "naps").mkdir(parents=True, exist_ok=True)
-    driver = store / "summem"
-    if not driver.exists():
-        shutil.copy2(Path(__file__).resolve(), driver)
-        os.chmod(driver, 0o755)
     config = store / "config.toml"
     if not config.exists():
         config.write_text(CONFIG_TEMPLATE, encoding="utf-8")
@@ -239,54 +235,6 @@ def knobs(parent):
         return result
     except (OSError, UnicodeDecodeError, tomllib.TOMLDecodeError, TypeError, ValueError, AttributeError):
         return defaults
-
-
-def store_stats(parent) -> tuple[int, str | None]:
-    """Return note grain and latest date from store filenames. Does not create a store."""
-    store = Path(parent) / ".summem"
-    count = 0
-    stamps: list[str] = []
-    notes = store / "notes"
-    if notes.is_dir():
-        for path in notes.iterdir():
-            if not path.is_file() or path.name.startswith("."):
-                continue
-            stamp = _note_stamp(path.name)
-            if stamp is None:
-                continue
-            count += 1
-            stamps.append(stamp)
-    naps = store / "naps"
-    seen: set[str] = set()
-    if naps.is_dir():
-        for path in naps.iterdir():
-            if not path.is_file() or path.name.startswith("."):
-                continue
-            if path.suffix not in (".sum", ".tree"):
-                continue
-            if path.stem in seen:
-                continue
-            parsed = _parse_nap_stem(path.stem)
-            if parsed is None:
-                continue
-            seen.add(path.stem)
-            stamp, _, _, leaves = parsed
-            count += leaves
-            stamps.append(stamp)
-    latest = _day_from_stamp(max(stamps)) if stamps else None
-    return count, latest
-
-
-def _note_stamp(name: str) -> str | None:
-    parts = name.split("-")
-    if len(parts) != 2:
-        return None
-    stamp, rand = parts
-    if len(stamp) != 16 or len(rand) != 16:
-        return None
-    if any(c not in "0123456789abcdef" for c in rand):
-        return None
-    return stamp
 
 
 def _ignored_store(git_root: Path, store_dir: Path) -> bool:
@@ -318,18 +266,12 @@ def catalog_text(git_root, resolved_parent) -> str:
             continue
         found.append(parent)
     found.sort()
-    lines: list[str] = []
+    if not found:
+        return ""
+    lines = ["== Additional SumMem Catalogs =="]
     for parent in found:
         rel = parent.relative_to(root).as_posix()
-        count, latest = store_stats(parent)
-        grain = "1 note" if count == 1 else f"{count} notes"
-        if latest:
-            lines.append(f"{rel}  ({grain}, latest {latest})")
-        else:
-            lines.append(f"{rel}  ({grain})")
-        lines.append(f"{CLI_NAME} wake --path {rel}")
-    if not lines:
-        return ""
+        lines.append(f"./{rel}")
     return "\n".join(lines) + "\n"
 
 
@@ -379,10 +321,6 @@ def _nap_caption(sum_path: Path | None) -> str:
     if text.endswith("\n"):
         text = text[:-1]
     return text
-
-
-def _day_from_stamp(stamp: str) -> str:
-    return f"{stamp[0:4]}-{stamp[4:6]}-{stamp[6:8]}"
 
 
 def list_view(parent) -> list[ViewNode]:
@@ -895,7 +833,7 @@ def fold_request(parent, wake_lines: int | None = None) -> str:
         f"  {format_wake_line(left, ids)}\n"
         f"  {format_wake_line(right, ids)}\n"
         "\n"
-        f'Run: {CLI_NAME} nap {short_id(left.id, ids)} {short_id(right.id, ids)} "<your line>"\n'
+        f'Run: {AGENT_BIN} nap {short_id(left.id, ids)} {short_id(right.id, ids)} "<your line>"\n'
         f"{extra}"
     )
 
@@ -947,6 +885,48 @@ def require_python(version_info: tuple[int, ...] = sys.version_info) -> None:
         raise SystemExit(1)
 
 
+def prompt_text() -> str:
+    """Return the agent prompt pasted at the top of AGENTS.md."""
+    return f"""\
+# Project Memory
+
+Shared memory for this repository. Run `{AGENT_BIN}`. `--path` aims at a store, not at that file. This block is how the repository opts in; the driver alone is not activation.
+
+## At Session Start: Activating SumMem (Mandatory)
+
+If you can see a prior **root** SumMem wake in this conversation, skip `wake`.
+
+Otherwise run `{AGENT_BIN} wake` from the repository root.
+
+## While Working: Register Memories (Mandatory)
+
+`{AGENT_BIN} note "…"` records one short line. Call it whenever you learn something new about the project that could be of interest to another contributor, and that is acceptable in git forever: facts, insights, designs and decisions, etc. Personal, machine-local, and user preference facts stay out. If `note` asks for a nap, do that nap before your next action.
+
+Do not register redundant memories.
+
+Never edit or delete the memory files; the tool manages them.
+
+## Other commands
+
+- `{AGENT_BIN} recall <regex>` — search remembered text word for word
+- `{AGENT_BIN} zoom <id>` — open a nap for more detail
+- `{AGENT_BIN} wake --path <path>` — when you work under a cataloged path, pull that store if its wake is not already in this conversation. Ignore `--path` if the root wake didn't have a catalog.
+- `{AGENT_BIN} start <dir>` — start a new store in that directory (only when asked), such as for a package in a monorepo
+"""
+
+
+def init_text() -> str:
+    """Return the full `init` print: paste recipe plus prompt_text()."""
+    return (
+        "Paste this at the top of AGENTS.md. "
+        "If Claude Code should see it too,"
+        "\n"
+        "put @AGENTS.md at the top of CLAUDE.md.\n"
+        "\n"
+        f"{prompt_text()}"
+    )
+
+
 def usage_text() -> str:
     """Return the top-level command catalog printed by missing command and -h."""
     return f"""\
@@ -958,15 +938,16 @@ SumMem: shared memory for agents in a repository.
   {CLI_NAME} zoom    [--path PATH] ID                 open a nap to its children
   {CLI_NAME} recall  [--path PATH] PATTERN            search remembered text
   {CLI_NAME} start <path>                             create a store in that directory
+  {CLI_NAME} init                                     print the agent prompt to paste
 
-Every command except start takes optional --path. Omit it to use $PWD.
+Every command except start and init takes optional --path. Omit it to use $PWD.
 --path aims at a file or directory and walks up to the nearest store.
 
 For a command's options: {CLI_NAME} <command> -h
 """
 
 
-_COMMANDS = ("wake", "note", "nap", "zoom", "recall", "start")
+_COMMANDS = ("wake", "note", "nap", "zoom", "recall", "start", "init")
 _HELP_FLAGS = ("-h", "--help")
 
 
@@ -1004,6 +985,7 @@ def main(argv: list[str] | None = None) -> int:
     recall.add_argument("pattern")
     start = sub.add_parser("start")
     start.add_argument("dir")
+    sub.add_parser("init")
     for parser_with_path in (wake, note, nap, zoom, recall):
         parser_with_path.add_argument("--path", help="aim at this file or directory")
     try:
@@ -1023,6 +1005,9 @@ def main(argv: list[str] | None = None) -> int:
         target.mkdir(parents=True, exist_ok=True)
         ensure_store(target)
         return 0
+    if args.cmd == "init":
+        sys.stdout.write(init_text())
+        return 0
     try:
         parent = resolve_parent(Path.cwd(), args.path)
     except ValueError as exc:
@@ -1033,8 +1018,13 @@ def main(argv: list[str] | None = None) -> int:
         doc = wake_text(parent)
         cat = catalog_text(find_store_parent(parent), parent)
         footer = "You are up to speed.\n"
-        sep = "\n" if doc and cat else ""
-        sys.stdout.write(doc + sep + cat + footer)
+        if cat:
+            if doc:
+                sys.stdout.write(cat + "\n== Project-root Memories ==\n" + doc + footer)
+            else:
+                sys.stdout.write(cat + footer)
+        else:
+            sys.stdout.write(doc + footer)
         return 0
     if args.cmd == "nap":
         for token in (args.id_a, args.id_b):

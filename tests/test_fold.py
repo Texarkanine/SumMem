@@ -188,7 +188,7 @@ def test_nap_prints_remaining_ones_not_parent_plus_one(tmp_path, monkeypatch, ca
     out = capsys.readouterr().out
     assert "  c\n" in out
     assert "  d\n" in out
-    assert "Run: summem nap " in out
+    assert "Run: .summem/summem nap " in out
     assert "Invent nothing." in out
 
 
@@ -221,7 +221,7 @@ def test_over_budget_note_requests_equal_grain_ones(tmp_path, monkeypatch, capsy
     assert "Invent nothing." in out
     assert "  alpha\n" in out
     assert "  beta\n" in out
-    assert 'Run: summem nap ' in out
+    assert 'Run: .summem/summem nap ' in out
     assert '"<your line>"' in out
     pa = m.short_id(ids[0], ids)
     pb = m.short_id(ids[1], ids)
@@ -250,7 +250,7 @@ def test_config_toml_wake_lines_is_read(tmp_path, monkeypatch, capsys):
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     assert m.main(["note", "beta"]) == 0
     out = capsys.readouterr().out
-    assert "Run: summem nap " in out
+    assert "Run: .summem/summem nap " in out
     assert "Invent nothing." in out
     notes = [p for p in (repo / ".summem" / "notes").iterdir() if not p.name.startswith(".")]
     assert len(notes) == 2
@@ -268,6 +268,8 @@ def test_fold_request_mentions_remaining(tmp_path, monkeypatch):
     assert "1 compression remains after this one." in out
     assert "  a\n" in out
     assert "  b\n" in out
+    assert "Run: .summem/summem nap " in out
+    assert "Run: summem nap " not in out
 
 
 def test_fold_request_identical_notes_use_short_prefix(tmp_path, monkeypatch):

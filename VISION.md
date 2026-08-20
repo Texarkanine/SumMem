@@ -51,16 +51,17 @@ Git’s job is to merge a directory of files. It is not a timestamp server and n
 
 The interface does not mention store files, hashes as paths, or git. It must stay stable if the backend changes. It does mention `--path`, which is how the agent aims a command at work in the tree.
 
-Every command except `start` takes an optional `--path <relative_path>`. The script walks from that path (or from `$PWD` if the flag is omitted) up to the nearest store and uses that store. `--path` may be a file: `summem note --path foo/packages/baz/fee.ts "…"` walks from `foo/packages/baz` and lands in `foo/packages/baz` if that directory was `start`ed, else further up, at least to the git root.
+Every command except `start` and `init` takes an optional `--path <relative_path>`. The script walks from that path (or from `$PWD` if the flag is omitted) up to the nearest store and uses that store. `--path` may be a file: `summem note --path foo/packages/baz/fee.ts "…"` walks from `foo/packages/baz` and lands in `foo/packages/baz` if that directory was `start`ed, else further up, at least to the git root.
 
 | Command | Contract |
 |---|---|
-| `wake` | Print the decaying document for the resolved store. Do what it prints. Never “cannot wake, go nap first.” If the resolved store is the git root, also print the catalog of every other started store and how to pull one. |
+| `wake` | Print the decaying document for the resolved store. Do what it prints. Never “cannot wake, go nap first.” If the resolved store is the git root, also print a labeled catalog of every other started store (paths only, not pull commands). |
 | `note "…"` | Record one line, at most 280 bytes, in the resolved store. The script assigns time and name. |
 | `nap <id-a> <id-b> "…"` | Two adjacent content ids a wake printed, plus a caption. Not a positional range. `--path` selects which store. |
 | `recall <regex>` | Search the resolved store word for word. |
 | `zoom <id>` | Open that block into its two halves, down to raw notes. A content id a wake printed. |
 | `start <dir>` | Create a store **in that directory** (no walk-up) and write a default config. Operator command; agents run it only when asked to start a package. |
+| `init` | Print the baked agent prompt and a paste-at-top-of-`AGENTS.md` recipe. Not a store command. No `--path`. Does not write `AGENTS.md`. |
 
 If `note` asks for a nap, the agent does that nap before its next action. Subagents should not `note` as a taste rule so the recent window does not fill with trivia. The store does not depend on that rule.
 
@@ -68,7 +69,7 @@ No “write a file.” No “sort by git.” A later sqlite backend, or a differ
 
 ## Scopes
 
-A command resolves **one** store: from `--path` if given, otherwise from `$PWD`, walk toward the git root and take the first directory that already has a store. Do not create a store because the agent `note`d from a deep folder or passed a file under one. Outside a repository, every store command fails, including `start`.
+A command resolves **one** store: from `--path` if given, otherwise from `$PWD`, walk toward the git root and take the first directory that already has a store. Do not create a store because the agent `note`d from a deep folder or passed a file under one. Outside a repository, every store command fails, including `start`. `init` and help still print.
 
 `start <dir>` is the no-walk-up exception inside a repository: it creates a store in `<dir>` itself.
 
@@ -84,17 +85,19 @@ OptMem **pushes**: one wake at session start, the whole memory is in context. Na
 
 So SumMem pushes **root**, and makes every other store available to pull.
 
+A repository opts in by placing `.summem/summem`, running `init`, and putting the printed block at the top of committed `AGENTS.md`. Presence of the driver is not activation. `CLAUDE.md` may stay a thin `@AGENTS.md` pointer; do not treat it as an equal paste target.
+
 Session start is still mandatory and once. The first wake must **resolve to the true root** — cwd at the root, or `--path` aimed at the root, not `.` from a package:
 
-> Run `summem wake` from the repository root (or `summem wake --path <root-relative>`) before any other tool call.
-> If you can see a prior **root** SumMem wake in this conversation, do not run the root wake again.
+> Run `.summem/summem wake` from the repository root.
+> If you can see a prior **root** SumMem wake in this conversation, skip the root wake.
 
 That root wake prints two things:
 
-1. The root store’s decaying document (the push).
-2. A catalog of every other started store: relative path, note count, latest date, and one line of instruction — when you work under that path, `summem wake --path <that path>` if that store’s wake is not already in this conversation.
+1. A labeled catalog of every other started store: `== Additional SumMem Catalogs ==` and one `./path` line each. No note counts. No `wake --path` command line — that line was being run as an instruction.
+2. The root store’s decaying document under `== Project-root memories ==` (the push), omitted when that document is empty.
 
-The catalog is computed by walking the tree for store directories. It is not a committed index file. If in a git repo, it should honor git ignore (not .gitignore - but `git ignore` - this includes .git/info/exclude).
+The catalog is computed by walking the tree for store directories. It is not a committed index file. If in a git repo, it should honor git ignore (not .gitignore - but `git ignore` - this includes .git/info/exclude). If there are no other stores, both extra headers are omitted. If the root document is empty, the memories header is omitted.
 
 `summem wake --path foo/packages/baz/fee.ts` pulls **only** the nearest store to that file. It does not reprint root. It does not reprint the full catalog.
 
@@ -106,19 +109,19 @@ Do not load every started store in the root wake. That is the budget problem `st
 
 The script does not infer a monorepo. A tree ten folders deep whose packages live at layer three is not special until someone says so.
 
-The **git root always auto-creates** on the first `wake`, `note`, `nap`, `zoom`, or `recall` in that repository: store directory plus a config file filled with the script’s defaults, commented so a human can see every knob. Until someone `start`s another path, every note in the tree rolls up to root. A regular repository stays in that shape and can raise `WAKE_LINES` on the root config to spend the whole reading budget in one place.
+The **git root always auto-creates** on the first `wake`, `note`, `nap`, `zoom`, or `recall` in that repository: store dirs plus a config file filled with the script’s defaults, commented so a human can see every setting. It does not place `.summem/summem`. The operator places that file (this development repo: a symlink to repo-root `summem`, the record), runs `init`, and pastes the prompt. Until someone `start`s another path, every note in the tree rolls up to root. A regular repository stays in that shape and can raise `WAKE_LINES` on the root config to spend the whole reading budget in one place.
 
-`summem start <dir>` writes the same kind of store and default config into that directory. After that, `--path` under it resolves here instead of rolling up. A five-level monorepo starts the five directories that should have their own memory and sets each config tight. Root wake stays one document plus a five-line catalog. Pulling a package is one short document, not five stacked layers and not ten accidental ones.
+`summem start <dir>` writes the same kind of store dirs and default config into that directory. It does not copy a driver there. After that, `--path` under it resolves here instead of rolling up. Agents still invoke root `.summem/summem` and pass `--path`. A five-level monorepo starts the five directories that should have their own memory and sets each config tight. Root wake stays one document plus a five-line catalog. Pulling a package is one short document, not five stacked layers and not ten accidental ones.
 
 `start` is how you onboard a package. It is not implied by `package.json`, and it is not implied by `cd`.
 
-If a store exists but its config file is missing or a knob is omitted, the script uses internal defaults. It does not fail, and it does not rewrite the file unless someone runs `start`.
+If a store exists but its config file is missing or a setting is omitted, the script uses internal defaults. It does not fail, and it does not rewrite the file unless someone runs `start`.
 
 ## Per-store configuration
 
-Knobs are not environment variables. Two repositories on the same machine want different budgets: one is a deep monorepo that must stay tight at every started layer; one is a single store that should burn the whole context budget at root. A process-wide `WAKE_LINES` cannot say both. A knob in each store can.
+Settings are not environment variables. Two repositories on the same machine want different budgets: one is a deep monorepo that must stay tight at every started layer; one is a single store that should burn the whole context budget at root. A process-wide `WAKE_LINES` cannot say both. A setting in each store can.
 
-The script loads `config` from that store, then fills any missing name from built-in defaults. The file is committed with the repo, so every clone and every CI job sees the same budgets.
+The script loads `config` from that store, then fills any missing value from built-in defaults. The file is committed with the repo, so every clone and every CI job sees the same budgets.
 
 Each wake renders **one** store with that store’s `WAKE_LINES`. Root wake is root’s budget plus a small catalog. A pull is that package’s budget. They do not stack in a single command. That is the control: start fewer stores, or lower each store’s budget.
 
@@ -261,7 +264,7 @@ naps/…  .tree        2 notes
 notes/               a dozen loose files               today
 ```
 
-File **count** per scope stays on the order of the wake budget, not on the order of lifetime notes. Printed **lines** follow the knob: raising `WAKE_LINES` can crack the right edge of that on-disk tree in memory. File **size** is where `T` shows up, and only in old blocks. Each fat `.tree` is a slice of what OptMem would have kept in one `LOG.txt`. At-budget wake still only reads the matching `.sum`.
+File **count** per scope stays on the order of the wake budget, not on the order of lifetime notes. Printed **lines** follow the setting: raising `WAKE_LINES` can crack the right edge of that on-disk tree in memory. File **size** is where `T` shows up, and only in old blocks. Each fat `.tree` is a slice of what OptMem would have kept in one `LOG.txt`. At-budget wake still only reads the matching `.sum`.
 
 A brand-new two-entry `.tree` is the right edge. Next month it is eaten by a larger parent and leaves `HEAD`.
 

@@ -78,8 +78,8 @@ def test_note_rejects_non_utc_now(tmp_path):
         m.write_note(repo, "hello", local, Random(0))
 
 
-def test_first_note_creates_config_notes_and_driver(tmp_path):
-    """First note creates commented config, a notes file, and the driver if missing."""
+def test_first_note_creates_config_and_notes(tmp_path):
+    """First note creates commented config and a notes file, not a driver."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     path = _write(m, repo, text="hello")
@@ -88,9 +88,19 @@ def test_first_note_creates_config_notes_and_driver(tmp_path):
     assert tomllib.loads(config) == {}
     assert config.lstrip().startswith("#")
     assert path.read_bytes() == m.note_file_bytes("hello")
-    assert (store / "summem").is_file()
+    assert not (store / "summem").exists()
     notes = [p for p in (store / "notes").iterdir() if not p.name.startswith(".")]
     assert len(notes) == 1
+
+
+def test_ensure_store_does_not_create_driver(tmp_path):
+    """ensure_store does not place .summem/summem."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.ensure_store(repo)
+    assert not (repo / ".summem" / "summem").exists()
+    assert (repo / ".summem" / "notes").is_dir()
+    assert (repo / ".summem" / "naps").is_dir()
 
 
 def test_existing_driver_is_not_overwritten(tmp_path):

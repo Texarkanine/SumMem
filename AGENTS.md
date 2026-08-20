@@ -1,3 +1,28 @@
+# Project Memory
+
+Shared memory for this repository. Run `.summem/summem`. `--path` aims at a store, not at that file. This block is how the repository opts in; the driver alone is not activation.
+
+## At Session Start: Activating SumMem (Mandatory)
+
+If you can see a prior **root** SumMem wake in this conversation, skip `wake`.
+
+Otherwise run `.summem/summem wake` from the repository root.
+
+## While Working: Register Memories (Mandatory)
+
+`.summem/summem note "…"` records one short line. Call it whenever you learn something new about the project that could be of interest to another contributor, and that is acceptable in git forever: facts, insights, designs and decisions, etc. Personal, machine-local, and user preference facts stay out. If `note` asks for a nap, do that nap before your next action.
+
+Do not register redundant memories.
+
+Never edit or delete the memory files; the tool manages them.
+
+## Other commands
+
+- `.summem/summem recall <regex>` — search remembered text word for word
+- `.summem/summem zoom <id>` — open a nap for more detail
+- `.summem/summem wake --path <path>` — when you work under a cataloged path, pull that store if its wake is not already in this conversation. Ignore `--path` if the root wake didn't have a catalog.
+- `.summem/summem start <dir>` — start a new store in that directory (only when asked), such as for a package in a monorepo
+
 # Agent context
 
 Tracked agent-facing project knowledge lives under `memory-bank/`. Prefer those files over inventing project facts.
