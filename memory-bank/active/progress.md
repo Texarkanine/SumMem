@@ -102,7 +102,37 @@ Rework: `ensure_store` must not copy the driver. Align the baked prompt, `AGENTS
     - Nested `start` does not get a driver. Agents run root `.summem/summem` and pass `--path`.
     - Catalog still says `summem`; the prompt says `.summem/summem`.
     - Fix `./summem/summem` in the operator draft to `.summem/summem`.
+
+## 2026-08-19 - PREFLIGHT - FAIL (fixable)
+
+* Work completed
+    - Preflight found unit-2 invariant/onboarding gaps and unit-1 leftover-copy details.
+* Decisions made
+    - Replan. Do not parameterize `prompt_text()`.
+    - Brief requirement 6 and AC 3 now say invoke `.summem/summem`.
+* Insights
+    - Lockstep is already red because `AGENTS.md` was edited before `prompt_text()`.
+
+## 2026-08-19 - PLAN - COMPLETE
+
+* Work completed
+    - Replanned: enumerated `test_prompt_text_invariants` edits; one invoke spelling; delete shutil/driver local; locate `test_start_creates_store_in_dir`; skip `ROADMAP.md`.
 * Insights
     - “Store exists” tests that check for a `summem` file were testing the copy.
+
+## 2026-08-19 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Validated the Level 2 rework plan against the tree. `.preflight-status` first line: `FAIL (fixable)`.
+    - TDD encoding passed; no step swap and no change-detector strike were needed.
+    - Traced dependencies: `test_proof_ingest`, `test_zipper` lock probe, `usage_text` catalog tests, and the repo-root loader are all unaffected by dropping the copy.
+* Decisions made
+    - Two fixable blockers in unit 2: it never schedules the `"## SumMem"` invariant it breaks, and it inherits the draft’s “driver is repo-root `summem`” sentence plus a mixed invoke spelling.
+    - Three low fixables in unit 1: unused `import shutil`, the stranded `driver` local, and mis-located test edits (`test_scopes.py:77` is the `start` case; `test_ensure_store_creates_naps_dir` carries the same assertion).
+    - `ROADMAP.md` needs no edit — it already says `.summem/summem` — but the plan should say that instead of omitting it.
+* Insights
+    - The lockstep test is already red before build: `AGENTS.md` was edited to the draft while `prompt_text()` still returns the `## SumMem` version.
+    - `.summem/summem` is an uncommitted typechange to a symlink and `dogfood/.summem/summem` is already a committed symlink, so “store drivers symlink to it” needs no plan unit.
+    - Proof 1 only caught chevrons in the driver source because `ensure_store` copied it into the scanned store; that guard goes away with the copy.
 
 

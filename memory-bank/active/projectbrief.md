@@ -12,7 +12,7 @@ They run `summem init`, paste the printed block at the top of committed `AGENTS.
 
 ### Agent starts a session in an opted-in repo
 
-They find repo-root `summem`, run a root wake once, skip if a root wake is already in the conversation, then `note` only stranger-clone facts.
+They run `.summem/summem`, do a root wake once, skip if a root wake is already in the conversation, then `note` only stranger-clone facts.
 
 ### This repo dogfoods the prompt
 
@@ -25,7 +25,7 @@ We write the same block at the top of our `AGENTS.md` and check that cheap Compo
 3. Put that block at the top of this repo’s `AGENTS.md`. Keep the existing memory-bank section under it. Keep `CLAUDE.md` as `@AGENTS.md`.
 4. Wake once at session start; skip if a root wake is already in the conversation. Never say “before any other tool call.”
 5. Notes are stranger-clone public facts only. Personal, machine, and preference facts stay out.
-6. Tell agents how to find repo-root `summem` (CWD / `--path`, not `.summem/summem`). Habitat may mention git to find the root; the agent interface still must not treat git as the store.
+6. Tell agents to invoke `.summem/summem`. `--path` aims at a store, not at the driver. Habitat may mention git to find the repository root; the agent interface still must not treat git as the store.
 7. After writing, instrument this repo and see whether cheap Composer 2.5 (not fast) subagents follow the prompt.
 
 ## Constraints
@@ -39,7 +39,7 @@ We write the same block at the top of our `AGENTS.md` and check that cheap Compo
 
 1. `summem init` prints a baked prompt plus a paste-at-top-of-`AGENTS.md` instruction.
 2. This repo’s `AGENTS.md` starts with that prompt. `CLAUDE.md` remains `@AGENTS.md`.
-3. The prompt matches issue #2’s wake and note rules and the find-the-driver comments.
+3. The prompt matches issue #2’s wake and note rules. Agents invoke `.summem/summem` (issue #2 comments that forbade that path are superseded).
 4. Catalog `usage_text` names `init` the same way other commands are named.
 5. Composer 2.5 (not fast) subagents given the prompt can follow it (wake once, skip duplicate root wake, note policy, find the driver).
 

@@ -4,7 +4,7 @@
 **Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Planned rework: stop `ensure_store` copy; prompt/`AGENTS.md` invoke `.summem/summem`; docs match onboarding.
+- Replanned after preflight FAIL (fixable): one invoke path `.summem/summem`; drop copy leftovers; enumerate prompt invariants; brief requirement 6 updated.
 
 ## Next Step
-- Preflight validation of the plan.
+- Preflight validation of the revised plan.
