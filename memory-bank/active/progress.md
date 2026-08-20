@@ -13,3 +13,16 @@ Wire Python coverage collection and Codecov upload (stockroom-style) plus a READ
     - Level 2: small self-contained enhancement (CI/tooling + badge), not a product-architecture change
 * Insights
     - The only GitHub workflow today is Release Please; coverage mentions in README/techContext are about not using coverage-based test selection, not reporting
+
+## 2026-08-20 - PLAN - COMPLETE
+
+* Work completed
+    - Wrote Level 2 plan: tox coverage env, live lcov test, CI upload, README badge
+    - Validated `pytest-cov --cov=summem` on the shebang script
+    - Put the consumer-Actions TDD ruling in the brief before preflight
+* Decisions made
+    - `--cov=summem` (not `--cov=.`); `coverage` stays out of default `env_list`
+    - Do not subprocess `tox` from pytest; lock the env in `tox.ini` and prove measurement with nested pytest
+    - Follow stockroom's Python upload (`codecov-action@v7`, status checks off, `fail_ci_if_error: false`), not Make/uv
+* Insights
+    - Adding test CI is in scope only because upload needs a job; no multi-version matrix in this task
