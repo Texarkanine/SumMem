@@ -48,3 +48,14 @@ Tweak `prompt_text()` and the committed `AGENTS.md` block so agents `git add` an
     - No `notes/` or `naps/` in the prompt
 * Insights
     - None beyond the plan
+
+## 2026-08-19 - QA - COMPLETE (FAIL)
+
+* Work completed
+    - Reviewed the implementation against the Level 2 plan and acceptance criteria
+    - Verified prompt/`AGENTS.md` lockstep, writer-only wording, documentation consistency, CLI isolation, and absence of implementation debris
+    - Ran the complete suite: 208 tests passed on Python 3.11
+* Findings
+    - Blocking: `assert "commit" in lower` in `test_prompt_text_teaches_git_publish` is satisfied by the unrelated pre-existing phrase `committed AGENTS.md`; deleting the required `Commit them...` sentence would not make the test fail
+* Decision
+    - QA FAIL; Build must rerun to make the test specifically protect the commit instruction, then QA must rerun

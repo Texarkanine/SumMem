@@ -79,4 +79,10 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA - FAIL
+
+## QA Findings
+
+- **Blocking:** `test_prompt_text_teaches_git_publish` checks only that `"commit"` appears somewhere in the prompt. The unrelated pre-existing phrase `committed AGENTS.md` satisfies that assertion, so the test stays green if the required `Commit them...` instruction is removed.
+- **Required correction:** Rerun Build and assert the actual commit instruction without locking the entire paragraph, then rerun QA.
+- **Verified:** The implementation itself matches the planned wording and writer boundary; documentation is reconciled; all 208 tests pass.

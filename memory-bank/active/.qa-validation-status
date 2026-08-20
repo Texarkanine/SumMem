@@ -1,0 +1,19 @@
+FAIL
+
+# QA Validation
+
+## Blocking Finding
+
+- `tests/test_init.py::test_prompt_text_teaches_git_publish` does not prove that the prompt instructs agents to commit the files. Its `assert "commit" in lower` is already satisfied by the unrelated pre-existing phrase `committed AGENTS.md`, so removing the new `Commit them with the rest of the work...` instruction would not fail the test. Acceptance criterion 4 requires the new test to cover the publish instruction, including commit.
+
+## Verified
+
+- `prompt_text()` explicitly keeps the script as the only writer and tells agents to `git add` and commit the files the script wrote.
+- `AGENTS.md` remains lockstep with `prompt_text()`.
+- Store paths remain absent from the activation block, and CLI-facing output was not taught to mention git.
+- `techContext.md`, `productContext.md`, and the architecture atlas now agree with the implemented behavior.
+- The complete suite passes: 208 tests on Python 3.11.
+
+## Required Next Phase
+
+Rerun Build to make the commit assertion target the actual publish instruction, then rerun QA.
