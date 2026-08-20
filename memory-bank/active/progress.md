@@ -74,4 +74,15 @@ Bake a SumMem agent prompt into the driver, print it from `summem init`, land it
 * Insights
     - Cheap agents run a catalog line that is only a command. Lockstep `prompt_text()` into `AGENTS.md` is the right activation shape.
 
+## 2026-08-19 - REWORK - INITIATED
+
+* Work completed
+    - Operator requested rework after reflect: strike driver copy from `ensure_store`; align prompt, `AGENTS.md`, and docs with onboarding (place `.summem/summem`, `init`, paste).
+* Decisions made
+    - `ensure_store` keeps dirs + default config; it does not copy or create the driver.
+    - This repo: repo-root `summem` remains the record; store drivers are symlinks.
+    - Agents invoke `.summem/summem`.
+* Insights
+    - Issue #2 comments that forbade teaching `.summem/summem` are superseded for the invoke path.
+
 

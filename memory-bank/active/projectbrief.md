@@ -42,3 +42,11 @@ We write the same block at the top of our `AGENTS.md` and check that cheap Compo
 3. The prompt matches issue #2’s wake and note rules and the find-the-driver comments.
 4. Catalog `usage_text` names `init` the same way other commands are named.
 5. Composer 2.5 (not fast) subagents given the prompt can follow it (wake once, skip duplicate root wake, note policy, find the driver).
+
+## Rework
+
+`ensure_store` must not place the driver. It already creates `notes/` and `naps/`, and writes default config when missing. Strike the `copy2` of `__file__` into `.summem/summem`.
+
+Onboarding: the operator places `.summem/summem`, runs `init`, pastes that prompt into `AGENTS.md`, then the repository has memory. This repo’s record is repo-root `summem`; `.summem/summem` and dogfood’s driver symlink to it.
+
+Align the baked prompt, this repo’s `AGENTS.md`, and docs (`VISION.md`, `ROADMAP.md`, persistent memory-bank) with that story: agents invoke `.summem/summem`. Presence of a driver is still not activation; the `AGENTS.md` block is.
