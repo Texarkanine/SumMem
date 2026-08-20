@@ -19,4 +19,4 @@ graph TD
 Either milestone may run first. They may run in parallel.
 
 - [x] Search nested nap captions in recall, then warn on unreadable sibling packs in zoom/recall (#8 then #7)
-- [ ] Tox matrix 3.11–current non-EOL plus a reliable pytest command; off-the-shelf cache only if solid (#6 then #9)
+- [x] Tox matrix 3.11–current non-EOL plus a reliable pytest command; off-the-shelf cache only if solid (#6 then #9)

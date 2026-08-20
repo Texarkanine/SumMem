@@ -1,14 +1,13 @@
 # Active Context
 
 ## Current Task: open-issue-wave
-**Phase:** MILESTONE-EXECUTION - IN-PROGRESS
+**Phase:** MILESTONE-EXECUTION - COMPLETE
 
 ## What Was Done
 
-- Product milestone done: draft [PR #12](https://github.com/Texarkanine/SumMem/pull/12) (`feat/recall-zoom-packs`). Nested captions in recall; `skipped a pack` on stderr for unreadable sibling packs. Wake stays silent. 211 pytest. `memory-bank/active/` not on the branch.
-- Infra worker still in flight.
+- Product: draft [PR #12](https://github.com/Texarkanine/SumMem/pull/12).
+- Infra: draft [PR #13](https://github.com/Texarkanine/SumMem/pull/13) (`feat/tox-pytest-runner`). `tox` is the suite command; `py311`–`py314`; `package = skip`; testmon skipped. Both milestones `[x]`.
 
 ## Next Step
 
-- Wait for the infra worker's draft PR, then tick #6+#9.
-- Leftover from product (not this wave): `named_ids` still skips bad trees quietly.
+- Operator: `/niko-archive` for the capstone (parent L4 files live on `niko/open-issue-wave` in the ops worktree, not on `main`).

@@ -34,3 +34,18 @@ Operate two parallel niko-in-worktree agents to close open issues #6–#9 as two
     - Shared children-file walker deferred (preflight advisory).
 * Insights
     - `named_ids` still skips unreadable trees silently — leftover, not in this wave.
+
+## 2026-08-19 - INFRA MILESTONE - COMPLETE
+
+* Work completed
+    - Draft PR #13: tox matrix 3.11–3.14, one documented command, no pyproject, cache skipped.
+* Decisions made
+    - testmon not proven on tmp_path/worktree/SourceFileLoader suite; skip rather than invent a cache.
+    - `skip_missing_interpreters = true`; no CI yet.
+* Insights
+    - This machine’s uv offered 3.14.0rc3; local tox can go green without every interpreter.
+
+## 2026-08-19 - L4 MILESTONES - ALL DONE
+
+* Work completed
+    - Both draft PRs exist. Capstone archive is `/niko-archive`.
