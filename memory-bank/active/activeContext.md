@@ -1,11 +1,11 @@
 # Active Context
 
 ## Current Task: recall-zoom-packs
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Restated [SumMem#8](https://github.com/Texarkanine/SumMem/issues/8) and [SumMem#7](https://github.com/Texarkanine/SumMem/issues/7) into `projectbrief.md` (standing operator consent; no intent wait).
-- Classified Level 2: two contained enhancements in the zoom/recall children-file walk; no architecture change; `_note_children` must stay note-only for rematerialize/`_nap_stem`.
+- Classified L2 and restated #8 then #7.
+- Planned two TDD units: `_recall_nested` (do not change `_note_children`), then `_warn_skipped_pack` on sibling `continue` only; atlas sentences after.
 
 ## Next Step
-- Load the Level 2 workflow and run the plan phase.
+- Preflight validation (spawn `/niko-preflight`).

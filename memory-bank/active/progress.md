@@ -16,3 +16,15 @@
 * Insights
     - `_note_children` is also the leftmost-note walker for `_nap_stem`; it must keep yielding only `NoteChild`
     - Existing `test_recall_malformed_tree_does_not_raise` and `test_cli_zoom_nested_id_skips_sibling_bad_tree` are the silent-skip baseline
+
+## 2026-08-19 - PLAN - COMPLETE
+
+* Work completed
+    - Wrote L2 test plan and implementation steps in `tasks.md` (#8 walker, then #7 stderr, then atlas)
+* Decisions made
+    - Nested caption hits use zoom's `{id}  {caption}` line, not a wake `xN prefix:` row
+    - Skip message is the constant `skipped a pack` (distinct from fatal `unreadable pack`)
+    - Warn only on sibling `continue`; asked-for unreadable zoom still raises
+    - Do not change `_note_children`
+* Insights
+    - A view caption line and a nested caption line can both match the same regex and are different rows; `seen` should not collapse them
