@@ -63,3 +63,14 @@ Wire Python coverage collection and Codecov upload (stockroom-style) plus a READ
 * Insights
     - CI extras and codecov.yml `comment` match stockroom, not plan-creep
     - Live `--cov` argv and the tox command string are still two surfaces (preflight radical not applied)
+
+## 2026-08-20 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-codecov-upload.md`
+    - Reconciled persistent files (techContext already current; others skip)
+* Decisions made
+    - No rebuild for the two QA advisories
+* Insights
+    - Put the consumer-Actions TDD ruling in the brief before preflight when adding third-party Action YAML
+    - Nested `--cov` under `tox -e coverage` needs an isolated `COVERAGE_FILE`
