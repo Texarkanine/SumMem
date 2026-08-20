@@ -243,10 +243,22 @@ def test_root_wake_catalog_is_labeled_paths_not_commands(tmp_path, monkeypatch, 
     assert "./pkg" in lines
     assert "summem wake --path pkg" not in out
     assert "wake --path" not in out
-    assert "== Project-root memories ==" in lines
-    assert lines.index("== Additional memory catalogs ==") < lines.index("== Project-root memories ==")
+    assert "== Project-root memories ==" not in out
     assert lines[-1] == "You are up to speed."
     assert "pkg-note" not in out
+
+
+def test_empty_root_omits_project_root_header(tmp_path, monkeypatch, capsys):
+    """A cataloged repo with no root notes omits == Project-root memories ==."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["start", "pkg"]) == 0
+    capsys.readouterr()
+    assert m.main(["wake"]) == 0
+    out = capsys.readouterr().out
+    assert out == "== Additional memory catalogs ==\n./pkg\nYou are up to speed.\n"
+    assert "== Project-root memories ==" not in out
 
 
 def test_root_wake_catalogs_other_store(tmp_path, monkeypatch, capsys):

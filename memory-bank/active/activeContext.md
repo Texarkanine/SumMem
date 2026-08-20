@@ -1,10 +1,11 @@
 # Active Context
 
 ## Current Task: empty-root-header
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Classified Level 1: one wake-print condition in `summem`. Empty root currently always prints `== Project-root memories ==` when a catalog exists, so the closer sits under that header.
+- Root wake omits `== Project-root memories ==` when `wake_text` is empty. Catalog-first stays. Header still splits catalog from a non-empty document.
+- pytest 207 passed. This repo’s wake is catalog plus closer.
 
 ## Next Step
-- Load the Level 1 workflow and build.
+- QA

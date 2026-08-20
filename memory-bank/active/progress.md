@@ -232,3 +232,14 @@ Omit `== Project-root memories ==` when the root decaying document is empty.
     - Header prints only when catalog and `wake_text` are both non-empty. Catalog-first stays.
 * Insights
     - `test_root_wake_catalog_is_labeled_paths_not_commands` notes only in `pkg` and currently locks the empty-root header.
+
+## 2026-08-19 - BUILD - COMPLETE
+
+* Work completed
+    - Memories header prints only when catalog and root document are both non-empty.
+    - Tests: empty-root omits the header; catalog-plus-notes still has it. pytest 207 passed.
+    - `VISION.md` Activation matches.
+* Decisions made
+    - Empty catalog+empty doc is closer only. `cat + footer` (no extra blank line).
+* Insights
+    - The header is a splitter, not a label for an empty section.

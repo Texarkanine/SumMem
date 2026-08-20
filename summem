@@ -1018,7 +1018,10 @@ def main(argv: list[str] | None = None) -> int:
         cat = catalog_text(find_store_parent(parent), parent)
         footer = "You are up to speed.\n"
         if cat:
-            sys.stdout.write(cat + "\n== Project-root memories ==\n" + doc + footer)
+            if doc:
+                sys.stdout.write(cat + "\n== Project-root memories ==\n" + doc + footer)
+            else:
+                sys.stdout.write(cat + footer)
         else:
             sys.stdout.write(doc + footer)
         return 0
