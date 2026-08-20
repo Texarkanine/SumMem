@@ -10,7 +10,7 @@ Otherwise run `.summem/summem wake` from the repository root.
 
 ## While Working: Register Memories (Mandatory)
 
-`.summem/summem note "…"` records one short line. Call it whenever you learn something new about the project that could be of interest to another contributor, and that is acceptable in git forever: facts, insights, designs and decisions, etc. Personal, machine-local, and user preference facts stay out. If `note` asks for a nap, do that nap before your next action.
+`.summem/summem note "…"` records one short line. Call it whenever you learn a fact about this project that another contributor would still need: designs, decisions, invariants, and the like. A note must still be true after a fresh clone on another machine. Personal, machine-local, and user preference facts stay out. If `note` asks for a nap, do that nap before your next action.
 
 Do not register redundant memories.
 
