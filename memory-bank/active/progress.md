@@ -1,6 +1,6 @@
 # Progress
 
-Bake a SumMem agent prompt into the driver, print it from `summem init`, land it at the top of this repo’s `AGENTS.md`, and check that cheap Composer 2.5 subagents follow it.
+Rework: `ensure_store` must not copy the driver. Align the baked prompt, `AGENTS.md`, and docs with onboarding (place `.summem/summem`, `init`, paste). This repo’s record stays repo-root `summem`; store drivers symlink to it.
 
 **Complexity:** Level 2
 
@@ -84,5 +84,14 @@ Bake a SumMem agent prompt into the driver, print it from `summem init`, land it
     - Agents invoke `.summem/summem`.
 * Insights
     - Issue #2 comments that forbade teaching `.summem/summem` are superseded for the invoke path.
+
+## 2026-08-19 - COMPLEXITY-ANALYSIS - COMPLETE
+
+* Work completed
+    - Classified the rework as Level 2.
+* Decisions made
+    - Level 2: one function to stop copying, plus lockstep prompt/docs. Not L3 — onboarding is already specified.
+* Insights
+    - Tests that expect a first note to create `.summem/summem` are now wrong, not incomplete.
 
 
