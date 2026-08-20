@@ -1,8 +1,8 @@
 # Progress
 
-Rework: `ensure_store` must not copy the driver. Align the baked prompt, `AGENTS.md`, and docs with onboarding (place `.summem/summem`, `init`, paste). This repo’s record stays repo-root `summem`; store drivers symlink to it.
+Omit `== Project-root memories ==` when the root decaying document is empty.
 
-**Complexity:** Level 2
+**Complexity:** Level 1
 
 ## 2026-08-19 - COMPLEXITY-ANALYSIS - COMPLETE
 
@@ -223,3 +223,12 @@ Rework: `ensure_store` must not copy the driver. Align the baked prompt, `AGENTS
     - Catalog-first stays. Catalog heading stays a label (no `wake --path`). Wake is a document, not a script.
 * Insights
     - Empty root currently prints the header and glues `You are up to speed.` under it like a memory.
+
+## 2026-08-19 - COMPLEXITY-ANALYSIS - COMPLETE
+
+* Work completed
+    - Classified the empty-header rework as Level 1: one wake-print condition, one component.
+* Decisions made
+    - Header prints only when catalog and `wake_text` are both non-empty. Catalog-first stays.
+* Insights
+    - `test_root_wake_catalog_is_labeled_paths_not_commands` notes only in `pkg` and currently locks the empty-root header.
