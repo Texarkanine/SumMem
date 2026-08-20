@@ -99,3 +99,15 @@ Sunset `VISION.md` and `ROADMAP.md`: drop what is true of the tree or what we bu
     - Standalone task; next step is `/niko-archive`
 * Insights
     - Strongest inherited VISION sentences were the ones that failed QA
+
+## 2026-08-19 - POST-REFLECT - ATLAS REWRITE
+
+* Work completed
+    - Rewrote `docs/architecture/index.md` for a reader who has not opened the code
+    - Opened draft PR #11; pushed the atlas rewrite
+* Decisions made
+    - Concepts first; introduce a name before using it
+    - Fold pictured as `A`–`H`; zipper pictured as shared letters plus letter vs number continuations, with rematerialize as its own snapshot
+    - A 2048-nap is eleven binary levels and one fat children file, not infinite braces
+* Insights
+    - The merge chart that skipped rematerialize was the confusing one; showing letters inside each pack made the overlap obvious
