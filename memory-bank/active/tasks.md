@@ -113,7 +113,7 @@ No new technology - validation not required. Release Please and the helper-app t
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
 
 ## First QA
 
@@ -121,3 +121,10 @@ No new technology - validation not required. Release Please and the helper-app t
 - **Blocking:** Update the stable command inventory in `memory-bank/techContext.md` to include `version`, and update the outside-repository invariant in `memory-bank/productContext.md` to include `version`.
 - **Verified:** The implementation otherwise matches the plan. All 8 version tests pass on Python 3.11–3.14; the full suite's one failure per environment is the documented pre-existing `AGENTS.md` / `prompt_text()` drift.
 - **Rework:** Those two statements, plus the matching sentence in `systemPatterns.md`.
+
+## Second QA
+
+- **Result:** PASS
+- **Verified:** Rework fixed the two blocking doc gaps. CLI, Release Please lockstep, workflow, and living docs match the plan. All 8 version tests pass; full tox is 229 passed with the same pre-existing AGENTS.md failure per environment.
+- **Advisories:** `projectbrief.md` still lists `--version` as an alternative (plan chose subcommand-only); AGENTS.md / `prompt_text()` drift remains out of scope.
+- **Next:** `/niko-reflect`

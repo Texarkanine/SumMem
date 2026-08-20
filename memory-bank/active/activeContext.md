@@ -1,9 +1,9 @@
 # Active Context
 
 **Current Task:** version-tracking
-**Phase:** BUILD - COMPLETE
-**What Was Done:** QA rework: added `version` to the stable CLI list in `techContext.md`, and to the outside-repository invariant in `productContext.md` and `systemPatterns.md`.
-**Next Step:** QA review.
+**Phase:** QA - COMPLETE (PASS)
+**What Was Done:** Second QA passed. Rework fixed persistent-doc gaps; CLI, Release Please config, workflow, and living docs match the plan.
+**Next Step:** Operator runs `/niko-reflect`.
 
 ## Files created or modified
 
