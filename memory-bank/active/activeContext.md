@@ -1,11 +1,13 @@
 # Active Context
 
 ## Current Task: tox-pytest-runner
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Restated issues #6 and #9 plus standing decisions into `projectbrief.md`.
-- Classified Level 2: one self-contained test-runner enhancement (tox + docs), no product-CLI or architectural change.
+- Classified L2 and planned tox as the one pytest command for py311–py314.
+- Validated `package = skip` with no manifest; tox found 3.11–3.14 (3.14.0rc3 on this uv).
+- Cache skipped (testmon not proven on tmp_path / worktree / SourceFileLoader suite).
+- tox-uv not required.
 
 ## Next Step
-- Load the Level 2 workflow and run plan.
+- Preflight validation of the plan.

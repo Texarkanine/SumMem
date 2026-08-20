@@ -16,3 +16,19 @@ Add tox as the one documented pytest command, covering CPython 3.11 through curr
 * Insights
     - No project manifest today; tests load repo-root `summem` via SourceFileLoader
     - Current documented command is `uv run --python 3.11 --with pytest pytest`
+
+## 2026-08-19 - PLAN - COMPLETE
+
+* Work completed
+    - Wrote the L2 plan: tox.ini contract tests, docs, then a non-nested tox verification run
+    - Technology validation: tox 4 + `package = skip` + pytest.ini `testpaths = tests` works with no pyproject.toml
+    - Confirmed interpreters: 3.11.11, 3.12.11, 3.13.7, 3.14.0rc3
+* Decisions made
+    - Documented command is `tox`; `uvx --with tox tox` is how to invoke without a global install
+    - `skip_missing_interpreters = true` so local `tox` still runs when a CPython is missing
+    - Skip pytest-testmon and any custom cache
+    - Keep `py314` and document this machine's 3.14.0rc3 gap
+    - Do not add tox-uv as a tox `requires`
+* Insights
+    - Factor-style `env_list` is harder to assert with stdlib configparser; the plan uses an explicit comma list
+    - A pytest case that subprocesses tox would recurse once the suite runs under tox
