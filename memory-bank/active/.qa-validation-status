@@ -1,0 +1,4 @@
+PASS
+
+Advisories:
+1. Catalog output still names the product `summem` (for example `summem wake --path`). Composer Probe A used `.summem/summem` for the root wake, then over-pulled dogfood because the catalog line reads as a command. The plan kept that catalog spelling; this does not block.

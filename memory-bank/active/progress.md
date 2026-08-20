@@ -179,3 +179,15 @@ Rework: `ensure_store` must not copy the driver. Align the baked prompt, `AGENTS
 * Insights
     - Git-root auto-create without a driver is the intended onboard gap: dirs + config appear; agents cannot invoke `.summem/summem` until someone places it.
     - Catalog still advertises a pull in wake output; a fresh agent may run it even when not working under that path.
+
+## 2026-08-19 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Reviewed the rework against the approved Level 2 plan, project brief, and system patterns. Did not edit the implementation.
+    - Confirmed driver-copy removal, `.summem/summem` prompt lockstep, docs, tests, and Composer probe record are complete and acceptable as-is.
+* Decisions made
+    - QA passed. No build or plan rerun.
+    - Catalog-as-command over-pull stays an advisory, not a blocker: the plan kept `usage_text` as `summem`, and Probe A still used `.summem/summem` for the root wake.
+    - Nested-store driver symlink stays out (preflight advisory, not plan).
+* Insights
+    - Striking the copy left `ensure_store` as dirs plus default config, which is the onboarding story: the operator places `.summem/summem`.

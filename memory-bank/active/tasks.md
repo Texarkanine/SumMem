@@ -105,6 +105,16 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight (PASS WITH ADVISORY)
 - [x] Build
-- [ ] QA
+- [x] QA (PASS)
 
 Build units 1–4 done. pytest 205 passed. Composer 2.5 Probe A ran `.summem/summem wake` (then catalog `wake --path dogfood`). Probe B skipped a second root wake. Did not take the nested-store symlink advisory.
+
+### QA findings
+
+- **PASS.** The rework matches the plan and is acceptable as-is.
+- `ensure_store` only creates `notes/`, `naps/`, and missing config. `shutil`/`copy2`/`chmod` are gone. First wake, first note, and `start` do not place a driver; a pre-placed driver is still left alone.
+- `prompt_text()` and this repo’s `AGENTS.md` lockstep on `.summem/summem`. Invariants dropped `"## SumMem"` and `"repository root"`; they require `.summem/summem` and still forbid OptMem wake-first / dual-paste wording. `CLAUDE.md` remains `@AGENTS.md`. Catalog `usage_text` still names `summem`.
+- `VISION.md` Onboarding/Activation, `systemPatterns.md`, and `techContext.md` no longer say the script copies the driver. `ROADMAP.md` was correctly left alone. Archives were not rewritten.
+- Composer 2.5 Probe A invoked `.summem/summem wake` (not `./summem` or `./summem/summem`). Probe B skipped a second root wake.
+- Advisory (non-blocking): catalog lines still look like commands, so Probe A also pulled dogfood. Out of this rework’s scope.
+- Nested-store driver symlink was a preflight radical-innovation advisory. Build correctly did not add it.
