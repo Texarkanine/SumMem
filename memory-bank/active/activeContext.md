@@ -1,10 +1,11 @@
 # Active Context
 
 ## Current Task: ship-prompt-file
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Classified [SumMem#19](https://github.com/Texarkanine/SumMem/issues/19) as Level 2: onboarding-path change in one subsystem (baked prompt / `init`), with a design choice (ship a file vs wrap the `init` print) but no store or architecture work.
+- Classified #19 as Level 2.
+- Planned: ship `docs/agents-prompt.md` lockstep with `prompt_text()`; `init` keeps printing (redirect is wrap-safe) but stops saying paste; README onboard copies the file; restore `AGENTS.md` wrap-damaged spaces.
 
 ## Next Step
-- Load the Level 2 workflow and run the plan phase.
+- Preflight validation (subagent).
