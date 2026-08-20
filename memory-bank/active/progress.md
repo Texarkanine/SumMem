@@ -66,3 +66,13 @@ Add tox as the one documented pytest command, covering CPython 3.11 through curr
     - Implementation is acceptable as-is; proceed to Reflection
 * Insights
     - The config-only contract tests cover the runner without creating recursive tox execution
+
+## 2026-08-19 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `reflection-tox-pytest-runner.md`
+    - Reconciled persistent files
+* Decisions made
+    - techContext: remove this-machine uv 3.14.0rc3 (local env, not a standing pointer)
+* Insights
+    - configparser `{posargs}` interpolation; do not nest tox under pytest
