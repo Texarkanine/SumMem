@@ -1,0 +1,1 @@
+TDD does not govern GitHub Actions YAML that only invokes a third-party action; it would if SumMem were an Action.

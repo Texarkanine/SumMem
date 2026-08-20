@@ -1,6 +1,6 @@
 # Tech Context
 
-The file backend is a Python 3 shebang script. A store is a `.summem/` directory (not `.mem/` — that name is already taken in this problem space). Agents invoke `.summem/summem`. This development repo’s record is repo-root `summem`; store-local `.summem/summem` is a symlink to it. `ensure_store` creates `notes/`, `naps/`, and default `config.toml` when missing. It does not copy the driver. Per-store settings live in `.summem/config.toml`, read with stdlib [`tomllib`](https://docs.python.org/3/library/tomllib.html) (added in 3.11; parse only). Default config is a commented template written as text, not a TOML dump. Agents talk to a stable CLI (`wake`, `note`, `nap`, `recall`, `zoom`, `start`, `init`). The on-disk format may later change, including to sqlite; the command table in the README must not.
+The file backend is a Python 3 shebang script. A store is a `.summem/` directory (not `.mem/` — that name is already taken in this problem space). Agents invoke `.summem/summem`. This development repo’s record is repo-root `summem`; store-local `.summem/summem` is a symlink to it. `ensure_store` creates `notes/`, `naps/`, and default `config.toml` when missing. It does not copy the driver. Per-store settings live in `.summem/config.toml`, read with stdlib [`tomllib`](https://docs.python.org/3/library/tomllib.html) (added in 3.11; parse only). Default config is a commented template written as text, not a TOML dump. Agents talk to a stable CLI (`wake`, `note`, `nap`, `recall`, `zoom`, `start`, `init`, `version`). The on-disk format may later change, including to sqlite; the command table in the README must not.
 
 Activation is the SumMem block at the top of committed `AGENTS.md`. Presence of the driver is not. The copyable file is `docs/agents-prompt.md`; `init` prints the same text. Tests load repo-root `summem`. This repository commits `.summem/notes/` (and naps when written). `.gitignore` does not ignore them.
 
@@ -15,6 +15,8 @@ Hashing is SHA-256 from the language standard library (`hashlib` in Python 3). D
 None. The product is one shebang file; there is no packaging step and no separate database to provision.
 
 License: GNU AGPL v3, in `LICENSE`.
+
+Semver tags come from Release Please (`release-type: simple`) on `main`. Generic extra-files bump `__version__` in repo-root `summem` (`x-release-please-version`). `summem version` prints that string. Helper-bot auth is repository variable `HELPER_APP_ID` and repository secret `HELPER_APP_PRIVATE_KEY`, provisioned after merge. GitHub Actions YAML that only invokes that third-party action is not product TDD in this repo.
 
 ## Testing Process
 

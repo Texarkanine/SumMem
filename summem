@@ -171,6 +171,7 @@ WAKE_LINES = 32
 CLI_NAME = "summem"
 AGENT_BIN = ".summem/summem"
 PROMPT_DOC = "docs/agents-prompt.md"
+__version__ = "0.1.0"  # x-release-please-version
 
 CONFIG_TEMPLATE = """\
 # SumMem per-store settings. Missing values take the script's defaults.
@@ -978,15 +979,16 @@ SumMem: shared memory for agents in a repository.
   {CLI_NAME} recall  [--path PATH] PATTERN            search remembered text
   {CLI_NAME} start <path>                             create a store in that directory
   {CLI_NAME} init                                     print the agent prompt
+  {CLI_NAME} version                                  print this script's version
 
-Every command except start and init takes optional --path. Omit it to use $PWD.
+Every command except start, init, and version takes optional --path. Omit it to use $PWD.
 --path aims at a file or directory and walks up to the nearest store.
 
 For a command's options: {CLI_NAME} <command> -h
 """
 
 
-_COMMANDS = ("wake", "note", "nap", "zoom", "recall", "start", "init")
+_COMMANDS = ("wake", "note", "nap", "zoom", "recall", "start", "init", "version")
 _HELP_FLAGS = ("-h", "--help")
 
 
@@ -1025,6 +1027,7 @@ def main(argv: list[str] | None = None) -> int:
     start = sub.add_parser("start")
     start.add_argument("dir")
     sub.add_parser("init")
+    sub.add_parser("version")
     for parser_with_path in (wake, note, nap, zoom, recall):
         parser_with_path.add_argument("--path", help="aim at this file or directory")
     try:
@@ -1046,6 +1049,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.cmd == "init":
         sys.stdout.write(init_text())
+        return 0
+    if args.cmd == "version":
+        sys.stdout.write(f"{__version__}\n")
         return 0
     try:
         parent = resolve_parent(Path.cwd(), args.path)

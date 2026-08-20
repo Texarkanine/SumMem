@@ -315,7 +315,7 @@ Root wake prints a labeled catalog of every other started store (paths only, not
 
 A child store in context is advertised, not enforced. Do not load every started store in the root wake.
 
-Outside a repository, store commands fail. `init` and help still print.
+Outside a repository, store commands fail. `init`, `version`, and help still print.
 
 ## Invariants
 
