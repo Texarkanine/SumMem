@@ -1,8 +1,8 @@
 # Active Context
 
 **Current Task:** version-tracking
-**Phase:** QA - COMPLETE (FAIL)
-**What Was Done:** Implemented `summem version`, Release Please `simple` + generic extra-files on repo-root `summem`, stockroom helper-bot workflow, and living-doc updates. 8 new tests in `tests/test_version.py`. Extended catalog and `--path` tests.
+**Phase:** BUILD - COMPLETE
+**What Was Done:** QA rework: added `version` to the stable CLI list in `techContext.md`, and to the outside-repository invariant in `productContext.md` and `systemPatterns.md`.
 **Next Step:** QA review.
 
 ## Files created or modified

@@ -114,3 +114,10 @@ No new technology - validation not required. Release Please and the helper-app t
 - [x] Preflight
 - [x] Build
 - [ ] QA
+
+## First QA
+
+- **Result:** FAIL
+- **Blocking:** Update the stable command inventory in `memory-bank/techContext.md` to include `version`, and update the outside-repository invariant in `memory-bank/productContext.md` to include `version`.
+- **Verified:** The implementation otherwise matches the plan. All 8 version tests pass on Python 3.11–3.14; the full suite's one failure per environment is the documented pre-existing `AGENTS.md` / `prompt_text()` drift.
+- **Rework:** Those two statements, plus the matching sentence in `systemPatterns.md`.

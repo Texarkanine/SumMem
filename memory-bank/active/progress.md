@@ -77,3 +77,12 @@ Instrument Release Please for semantically versioned tags, keep `summem` one fil
     - Full tox remains at 229 passed and 1 pre-existing `AGENTS.md` lockstep failure per environment
 * Next step
     - Build must rerun to correct the two persistent documentation statements
+
+## 2026-08-20 - BUILD - COMPLETE
+
+* Work completed
+    - Persistent docs now name `version` in the CLI inventory and the outside-repository invariant
+* Decisions made
+    - Also updated the matching sentence in `systemPatterns.md` so the next QA cannot trip on the same stale line
+* Insights
+    - One command added three “closed lists” in persistent briefing, not only the README table
