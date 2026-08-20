@@ -897,8 +897,6 @@ If you can see a prior **root** SumMem wake in this conversation, skip `wake`.
 
 Otherwise run `.summem/summem wake` from the repository root.
 
-Do what it prints, to the end of its output.
-
 ## While Working: Register Memories (Mandatory)
 
 `.summem/summem note "…"` records one short line. Only record public facts that could be of interest to another contributor, and that are acceptable in git forever. Personal, machine-local, and user preference facts stay out. If `note` asks for a nap, do that nap before your next action.
