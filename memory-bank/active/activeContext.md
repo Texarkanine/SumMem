@@ -1,12 +1,14 @@
 # Active Context
 
 ## Current Task: prompt-membership
-**Phase:** BUILD - COMPLETE (rework)
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
 
-- First QA FAIL: `tasks.md` duplicated the three-step plan when the unit was marked ✅. Removed the duplicate. Product files unchanged.
+- Reran QA after the rework commit removed the duplicated implementation-plan block from `tasks.md`.
+- Verified that the implementation correctly separates the workflow and clone-portability membership test into separate sentences without adding change-detectors or introducing new issues.
+- QA passed.
 
 ## Next Step
 
-- Rerun QA.
+- Proceed to `/niko-reflect`.

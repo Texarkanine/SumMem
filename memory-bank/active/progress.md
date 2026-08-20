@@ -87,3 +87,14 @@ Split the baked SumMem note prompt so the mandatory-note workflow and the clone-
 * Insights
     - Marking a plan unit complete by pasting its body again is how the duplicate happened.
 
+## 2026-08-20 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Reviewed the reworked Build commit against the approved replan, creative decision, project brief, and system patterns.
+* Decisions made
+    - The implementation matches the approved prompt-only design and scope.
+    - The documentation debris in `tasks.md` has been successfully removed.
+    - QA passes.
+* Insights
+    - None.
+
