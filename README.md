@@ -25,9 +25,11 @@ This is not a single-actor local diary ([OptMem](https://github.com/VictorTaelin
 
 ### Onboard a repository
 
-1. Place `.summem/summem` (copy or symlink [summem](summem)).
+1. Copy [summem](./summem) into `.summem/summem` in your repository's root.
 2. Run `.summem/summem init` and paste the printed block at the top of committed `AGENTS.md`.
-3. The first `wake`, `note`, `nap`, `zoom`, or `recall` creates the root store. Until someone `start`s another path, every note in the tree rolls up there.
+3. Add `**/.summem/__pycache__/` to your `.gitignore`
+4. The first `wake`, `note`, `nap`, `zoom`, or `recall` creates the root store. Until someone `start`s another path, every note in the tree rolls up there.
+5. (optional): run `.summem/summem start <path>` now for any sub-packages (i.e. in a monorepo)
 
 Presence of the driver is not activation. The `AGENTS.md` block is.
 
