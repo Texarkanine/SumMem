@@ -311,7 +311,7 @@ Zoom and recall print one agent-safe line when they skip an unreadable sibling c
 
 A command resolves **one** store. The work path may be a file: the walk starts at that file’s directory. The script does not parse workspace manifests. It does not create a store because someone recorded a note from a deep folder.
 
-Root wake prints a labeled catalog of every other started store (paths only, not pull commands), then the root listing when that listing is non-empty. The catalog is a walk of the tree that honors git ignore. It is not a committed index. A wake aimed at a path prints only the nearest store.
+Root wake prints a labeled catalog of every other started store (paths only, not pull commands), then the root listing when that listing is non-empty, labeled `== Project-root Memories ==`. The catalog is a walk of the tree that honors git ignore. It is not a committed index. A wake aimed at a path prints only the nearest store.
 
 A child store in context is advertised, not enforced. Do not load every started store in the root wake.
 

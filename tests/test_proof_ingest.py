@@ -49,5 +49,6 @@ def test_two_worktrees_note_merge_without_conflict(tmp_path):
     assert "alpha" in out
     assert "beta" in out
     lines = [line for line in out.splitlines() if line]
+    assert lines[0] == "== Project-root Memories =="
     assert lines[-1] == "You are up to speed."
-    assert set(lines[:-1]) == {"alpha", "beta"}
+    assert set(lines[1:-1]) == {"alpha", "beta"}

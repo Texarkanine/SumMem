@@ -1,10 +1,12 @@
 # Active Context
 
 ## Current Task: wake-root-header
-**Phase:** BUILD - READY
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Level 1 determined: incorrect omission of `== Project-root Memories ==` when the catalog is empty; single component is root-wake stdout assembly in `summem`.
+- Root wake labels a non-empty git-root document with `== Project-root Memories ==` even when there is no catalog.
+- Pull wakes stay unlabeled; empty root document still omits the header.
+- `uvx --with tox tox`: 236 passed on py311–py314.
 
 ## Next Step
-- Execute Level 1 Build.
+- Level 1 QA via a subagent running `/niko-qa`.

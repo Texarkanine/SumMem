@@ -1061,15 +1061,19 @@ def main(argv: list[str] | None = None) -> int:
     k = knobs(parent)
     if args.cmd == "wake":
         doc = wake_text(parent)
-        cat = catalog_text(find_store_parent(parent), parent)
+        root = find_store_parent(parent)
+        cat = catalog_text(root, parent)
         footer = "You are up to speed.\n"
+        body = ""
         if cat:
-            if doc:
-                sys.stdout.write(cat + "\n== Project-root Memories ==\n" + doc + footer)
-            else:
-                sys.stdout.write(cat + footer)
-        else:
-            sys.stdout.write(doc + footer)
+            body += cat
+        if doc:
+            if Path(parent).resolve() == Path(root).resolve():
+                if body:
+                    body += "\n"
+                body += "== Project-root Memories ==\n"
+            body += doc
+        sys.stdout.write(body + footer)
         return 0
     if args.cmd == "nap":
         for token in (args.id_a, args.id_b):
