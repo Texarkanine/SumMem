@@ -86,6 +86,14 @@ Validated on this machine, 2026-08-19:
 - Runner tests assert README wording and preflight strikes them: already covered — config contract only.
 - We treat rc3 as a reason to drop 3.14 from the matrix: already covered — declare and document.
 
+## QA Results
+
+- PASS: `tox.ini` implements the approved py311–py314, no-package pytest runner without extra abstractions or dependencies.
+- PASS: config contract tests cover the intended executable behavior and avoid recursive tox invocation.
+- PASS: README and techContext consistently document `tox`, the optional `uvx` invocation, and the cache decision.
+- PASS: independent QA run completed with 211 tests passing in each of py311, py312, py313, and py314.
+- No blocking KISS, DRY, YAGNI, completeness, regression, integrity, or documentation findings.
+
 ## Status
 
 - [x] Initialization complete
@@ -95,4 +103,4 @@ Validated on this machine, 2026-08-19:
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
