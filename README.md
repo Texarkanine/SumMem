@@ -26,7 +26,7 @@ This is not a single-actor local diary ([OptMem](https://github.com/VictorTaelin
 ### Onboard a repository
 
 1. Copy [summem](./summem) into `.summem/summem` in your repository's root.
-2. Run `.summem/summem init` and paste the printed block at the top of committed `AGENTS.md`.
+2. Insert [docs/agents-prompt.md](docs/agents-prompt.md) from this repository at the top of committed `AGENTS.md`.
 3. Add `**/.summem/__pycache__/` to your `.gitignore`
 4. The first `wake`, `note`, `nap`, `zoom`, or `recall` creates the root store. Until someone `start`s another path, every note in the tree rolls up there.
 5. (optional): run `.summem/summem start <path>` now for any sub-packages (i.e. in a monorepo)
@@ -42,7 +42,7 @@ summem nap     [--path PATH] ID-A ID-B CAPTION  fold two adjacent ids
 summem zoom    [--path PATH] ID                 open a nap to its children
 summem recall  [--path PATH] PATTERN            search remembered text
 summem start <path>                             create a store in that directory
-summem init                                     print the agent prompt to paste
+summem init                                     print the agent prompt
 ```
 
 Agents invoke `.summem/summem`. Bare `summem` is the printed name of this invocation. If `note` asks for a nap, do that nap before the next action. Never edit store files by hand.
@@ -53,7 +53,8 @@ Agents invoke `.summem/summem`. Bare `summem` is the printed name of this invoca
 
 - [Architecture](docs/architecture/index.md) — algorithm, store layout, invariants
 - [Notes](docs/notes.md) — what this backend is not yet
-- [AGENTS.md](AGENTS.md) — the baked session-start prompt (also printed by `init`)
+- [docs/agents-prompt.md](docs/agents-prompt.md) — the baked session-start prompt (also printed by `init`)
+- [AGENTS.md](AGENTS.md) — this repository's activation plus extra agent context
 
 ## Developing
 

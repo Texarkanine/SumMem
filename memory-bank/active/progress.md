@@ -59,3 +59,16 @@ Ship the baked agent prompt as a repository file so onboarding does not depend o
     - Plan is now acceptable for build phase
 * Insights
     - Added an advisory to consider adding a `--raw` flag to `init` (or making it the default when stdout is not a tty) to make redirection a perfect onboarding path
+
+## 2026-08-20 - BUILD - COMPLETE
+
+* Work completed
+    - Added `PROMPT_DOC` and `docs/agents-prompt.md` lockstep with `prompt_text()`
+    - Restored `AGENTS.md` prefix spaces
+    - Rewrote `init_text()` / `usage_text()` and leftover "paste" docstrings
+    - Updated README, architecture, and briefing
+    - tox: 224 passed on py311–py314
+* Decisions made
+    - Did not take the `--raw` / non-tty advisory
+* Insights
+    - The wrap-paste defect was already in this repo's `AGENTS.md`; lockstep restore was the repair

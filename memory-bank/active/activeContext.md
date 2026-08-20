@@ -1,12 +1,28 @@
 # Active Context
 
 ## Current Task: ship-prompt-file
-**Phase:** BUILD - IN-PROGRESS
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Classified #19 as Level 2.
-- Planned: ship `docs/agents-prompt.md` lockstep with `prompt_text()`; `init` keeps printing but stops saying paste; README onboard copies the file; restore `AGENTS.md` wrap-damaged spaces; drop leftover "paste" docstrings.
-- Preflight PASS WITH ADVISORY. Did not take `--raw` / non-tty split.
+- Shipped `docs/agents-prompt.md` lockstep with `prompt_text()`.
+- Restored `AGENTS.md` wrap-damaged spaces (`clone on`, `nap before`).
+- `init` and the catalog no longer say paste; recipe names `PROMPT_DOC`.
+- README / architecture / briefing point at the shipped file.
+- tox 224 passed on py311–py314.
+
+## Files
+- `/home/mobaxterm/git/SumMem/summem`
+- `/home/mobaxterm/git/SumMem/tests/test_init.py`
+- `/home/mobaxterm/git/SumMem/docs/agents-prompt.md`
+- `/home/mobaxterm/git/SumMem/AGENTS.md`
+- `/home/mobaxterm/git/SumMem/README.md`
+- `/home/mobaxterm/git/SumMem/docs/architecture/index.md`
+- `/home/mobaxterm/git/SumMem/memory-bank/systemPatterns.md`
+- `/home/mobaxterm/git/SumMem/memory-bank/techContext.md`
+
+## Decisions
+- Did not add `--raw` or split recipe onto stderr (preflight advisory).
+- No deviations from the plan.
 
 ## Next Step
-- Execute the implementation plan in TDD order.
+- QA review (subagent).
