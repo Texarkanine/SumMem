@@ -201,3 +201,16 @@ Rework: `ensure_store` must not copy the driver. Align the baked prompt, `AGENTS
     - Kept catalog-as-command out of this task. Encode the positive invoke path, not a ban that matches it.
 * Insights
     - Store, driver, and activation are three objects. `ensure_store` copying `__file__` had collapsed the first two.
+
+## 2026-08-19 - POST-REFLECT - catalog headers
+
+* Work completed
+    - Operator showed a root wake whose catalog was `dogfood` plus `summem wake --path dogfood` with no label; a subagent ran that line as an instruction.
+    - Root wake now prints `== Additional memory catalogs ==` and `./path` lines first, then `== Project-root memories ==` and the root document. Empty extra-store list omits both headers. Pull wakes still omit the catalog.
+    - Dropped catalog note counts, dates, and the `summem wake --path` command line. `VISION.md` Activation and `systemPatterns.md` match.
+    - pytest 206 passed. Smoke: `./.summem/summem wake` shows `./dogfood` under the catalog header.
+* Decisions made
+    - Instruction to pull stays in `AGENTS.md` (“when you work under that path”), not in wake output.
+    - Did not add nested-store driver symlinks.
+* Insights
+    - A catalog line that is only a shell command will be executed. Label it and print paths.

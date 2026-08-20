@@ -27,7 +27,7 @@ TDD on store/wake/start/init was straightforward once “store exists” tests s
 ### Technical
 - `ensure_store` copying `__file__` made “the store exists” look like “an agent can run the script.” Store creation is dirs plus config. The driver is operator-placed. Activation is the `AGENTS.md` block.
 - A substring invariant that forbids the real invoke path will fight the next policy correction. Encode the positive command, not a ban list that happens to match it.
-- Catalog lines that look like `summem wake --path …` still over-pull a cheap agent after a correct `.summem/summem` root wake. That is a catalog problem, not a prompt-path problem.
+- Catalog lines that look like `summem wake --path …` over-pull a cheap agent after a correct `.summem/summem` root wake. After reflect the operator had us label the catalog and print `./path` only; the pull recipe stays in `AGENTS.md`.
 
 ### Process
 - First-pass Composer probes do not count after the prompt is rewritten. Unit 4 had to re-instrument.

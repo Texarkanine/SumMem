@@ -56,7 +56,9 @@ def test_root_wake_lists_other_stores_pull_prints_only_that_store(tmp_path):
     root_wake = _run([sys.executable, str(SCRIPT), "wake"], repo)
     root_out = root_wake.stdout.decode("utf-8")
     assert "root-note" in root_out
-    assert "summem wake --path pkg" in root_out
+    assert "./pkg" in root_out
+    assert "== Additional memory catalogs ==" in root_out
+    assert "summem wake --path pkg" not in root_out
     assert ".summem/summem" not in root_out
     pull = _run([sys.executable, str(SCRIPT), "wake", "--path", "pkg"], repo)
     pull_out = pull.stdout.decode("utf-8")

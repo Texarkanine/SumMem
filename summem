@@ -236,54 +236,6 @@ def knobs(parent):
         return defaults
 
 
-def store_stats(parent) -> tuple[int, str | None]:
-    """Return note grain and latest date from store filenames. Does not create a store."""
-    store = Path(parent) / ".summem"
-    count = 0
-    stamps: list[str] = []
-    notes = store / "notes"
-    if notes.is_dir():
-        for path in notes.iterdir():
-            if not path.is_file() or path.name.startswith("."):
-                continue
-            stamp = _note_stamp(path.name)
-            if stamp is None:
-                continue
-            count += 1
-            stamps.append(stamp)
-    naps = store / "naps"
-    seen: set[str] = set()
-    if naps.is_dir():
-        for path in naps.iterdir():
-            if not path.is_file() or path.name.startswith("."):
-                continue
-            if path.suffix not in (".sum", ".tree"):
-                continue
-            if path.stem in seen:
-                continue
-            parsed = _parse_nap_stem(path.stem)
-            if parsed is None:
-                continue
-            seen.add(path.stem)
-            stamp, _, _, leaves = parsed
-            count += leaves
-            stamps.append(stamp)
-    latest = _day_from_stamp(max(stamps)) if stamps else None
-    return count, latest
-
-
-def _note_stamp(name: str) -> str | None:
-    parts = name.split("-")
-    if len(parts) != 2:
-        return None
-    stamp, rand = parts
-    if len(stamp) != 16 or len(rand) != 16:
-        return None
-    if any(c not in "0123456789abcdef" for c in rand):
-        return None
-    return stamp
-
-
 def _ignored_store(git_root: Path, store_dir: Path) -> bool:
     rel = store_dir.relative_to(git_root).as_posix()
     result = subprocess.run(
@@ -313,18 +265,12 @@ def catalog_text(git_root, resolved_parent) -> str:
             continue
         found.append(parent)
     found.sort()
-    lines: list[str] = []
+    if not found:
+        return ""
+    lines = ["== Additional memory catalogs =="]
     for parent in found:
         rel = parent.relative_to(root).as_posix()
-        count, latest = store_stats(parent)
-        grain = "1 note" if count == 1 else f"{count} notes"
-        if latest:
-            lines.append(f"{rel}  ({grain}, latest {latest})")
-        else:
-            lines.append(f"{rel}  ({grain})")
-        lines.append(f"{CLI_NAME} wake --path {rel}")
-    if not lines:
-        return ""
+        lines.append(f"./{rel}")
     return "\n".join(lines) + "\n"
 
 
@@ -374,10 +320,6 @@ def _nap_caption(sum_path: Path | None) -> str:
     if text.endswith("\n"):
         text = text[:-1]
     return text
-
-
-def _day_from_stamp(stamp: str) -> str:
-    return f"{stamp[0:4]}-{stamp[4:6]}-{stamp[6:8]}"
 
 
 def list_view(parent) -> list[ViewNode]:
@@ -978,7 +920,9 @@ def init_text() -> str:
     """Return the full `init` print: paste recipe plus prompt_text()."""
     return (
         "Paste this at the top of AGENTS.md. "
-        "If Claude-only tools should see it, keep CLAUDE.md as @AGENTS.md.\n"
+        "If Claude Code should see it too,"
+        "\n"
+        "put @AGENTS.md at the top of CLAUDE.md.\n"
         "\n"
         f"{prompt_text()}"
     )
@@ -1075,8 +1019,10 @@ def main(argv: list[str] | None = None) -> int:
         doc = wake_text(parent)
         cat = catalog_text(find_store_parent(parent), parent)
         footer = "You are up to speed.\n"
-        sep = "\n" if doc and cat else ""
-        sys.stdout.write(doc + sep + cat + footer)
+        if cat:
+            sys.stdout.write(cat + "\n== Project-root memories ==\n" + doc + footer)
+        else:
+            sys.stdout.write(doc + footer)
         return 0
     if args.cmd == "nap":
         for token in (args.id_a, args.id_b):

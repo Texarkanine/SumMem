@@ -55,7 +55,7 @@ Every command except `start` and `init` takes an optional `--path <relative_path
 
 | Command | Contract |
 |---|---|
-| `wake` | Print the decaying document for the resolved store. Do what it prints. Never “cannot wake, go nap first.” If the resolved store is the git root, also print the catalog of every other started store and how to pull one. |
+| `wake` | Print the decaying document for the resolved store. Do what it prints. Never “cannot wake, go nap first.” If the resolved store is the git root, also print a labeled catalog of every other started store (paths only, not pull commands). |
 | `note "…"` | Record one line, at most 280 bytes, in the resolved store. The script assigns time and name. |
 | `nap <id-a> <id-b> "…"` | Two adjacent content ids a wake printed, plus a caption. Not a positional range. `--path` selects which store. |
 | `recall <regex>` | Search the resolved store word for word. |
@@ -94,10 +94,10 @@ Session start is still mandatory and once. The first wake must **resolve to the 
 
 That root wake prints two things:
 
-1. The root store’s decaying document (the push).
-2. A catalog of every other started store: relative path, note count, latest date, and one line of instruction — when you work under that path, `summem wake --path <that path>` if that store’s wake is not already in this conversation.
+1. A labeled catalog of every other started store: `== Additional memory catalogs ==` and one `./path` line each. No note counts. No `wake --path` command line — that line was being run as an instruction.
+2. The root store’s decaying document under `== Project-root memories ==` (the push).
 
-The catalog is computed by walking the tree for store directories. It is not a committed index file. If in a git repo, it should honor git ignore (not .gitignore - but `git ignore` - this includes .git/info/exclude).
+The catalog is computed by walking the tree for store directories. It is not a committed index file. If in a git repo, it should honor git ignore (not .gitignore - but `git ignore` - this includes .git/info/exclude). If there are no other stores, both extra headers are omitted.
 
 `summem wake --path foo/packages/baz/fee.ts` pulls **only** the nearest store to that file. It does not reprint root. It does not reprint the full catalog.
 

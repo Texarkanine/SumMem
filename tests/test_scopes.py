@@ -228,8 +228,29 @@ def test_monkeypatch_wake_lines_still_applies_when_config_omits_knob(tmp_path, m
     assert "beta" in out
 
 
+def test_root_wake_catalog_is_labeled_paths_not_commands(tmp_path, monkeypatch, capsys):
+    """Root wake labels extra stores as ./paths, not as wake --path commands."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["start", "pkg"]) == 0
+    assert m.main(["note", "--path", "pkg", "pkg-note"]) == 0
+    capsys.readouterr()
+    assert m.main(["wake"]) == 0
+    out = capsys.readouterr().out
+    lines = out.splitlines()
+    assert lines[0] == "== Additional memory catalogs =="
+    assert "./pkg" in lines
+    assert "summem wake --path pkg" not in out
+    assert "wake --path" not in out
+    assert "== Project-root memories ==" in lines
+    assert lines.index("== Additional memory catalogs ==") < lines.index("== Project-root memories ==")
+    assert lines[-1] == "You are up to speed."
+    assert "pkg-note" not in out
+
+
 def test_root_wake_catalogs_other_store(tmp_path, monkeypatch, capsys):
-    """Root wake lists another started store and how to pull it."""
+    """Root wake lists another started store under a catalog header."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
@@ -240,8 +261,10 @@ def test_root_wake_catalogs_other_store(tmp_path, monkeypatch, capsys):
     assert m.main(["wake"]) == 0
     out = capsys.readouterr().out
     assert "root-note" in out
-    assert "pkg" in out
-    assert "summem wake --path pkg" in out
+    assert "./pkg" in out
+    assert "== Additional memory catalogs ==" in out
+    assert "== Project-root memories ==" in out
+    assert "summem wake --path pkg" not in out
     assert ".summem/summem" not in out
     assert "notes/" not in out
     assert "naps/" not in out
@@ -261,7 +284,8 @@ def test_catalog_count_preserves_folded_note_grain(tmp_path, monkeypatch, capsys
     capsys.readouterr()
     assert m.main(["wake"]) == 0
     out = capsys.readouterr().out
-    assert "(2 notes" in out
+    assert "./pkg" in out
+    assert "(2 notes" not in out
     loose = [
         p
         for p in (repo / "pkg" / ".summem" / "notes").iterdir()
@@ -284,6 +308,8 @@ def test_pull_wake_omits_catalog_and_root_notes(tmp_path, monkeypatch, capsys):
     assert "pkg-note" in out
     assert "root-note" not in out
     assert "wake --path pkg" not in out
+    assert "== Additional memory catalogs ==" not in out
+    assert "== Project-root memories ==" not in out
 
 
 def test_ignored_store_omitted_from_catalog(tmp_path, monkeypatch, capsys):
@@ -299,7 +325,9 @@ def test_ignored_store_omitted_from_catalog(tmp_path, monkeypatch, capsys):
     capsys.readouterr()
     assert m.main(["wake"]) == 0
     out = capsys.readouterr().out
-    assert "wake --path pkg" in out
+    assert "./pkg" in out
+    assert "./secret" not in out
+    assert "wake --path pkg" not in out
     assert "wake --path secret" not in out
 
 
@@ -313,4 +341,6 @@ def test_empty_catalog_adds_no_output(tmp_path, monkeypatch, capsys):
     assert m.main(["wake"]) == 0
     out = capsys.readouterr().out
     assert out == m.wake_text(repo) + "You are up to speed.\n"
+    assert "== Additional memory catalogs ==" not in out
+    assert "== Project-root memories ==" not in out
 

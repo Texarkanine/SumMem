@@ -117,5 +117,6 @@ Build units 1–4 done. pytest 205 passed. Composer 2.5 Probe A ran `.summem/sum
 - `prompt_text()` and this repo’s `AGENTS.md` lockstep on `.summem/summem`. Invariants dropped `"## SumMem"` and `"repository root"`; they require `.summem/summem` and still forbid OptMem wake-first / dual-paste wording. `CLAUDE.md` remains `@AGENTS.md`. Catalog `usage_text` still names `summem`.
 - `VISION.md` Onboarding/Activation, `systemPatterns.md`, and `techContext.md` no longer say the script copies the driver. `ROADMAP.md` was correctly left alone. Archives were not rewritten.
 - Composer 2.5 Probe A invoked `.summem/summem wake` (not `./summem` or `./summem/summem`). Probe B skipped a second root wake.
-- Advisory (non-blocking): catalog lines still look like commands, so Probe A also pulled dogfood. Out of this rework’s scope.
+- Advisory (non-blocking at QA): catalog lines still look like commands, so Probe A also pulled dogfood. Out of the rework plan’s scope.
+- After reflect, operator asked to fix that: catalog is now a labeled `./path` list, not `wake --path` commands. pytest 206.
 - Nested-store driver symlink was a preflight radical-innovation advisory. Build correctly did not add it.
