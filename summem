@@ -1019,7 +1019,7 @@ def main(argv: list[str] | None = None) -> int:
         footer = "You are up to speed.\n"
         if cat:
             if doc:
-                sys.stdout.write(cat + "\n== Project-root memories ==\n" + doc + footer)
+                sys.stdout.write(cat + "\n== Project-root Memories ==\n" + doc + footer)
             else:
                 sys.stdout.write(cat + footer)
         else:
