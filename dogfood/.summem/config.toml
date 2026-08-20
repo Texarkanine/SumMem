@@ -1,0 +1,3 @@
+# SumMem per-store knobs. Missing names mean script defaults.
+# ENTRY_CHARS = 280
+WAKE_LINES = 4
