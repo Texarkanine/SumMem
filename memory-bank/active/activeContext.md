@@ -1,12 +1,12 @@
 # Active Context
 
 ## Current Task: docs-sunset
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Fresh `/niko`: no in-flight `memory-bank/active/`.
-- Intent confirmed: sunset VISION/ROADMAP; leftovers are any relevant leftover (not architecture-only); architecture page for algorithm + store layout is expected unless triage finds none.
-- Complexity: Level 2. Documentation enhancement of one docs surface (README + memory-bank + `docs/`). Product architecture unchanged. User already constrained shape (mkdocs-shaped markdown, not a site).
+- Classified Level 2.
+- Planned a prose/policy sunset: triage VISION/ROADMAP, write `docs/architecture/index.md` (algorithm + store layout), `docs/notes.md` leftovers, `docs/index.md` landing, sibling-genre README, reconcile persistent memory-bank, delete the two files.
+- No new executable behavior; no new tests.
 
 ## Next Step
-- Load the Level 2 workflow and execute the plan phase.
+- Preflight validation.
