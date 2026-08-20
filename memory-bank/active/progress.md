@@ -25,3 +25,13 @@ Tweak `prompt_text()` and the committed `AGENTS.md` block so agents `git add` an
     - Assert contract tokens, not the full closer
 * Insights
     - Wake/recall already forbid git in CLI output; that stays. The leak was the activation block, not the CLI.
+
+## 2026-08-19 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Validated Level 2 plan against TDD and codebase conventions
+    - Wrote .preflight-status
+* Decisions made
+    - Plan is PASS. TDD encoding is correct, and conflict detection passes since the plan explicitly narrows the "never mention git" rule to apply only to CLI output.
+* Insights
+    - The plan's approach to use "the files the script just wrote" avoids leaking store paths while still enabling agents to track notes.

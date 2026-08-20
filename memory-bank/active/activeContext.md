@@ -1,10 +1,10 @@
 # Active Context
 
 ## Current Task: prompt-commit-notes
-**Phase:** PLAN - COMPLETE
+**Phase:** PREFLIGHT - COMPLETE (PASS)
 
 ## What Was Done
-- Level 2 plan: TDD on `prompt_text()` publish tokens in `tests/test_init.py`; rewrite Register Memories closer; lockstep `AGENTS.md`; fix `techContext.md`; narrow productContext/atlas so CLI stays git-silent and the activation block may teach publish.
+- Preflight validation passed. The plan correctly encodes TDD steps and safely narrows the "no git" rule to CLI output while enabling the prompt to teach publishing.
 
 ## Next Step
-- Preflight validation
+- Build phase
