@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: agents-prompt
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
 - Added `summem init`: help-shaped, prints baked `prompt_text()`.
@@ -21,4 +21,4 @@
 - `/home/mobaxterm/git/SumMem/memory-bank/techContext.md`
 
 ## Next Step
-- QA review.
+- Run `/niko-reflect`.

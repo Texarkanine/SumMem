@@ -52,3 +52,15 @@ Bake a SumMem agent prompt into the driver, print it from `summem init`, land it
 * Insights
     - Cheap agents treat a catalog line that is only `summem wake --path dogfood` as something to run now. The prompt now says pull when you work under that path. The catalog still prints the bare command.
 
+## 2026-08-19 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Reviewed the build against the approved Level 2 plan, project brief, issue #2, and established system patterns.
+    - Confirmed the CLI implementation, baked prompt, repository lockstep, documentation updates, and Composer probe results are complete and acceptable as-is.
+    - Ran the full test suite: 204 passed.
+* Decisions made
+    - QA passed with no required build or plan changes.
+    - Recorded the repo-root executable spelling as an advisory only: the prompt identifies the driver and the instrumented agent successfully inferred `./summem` when needed.
+* Insights
+    - The implementation remains direct: `prompt_text()` is the single prompt source, `init_text()` only adds the operator recipe, and the lockstep test prevents repository drift.
+

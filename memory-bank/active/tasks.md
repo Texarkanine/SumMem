@@ -116,4 +116,10 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
+
+## QA Result
+
+- PASS: implementation matches the approved plan and issue #2 contracts.
+- Full test suite: 204 passed.
+- Advisory only: repo-root `summem` may require `./summem` when it is not on `PATH`; the instrumented agent inferred this successfully.
