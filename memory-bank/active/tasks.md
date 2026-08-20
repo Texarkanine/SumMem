@@ -11,4 +11,7 @@
 
 ## QA Result
 
-- **Status:** FAIL then rebuild (heading, then settings wording). Operator wants both. Re-QA.
+- **Status:** PASS. 207 tests pass on Python 3.11.
+- **Filter:** Operator ruled `VISION.md` and `ROADMAP.md` directional, not gospel. Lockstep findings against those two files do not block.
+- **Verified:** Empty root omits the memories header; catalog and closer still print. Catalog heading consistent in code and tests. Settings wording lockstepped into `systemPatterns.md` and `techContext.md`; `knobs()` unchanged. `AGENTS.md` matches `prompt_text()`.
+- **Advisories:** The wake branch nests three cases where two suffice. The two wake headers disagree on capitalization. `VISION.md` and `ROADMAP.md` still say "knobs" (discarded by the filter).

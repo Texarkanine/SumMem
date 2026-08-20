@@ -1,0 +1,32 @@
+PASS
+
+Task: empty-root-header (Level 1)
+Date: 2026-08-19
+
+Scope reviewed: b0bf5e9..HEAD — `summem`, `tests/test_scopes.py`, `tests/test_proof_scopes.py`,
+`tests/test_init.py`, `AGENTS.md`, `VISION.md`, `memory-bank/systemPatterns.md`,
+`memory-bank/techContext.md`.
+
+Operator filter applied: findings whose only force is `VISION.md` / `ROADMAP.md` disagreement with
+code, briefing, or prompt do not block. Those two files are directional and slated for sunset;
+standing docs are README + memory-bank.
+
+Verified:
+- Empty root document omits `== Project-root memories ==`; catalog and closer still print.
+- Catalog-plus-notes still prints both headers, catalog first. Pull wake unchanged. Empty catalog
+  unchanged.
+- Catalog heading `== Additional SumMem Catalogs ==` is consistent across `summem`,
+  `tests/test_scopes.py`, `tests/test_proof_scopes.py`. No stale `== Additional memory catalogs ==`
+  outside archived progress history.
+- `CONFIG_TEMPLATE` settings/values wording is lockstepped into `memory-bank/systemPatterns.md`
+  ("Settings live in the store") and `memory-bank/techContext.md`. `knobs()` deliberately unchanged.
+- `AGENTS.md` note-policy sentence matches `prompt_text()`; lockstep test enforces it.
+- Full suite on Python 3.11: 207 passed.
+
+Advisories (non-blocking):
+- `main()` wake branch nests three cases where two suffice; `cat + doc + footer` already covers the
+  empty-document case.
+- Heading capitalization is inconsistent between the two wake headers (title case vs sentence case).
+  Operator-chosen string; noted only.
+- `VISION.md` still states the "Knobs live in the store" invariant. Discarded per operator filter.
+- `ROADMAP.md` still says "config knobs" / "Per-store knobs". Discarded per operator filter.

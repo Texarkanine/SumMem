@@ -1,12 +1,12 @@
 # Active Context
 
 ## Current Task: empty-root-header
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
-- Empty-root omits the memories header. Catalog heading is `== Additional SumMem Catalogs ==`.
-- Operator wording: config comment is settings/values. Briefing and VISION lockstep. `knobs()` stays the loader name.
-- AGENTS.md note sentence matches `prompt_text()`.
+- Empty-root omits `== Project-root memories ==`. Catalog heading is `== Additional SumMem Catalogs ==`.
+- Config comment is settings/values; briefing lockstepped. `knobs()` unchanged.
+- QA PASS. VISION/ROADMAP findings discarded (directional; sunset next).
 
 ## Next Step
-- QA
+- Level 1 wrap-up. No reflect, no archive.

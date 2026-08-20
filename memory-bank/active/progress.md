@@ -283,3 +283,26 @@ Omit `== Project-root memories ==` when the root decaying document is empty.
     - Wording tweaks in this rework are in scope. Do not revert operator strings.
 * Insights
     - Adding the whole `summem` file also committed the template comment. Ask before treating a dirty string as a defect.
+
+## 2026-08-19 - QA - COMPLETE (PASS)
+
+* Work completed
+    - QA PASS. Operator filter: VISION/ROADMAP disagreements do not block. 207 pytest.
+* Decisions made
+    - VISION and ROADMAP are directional, not gospel. Next task sunsets them for README + memory-bank.
+* Insights
+    - Two wake headers disagree on capitalization (operator-chosen). `knobs()` stays the loader name.
+
+## 2026-08-19 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Reviewed `b0bf5e9..HEAD` against the Level 1 empty-root-header task: wake print condition, catalog heading rename, settings wording, `AGENTS.md` / `prompt_text()` lockstep.
+    - Confirmed the catalog heading is consistent across `summem` and both scope test modules, and that the settings wording reached `systemPatterns.md` and `techContext.md`.
+    - Ran the full suite on Python 3.11: 207 passed.
+* Decisions made
+    - QA passed. No build or plan rerun.
+    - Applied the operator's filter: `VISION.md` and `ROADMAP.md` are directional and slated for sunset, so their remaining "knobs" wording is an advisory, not a blocker.
+    - Kept the wake-branch shape and the heading capitalization mismatch as advisories; both are operator-chosen or cosmetic.
+* Insights
+    - Standing documentation for this repo is now README plus `memory-bank/`. Terminology lockstep is judged against those, not against `VISION.md`.
+    - `cat + doc + footer` already renders the empty-document case, so the third branch in `main()` is redundant rather than wrong.
