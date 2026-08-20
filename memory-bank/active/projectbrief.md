@@ -50,3 +50,7 @@ We write the same block at the top of our `AGENTS.md` and check that cheap Compo
 Onboarding: the operator places `.summem/summem`, runs `init`, pastes that prompt into `AGENTS.md`, then the repository has memory. This repo’s record is repo-root `summem`; `.summem/summem` and dogfood’s driver symlink to it.
 
 Align the baked prompt, this repo’s `AGENTS.md`, and docs (`VISION.md`, `ROADMAP.md`, persistent memory-bank) with that story: agents invoke `.summem/summem`. Presence of a driver is still not activation; the `AGENTS.md` block is.
+
+## Rework
+
+Omit `== Project-root memories ==` when the root decaying document is empty. That header exists only to split a catalog from a document. If there is a catalog and no root notes, print the catalog and the closer. Catalog-first stays. Do not put `wake --path` in the catalog heading.

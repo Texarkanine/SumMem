@@ -214,3 +214,12 @@ Rework: `ensure_store` must not copy the driver. Align the baked prompt, `AGENTS
     - Did not add nested-store driver symlinks.
 * Insights
     - A catalog line that is only a shell command will be executed. Label it and print paths.
+
+## 2026-08-19 - REWORK - INITIATED
+
+* Work completed
+    - Operator requested a teeny rework: omit `== Project-root memories ==` when the root decaying document is empty.
+* Decisions made
+    - Catalog-first stays. Catalog heading stays a label (no `wake --path`). Wake is a document, not a script.
+* Insights
+    - Empty root currently prints the header and glues `You are up to speed.` under it like a memory.
