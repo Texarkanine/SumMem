@@ -49,3 +49,13 @@ Ship the baked agent prompt as a repository file so onboarding does not depend o
     - Did not take the advisory to split `init` recipe onto stderr
 * Insights
     - Contributor-facing comments can re-teach a rejected onboarding path even when CLI output is fixed
+
+## 2026-08-20 - PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+
+* Work completed
+    - Re-ran preflight checks on the updated plan
+    - Wrote `.preflight-status` with `PASS WITH ADVISORY`
+* Decisions made
+    - Plan is now acceptable for build phase
+* Insights
+    - Added an advisory to consider adding a `--raw` flag to `init` (or making it the default when stdout is not a tty) to make redirection a perfect onboarding path

@@ -1,12 +1,12 @@
 # Active Context
 
 ## Current Task: ship-prompt-file
-**Phase:** PLAN - COMPLETE
+**Phase:** BUILD - IN-PROGRESS
 
 ## What Was Done
 - Classified #19 as Level 2.
-- Planned: ship `docs/agents-prompt.md` lockstep with `prompt_text()`; `init` keeps printing (redirect is wrap-safe) but stops saying paste; README onboard copies the file; restore `AGENTS.md` wrap-damaged spaces.
-- Preflight FAIL (fixable): scheduled docstring updates so `prompt_text()`, `init_text()`, and `test_agents_md_starts_with_prompt_text` no longer teach "paste".
+- Planned: ship `docs/agents-prompt.md` lockstep with `prompt_text()`; `init` keeps printing but stops saying paste; README onboard copies the file; restore `AGENTS.md` wrap-damaged spaces; drop leftover "paste" docstrings.
+- Preflight PASS WITH ADVISORY. Did not take `--raw` / non-tty split.
 
 ## Next Step
-- Re-run preflight.
+- Execute the implementation plan in TDD order.

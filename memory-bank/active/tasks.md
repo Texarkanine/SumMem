@@ -82,6 +82,6 @@ No new technology - validation not required
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight (re-run after docstring-wording fix)
+- [x] Preflight (PASS WITH ADVISORY; did not take `--raw` / tty split)
 - [ ] Build
 - [ ] QA
