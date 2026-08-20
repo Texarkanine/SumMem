@@ -84,3 +84,14 @@ Ship the baked agent prompt as a repository file so onboarding does not depend o
     - Retained the preflight redirect advisory as non-blocking because the shipped file is the primary onboarding path
 * Insights
     - The lockstep test makes `docs/agents-prompt.md` a maintained interface rather than a drifting documentation copy
+
+## 2026-08-20 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-ship-prompt-file.md`
+    - Reconciled persistent files (no further edits)
+* Decisions made
+    - Most-elegant form is what we built: file is the artifact, `init` is a reprint
+* Insights
+    - Selecting a wrapping terminal is a different failure than wrong bytes
+    - Retiring a word from the operator path includes docstrings
