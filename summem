@@ -919,9 +919,7 @@ Otherwise run `{AGENT_BIN} wake` from the repository root.
 
 ## While Working: Register Memories (Mandatory)
 
-`{AGENT_BIN} note "…"` records one short line. Call it whenever you learn a fact about this project that another contributor would still need: designs, decisions, invariants, and the like.
-
-A note must still be true after a fresh clone on another machine. Personal, machine-local, and user preference facts stay out. If `note` asks for a nap, do that nap before your next action.
+`{AGENT_BIN} note "…"` records one short line. Call it whenever you learn a fact about this project that another contributor would still need: designs, decisions, invariants, and the like. A note must still be true after a fresh clone on another machine. Personal, machine-local, and user preference facts stay out. If `note` asks for a nap, do that nap before your next action.
 
 Do not register redundant memories.
 
