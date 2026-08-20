@@ -35,3 +35,16 @@ Tweak `prompt_text()` and the committed `AGENTS.md` block so agents `git add` an
     - Plan is PASS. TDD encoding is correct, and conflict detection passes since the plan explicitly narrows the "never mention git" rule to apply only to CLI output.
 * Insights
     - The plan's approach to use "the files the script just wrote" avoids leaking store paths while still enabling agents to track notes.
+
+## 2026-08-19 - BUILD - COMPLETE
+
+* Work completed
+    - TDD: `test_prompt_text_teaches_git_publish` red then green
+    - `prompt_text()` / `AGENTS.md` closer: script-only-writer, then `git add` and commit
+    - `techContext.md`, `productContext.md`, architecture change-surface row
+    - 208 pytest
+* Decisions made
+    - Wording: "After `note` or `nap`, `git add` the files the script just wrote."
+    - No `notes/` or `naps/` in the prompt
+* Insights
+    - None beyond the plan

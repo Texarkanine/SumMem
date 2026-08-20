@@ -75,6 +75,21 @@ def test_prompt_text_invariants():
     assert "./summem/summem" not in prompt
 
 
+def test_prompt_text_teaches_git_publish():
+    """prompt_text() tells agents to git add/commit files the script wrote; script stays the only writer."""
+    m = load_summem()
+    prompt = m.prompt_text()
+    lower = prompt.lower()
+    assert "git add" in prompt
+    assert "commit" in lower
+    assert "the tool manages them" not in prompt
+    assert "invent filenames" in lower
+    assert "rewrite" in lower
+    assert "the only writer" in lower
+    assert "notes/" not in prompt
+    assert "naps/" not in prompt
+
+
 def test_agents_md_starts_with_prompt_text():
     """This repo's AGENTS.md starts with prompt_text() so the paste does not drift."""
     m = load_summem()

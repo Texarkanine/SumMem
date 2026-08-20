@@ -25,7 +25,7 @@ Tweak `prompt_text()` so agents `git add` and commit the files the script just w
 
 ## Implementation Plan
 
-### 1. Prompt publish instruction — executable
+### 1. Prompt publish instruction — executable — done
 
 - Files: `tests/test_init.py`, `summem` (`prompt_text`), `AGENTS.md`
 
@@ -34,14 +34,14 @@ Tweak `prompt_text()` so agents `git add` and commit the files the script just w
 3. Write tests and run red: `assert "git add" in prompt` and `assert "commit" in prompt.lower()`; assert the writer-only constraint is present; `assert "the tool manages them" not in prompt`; existing `.summem/summem` / no-FIRST invariants stay. Run `uv run --python 3.11 --with pytest pytest tests/test_init.py` — new asserts fail.
 4. Write code and run green: rewrite the Register Memories closer in `prompt_text()` so the script remains the only writer and agents `git add` the files it just wrote, then commit with the rest of the work or as their own commit. Do not name `notes/`, `naps/`, or hashes. Copy the new `prompt_text()` into the top of `AGENTS.md`. Do not teach `usage_text` or CLI prints to mention git.
 
-### 2. techContext store-data sentence — prose/policy
+### 2. techContext store-data sentence — prose/policy — done
 
 - Files: `memory-bank/techContext.md`
 - No tests: prose/policy artifact
 
 1. Replace "Generated store data in this repository is ignored." with a sentence that matches the tree: this repo commits `.summem/notes/` (and naps when present); `.gitignore` does not ignore them.
 
-### 3. Agent-interface briefing — prose/policy
+### 3. Agent-interface briefing — prose/policy — done
 
 - Files: `memory-bank/productContext.md`, `docs/architecture/index.md`
 - No tests: prose/policy artifact
@@ -78,5 +78,5 @@ No new technology - validation not required
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
 - [x] Preflight
-- [ ] Build
+- [x] Build
 - [ ] QA
