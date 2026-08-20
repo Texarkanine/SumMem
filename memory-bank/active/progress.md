@@ -36,3 +36,19 @@ Bake a SumMem agent prompt into the driver, print it from `summem init`, land it
     - Validated that the `AGENTS.md` lockstep test is a valid cross-file contract test, not a change-detector.
 * Insights
     - The plan's test coverage appropriately handles all required aspects without change-detector tests.
+
+## 2026-08-19 - BUILD - COMPLETE
+
+* Work completed
+    - `summem init` prints paste recipe + `prompt_text()`; works outside a repo; no `--path`; catalog names it.
+    - `AGENTS.md` starts with the same prompt. `CLAUDE.md` still `@AGENTS.md`.
+    - VISION CLI/Activation, ROADMAP Later, systemPatterns, techContext updated.
+    - Composer 2.5 Probe A: ran `./summem wake` from repo root, then `wake --path dogfood` because the catalog prints a bare command. Probe B: skipped second root wake. Tightened prompt pull sentence after A.
+    - 204 pytest passed.
+* Decisions made
+    - `init` is handled before `resolve_parent`.
+    - Prompt heading `## SumMem`. Did not name `.summem/summem` even to forbid it (substring test).
+    - Did not change catalog_text; that VISION miss is outside issue #2.
+* Insights
+    - Cheap agents treat a catalog line that is only `summem wake --path dogfood` as something to run now. The prompt now says pull when you work under that path. The catalog still prints the bare command.
+

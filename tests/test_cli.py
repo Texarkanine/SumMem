@@ -67,7 +67,7 @@ def test_nap_subcommand_writes_and_wake_reads(tmp_path, monkeypatch, capsys):
 
 
 def test_path_flag_is_known_on_all_non_start_commands(tmp_path, monkeypatch):
-    """--path is accepted on wake, note, nap, zoom, and recall, and rejected on start."""
+    """--path is accepted on wake, note, nap, zoom, and recall, and rejected on start and init."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
@@ -80,6 +80,7 @@ def test_path_flag_is_known_on_all_non_start_commands(tmp_path, monkeypatch):
     assert m.main(["zoom", "--path", ".", nap_id]) != 2
     assert m.main(["recall", "--path", ".", "hello"]) == 0
     assert m.main(["start", "pkg", "--path", "."]) != 0
+    assert m.main(["init", "--path", "."]) != 0
 
 
 def test_note_without_text_fails(tmp_path, monkeypatch):
@@ -234,12 +235,14 @@ def test_bare_invocation_prints_command_catalog(capsys):
     captured = capsys.readouterr()
     text = captured.out + captured.err
     assert catalog in text
-    lines = {name: ln for ln in catalog.splitlines() for name in ("wake", "note", "nap", "zoom", "recall", "start") if f"summem {name}" in ln}
+    lines = {name: ln for ln in catalog.splitlines() for name in ("wake", "note", "nap", "zoom", "recall", "start", "init") if f"summem {name}" in ln}
     for name in ("wake", "note", "nap", "zoom", "recall"):
         assert name in lines
         assert "--path" in lines[name]
     assert "start" in lines
     assert "--path" not in lines["start"]
+    assert "init" in lines
+    assert "--path" not in lines["init"]
 
 
 def test_help_flag_prints_catalog(capsys):

@@ -51,7 +51,7 @@ Git’s job is to merge a directory of files. It is not a timestamp server and n
 
 The interface does not mention store files, hashes as paths, or git. It must stay stable if the backend changes. It does mention `--path`, which is how the agent aims a command at work in the tree.
 
-Every command except `start` takes an optional `--path <relative_path>`. The script walks from that path (or from `$PWD` if the flag is omitted) up to the nearest store and uses that store. `--path` may be a file: `summem note --path foo/packages/baz/fee.ts "…"` walks from `foo/packages/baz` and lands in `foo/packages/baz` if that directory was `start`ed, else further up, at least to the git root.
+Every command except `start` and `init` takes an optional `--path <relative_path>`. The script walks from that path (or from `$PWD` if the flag is omitted) up to the nearest store and uses that store. `--path` may be a file: `summem note --path foo/packages/baz/fee.ts "…"` walks from `foo/packages/baz` and lands in `foo/packages/baz` if that directory was `start`ed, else further up, at least to the git root.
 
 | Command | Contract |
 |---|---|
@@ -61,6 +61,7 @@ Every command except `start` takes an optional `--path <relative_path>`. The scr
 | `recall <regex>` | Search the resolved store word for word. |
 | `zoom <id>` | Open that block into its two halves, down to raw notes. A content id a wake printed. |
 | `start <dir>` | Create a store **in that directory** (no walk-up) and write a default config. Operator command; agents run it only when asked to start a package. |
+| `init` | Print the baked agent prompt and a paste-at-top-of-`AGENTS.md` recipe. Not a store command. No `--path`. Does not write `AGENTS.md`. |
 
 If `note` asks for a nap, the agent does that nap before its next action. Subagents should not `note` as a taste rule so the recent window does not fill with trivia. The store does not depend on that rule.
 
@@ -68,7 +69,7 @@ No “write a file.” No “sort by git.” A later sqlite backend, or a differ
 
 ## Scopes
 
-A command resolves **one** store: from `--path` if given, otherwise from `$PWD`, walk toward the git root and take the first directory that already has a store. Do not create a store because the agent `note`d from a deep folder or passed a file under one. Outside a repository, every store command fails, including `start`.
+A command resolves **one** store: from `--path` if given, otherwise from `$PWD`, walk toward the git root and take the first directory that already has a store. Do not create a store because the agent `note`d from a deep folder or passed a file under one. Outside a repository, every store command fails, including `start`. `init` and help still print.
 
 `start <dir>` is the no-walk-up exception inside a repository: it creates a store in `<dir>` itself.
 
@@ -84,10 +85,12 @@ OptMem **pushes**: one wake at session start, the whole memory is in context. Na
 
 So SumMem pushes **root**, and makes every other store available to pull.
 
+A repository opts in by putting the block `summem init` prints at the top of committed `AGENTS.md`. Presence of the driver is not activation. `CLAUDE.md` may stay a thin `@AGENTS.md` pointer; do not treat it as an equal paste target.
+
 Session start is still mandatory and once. The first wake must **resolve to the true root** — cwd at the root, or `--path` aimed at the root, not `.` from a package:
 
-> Run `summem wake` from the repository root (or `summem wake --path <root-relative>`) before any other tool call.
-> If you can see a prior **root** SumMem wake in this conversation, do not run the root wake again.
+> Run `summem wake` from the repository root (or `summem wake --path <root>`).
+> If you can see a prior **root** SumMem wake in this conversation, skip the root wake.
 
 That root wake prints two things:
 

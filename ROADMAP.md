@@ -92,7 +92,6 @@ Not required to call the file backend done:
 - Harness hooks. They may nag; they are not how memory loads
 - Full OptMem aligned cover after merge. Equal-grain file requests plus in-memory wake expand are not that rebuild
 - Pack-size cap, unless a `.tree` approaches a host blob warning
-- Shipping the agent prompt or Cursor rule that makes root wake mandatory
 - A filled `README.md`
 
 ## Cross-phase invariants

@@ -2,13 +2,13 @@
 
 ## How This System Works
 
-SumMem is a script that owns a grow-only set of facts in the git tree, and a decaying view of that set. Agents never touch the store. They run `wake`, `note`, `nap`, `recall`, `zoom`, and `start`. Bare invocation and `-h` print a handwritten catalog (`usage_text`); a command registered only with argparse will not appear there. The script assigns names, times, and hashes. The committed driver is repo-root `summem`. `ensure_store` copies it into a store’s `.summem/summem` when that file is missing.
+SumMem is a script that owns a grow-only set of facts in the git tree, and a decaying view of that set. Agents never touch the store. They run `wake`, `note`, `nap`, `recall`, `zoom`, `start`, and `init`. Bare invocation and `-h` print a handwritten catalog (`usage_text`); a command registered only with argparse will not appear there. `init` prints the baked agent prompt; that block at the top of committed `AGENTS.md` is how a repository opts in. The script assigns names, times, and hashes. The committed driver is repo-root `summem`. `ensure_store` copies it into a store’s `.summem/summem` when that file is missing.
 
 The view matches [OptMem](https://github.com/VictorTaelin/OptMem): short notes, a merge tree of summaries, a bounded wake. The store does not. OptMem's one append-only log and position-as-identity cannot survive squash-merge, uninterested conflict resolution, or many writers at once. SumMem keeps the view and replaces the single log with a directory of immutable files.
 
 Ingest is wait-free union: one immutable file per note. Integrate is cooperative: the script may fold a sealed block into a one-line caption plus a self-contained payload, then drop the children from the view. Wake is wait-free: it prints whatever captions exist and never blocks on a missing nap.
 
-A command resolves one store by walking from `--path` or `$PWD` toward the git root and taking the first started directory. Outside a repository, store commands fail; help still prints. Root wake pushes that store's decaying document and a computed catalog of every other started store. A pull (`wake --path`) prints only the nearest store. Child memory in context is advertised, not enforced.
+A command resolves one store by walking from `--path` or `$PWD` toward the git root and taking the first started directory. Outside a repository, store commands fail; `init` and help still print. Root wake pushes that store's decaying document and a computed catalog of every other started store. A pull (`wake --path`) prints only the nearest store. Child memory in context is advertised, not enforced.
 
 `VISION.md` is the design contract. This file is the briefing subset. If the working tree lacks a piece of this model, that is work to build, not a signal that the model is wrong. Change-surface routing lives in `VISION.md` under "Change surfaces".
 
@@ -56,7 +56,7 @@ A missing or conflict-marked caption degrades to grain and unique prefix with no
 
 ## Root pushes; other stores pull
 
-Session start wakes the true root once. That print includes the catalog: walk the tree, honor git ignore (including `.git/info/exclude`), do not keep a committed index. `wake --path` does not reprint root or the full catalog. Do not load every started store in the root wake.
+Session start wakes the true root once, because of the `AGENTS.md` block, not a harness hook. Skip if a root wake is already in the conversation. That print includes the catalog: walk the tree, honor git ignore (including `.git/info/exclude`), do not keep a committed index. `wake --path` does not reprint root or the full catalog. Do not load every started store in the root wake.
 
 ## Knobs live in the store
 

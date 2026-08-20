@@ -1,8 +1,8 @@
 # Tech Context
 
-The first backend specified in `VISION.md` is a Python 3 shebang script at repo-root `summem` that writes ordinary files in git. A store is a `.summem/` directory (not `.mem/` — that name is already taken in this problem space). `ensure_store` copies the driver into that brand directory when missing. Per-store knobs live in `.summem/config.toml`, read with stdlib [`tomllib`](https://docs.python.org/3/library/tomllib.html) (added in 3.11; parse only). Default config is a commented template written as text, not a TOML dump. Agents talk to a stable CLI (`wake`, `note`, `nap`, `recall`, `zoom`, `start`). The on-disk format may later change, including to sqlite; the CLI table in `VISION.md` must not.
+The first backend specified in `VISION.md` is a Python 3 shebang script at repo-root `summem` that writes ordinary files in git. A store is a `.summem/` directory (not `.mem/` — that name is already taken in this problem space). `ensure_store` copies the driver into that brand directory when missing. Per-store knobs live in `.summem/config.toml`, read with stdlib [`tomllib`](https://docs.python.org/3/library/tomllib.html) (added in 3.11; parse only). Default config is a commented template written as text, not a TOML dump. Agents talk to a stable CLI (`wake`, `note`, `nap`, `recall`, `zoom`, `start`, `init`). The on-disk format may later change, including to sqlite; the CLI table in `VISION.md` must not.
 
-This tree is not itself a SumMem store until a working driver is bound to an agentic hook. The committed product is repo-root `summem`. Generated store data in this repository is ignored.
+Activation is the SumMem block at the top of committed `AGENTS.md`. Presence of the driver is not. `init` prints that block. The committed product is repo-root `summem`. Generated store data in this repository is ignored.
 
 ## Environment Setup
 
