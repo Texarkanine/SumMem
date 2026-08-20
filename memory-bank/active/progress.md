@@ -64,3 +64,15 @@ Replace the bare `note is too long` rejection with an OptMem-style ratchet for `
 * Insights
     - `unknown id` is one string and two causes (identity miss vs missing `.tree`)
     - `tests/test_cli.py::test_note_error_text_omits_store_paths_and_git` already owns the CLI over-long note path
+
+## 2026-08-20 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Re-ran Preflight on the rewritten raise-site plan against `summem` call sites and existing tests
+    - First line of `.preflight-status`: `PASS WITH ADVISORY`
+* Decisions made
+    - Plan is acceptable as-is; prior FAIL (fixable) items are resolved
+    - Advisories only: align tight-store byte count with the `toolong` fixture; do not invent a line-627-only zoom fixture; table-driven Unit 2 tests remain optional
+* Insights
+    - `zoom_text` unknown tokens raise from `resolve_id` first; missing-`.tree` is the view-nap loop at line 609
+    - `test_config_entry_chars_is_per_store_for_notes_and_naps` has no `capsys` today and uses 7-byte `toolong`
