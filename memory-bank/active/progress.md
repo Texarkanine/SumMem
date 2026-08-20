@@ -135,4 +135,20 @@ Rework: `ensure_store` must not copy the driver. Align the baked prompt, `AGENTS
     - `.summem/summem` is an uncommitted typechange to a symlink and `dogfood/.summem/summem` is already a committed symlink, so “store drivers symlink to it” needs no plan unit.
     - Proof 1 only caught chevrons in the driver source because `ensure_store` copied it into the scanned store; that guard goes away with the copy.
 
+## 2026-08-19 - PREFLIGHT - COMPLETE (FAIL (fixable))
+
+* Work completed
+    - Revalidated the revised Level 2 rework plan against the implementation, tests, documentation, and project brief.
+    - Swapped unit 1's test-writing step ahead of its premature production deletion, as authorized by Preflight.
+    - Wrote `.preflight-status` with first line `FAIL (fixable)`.
+* Decisions made
+    - Replan before Build: add a concrete Composer 2.5 (not fast) verification of the rewritten prompt.
+    - All earlier path, invariant, dead-code, test-location, and `ROADMAP.md` findings are resolved.
+* Insights
+    - The prior Composer probe exercised the pre-rework prompt and cannot prove the revised `.summem/summem` instructions satisfy requirement 7 and acceptance criterion 5.
+
+## 2026-08-19 - PLAN - COMPLETE
+
+* Work completed
+    - Added unit 4: Composer 2.5 probes of the rewritten prompt. Collapsed unit 1 leftover stub/code overlap.
 

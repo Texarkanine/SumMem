@@ -32,14 +32,13 @@ Strike driver copy from `ensure_store`. Align the baked prompt, this repo’s `A
 - Files: `tests/test_store.py`, `tests/test_wake.py`, `tests/test_scopes.py`, `summem`
 
 1. Stub tests: empty cases that missing driver stays missing; existing driver/symlink unchanged; first wake/note/start do not create `summem`.
-2. Stub interface: `ensure_store` still creates `notes/`, `naps/`, default `config.toml`; delete the driver local and the `if not driver.exists()` branch (no leftover no-op).
-3. Write tests and run red:
+2. Write tests and run red:
    - `test_first_note_creates_config_notes_and_driver`: drop the driver-file assertion; rename if the name still says “and driver”.
    - Add `test_ensure_store_does_not_create_driver`.
    - `test_first_wake_creates_store`: drop `(store / "summem").is_file()`.
    - `test_start_creates_store_in_dir` in `tests/test_scopes.py` (the only `(store / "summem").is_file()` there): drop that assertion.
    - Keep `test_existing_driver_is_not_overwritten` and `test_ensure_store_creates_naps_dir` as no-clobber guards (pre-placed driver still untouched).
-4. Write code and run green: delete the copy/chmod of `driver` in `ensure_store`. Delete unused `import shutil`. Leave `notes/`, `naps/`, and missing-config write.
+3. Write code and run green: in `ensure_store`, delete the driver local, the `if not driver.exists()` branch, the copy/chmod, and unused `import shutil`. Leave `notes/`, `naps/`, and missing-config write.
 
 ### 2. Baked prompt and this repo’s `AGENTS.md` — executable + prose
 
@@ -60,6 +59,18 @@ Strike driver copy from `ensure_store`. Align the baked prompt, this repo’s `A
 3. `systemPatterns.md` / `techContext.md`: stop saying `ensure_store` copies the driver. This repo: record is repo-root `summem`; `.summem/summem` is a symlink. Agents invoke `.summem/summem`.
 4. `ROADMAP.md`: already places the script at `.summem/summem`; no edit.
 5. Do not rewrite archives.
+
+### 4. Instrument Composer 2.5 — prose/policy
+
+- Files: none required
+- No tests: prose/policy artifact (external semantic check, not pytest)
+
+1. After units 1–3, spawn cheap Composer 2.5 (not fast) subagents. Tell them they are a subagent and not to run `memo`. Give them the rewritten SumMem block (`prompt_text()` / top of `AGENTS.md`).
+2. Probe A: no prior root wake in their prompt — do they invoke `.summem/summem` (not repo-root `./summem` or `./summem/summem`) and run a root wake?
+3. Probe B: a prior root wake already in their prompt — do they skip a second root wake?
+4. Record what they did in `progress.md`. If they miss because the prompt is wrong, fix the prompt (and lockstep). Do not treat a confused subagent as a pytest failure.
+
+The earlier Composer probe in this task used the pre-rework prompt and does not count.
 
 ## Technology Validation
 

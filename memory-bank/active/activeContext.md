@@ -4,7 +4,7 @@
 **Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Replanned after preflight FAIL (fixable): one invoke path `.summem/summem`; drop copy leftovers; enumerate prompt invariants; brief requirement 6 updated.
+- Replanned after second preflight FAIL (fixable): added Composer 2.5 verification of the rewritten prompt (unit 4).
 
 ## Next Step
 - Preflight validation of the revised plan.
