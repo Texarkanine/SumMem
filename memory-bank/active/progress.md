@@ -14,3 +14,14 @@ Tweak `prompt_text()` and the committed `AGENTS.md` block so agents `git add` an
     - Self-contained: `prompt_text()`, lockstep `AGENTS.md`, `techContext.md`, and existing init/prompt tests.
 * Insights
     - `productContext.md` still says the agent interface does not mention git. #14 explicitly wants git publish in the prompt. Do not expand scope unless plan or preflight requires a briefing line.
+
+## 2026-08-19 - PLAN - COMPLETE
+
+* Work completed
+    - Wrote Level 2 TDD plan: publish tokens in `test_prompt_text_invariants`, rewrite `prompt_text()` closer, lockstep `AGENTS.md`, fix `techContext.md`, narrow productContext/atlas
+* Decisions made
+    - Retire "the tool manages them"; do not name `notes/` or `naps/` in the prompt
+    - Briefing reconcile is in scope: leaving "never mention git" would be wrong content after the prompt change
+    - Assert contract tokens, not the full closer
+* Insights
+    - Wake/recall already forbid git in CLI output; that stays. The leak was the activation block, not the CLI.
