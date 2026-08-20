@@ -51,3 +51,15 @@ Wire Python coverage collection and Codecov upload (stockroom-style) plus a READ
     - Did not drive the live test from the tox command string (preflight radical, not applied)
 * Insights
     - `--cov=summem` works on the no-suffix shebang; nested `--cov` under `tox -e coverage` needs a clean child env
+
+## 2026-08-20 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Semantic review of codecov-upload against the Level 2 plan, brief AC1–AC5, and stockroom’s Python upload path
+    - Wrote `memory-bank/active/.qa-validation-status` (`PASS`)
+* Decisions made
+    - PASS: implementation is acceptable as-is
+    - Two advisories recorded; neither requires a rebuild
+* Insights
+    - CI extras and codecov.yml `comment` match stockroom, not plan-creep
+    - Live `--cov` argv and the tox command string are still two surfaces (preflight radical not applied)

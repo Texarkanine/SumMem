@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: codecov-upload
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
 - Opt-in `tox -e coverage` writes `coverage/lcov.info` via `pytest-cov --cov=summem`. Default `tox` stays coverage-free; `pytest-cov` is a default tox dep so the live nest can run.

@@ -94,6 +94,18 @@ PoC (2026-08-20, `uvx --with pytest --with pytest-cov --python 3.11`): `pytest t
 - Preflight blocked on CI YAML TDD: already covered by constraint 6 / Challenge.
 - `--cov` landed on every local `tox` run: already covered by the default-suite behavior and `env_list` lock.
 
+## QA Results
+
+PASS. Implementation matches the plan and acceptance criteria. Advisories do not block.
+
+- Completeness: all five plan units are present (`tox -e coverage` → `coverage/lcov.info`, default suite coverage-free, CI upload, README badge, work on `feat/codecov-upload`). No stubs or TODOs.
+- KISS / DRY: dest-dir `Path.mkdir`, nested `--cov` isolation, and split live-emit vs ini-lock tests match the plan and preflight advisories; no extra runner or product-package layer.
+- YAGNI: `workflow_dispatch`, `permissions`, concurrency, and codecov.yml `comment` are stockroom copies (and preflight hygiene), not speculative product features. Make/uv/dual-root flags correctly omitted.
+- Regression / Integrity: default `env_list` and `[testenv] commands` unchanged; `pytest-cov` in default deps as planned; public CLI untouched; `checkout@v7` / `codecov-action@v7` are current majors.
+- Documentation: README badge + Developing note and techContext Testing Process updated; systemPatterns correctly left alone.
+- Advisory (non-blocking): live emit hardcodes `--cov=summem` rather than parsing `[testenv:coverage] commands` (preflight radical, not applied). The ini lock still owns the tox surface.
+- Advisory (non-blocking): `test_default_pytest_does_not_write_lcov` is a weak complement (tmp_path dest is never used by default pytest; ROOT lcov assert is skipped if a leftover file exists). `test_default_tox_commands_have_no_cov` is the real default-suite contract.
+
 ## Status
 
 - [x] Initialization complete
@@ -103,4 +115,4 @@ PoC (2026-08-20, `uvx --with pytest --with pytest-cov --python 3.11`): `pytest t
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
