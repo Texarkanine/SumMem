@@ -81,7 +81,8 @@ def test_prompt_text_teaches_git_publish():
     prompt = m.prompt_text()
     lower = prompt.lower()
     assert "git add" in prompt
-    assert "commit" in lower
+    assert "commit them" in lower
+    assert "own commit" in lower
     assert "the tool manages them" not in prompt
     assert "invent filenames" in lower
     assert "rewrite" in lower

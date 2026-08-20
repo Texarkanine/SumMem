@@ -59,3 +59,13 @@ Tweak `prompt_text()` and the committed `AGENTS.md` block so agents `git add` an
     - Blocking: `assert "commit" in lower` in `test_prompt_text_teaches_git_publish` is satisfied by the unrelated pre-existing phrase `committed AGENTS.md`; deleting the required `Commit them...` sentence would not make the test fail
 * Decision
     - QA FAIL; Build must rerun to make the test specifically protect the commit instruction, then QA must rerun
+
+## 2026-08-19 - BUILD - COMPLETE (rework)
+
+* Work completed
+    - Assert `commit them` and `own commit` instead of `commit`
+    - 208 pytest
+* Decisions made
+    - QA cited `committed AGENTS.md`, which is not in `prompt_text()`. Tighten anyway: a bare `commit` substring is a weak contract.
+* Insights
+    - Token asserts need enough words to name the instruction, not so many they lock the paragraph.

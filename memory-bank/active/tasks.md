@@ -79,7 +79,7 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [x] QA - FAIL
+- [x] QA - FAIL (rework: tighten commit assertion)
 
 ## QA Findings
 
