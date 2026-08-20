@@ -14,3 +14,15 @@ Instrument Release Please for semantically versioned tags, keep `summem` one fil
     - Dependabot is out of scope
 * Insights
     - Stockroom is the closest match: `release-type: simple`, generic extra-files, helper-bot token, no publish job
+
+## 2026-08-20 - PLAN - COMPLETE
+
+* Work completed
+    - Wrote the Level 2 plan: version subcommand, extra-files lockstep, workflow, living docs
+* Decisions made
+    - CLI surface is `summem version`, not `--version` (`init` is the analog)
+    - `__version__ = "0.1.0"` with `x-release-please-version`; `release-type: simple`
+    - Extra-files target repo-root `summem` only
+    - No Dependabot, no CHANGELOG stub, no publish job
+* Insights
+    - Existing catalog and `--path` tests list a closed command set and must be extended in Unit 1
