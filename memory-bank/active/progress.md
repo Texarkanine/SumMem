@@ -32,3 +32,14 @@ Add tox as the one documented pytest command, covering CPython 3.11 through curr
 * Insights
     - Factor-style `env_list` is harder to assert with stdlib configparser; the plan uses an explicit comma list
     - A pytest case that subprocesses tox would recurse once the suite runs under tox
+
+## 2026-08-19 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Validated the implementation plan against codebase reality and rules
+    - `.preflight-status` is PASS
+* Decisions made
+    - Plan is sound and follows TDD strictly
+    - No change-detectors found in the test plan
+* Insights
+    - The plan correctly distinguishes between executable units and prose/policy artifacts
