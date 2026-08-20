@@ -94,4 +94,15 @@ Rework: `ensure_store` must not copy the driver. Align the baked prompt, `AGENTS
 * Insights
     - Tests that expect a first note to create `.summem/summem` are now wrong, not incomplete.
 
+## 2026-08-19 - PLAN - COMPLETE
+
+* Work completed
+    - Wrote Level 2 rework plan: no driver copy; prompt lockstep; VISION/memory-bank docs.
+* Decisions made
+    - Nested `start` does not get a driver. Agents run root `.summem/summem` and pass `--path`.
+    - Catalog still says `summem`; the prompt says `.summem/summem`.
+    - Fix `./summem/summem` in the operator draft to `.summem/summem`.
+* Insights
+    - “Store exists” tests that check for a `summem` file were testing the copy.
+
 
