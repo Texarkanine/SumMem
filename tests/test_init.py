@@ -7,16 +7,30 @@ from pathlib import Path
 from conftest import ROOT, load_summem
 
 
-def test_init_prints_paste_recipe_and_prompt(capsys):
-    """main(['init']) exits 0 and prints the paste recipe plus prompt_text()."""
+def test_init_prints_recipe_and_prompt(capsys):
+    """main(['init']) exits 0 and prints the insert recipe plus prompt_text()."""
     m = load_summem()
     prompt = m.prompt_text()
     assert m.main(["init"]) == 0
     out = capsys.readouterr().out
     assert "AGENTS.md" in out
+    assert m.PROMPT_DOC in out
     assert prompt
     assert prompt in out
+    assert "paste" not in out.lower()
     assert "AGENTS.md or CLAUDE.md" not in out
+
+
+def test_usage_init_line_does_not_say_paste():
+    """usage_text() init catalog line does not tell the operator to paste."""
+    m = load_summem()
+    lines = [
+        ln
+        for ln in m.usage_text().splitlines()
+        if f"{m.CLI_NAME} init" in ln
+    ]
+    assert lines
+    assert "paste" not in lines[0].lower()
 
 
 def test_init_outside_repository_writes_nothing(tmp_path, monkeypatch, capsys):
@@ -93,8 +107,15 @@ def test_prompt_text_notes_are_part_of_the_work():
 
 
 def test_agents_md_starts_with_prompt_text():
-    """This repo's AGENTS.md starts with prompt_text() so the paste does not drift."""
+    """This repo's AGENTS.md starts with prompt_text() so the shipped prompt does not drift."""
     m = load_summem()
     agents = Path(ROOT, "AGENTS.md").read_text(encoding="utf-8")
     prompt = m.prompt_text().strip()
     assert agents.startswith(prompt)
+
+
+def test_shipped_prompt_matches_prompt_text():
+    """docs/agents-prompt.md is exactly prompt_text() so installers copy a lockstep file."""
+    m = load_summem()
+    shipped = Path(ROOT, m.PROMPT_DOC).read_text(encoding="utf-8")
+    assert shipped == m.prompt_text()
