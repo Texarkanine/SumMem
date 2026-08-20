@@ -2,5 +2,5 @@
 
 **Current Task:** version-tracking
 **Phase:** PLAN - COMPLETE
-**What Was Done:** Level 2 plan for [SumMem#20](https://github.com/Texarkanine/SumMem/issues/20). `summem version` (not `--version`) prints `__version__`. Release Please `simple` + generic extra-files on repo-root `summem`. Stockroom helper-bot workflow. No Dependabot. No CHANGELOG stub.
+**What Was Done:** Re-planned after preflight FAIL. Operator overruled treating `.github/workflows/release-please.yaml` as product TDD: SumMem is not a GitHub Action; the workflow only invokes Release Please. Unit 3 stays prose/policy. CLI and extra-files lockstep unchanged.
 **Next Step:** Preflight validation.

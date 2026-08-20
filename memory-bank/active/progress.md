@@ -26,3 +26,22 @@ Instrument Release Please for semantically versioned tags, keep `summem` one fil
     - No Dependabot, no CHANGELOG stub, no publish job
 * Insights
     - Existing catalog and `--path` tests list a closed command set and must be extended in Unit 1
+
+## 2026-08-20 - PREFLIGHT - COMPLETE
+
+* Result
+    - `FAIL (blocking)`
+* Findings
+    - The Release Please workflow is executable configuration, not prose/policy; its implementation unit has no test-first steps and violates the blocking TDD plan-encoding gate
+    - CLI and Release Please lockstep units otherwise match existing code, test, and sibling-repository conventions
+    - Advisory: consider deriving parser registration, `_COMMANDS`, and catalog rows from one declarative command registry
+
+## 2026-08-20 - PLAN - COMPLETE
+
+* Work completed
+    - Re-planned after the blocking preflight: unit 3 stays prose/policy
+* Decisions made
+    - Operator ruling: GitHub Actions that only invoke a third-party action are not executable product behavior for TDD in this repo. TDD would apply if the product were an Action
+    - Did not take the command-registry advisory
+* Insights
+    - always-tdd’s “workflow the product runs” means product-owned executable config, not a consumer YAML for someone else’s Action

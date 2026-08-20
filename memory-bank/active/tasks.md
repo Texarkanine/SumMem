@@ -57,6 +57,8 @@ Instrument [SumMem#20](https://github.com/Texarkanine/SumMem/issues/20): Release
 
 ### 3. Release Please workflow — prose/policy
 
+Operator ruling 2026-08-20: this YAML only *invokes* a third-party action. That is not executable product behavior for TDD here. TDD would apply if SumMem were a GitHub Action.
+
 - Files: `.github/workflows/release-please.yaml`
 - No tests: prose/policy artifact
 
@@ -91,13 +93,15 @@ No new technology - validation not required. Release Please and the helper-app t
 - `release-type: python` expects a package layout we do not have: use `simple` plus generic extra-files.
 - Extra-files aimed at `.summem/summem` would edit a symlink: target repo-root `summem` only.
 - Existing catalog / `--path` tests name a closed command set: extend those cases in Unit 1 so they do not fight the new command.
-- Asserting the whole config or workflow YAML would be a change-detector: test only marker, lockstep, and the generic path.
+- Asserting Release Please JSON as a snapshot would be a change-detector: test only marker, lockstep, and the generic path.
+- A later preflight may call the workflow “configuration or workflow the product runs”: it does not. The product is the script. See the operator ruling on unit 3. Do not add workflow tests.
 
 ## Pre-Mortem
 
 - Operators type `summem --version` and get argparse failure: already covered — the CLI is a subcommand catalog; `init` is the analog. One surface: `version`.
 - First release never bumps the script: already covered by Challenge on extra-files path and the lockstep/marker tests.
 - Preflight rejects a JSON snapshot test: already covered by Challenge on change-detectors.
+- Preflight blocks again on missing workflow tests: already covered by the operator ruling on unit 3. Keep unit 3 prose/policy.
 - Starting at `0.1.0` surprises someone who wanted `1.0.0`: keep `0.1.0` (no prior tag; sibling `bump-minor-pre-major` applies). Do not add a second version source to “look official.”
 
 ## Status
