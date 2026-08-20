@@ -64,3 +64,14 @@ Bake a SumMem agent prompt into the driver, print it from `summem init`, land it
 * Insights
     - The implementation remains direct: `prompt_text()` is the single prompt source, `init_text()` only adds the operator recipe, and the lockstep test prevents repository drift.
 
+## 2026-08-19 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-agents-prompt.md`.
+    - productContext: outside a repository, help and `init` still print.
+* Decisions made
+    - Catalog-as-command is a later VISION fix, not a reflect-time rewrite.
+* Insights
+    - Cheap agents run a catalog line that is only a command. Lockstep `prompt_text()` into `AGENTS.md` is the right activation shape.
+
+
