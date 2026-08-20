@@ -26,3 +26,26 @@ Ship the baked agent prompt as a repository file so onboarding does not depend o
     - Do not hard-wrap the shipped file; do not have `init` write `AGENTS.md`
 * Insights
     - Redirecting `init` is wrap-safe; selecting the screen is the defect
+
+## 2026-08-20 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Validated the plan against the CLI, tests, onboarding docs, architecture, TDD rules, and project conventions
+    - Wrote `.preflight-status` with `FAIL (fixable)`
+* Decisions made
+    - Build remains gated until the plan schedules removal of stale “paste” wording from the affected code and retained test docstrings
+    - Kept stdout/stderr separation for exact redirect output as an advisory rather than changing the plan
+* Insights
+    - The proposed shipped-file equality test is a valid cross-file lockstep contract, not a prose change-detector
+    - The implementation structure otherwise preserves the standalone-driver, no-write, and public CLI contracts
+
+## 2026-08-20 - PLAN - COMPLETE
+
+* Work completed
+    - Replanned after preflight FAIL (fixable)
+    - Scheduled docstring rewrites: `prompt_text()` ("pasted"), `init_text()` ("paste recipe"), `test_agents_md_starts_with_prompt_text` ("the paste does not drift")
+* Decisions made
+    - Those lines are instructional comments, not new executable behavior; no change-detector on docstring text
+    - Did not take the advisory to split `init` recipe onto stderr
+* Insights
+    - Contributor-facing comments can re-teach a rejected onboarding path even when CLI output is fixed

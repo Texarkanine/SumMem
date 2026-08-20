@@ -1,0 +1,9 @@
+FAIL (fixable)
+
+The plan is complete enough to implement, follows the required test-first order for both executable units, uses the existing pytest/tox infrastructure, and preserves the standalone-driver and write-nothing contracts. The shipped-file equality test is a legitimate cross-file lockstep contract, not a prose change-detector.
+
+Fixable finding: the plan removes “paste” from the CLI recipe and onboarding path but does not schedule updates to the stale contributor-facing wording in `summem` (`prompt_text()` says “pasted” and `init_text()` says “paste recipe”) or the retained `test_agents_md_starts_with_prompt_text` docstring (“so the paste does not drift”). Add these surgical wording updates to the relevant implementation steps before Build so the code and test documentation do not continue teaching the rejected workflow.
+
+Convention, dependency, conflict, and public-interface checks otherwise pass. `PROMPT_DOC` fits the existing module-level constant pattern; `docs/agents-prompt.md` is correctly distinct from this repository's extended `AGENTS.md`; the plan accounts for README, architecture, catalog, CLI output, and the existing no-write behavior.
+
+Advisory — radical innovation: split `init` into a recipe on stderr and exact `prompt_text()` bytes on stdout (for example, `init_recipe_text()` → stderr and `prompt_text()` → stdout). Then `.summem/summem init > agents-prompt.md` would produce a directly insertable file while an interactive invocation would still show guidance. This is a larger CLI-output redesign and is not required for the current acceptance criteria; do not add it without operator approval.

@@ -32,7 +32,7 @@ Ship the baked agent prompt as `docs/agents-prompt.md` (exact `prompt_text()`) s
 1. Stub tests: add `test_shipped_prompt_matches_prompt_text` in `tests/test_init.py` (empty body). Keep `test_agents_md_starts_with_prompt_text`.
 2. Stub interface: add `PROMPT_DOC = "docs/agents-prompt.md"` next to `AGENT_BIN` in `summem`.
 3. Write tests and run red: `Path(ROOT, m.PROMPT_DOC).read_text(encoding="utf-8") == m.prompt_text()`. Do not assert on prompt wording. Run `tox -e py311 -- tests/test_init.py::test_shipped_prompt_matches_prompt_text` — expect fail (missing file).
-4. Write code and run green: write `docs/agents-prompt.md` as exact `prompt_text()` (one paragraph per line; no hard wrap). Restore this repo's `AGENTS.md` baked prefix so `clone on` / `nap before` match `prompt_text()`. Leave the `# Agent context` suffix in place.
+4. Write code and run green: write `docs/agents-prompt.md` as exact `prompt_text()` (one paragraph per line; no hard wrap). Restore this repo's `AGENTS.md` baked prefix so `clone on` / `nap before` match `prompt_text()`. Leave the `# Agent context` suffix in place. Rewrite the `prompt_text()` docstring so it does not say the prompt is "pasted". Rewrite `test_agents_md_starts_with_prompt_text`'s docstring so it does not say "the paste does not drift". No tests on those comments.
 
 ### 2. init recipe and catalog — executable
 
@@ -41,7 +41,7 @@ Ship the baked agent prompt as `docs/agents-prompt.md` (exact `prompt_text()`) s
 1. Stub tests: rename/extend `test_init_prints_paste_recipe_and_prompt` to assert the new recipe; add `test_usage_init_line_does_not_say_paste`.
 2. Stub interface: no new functions. `init_text()` and `usage_text()` signatures stay.
 3. Write tests and run red: `PROMPT_DOC` in `init_text()`; `"paste"` not in `init_text().lower()` and not in the `usage_text()` init catalog line; `prompt_text()` still in `main(["init"])` stdout; existing write-nothing / extra-args / `--path` tests unchanged.
-4. Write code and run green: `init_text()` tells the operator to insert `PROMPT_DOC` from the SumMem repository at the top of `AGENTS.md`, notes that this print is the same text, keeps the CLAUDE.md `@AGENTS.md` sentence, still appends `prompt_text()`. `usage_text()` init line becomes `print the agent prompt` (no "to paste").
+4. Write code and run green: `init_text()` tells the operator to insert `PROMPT_DOC` from the SumMem repository at the top of `AGENTS.md`, notes that this print is the same text, keeps the CLAUDE.md `@AGENTS.md` sentence, still appends `prompt_text()`. Rewrite the `init_text()` docstring so it does not say "paste recipe". `usage_text()` init line becomes `print the agent prompt` (no "to paste").
 
 ### 3. Onboarding docs and briefing — prose/policy
 
@@ -82,6 +82,6 @@ No new technology - validation not required
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
+- [ ] Preflight (re-run after docstring-wording fix)
 - [ ] Build
 - [ ] QA
