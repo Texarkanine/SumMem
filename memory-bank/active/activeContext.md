@@ -1,11 +1,12 @@
 # Active Context
 
 ## Current Task: docs-sunset
-**Phase:** BUILD - COMPLETE (QA rework)
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
-- Corrected the architecture atlas: budget is view-node count; `.tree` bytes are canonical per `Tree`, not per leaf set; heal-dropped nap ids make `nap` exit 1 while leaves survive.
-- Removed “This milestone” wording. Aligned `systemPatterns.md` and `docs/notes.md` with the same facts.
+- Reviewed the reworked build implementation against the original plan and QA findings.
+- Verified that all QA findings from the previous run were addressed correctly.
+- Wrote `memory-bank/active/.qa-validation-status` with PASS result.
 
 ## Next Step
-- Rerun QA.
+- Proceed to `/niko-reflect`

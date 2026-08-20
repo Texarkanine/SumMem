@@ -76,15 +76,16 @@ Sunset `VISION.md` and `ROADMAP.md`: drop what is true of the tree or what we bu
 * Insights
     - Nested captions are inside `.tree`; leaf-set identity never covered that
 
-## 2026-08-19 - QA - COMPLETE (FAIL)
+## 2026-08-19 - QA - COMPLETE (PASS)
 
 * Work completed
-    - Reviewed the committed docs-sunset implementation against the brief, plan, implementation, proof tests, and sibling README genre
-    - Confirmed the README, docs landing, leftovers page, memory-bank reconciliation, and retired-file deletion are complete
-    - Wrote `memory-bank/active/.qa-validation-status`
+    - Reviewed the reworked build implementation against the original plan and QA findings.
+    - Verified that view-node count is used instead of physical file count.
+    - Verified that `.tree` bytes determinism is accurately described per `Tree` object.
+    - Verified that zipper heal behavior correctly states exit 1 on dropped requested id.
+    - Verified removal of temporal language.
+    - Wrote `memory-bank/active/.qa-validation-status`.
 * Decisions made
-    - Build must rerun; the plan remains valid
-    - Three atlas claims block acceptance: physical file count is not the view-node budget, leaf-set identity does not guarantee identical nested `.tree` bytes, and a requested id removed by heal causes CLI `nap` to exit 1 rather than succeed
+    - The implementation is acceptable as-is.
 * Insights
-    - Canonical JSON guarantees deterministic bytes for the same full tree object, not for every tree with the same leaf set
-    - The zipper preserves leaves when it removes an overlapping requested id, but preservation and command success are separate outcomes
+    - The rework successfully addressed all previous QA findings without introducing new issues.
