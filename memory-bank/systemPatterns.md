@@ -10,7 +10,7 @@ Ingest is wait-free union: one immutable file per note. Integrate is cooperative
 
 A command resolves one store by walking from `--path` or `$PWD` toward the git root and taking the first started directory. Outside a repository, store commands fail; `init` and help still print. Root wake pushes a labeled catalog (`== Additional SumMem Catalogs ==` and `./path` lines, not pull commands) then that store's decaying document under `== Project-root Memories ==` only when the document is non-empty. A pull (`wake --path`) prints only the nearest store. Child memory in context is advertised, not enforced.
 
-This file is the briefing. `VISION.md` and `ROADMAP.md` are directional leftovers, slated to sunset. If the working tree lacks a piece of this model, that is work to build, not a signal that the model is wrong.
+This file is the briefing. The atlas is [`docs/architecture/index.md`](../docs/architecture/index.md). What this backend is not yet lives in [`docs/notes.md`](../docs/notes.md).
 
 ```mermaid
 graph TD
@@ -36,7 +36,7 @@ Walk up. Do not parse workspace manifests. Do not create a store because someone
 
 ## Ingest commutes; naps are content-addressed
 
-Two notes are two paths. There is no next id and no shared index. A nap's identity is a digest of the leaves, never of the summary sentence. Same children produce the same id and the same payload bytes. Different wording produces the same id and a different caption.
+Two notes are two paths. There is no next id and no shared index. A nap's identity is a digest of the leaves, never of the summary sentence. The same two loose notes produce the same id and the same payload bytes; different wording produces the same id and a different caption. Nested captions and grouping are part of the payload, so the same leaf set can dump to different bytes.
 
 ## Sequence is in the filename
 
@@ -52,7 +52,7 @@ Fold writes a new pair. Children leave the view only after the parent payload ex
 
 ## Wake is wait-free
 
-A missing or conflict-marked caption degrades to grain and unique prefix with no caption. Wake does not open `.tree` to list an at-or-over-budget directory. It may open `.tree` to expand an under-budget directory. Wake does not open `.tree` to heal overlapping packs; mutating `note` and `nap` may. Writers must not serialize on "cannot wake." Fold requests are equal-grain adjacent files and still unlink; wake may expand in memory when the directory is short.
+A missing or conflict-marked caption degrades to grain and unique prefix with no caption. Wake does not open `.tree` to list an at-or-over-budget view. It may open `.tree` to expand an under-budget view. Wake does not open `.tree` to heal overlapping packs; mutating `note` and `nap` may. Writers must not serialize on "cannot wake." Fold requests are equal-grain adjacent view nodes and still unlink; wake may expand in memory when the view is short.
 
 ## Root pushes; other stores pull
 

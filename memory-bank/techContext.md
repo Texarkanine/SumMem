@@ -1,6 +1,6 @@
 # Tech Context
 
-The first backend specified in `VISION.md` is a Python 3 shebang script. A store is a `.summem/` directory (not `.mem/` — that name is already taken in this problem space). Agents invoke `.summem/summem`. This development repo’s record is repo-root `summem`; store-local `.summem/summem` is a symlink to it. `ensure_store` creates `notes/`, `naps/`, and default `config.toml` when missing. It does not copy the driver. Per-store settings live in `.summem/config.toml`, read with stdlib [`tomllib`](https://docs.python.org/3/library/tomllib.html) (added in 3.11; parse only). Default config is a commented template written as text, not a TOML dump. Agents talk to a stable CLI (`wake`, `note`, `nap`, `recall`, `zoom`, `start`, `init`). The on-disk format may later change, including to sqlite; the CLI table in `VISION.md` must not.
+The file backend is a Python 3 shebang script. A store is a `.summem/` directory (not `.mem/` — that name is already taken in this problem space). Agents invoke `.summem/summem`. This development repo’s record is repo-root `summem`; store-local `.summem/summem` is a symlink to it. `ensure_store` creates `notes/`, `naps/`, and default `config.toml` when missing. It does not copy the driver. Per-store settings live in `.summem/config.toml`, read with stdlib [`tomllib`](https://docs.python.org/3/library/tomllib.html) (added in 3.11; parse only). Default config is a commented template written as text, not a TOML dump. Agents talk to a stable CLI (`wake`, `note`, `nap`, `recall`, `zoom`, `start`, `init`). The on-disk format may later change, including to sqlite; the command table in the README must not.
 
 Activation is the SumMem block at the top of committed `AGENTS.md`. Presence of the driver is not. `init` prints that block. Tests load repo-root `summem`. Generated store data in this repository is ignored.
 
@@ -18,9 +18,10 @@ License: GNU AGPL v3, in `LICENSE`.
 
 ## Testing Process
 
-Tests are pytest as configured in `pytest.ini`, run with `uv run --python 3.11 --with pytest pytest`. They load repo-root `summem` via `SourceFileLoader` (the path has no `.py` suffix). Executable behavior is TDD-governed by `.cursor/rules/shared/always-tdd.mdc`. The acceptance proofs the file backend must satisfy are listed in `VISION.md` under "First proof". Those are product tests, not a change-detector on the vision document.
+Tests are pytest as configured in `pytest.ini`, run with `uv run --python 3.11 --with pytest pytest`. They load repo-root `summem` via `SourceFileLoader` (the path has no `.py` suffix). Executable behavior is TDD-governed by `.cursor/rules/shared/always-tdd.mdc`. The acceptance proofs the file backend must satisfy live in `tests/test_proof_*.py`. Those are product tests, not a change-detector on a document.
 
 ## Canonical documents
 
-- `VISION.md` — design contract: agent interface, store roles, invariants, change surfaces, first proofs
+- `README.md` — what it is, why, quickstart, command table
+- `docs/architecture/index.md` — algorithm, store layout, invariants, change surfaces
 - `LICENSE` — AGPL-3.0
