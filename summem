@@ -153,6 +153,7 @@ def loads_tree(data: bytes) -> Tree:
 ENTRY_CHARS = 280
 WAKE_LINES = 32
 CLI_NAME = "summem"
+AGENT_BIN = ".summem/summem"
 
 CONFIG_TEMPLATE = """\
 # SumMem per-store settings. Missing values take the script's defaults.
@@ -832,7 +833,7 @@ def fold_request(parent, wake_lines: int | None = None) -> str:
         f"  {format_wake_line(left, ids)}\n"
         f"  {format_wake_line(right, ids)}\n"
         "\n"
-        f'Run: {CLI_NAME} nap {short_id(left.id, ids)} {short_id(right.id, ids)} "<your line>"\n'
+        f'Run: {AGENT_BIN} nap {short_id(left.id, ids)} {short_id(right.id, ids)} "<your line>"\n'
         f"{extra}"
     )
 
@@ -886,20 +887,20 @@ def require_python(version_info: tuple[int, ...] = sys.version_info) -> None:
 
 def prompt_text() -> str:
     """Return the agent prompt pasted at the top of AGENTS.md."""
-    return """\
+    return f"""\
 # Project Memory
 
-Shared memory for this repository. Run `.summem/summem`. `--path` aims at a store, not at that file. This block is how the repository opts in; the driver alone is not activation.
+Shared memory for this repository. Run `{AGENT_BIN}`. `--path` aims at a store, not at that file. This block is how the repository opts in; the driver alone is not activation.
 
 ## At Session Start: Activating SumMem (Mandatory)
 
 If you can see a prior **root** SumMem wake in this conversation, skip `wake`.
 
-Otherwise run `.summem/summem wake` from the repository root.
+Otherwise run `{AGENT_BIN} wake` from the repository root.
 
 ## While Working: Register Memories (Mandatory)
 
-`.summem/summem note "…"` records one short line. Call it whenever you learn something new about the project that could be of interest to another contributor, and that is acceptable in git forever: facts, insights, designs and decisions, etc. Personal, machine-local, and user preference facts stay out. If `note` asks for a nap, do that nap before your next action.
+`{AGENT_BIN} note "…"` records one short line. Call it whenever you learn something new about the project that could be of interest to another contributor, and that is acceptable in git forever: facts, insights, designs and decisions, etc. Personal, machine-local, and user preference facts stay out. If `note` asks for a nap, do that nap before your next action.
 
 Do not register redundant memories.
 
@@ -907,10 +908,10 @@ Never edit or delete the memory files; the tool manages them.
 
 ## Other commands
 
-- `.summem/summem recall <regex>` — search remembered text word for word
-- `.summem/summem zoom <id>` — open a nap for more detail
-- `.summem/summem wake --path <path>` — when you work under a cataloged path, pull that store if its wake is not already in this conversation. Ignore `--path` if the root wake didn't have a catalog.
-- `.summem/summem start <dir>` — start a new store in that directory (only when asked), such as for a package in a monorepo
+- `{AGENT_BIN} recall <regex>` — search remembered text word for word
+- `{AGENT_BIN} zoom <id>` — open a nap for more detail
+- `{AGENT_BIN} wake --path <path>` — when you work under a cataloged path, pull that store if its wake is not already in this conversation. Ignore `--path` if the root wake didn't have a catalog.
+- `{AGENT_BIN} start <dir>` — start a new store in that directory (only when asked), such as for a package in a monorepo
 """
 
 
