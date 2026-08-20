@@ -45,3 +45,11 @@ Instrument Release Please for semantically versioned tags, keep `summem` one fil
     - Did not take the command-registry advisory
 * Insights
     - always-tdd’s “workflow the product runs” means product-owned executable config, not a consumer YAML for someone else’s Action
+
+## 2026-08-20 - PREFLIGHT - COMPLETE
+
+* Result
+    - `PASS WITH ADVISORY`
+* Findings
+    - TDD ordering passes for CLI and Release Please lockstep units; workflow unit correctly stays prose/policy after the operator ruling
+    - Advisory: schedule updating the `usage_text()` `--path` footer to exclude `version`, and consider a declarative command registry for future commands

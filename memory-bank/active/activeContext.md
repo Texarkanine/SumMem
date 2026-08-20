@@ -1,6 +1,6 @@
 # Active Context
 
 **Current Task:** version-tracking
-**Phase:** PLAN - COMPLETE
-**What Was Done:** Re-planned after preflight FAIL. Operator overruled treating `.github/workflows/release-please.yaml` as product TDD: SumMem is not a GitHub Action; the workflow only invokes Release Please. Unit 3 stays prose/policy. CLI and extra-files lockstep unchanged.
-**Next Step:** Preflight validation.
+**Phase:** PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+**What Was Done:** Preflight validated the re-planned Level 2 implementation plan. TDD ordering passes for Units 1–2; Unit 3 workflow stays prose/policy per operator ruling. Advisories: update the catalog `--path` footer when adding `version`, and consider a declarative command registry.
+**Next Step:** Build (`/niko-build`).
