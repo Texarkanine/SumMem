@@ -40,3 +40,25 @@ def test_tox_commands_run_pytest_with_posargs():
 def test_pytest_collects_from_tests_directory():
     """pytest.ini testpaths is tests."""
     assert _ini(ROOT / "pytest.ini")["pytest"]["testpaths"] == "tests"
+
+
+def test_coverage_env_collects_summem_lcov():
+    """[testenv:coverage] uses --cov=summem and writes lcov under COVERAGE_DIR."""
+    commands = _ini(ROOT / "tox.ini")["testenv:coverage"]["commands"]
+    assert "--cov=summem" in commands
+    assert "lcov:{env:COVERAGE_DIR:coverage}/lcov.info" in commands
+    assert "{posargs}" in commands
+
+
+def test_default_tox_commands_have_no_cov():
+    """[testenv] commands do not pass --cov; coverage is not in env_list."""
+    commands = _ini(ROOT / "tox.ini")["testenv"]["commands"]
+    assert "--cov" not in commands
+    env_list = [
+        name.strip()
+        for name in _ini(ROOT / "tox.ini")["tox"]["env_list"].split(",")
+        if name.strip()
+    ]
+    assert "coverage" not in env_list
+
+

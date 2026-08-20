@@ -1,0 +1,1 @@
+tox -e coverage writes coverage/lcov.info via pytest-cov --cov=summem; default tox stays coverage-free.

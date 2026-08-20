@@ -1,0 +1,16 @@
+# https://docs.codecov.com/docs/codecov-yaml
+
+coverage:
+  status:
+    project:
+      default:
+        # Disable until coverage baseline is established
+        enabled: false
+    patch:
+      default:
+        enabled: false
+
+comment:
+  layout: "condensed_header, condensed_files, condensed_footer"
+  behavior: default
+  require_changes: true
