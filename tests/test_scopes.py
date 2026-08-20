@@ -74,7 +74,7 @@ def test_start_creates_store_in_dir(tmp_path, monkeypatch):
     monkeypatch.chdir(repo)
     assert m.main(["start", "foo/packages/baz"]) == 0
     store = repo / "foo" / "packages" / "baz" / ".summem"
-    assert (store / "summem").is_file()
+    assert not (store / "summem").exists()
     assert (store / "notes").is_dir()
     assert (store / "naps").is_dir()
     config = (store / "config.toml").read_text(encoding="utf-8")

@@ -1,23 +1,29 @@
-## SumMem
+# Project Memory
 
-Shared memory for this repository. The driver is the `summem` file at the repository root (the directory that contains `.git`). `--path` aims at a store, not at that file. This block is how the repository opts in; the driver alone is not activation.
+Shared memory for this repository. Run `.summem/summem`. `--path` aims at a store, not at that file. This block is how the repository opts in; the driver alone is not activation.
 
-### At session start
+## At Session Start: Activating SumMem (Mandatory)
 
-1. If you can see a prior **root** SumMem wake in this conversation, skip these steps.
-2. Run `summem wake` from the repository root, or `summem wake --path <root>`.
-3. Do what it prints, to the end of its output.
+If you can see a prior **root** SumMem wake in this conversation, skip `wake`.
 
-### Notes
+Otherwise run `.summem/summem wake` from the repository root.
 
-`summem note "…"` records one line, at most 280 bytes. Only durable public facts about this tree — what a stranger clone would need, and what is acceptable in git forever. Personal, machine, and preference facts stay out. If `note` asks for a nap, do that nap before your next action. Never edit store files.
+Do what it prints, to the end of its output.
 
-### Other commands
+## While Working: Register Memories (Mandatory)
 
-- `summem recall <regex>` — search remembered text word for word
-- `summem zoom <id>` — open a nap
-- `summem wake --path <path>` — when you work under a cataloged path, pull that store if its wake is not already in this conversation
-- `summem start <dir>` — only when asked to start a package memory
+`.summem/summem note "…"` records one short line. Only record public facts that could be of interest to another contributor, and that are acceptable in git forever. Personal, machine-local, and user preference facts stay out. If `note` asks for a nap, do that nap before your next action.
+
+Do not register redundant memories.
+
+Never edit or delete the memory files; the tool manages them.
+
+## Other commands
+
+- `.summem/summem recall <regex>` — search remembered text word for word
+- `.summem/summem zoom <id>` — open a nap for more detail
+- `.summem/summem wake --path <path>` — when you work under a cataloged path, pull that store if its wake is not already in this conversation. Ignore `--path` if the root wake didn't have a catalog.
+- `.summem/summem start <dir>` — start a new store in that directory (only when asked), such as for a package in a monorepo
 
 # Agent context
 

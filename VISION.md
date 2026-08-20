@@ -85,11 +85,11 @@ OptMem **pushes**: one wake at session start, the whole memory is in context. Na
 
 So SumMem pushes **root**, and makes every other store available to pull.
 
-A repository opts in by putting the block `summem init` prints at the top of committed `AGENTS.md`. Presence of the driver is not activation. `CLAUDE.md` may stay a thin `@AGENTS.md` pointer; do not treat it as an equal paste target.
+A repository opts in by placing `.summem/summem`, running `init`, and putting the printed block at the top of committed `AGENTS.md`. Presence of the driver is not activation. `CLAUDE.md` may stay a thin `@AGENTS.md` pointer; do not treat it as an equal paste target.
 
 Session start is still mandatory and once. The first wake must **resolve to the true root** — cwd at the root, or `--path` aimed at the root, not `.` from a package:
 
-> Run `summem wake` from the repository root (or `summem wake --path <root>`).
+> Run `.summem/summem wake` from the repository root.
 > If you can see a prior **root** SumMem wake in this conversation, skip the root wake.
 
 That root wake prints two things:
@@ -109,9 +109,9 @@ Do not load every started store in the root wake. That is the budget problem `st
 
 The script does not infer a monorepo. A tree ten folders deep whose packages live at layer three is not special until someone says so.
 
-The **git root always auto-creates** on the first `wake`, `note`, `nap`, `zoom`, or `recall` in that repository: store directory plus a config file filled with the script’s defaults, commented so a human can see every knob. Until someone `start`s another path, every note in the tree rolls up to root. A regular repository stays in that shape and can raise `WAKE_LINES` on the root config to spend the whole reading budget in one place.
+The **git root always auto-creates** on the first `wake`, `note`, `nap`, `zoom`, or `recall` in that repository: store dirs plus a config file filled with the script’s defaults, commented so a human can see every knob. It does not place `.summem/summem`. The operator places that file (this development repo: a symlink to repo-root `summem`, the record), runs `init`, and pastes the prompt. Until someone `start`s another path, every note in the tree rolls up to root. A regular repository stays in that shape and can raise `WAKE_LINES` on the root config to spend the whole reading budget in one place.
 
-`summem start <dir>` writes the same kind of store and default config into that directory. After that, `--path` under it resolves here instead of rolling up. A five-level monorepo starts the five directories that should have their own memory and sets each config tight. Root wake stays one document plus a five-line catalog. Pulling a package is one short document, not five stacked layers and not ten accidental ones.
+`summem start <dir>` writes the same kind of store dirs and default config into that directory. It does not copy a driver there. After that, `--path` under it resolves here instead of rolling up. Agents still invoke root `.summem/summem` and pass `--path`. A five-level monorepo starts the five directories that should have their own memory and sets each config tight. Root wake stays one document plus a five-line catalog. Pulling a package is one short document, not five stacked layers and not ten accidental ones.
 
 `start` is how you onboard a package. It is not implied by `package.json`, and it is not implied by `cd`.
 

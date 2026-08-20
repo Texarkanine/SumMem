@@ -2,7 +2,7 @@
 
 ## How This System Works
 
-SumMem is a script that owns a grow-only set of facts in the git tree, and a decaying view of that set. Agents never touch the store. They run `wake`, `note`, `nap`, `recall`, `zoom`, `start`, and `init`. Bare invocation and `-h` print a handwritten catalog (`usage_text`); a command registered only with argparse will not appear there. `init` prints the baked agent prompt; that block at the top of committed `AGENTS.md` is how a repository opts in. The script assigns names, times, and hashes. The committed driver is repo-root `summem`. `ensure_store` copies it into a store’s `.summem/summem` when that file is missing.
+SumMem is a script that owns a grow-only set of facts in the git tree, and a decaying view of that set. Agents never touch the store. They run `wake`, `note`, `nap`, `recall`, `zoom`, `start`, and `init` via `.summem/summem`. Bare invocation and `-h` print a handwritten catalog (`usage_text`); a command registered only with argparse will not appear there. `init` prints the baked agent prompt; that block at the top of committed `AGENTS.md` is how a repository opts in. The script assigns names, times, and hashes. This development repo’s record is repo-root `summem`; `.summem/summem` (and dogfood’s) is a symlink to it. `ensure_store` creates `notes/`, `naps/`, and default config when missing. It does not place the driver.
 
 The view matches [OptMem](https://github.com/VictorTaelin/OptMem): short notes, a merge tree of summaries, a bounded wake. The store does not. OptMem's one append-only log and position-as-identity cannot survive squash-merge, uninterested conflict resolution, or many writers at once. SumMem keeps the view and replaces the single log with a directory of immutable files.
 

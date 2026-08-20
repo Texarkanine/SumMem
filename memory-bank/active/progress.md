@@ -162,3 +162,20 @@ Rework: `ensure_store` must not copy the driver. Align the baked prompt, `AGENTS
     - Recorded a radical innovation advisory for `ensure_store` to write `.summem/summem` as a relative symlink to the root script to completely prevent nested execution issues.
 * Insights
     - Lockstep test is valid and not a change-detector; it enforces the contract between the executable and `AGENTS.md`.
+
+## 2026-08-19 - BUILD - COMPLETE (PASS)
+
+* Work completed
+    - Unit 1: `ensure_store` no longer copies `__file__`. Dirs + default config only. `import shutil` removed. Existing driver still left alone.
+    - Unit 2: `prompt_text()` / `AGENTS.md` invoke `.summem/summem`. Dropped `"## SumMem"` and `"repository root"` invariants; lockstep holds.
+    - Unit 3: `VISION.md` Onboarding/Activation, `systemPatterns.md`, `techContext.md` aligned. `ROADMAP.md` already said `.summem/summem`. Archives not rewritten.
+    - Unit 4: Composer 2.5 Probe A ran `.summem/summem wake` from repo root (not `./summem` or `./summem/summem`), then `.summem/summem wake --path dogfood` because the catalog printed that pull. Probe B skipped a second root wake.
+    - This repo: `.summem/summem` → `../summem` (typechange). `dogfood/.summem/summem` already a symlink.
+    - pytest 205 passed.
+* Decisions made
+    - Did not add nested-store driver symlinks (preflight advisory). Agents keep using root `.summem/summem` + `--path`.
+    - Did not treat Probe A’s extra dogfood pull as a prompt miss. Invoke path was the rework bar; catalog over-pull is the same pull the first Composer probe showed.
+    - Left the `.gitignore` `__pycache__/` slash fix unstaged.
+* Insights
+    - Git-root auto-create without a driver is the intended onboard gap: dirs + config appear; agents cannot invoke `.summem/summem` until someone places it.
+    - Catalog still advertises a pull in wake output; a fresh agent may run it even when not working under that path.

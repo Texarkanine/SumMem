@@ -59,20 +59,19 @@ def test_help_before_init_prints_init_help(capsys):
 
 
 def test_prompt_text_invariants():
-    """prompt_text() names the driver and wake rules; omits forbidden strings."""
+    """prompt_text() names .summem/summem and wake rules; omits forbidden strings."""
     m = load_summem()
     prompt = m.prompt_text()
     lower = prompt.lower()
-    assert "## SumMem" in prompt
     assert "summem" in lower
     assert "wake" in lower
     assert "root" in lower
     assert "conversation" in lower
     assert "stranger" in lower or "public" in lower
     assert "before any other tool call" not in lower
-    assert ".summem/summem" not in prompt
+    assert ".summem/summem" in prompt
     assert "AGENTS.md or CLAUDE.md" not in prompt
-    assert "repository root" in lower
+    assert "./summem/summem" not in prompt
 
 
 def test_agents_md_starts_with_prompt_text():

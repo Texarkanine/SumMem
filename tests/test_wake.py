@@ -21,7 +21,7 @@ def test_wake_without_store_creates_and_prints_nothing(tmp_path):
     assert m.wake_text(repo) == ""
     assert (repo / ".summem" / "config.toml").is_file()
     assert (repo / ".summem" / "notes").is_dir()
-    assert (repo / ".summem" / "summem").is_file()
+    assert not (repo / ".summem" / "summem").exists()
 
 
 def test_wake_lists_two_notes_sorted_by_filename(tmp_path):
