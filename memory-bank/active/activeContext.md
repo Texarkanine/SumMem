@@ -1,11 +1,11 @@
 # Active Context
 
 ## Current Task: noting-ratchet
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Intent confirmed: [SumMem#16](https://github.com/Texarkanine/SumMem/issues/16) note/nap length ratchet is must-ship; other CLI errors get a problem statement plus a known next step only when that step is not obvious.
-- Classified Level 2: enhancement of existing validation and stderr text in one script; no store-format or architecture change.
+- Level 2 plan: must-ship OptMem-style too-long footer in `require_entry` (covers `note` and `nap`); closed table of other agent-facing errors; no atlas change.
+- Tests stay in `tests/test_store.py`, `tests/test_nap.py`, `tests/test_cli.py`, `tests/test_scopes.py`, `tests/test_proof_reject.py`.
 
 ## Next Step
-- Load the Level 2 workflow and execute its first phase.
+- Preflight validation of the plan.
