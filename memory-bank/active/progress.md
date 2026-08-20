@@ -24,3 +24,24 @@ Split the baked SumMem note prompt so the mandatory-note workflow and the clone-
     - No full-prompt snapshot. No #14 / git-add work on this branch.
 * Insights
     - Existing `personal` / `contributor` checks are already policy-as-contract; clone-portability fits that pattern.
+
+## 2026-08-20 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Validated the prompt-membership plan against `prompt_text()`, `tests/test_init.py`, `AGENTS.md`, the creative, and atlas/product constraints.
+    - First line of `.preflight-status`: FAIL (blocking).
+* Decisions made
+    - TDD encoding fails blocking: the one executable unit has no test-writing steps after the claimed change-detector strike.
+    - Did not edit `tasks.md` (nothing to swap or strike in the numbered list).
+* Insights
+    - The Test Plan's split-sentence check is already true on HEAD; the buried membership is "git forever" in the Call it whenever sentence.
+
+## 2026-08-20 - PLAN - COMPLETE (replan)
+
+* Work completed
+    - Reclassified the unit as prose/policy. Dropped new phrase/structure asserts on `prompt_text()`.
+* Decisions made
+    - Operator: asserting on the printed prompt sentences is a change-detector; cut them. `init` printing is not a new executable unit for this task.
+    - Keep existing lockstep and invariant tests; do not add `clone` / split-sentence checks. Do not take the labeled-heading advisory unless asked.
+* Insights
+    - `test_agents_md_starts_with_prompt_text` still belongs: it fails when the two copies drift, not when the wording changes.

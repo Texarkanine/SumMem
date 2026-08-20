@@ -5,8 +5,8 @@
 
 ## What Was Done
 
-- Level 2 plan: one executable unit — `test_prompt_text_invariants` (clone + split-sentence), then `prompt_text()` / `AGENTS.md`.
-- No new test files. No store/CLI. No OptMem in the prompt. No redact.
+- Operator: cut the planned phrase tests. `init` printing text does not make those asserts executable behavior. They are change-detectors.
+- Replanned as one prose/policy unit: rewrite `prompt_text()` Register Memories, lockstep `AGENTS.md`, run existing `tests/test_init.py` + `tox`. No new tests.
 
 ## Next Step
 
