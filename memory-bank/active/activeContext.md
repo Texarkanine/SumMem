@@ -1,7 +1,7 @@
 # Active Context
 
 **Current Task:** version-tracking
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (FAIL)
 **What Was Done:** Implemented `summem version`, Release Please `simple` + generic extra-files on repo-root `summem`, stockroom helper-bot workflow, and living-doc updates. 8 new tests in `tests/test_version.py`. Extended catalog and `--path` tests.
 **Next Step:** QA review.
 

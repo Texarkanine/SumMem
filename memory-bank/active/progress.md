@@ -65,3 +65,15 @@ Instrument Release Please for semantically versioned tags, keep `summem` one fil
     - Took the catalog-footer advisory; left the command-registry advisory
 * Insights
     - `AGENTS.md` on this SHA already drifted from `prompt_text()` (`cloneon`, `napbefore`)
+
+## 2026-08-20 - QA - COMPLETE
+
+* Result
+    - `FAIL (blocking)`
+* Findings
+    - `memory-bank/techContext.md` omits `version` from its stable CLI inventory, contradicting its own Release Please paragraph and the implementation
+    - `memory-bank/productContext.md` omits repository-independent `version` behavior from its outside-repository invariant
+    - The implementation otherwise matches the plan; all 8 version tests pass on Python 3.11–3.14
+    - Full tox remains at 229 passed and 1 pre-existing `AGENTS.md` lockstep failure per environment
+* Next step
+    - Build must rerun to correct the two persistent documentation statements

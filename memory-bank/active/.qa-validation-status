@@ -1,0 +1,5 @@
+FAIL
+
+1. **Blocking — Documentation consistency:** `memory-bank/techContext.md` still lists the stable CLI as `wake`, `note`, `nap`, `recall`, `zoom`, `start`, and `init`, omitting the newly implemented `version` command. `memory-bank/productContext.md` still says only help and `init` print outside a repository, omitting the new repository-independent `version` behavior. These persistent context statements now contradict the implementation and the updated architecture/system-pattern docs. Build must rerun to update both statements.
+2. **Pass — Implementation completeness:** `summem version`, Release Please config/manifest/workflow, marker and manifest lockstep, generic extra-files targeting repo-root `summem`, helper-app auth, command catalog, `--path` rejection, and planned living-doc changes are implemented without speculative abstractions or debug debris.
+3. **Pass — Regression checks:** All 8 version tests pass on Python 3.11, 3.12, 3.13, and 3.14. The complete suite reports 229 passed and the same pre-existing `test_agents_md_starts_with_prompt_text` failure on each environment; the build diff does not touch `AGENTS.md` or `prompt_text()`.
