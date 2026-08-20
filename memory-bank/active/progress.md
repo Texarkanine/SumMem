@@ -27,3 +27,13 @@ Print `== Project-root Memories ==` on root wake whenever the root document is n
 * Insights
     - Catalog presence is the wrong proxy for "this is the root wake"; a root-only store has no catalog
 
+## 2026-08-20 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Semantic review of root-wake header assembly against the project brief
+    - PASS: header prints for a non-empty git-root document with or without a catalog; empty documents and pull wakes stay unlabeled
+* Decisions made
+    - Acceptable as-is; no build rework
+* Insights
+    - Gating the header on catalog presence was the defect; gating on `parent == git root` is the root-store label the brief asked for
+

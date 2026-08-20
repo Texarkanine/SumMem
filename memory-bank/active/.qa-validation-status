@@ -1,0 +1,3 @@
+PASS
+
+No blocking findings. Root wake labels a non-empty git-root document regardless of catalog; empty documents and pull wakes stay unlabeled.
