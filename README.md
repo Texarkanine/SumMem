@@ -1,0 +1,66 @@
+# SumMem
+
+**A committed, concurrent memory for agents working in a git repository.**
+
+Agents never touch the store. They run a script. The script owns every file. Wake prints a decaying view of what the repository has learned: recent notes verbatim, older notes as one-line summaries. Zoom can still open those summaries down to the original sentences after a squash merge.
+
+The first consumer in mind is a monorepo — repo root plus many packages — but the model is any git tree. A scope is a directory that has opted in, not a `package.json` and not an actor.
+
+## Why SumMem?
+
+- **Many writers, no lock** — two `note`s are two paths. Git merge keeps both. There is no next-id and no cross-clone actor.
+- **The view stays bounded** — recent facts stay verbatim; older facts collapse to one-line captions. Wake never refuses to print.
+- **Squash does not erase sentences** — originals live in files at `HEAD`, so a fresh clone of `main` can still zoom.
+- **Scopes are opt-in** — the git root auto-creates; every other store is `start <dir>`. Empty packages stay empty.
+- **The script is the product** — one shebang file. The on-disk backend can change; the commands must not.
+
+This is not a single-actor local diary ([OptMem](https://github.com/VictorTaelin/OptMem), including its machine-global store). It is not task-scoped working documentation (Niko’s `memory-bank/`).
+
+## Quick Start
+
+### Prerequisites
+
+- A git repository
+- Python 3.11+ (`tomllib`)
+
+### Onboard a repository
+
+1. Place `.summem/summem` (copy or symlink [summem](summem)).
+2. Run `.summem/summem init` and paste the printed block at the top of committed `AGENTS.md`.
+3. The first `wake`, `note`, `nap`, `zoom`, or `recall` creates the root store. Until someone `start`s another path, every note in the tree rolls up there.
+
+Presence of the driver is not activation. The `AGENTS.md` block is.
+
+### Day to day
+
+```text
+summem wake    [--path PATH]                    print this store's view
+summem note    [--path PATH] TEXT               record one line
+summem nap     [--path PATH] ID-A ID-B CAPTION  fold two adjacent ids
+summem zoom    [--path PATH] ID                 open a nap to its children
+summem recall  [--path PATH] PATTERN            search remembered text
+summem start <path>                             create a store in that directory
+summem init                                     print the agent prompt to paste
+```
+
+Agents invoke `.summem/summem`. Bare `summem` is the printed name of this invocation. If `note` asks for a nap, do that nap before the next action. Never edit store files by hand.
+
+`--path` aims at work in the tree. The script walks from that path (or from `$PWD`) to the nearest started store.
+
+## Documentation
+
+- [Architecture](docs/architecture/index.md) — algorithm, store layout, invariants
+- [Notes](docs/notes.md) — what this backend is not yet
+- [AGENTS.md](AGENTS.md) — the baked session-start prompt (also printed by `init`)
+
+## Developing
+
+Tests load repo-root `summem` (the path has no `.py` suffix). Use `uv`, not this machine’s bare `python3`:
+
+```bash
+uv run --python 3.11 --with pytest pytest
+```
+
+## License
+
+[GNU Affero General Public License v3.0](LICENSE)

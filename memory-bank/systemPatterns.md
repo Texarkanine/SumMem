@@ -10,7 +10,7 @@ Ingest is wait-free union: one immutable file per note. Integrate is cooperative
 
 A command resolves one store by walking from `--path` or `$PWD` toward the git root and taking the first started directory. Outside a repository, store commands fail; `init` and help still print. Root wake pushes a labeled catalog (`== Additional SumMem Catalogs ==` and `./path` lines, not pull commands) then that store's decaying document under `== Project-root Memories ==` only when the document is non-empty. A pull (`wake --path`) prints only the nearest store. Child memory in context is advertised, not enforced.
 
-This file is the briefing. `VISION.md` and `ROADMAP.md` are directional leftovers, slated to sunset. If the working tree lacks a piece of this model, that is work to build, not a signal that the model is wrong.
+This file is the briefing. The atlas is [`docs/architecture/index.md`](../docs/architecture/index.md). What this backend is not yet lives in [`docs/notes.md`](../docs/notes.md).
 
 ```mermaid
 graph TD

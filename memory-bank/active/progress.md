@@ -42,3 +42,26 @@ Sunset `VISION.md` and `ROADMAP.md`: drop what is true of the tree or what we bu
     - `techContext.md` line 21 cites VISION's "First proof" as the acceptance bar; it needs the same redirect to `tests/test_proof_*.py` that step 5.1 gives `productContext.md`
     - The "8-character id" bucket item is true-of-tree, not built-else: VISION already says shortest unique hex, at least 8, and `short_id`/`unique_prefix` implement that
     - Advisory: naming the architecture page's invariants and citing them from `tests/test_proof_*.py` docstrings would make the page checkable without adding tests
+
+## 2026-08-19 - BUILD - IN-PROGRESS
+
+* Work completed
+    - Confirmed triage buckets against `summem` and preflight
+* Decisions made
+    - **True:** ingest/nap/wake model; file store roles; hashing and `.tree` schema; unique prefix ≥8 of 64 hex; scopes/`start`/`--path`; root catalog; wait-free wake; equal-grain fold + in-memory expand; zipper on overlap; invariants the proof tests already enforce
+    - **Built else:** wake as a script to “do”; driver-only-at-`.summem/summem` with `ensure_store` copy; ROADMAP Phase 1–3 sequencing; treating overlap as unhandled / proof-6-only
+    - **Leftover:** second backend / sqlite; harness hooks; full OptMem aligned `cover(T)`; pack-size cap; hot margin
+    - Preflight’s invariant-anchoring idea (edit proof-test docstrings) left unimplemented: operator did not direct it
+
+## 2026-08-19 - BUILD - COMPLETE
+
+* Work completed
+    - Wrote `docs/architecture/index.md`, `docs/notes.md`, `docs/index.md`, `README.md`
+    - Reconciled persistent memory-bank; deleted `VISION.md` and `ROADMAP.md`
+    - Added an `AGENTS.md` When-to-load pointer after the baked prompt
+    - Full suite: 207 passed
+* Decisions made
+    - Architecture invariants table cites existing proof modules; test docstrings left alone
+    - Leftovers page is the Later items and unbuilt knobs only
+* Insights
+    - Living citations of the deleted files are gone from persistent memory-bank; archives keep history

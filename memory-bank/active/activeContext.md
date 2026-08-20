@@ -1,12 +1,14 @@
 # Active Context
 
 ## Current Task: docs-sunset
-**Phase:** PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Classified Level 2.
-- Planned a prose/policy sunset: triage VISION/ROADMAP, write `docs/architecture/index.md` (algorithm + store layout), `docs/notes.md` leftovers, `docs/index.md` landing, sibling-genre README, reconcile persistent memory-bank, delete the two files.
-- No new executable behavior; no new tests.
+- Triaged and deleted `VISION.md` and `ROADMAP.md`.
+- Wrote `/home/mobaxterm/git/SumMem/docs/architecture/index.md`, `/home/mobaxterm/git/SumMem/docs/notes.md`, `/home/mobaxterm/git/SumMem/docs/index.md`, `/home/mobaxterm/git/SumMem/README.md`.
+- Reconciled `/home/mobaxterm/git/SumMem/memory-bank/productContext.md`, `systemPatterns.md`, `techContext.md`.
+- Added one `AGENTS.md` When-to-load pointer to the atlas (after the baked prompt, so `prompt_text` lockstep still holds).
+- Named architecture invariants and pointed them at existing `tests/test_proof_*.py` modules. Did not edit test docstrings (preflight advisory, no operator direction).
 
 ## Next Step
-- Build. Two minor findings to absorb: step 2.1's architecture-docs skill is at `~/.cursor/skills/ai-rizz/`, not in this repo; step 6.2's grep covers any citation of the deleted files, so `techContext.md` lines 3 and 21 get fixed too. See `memory-bank/active/.preflight-status`.
+- QA review.

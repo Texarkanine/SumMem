@@ -1,6 +1,6 @@
 # Product Context
 
-`VISION.md` is the design contract for this product. These sections are the business subset of that contract. A working tree that lacks a capability named here is unfinished work, not a different product.
+These sections are the business context of SumMem: who it is for, what it is for, and what bounds it. The algorithm and store layout live in [`docs/architecture/index.md`](../docs/architecture/index.md).
 
 ## Target Audience
 
@@ -29,9 +29,7 @@ This product is not a single-actor local diary (that is OptMem, including its ma
 
 ## Success Criteria
 
-The product succeeds when the proofs in `VISION.md` under "First proof" hold. Those proofs are the acceptance bar for the first file backend: concurrent notes merge cleanly; same-block naps conflict only on the caption; originals survive squash onto `main`; positional ids are rejected; long-lived branches union then fold lazily; a path flag resolves to the nearest started store; root wake catalogs other stores and a pull prints only that store.
-
-A missing proof is unfinished work, not a reason to drop the criterion.
+The product succeeds when the file-backend proofs in `tests/test_proof_*.py` hold: concurrent notes merge cleanly; same-block naps conflict only on the caption; originals survive squash onto `main`; positional ids are rejected; long-lived branches union then fold lazily; a path flag resolves to the nearest started store; root wake catalogs other stores and a pull prints only that store.
 
 ## Key Constraints
 
