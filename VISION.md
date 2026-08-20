@@ -109,19 +109,19 @@ Do not load every started store in the root wake. That is the budget problem `st
 
 The script does not infer a monorepo. A tree ten folders deep whose packages live at layer three is not special until someone says so.
 
-The **git root always auto-creates** on the first `wake`, `note`, `nap`, `zoom`, or `recall` in that repository: store dirs plus a config file filled with the script’s defaults, commented so a human can see every knob. It does not place `.summem/summem`. The operator places that file (this development repo: a symlink to repo-root `summem`, the record), runs `init`, and pastes the prompt. Until someone `start`s another path, every note in the tree rolls up to root. A regular repository stays in that shape and can raise `WAKE_LINES` on the root config to spend the whole reading budget in one place.
+The **git root always auto-creates** on the first `wake`, `note`, `nap`, `zoom`, or `recall` in that repository: store dirs plus a config file filled with the script’s defaults, commented so a human can see every setting. It does not place `.summem/summem`. The operator places that file (this development repo: a symlink to repo-root `summem`, the record), runs `init`, and pastes the prompt. Until someone `start`s another path, every note in the tree rolls up to root. A regular repository stays in that shape and can raise `WAKE_LINES` on the root config to spend the whole reading budget in one place.
 
 `summem start <dir>` writes the same kind of store dirs and default config into that directory. It does not copy a driver there. After that, `--path` under it resolves here instead of rolling up. Agents still invoke root `.summem/summem` and pass `--path`. A five-level monorepo starts the five directories that should have their own memory and sets each config tight. Root wake stays one document plus a five-line catalog. Pulling a package is one short document, not five stacked layers and not ten accidental ones.
 
 `start` is how you onboard a package. It is not implied by `package.json`, and it is not implied by `cd`.
 
-If a store exists but its config file is missing or a knob is omitted, the script uses internal defaults. It does not fail, and it does not rewrite the file unless someone runs `start`.
+If a store exists but its config file is missing or a setting is omitted, the script uses internal defaults. It does not fail, and it does not rewrite the file unless someone runs `start`.
 
 ## Per-store configuration
 
-Knobs are not environment variables. Two repositories on the same machine want different budgets: one is a deep monorepo that must stay tight at every started layer; one is a single store that should burn the whole context budget at root. A process-wide `WAKE_LINES` cannot say both. A knob in each store can.
+Settings are not environment variables. Two repositories on the same machine want different budgets: one is a deep monorepo that must stay tight at every started layer; one is a single store that should burn the whole context budget at root. A process-wide `WAKE_LINES` cannot say both. A setting in each store can.
 
-The script loads `config` from that store, then fills any missing name from built-in defaults. The file is committed with the repo, so every clone and every CI job sees the same budgets.
+The script loads `config` from that store, then fills any missing value from built-in defaults. The file is committed with the repo, so every clone and every CI job sees the same budgets.
 
 Each wake renders **one** store with that store’s `WAKE_LINES`. Root wake is root’s budget plus a small catalog. A pull is that package’s budget. They do not stack in a single command. That is the control: start fewer stores, or lower each store’s budget.
 
@@ -264,7 +264,7 @@ naps/…  .tree        2 notes
 notes/               a dozen loose files               today
 ```
 
-File **count** per scope stays on the order of the wake budget, not on the order of lifetime notes. Printed **lines** follow the knob: raising `WAKE_LINES` can crack the right edge of that on-disk tree in memory. File **size** is where `T` shows up, and only in old blocks. Each fat `.tree` is a slice of what OptMem would have kept in one `LOG.txt`. At-budget wake still only reads the matching `.sum`.
+File **count** per scope stays on the order of the wake budget, not on the order of lifetime notes. Printed **lines** follow the setting: raising `WAKE_LINES` can crack the right edge of that on-disk tree in memory. File **size** is where `T` shows up, and only in old blocks. Each fat `.tree` is a slice of what OptMem would have kept in one `LOG.txt`. At-budget wake still only reads the matching `.sum`.
 
 A brand-new two-entry `.tree` is the right edge. Next month it is eaten by a larger parent and leaves `HEAD`.
 

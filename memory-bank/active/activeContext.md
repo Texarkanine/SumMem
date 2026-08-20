@@ -4,9 +4,9 @@
 **Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Root wake omits `== Project-root memories ==` when `wake_text` is empty.
-- Catalog heading is `== Additional SumMem Catalogs ==` (operator rename). VISION and proof 7 match.
-- pytest 207 passed.
+- Empty-root omits the memories header. Catalog heading is `== Additional SumMem Catalogs ==`.
+- Operator wording: config comment is settings/values. Briefing and VISION lockstep. `knobs()` stays the loader name.
+- AGENTS.md note sentence matches `prompt_text()`.
 
 ## Next Step
 - QA

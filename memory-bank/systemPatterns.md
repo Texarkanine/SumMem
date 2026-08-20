@@ -58,9 +58,9 @@ A missing or conflict-marked caption degrades to grain and unique prefix with no
 
 Session start wakes the true root once, because of the `AGENTS.md` block, not a harness hook. Skip if a root wake is already in the conversation. That print includes the catalog: walk the tree, honor git ignore (including `.git/info/exclude`), do not keep a committed index. `wake --path` does not reprint root or the full catalog. Do not load every started store in the root wake.
 
-## Knobs live in the store
+## Settings live in the store
 
-Budgets are per-store committed config, not environment variables. Missing names fall back to script defaults. The file is not rewritten unless someone runs `start`.
+Budgets are per-store committed config, not environment variables. Missing values fall back to script defaults. The file is not rewritten unless someone runs `start`.
 
 ## What this system is not
 

@@ -263,3 +263,23 @@ Omit `== Project-root memories ==` when the root decaying document is empty.
     - The heading rename is in scope. Do not treat it as an unplanned defect.
 * Insights
     - Proof 7 locked the old heading; a rename has to move VISION and the proof together.
+
+## 2026-08-19 - QA - COMPLETE (FAIL)
+
+* Work completed
+    - Reviewed the implementation against the approved Level 1 empty-root-header plan and established design contract.
+* Decisions made
+    - QA failed because the working tree changes `CONFIG_TEMPLATE` terminology from "knobs" to "settings" outside the plan, leaving `memory-bank/systemPatterns.md` out of sync.
+    - Build must rerun to update the documentation or revert the code change.
+* Insights
+    - The planned empty-root-header behavior in `HEAD` is complete; the blocker is an additional unrecorded terminology change.
+
+## 2026-08-19 - BUILD - COMPLETE
+
+* Work completed
+    - Operator kept CONFIG_TEMPLATE “settings/values”. Lockstepped `systemPatterns.md`, `techContext.md`, and VISION. Did not rename `knobs()`.
+    - AGENTS.md note-policy sentence already matches `prompt_text()`.
+* Decisions made
+    - Wording tweaks in this rework are in scope. Do not revert operator strings.
+* Insights
+    - Adding the whole `summem` file also committed the template comment. Ask before treating a dirty string as a defect.

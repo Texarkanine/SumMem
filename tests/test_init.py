@@ -67,7 +67,8 @@ def test_prompt_text_invariants():
     assert "wake" in lower
     assert "root" in lower
     assert "conversation" in lower
-    assert "stranger" in lower or "public" in lower
+    assert "contributor" in lower
+    assert "personal" in lower
     assert "before any other tool call" not in lower
     assert ".summem/summem" in prompt
     assert "AGENTS.md or CLAUDE.md" not in prompt
