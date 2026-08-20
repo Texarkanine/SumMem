@@ -27,3 +27,12 @@ Bake a SumMem agent prompt into the driver, print it from `summem init`, land it
     - Composer 2.5 probes are Build verification, not pytest.
 * Insights
     - Existing CLI tests encode “every command except start takes `--path`”; `init` must join `start` in those assertions in the same unit.
+
+## 2026-08-19 - PREFLIGHT - COMPLETE (PASS)
+
+* Work completed
+    - Preflight validation of the plan completed successfully with PASS.
+* Decisions made
+    - Validated that the `AGENTS.md` lockstep test is a valid cross-file contract test, not a change-detector.
+* Insights
+    - The plan's test coverage appropriately handles all required aspects without change-detector tests.
