@@ -1,5 +1,7 @@
 # SumMem
 
+[![codecov](https://codecov.io/github/Texarkanine/SumMem/graph/badge.svg)](https://codecov.io/github/Texarkanine/SumMem)
+
 **A committed, concurrent memory for agents working in a git repository.**
 
 Agents never touch the store. They run a script. The script owns every file. Wake prints a decaying view of what the repository has learned: recent notes verbatim, older notes as one-line summaries. Zoom can still open those summaries down to the original sentences after a squash merge.
@@ -59,7 +61,7 @@ Agents invoke `.summem/summem`. Bare `summem` is the printed name of this invoca
 
 ## Developing
 
-Tests load repo-root `summem` (the path has no `.py` suffix). The suite command is `tox`. It runs pytest on `tests/` for every declared non-EOL CPython from the 3.11 floor (3.11–3.14) that is installed. `tox -e py311` is the single-interpreter form. If tox is not on `PATH`, `uvx --with tox tox` is the same command without a global install.
+Tests load repo-root `summem` (the path has no `.py` suffix). The suite command is `tox`. It runs pytest on `tests/` for every declared non-EOL CPython from the 3.11 floor (3.11–3.14) that is installed. `tox -e py311` is the single-interpreter form. If tox is not on `PATH`, `uvx --with tox tox` is the same command without a global install. `tox -e coverage` is the opt-in lcov command (`coverage/lcov.info`); default `tox` does not pass `--cov`. The Codecov badge 404s until the `CODECOV_TOKEN` repository secret exists and CI has uploaded once.
 
 There is no test-result cache. This suite is heavy on `tmp_path`, git worktrees, and a no-suffix script loaded via `SourceFileLoader`; coverage-based selection (pytest-testmon and the like) is not proven not to skip a test that should run.
 

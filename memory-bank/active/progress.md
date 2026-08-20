@@ -38,3 +38,16 @@ Wire Python coverage collection and Codecov upload (stockroom-style) plus a READ
 * Insights
     - Live nested `--cov` will also run under CI `tox -e coverage`; isolate `COVERAGE_FILE` so the child cannot collide with the outer session
     - Lcov parent dir should be created in the coverage env; the live test’s `tmp_path` will not catch a missing `coverage/`
+
+## 2026-08-20 - BUILD - COMPLETE
+
+* Work completed
+    - TDD for coverage collection (stub → red → green); 4 new tests
+    - `tox -e coverage` emits `coverage/lcov.info`; CI uploads it; README badge added
+    - tox 236 passed on py311–py314
+* Decisions made
+    - Live emit in `tests/test_coverage_collection.py`; ini locks in `tests/test_tox_runner.py`
+    - Isolate nested `--cov` with `COVERAGE_FILE` under `tmp_path`; mkdir via `Path.mkdir`; pin `base_python = py311`
+    - Did not drive the live test from the tox command string (preflight radical, not applied)
+* Insights
+    - `--cov=summem` works on the no-suffix shebang; nested `--cov` under `tox -e coverage` needs a clean child env

@@ -27,7 +27,7 @@ No tests for `.github/workflows/ci.yaml`, `codecov.yml`, or the README badge (co
 
 ## Implementation Plan
 
-### 1. Coverage collection — executable
+### 1. Coverage collection — executable ✅
 
 - Files: `tox.ini`, `tests/test_coverage_collection.py`, `tests/test_tox_runner.py`
 
@@ -36,14 +36,14 @@ No tests for `.github/workflows/ci.yaml`, `codecov.yml`, or the README badge (co
 3. Write tests and run red: live nested `pytest --cov=summem --cov-report=lcov:{tmp_path}/lcov.info` on `tests/test_version.py::test_version_prints_script_version` asserts `SF:` contains `summem` and is not tests-only; ini contract asserts `[testenv:coverage]` flags, default `commands` / `env_list` unchanged. Default suite must install `pytest-cov` so the live case does not skip.
 4. Write code and run green: `[testenv]` `deps` = `pytest` + `pytest-cov`; `[testenv:coverage]` overrides `commands` to `pytest --cov=summem --cov-report=lcov:{env:COVERAGE_DIR:coverage}/lcov.info {posargs}` (create the dest dir if the reporter will not). Do not put `--cov` in default `commands` or `coverage` in `env_list`.
 
-### 2. Ignore coverage artifacts — prose/policy
+### 2. Ignore coverage artifacts — prose/policy ✅
 
 - Files: `.gitignore`
 - No tests: prose/policy artifact
 
 1. Ignore `.coverage`, `coverage/`, `htmlcov/`.
 
-### 3. CI upload — prose/policy
+### 3. CI upload — prose/policy ✅
 
 - Files: `.github/workflows/ci.yaml`, `codecov.yml`
 - No tests: consumer GitHub Actions YAML and Codecov config; not product TDD (projectbrief constraint 6)
@@ -51,7 +51,7 @@ No tests for `.github/workflows/ci.yaml`, `codecov.yml`, or the README badge (co
 1. Add a CI workflow (PR + push to `main`) that checks out, sets up Python 3.11, installs `tox`, runs `tox -e coverage`, then `codecov/codecov-action@v7` with `files: coverage/lcov.info`, `token: ${{ secrets.CODECOV_TOKEN }}`, `fail_ci_if_error: false` (stockroom Python upload).
 2. Add root `codecov.yml` (that filename, not `.yaml`): project/patch status `enabled: false` until a baseline exists.
 
-### 4. README badge and Developing note — prose/policy
+### 4. README badge and Developing note — prose/policy ✅
 
 - Files: `README.md`
 - No tests: prose/policy artifact
@@ -59,7 +59,7 @@ No tests for `.github/workflows/ci.yaml`, `codecov.yml`, or the README badge (co
 1. Add the stockroom-style badge: `[![codecov](https://codecov.io/github/Texarkanine/SumMem/graph/badge.svg)](https://codecov.io/github/Texarkanine/SumMem)`.
 2. In Developing, document `tox -e coverage` as the opt-in lcov command and that the badge 404s until `CODECOV_TOKEN` plus a successful upload.
 
-### 5. Tech context — prose/policy
+### 5. Tech context — prose/policy ✅
 
 - Files: `memory-bank/techContext.md`
 - No tests: prose/policy artifact
@@ -102,5 +102,5 @@ PoC (2026-08-20, `uvx --with pytest --with pytest-cov --python 3.11`): `pytest t
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
 - [x] Preflight
-- [ ] Build
+- [x] Build
 - [ ] QA
