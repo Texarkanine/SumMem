@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/Texarkanine/SumMem/compare/v0.2.0...v0.2.1) (2026-08-20)
+
+
+### Bug Fixes
+
+* label root-wake memories when there is no catalog ([#25](https://github.com/Texarkanine/SumMem/issues/25)) ([42f9566](https://github.com/Texarkanine/SumMem/commit/42f9566d115b6457be15ef87753fb9476149534a))
+
 ## [0.2.0](https://github.com/Texarkanine/SumMem/compare/v0.1.0...v0.2.0) (2026-08-20)
 
 
