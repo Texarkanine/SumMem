@@ -26,3 +26,15 @@ Wire Python coverage collection and Codecov upload (stockroom-style) plus a READ
     - Follow stockroom's Python upload (`codecov-action@v7`, status checks off, `fail_ci_if_error: false`), not Make/uv
 * Insights
     - Adding test CI is in scope only because upload needs a job; no multi-version matrix in this task
+
+## 2026-08-20 - PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+
+* Work completed
+    - Validated the Level 2 plan against tox.ini, tests, CI, README, stockroom’s Python upload path, and always-tdd
+    - Wrote `memory-bank/active/.preflight-status` with first line `PASS WITH ADVISORY`
+* Decisions made
+    - Plan is acceptable as-is; no TDD swap or change-detector strike
+    - Consumer Actions YAML / codecov.yml / README badge remain out of product TDD (brief constraint 6)
+* Insights
+    - Live nested `--cov` will also run under CI `tox -e coverage`; isolate `COVERAGE_FILE` so the child cannot collide with the outer session
+    - Lcov parent dir should be created in the coverage env; the live test’s `tmp_path` will not catch a missing `coverage/`

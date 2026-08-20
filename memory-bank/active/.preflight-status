@@ -1,0 +1,23 @@
+PASS WITH ADVISORY
+
+Level 2 codecov-upload plan is acceptable as-is. Planning is complete; no creative-phase docs were required. The only executable unit (coverage collection) encodes stub tests → stub `[testenv:coverage]` → write tests / red → write code / green. Units 2–5 are prose/policy (gitignore, consumer Actions YAML, codecov.yml, README badge, techContext) and correctly omit tests per brief constraint 6 and always-tdd. The tox.ini locks are user-facing contracts (AC1/AC2: `tox -e coverage` flags; default `env_list` / commands stay coverage-free), not change-detectors. No TDD swap or change-detector strike.
+
+Conventions match: `tests/test_*.py`, existing `ConfigParser(interpolation=None)` reader in `tests/test_tox_runner.py`, `package = skip`, no Make and no project package, workflow filename `ci.yaml` and Codecov filename `codecov.yml` as stockroom. Current `test_tox_runner.py` assertions stay valid after the planned edits. Public CLI is untouched. No overlapping coverage collector exists; README/techContext warnings are about coverage-based *selection* (testmon), not reporting.
+
+PoC already showed `--cov=summem` (not `--cov=.`) emits lcov whose only `SF:` is the no-suffix shebang. Remote is Texarkanine/SumMem; branch is already `feat/codecov-upload` (AC4/AC5). stockroom's Python upload path (`codecov/codecov-action@v7`, `fail_ci_if_error: false`, project/patch status off) is specified without copying Make/uv/dual-root.
+
+Advisories (do not block build):
+
+1. Downstream: CI `tox -e coverage` runs the full suite, including the new live nested `pytest --cov=summem`. The plan only designed that nest for the default (no `--cov`) env. Isolate the child (`COVERAGE_FILE` under `tmp_path`, clean cov env) so it cannot fight the outer session’s `.coverage` / pytest-cov env. Stockroom used per-test `COVERAGE_*_DIR` for the same class of problem.
+
+2. Dest dir: stockroom `mkdir -p`s the lcov parent. The live test writes under `tmp_path` (parent exists) and will not catch a missing `coverage/`. Treat directory creation as required in `[testenv:coverage] commands`, not “if the reporter will not.” coverage.py creates dirs for the *data file*; that is not a promise for the lcov output path. If using `mkdir`, tox 4 needs `allowlist_externals`; a Python `Path.mkdir` avoids that.
+
+3. TDD red: step 3’s “Default suite must install pytest-cov so the live case does not skip” can make the live test green during the red run (it does not read tox.ini). Add pytest-cov on the green/stub-infra step; do not `importorskip`. The INI contract stays red until coverage commands exist. Installing pytest-cov in `[testenv] deps` matches stockroom’s always-present dev extra; `--cov` still stays out of default `commands`.
+
+4. Test placement: the plan lists both `tests/test_coverage_collection.py` and `tests/test_tox_runner.py` while saying “one place, not both.” Pick in build: live emit in the new file, ini locks in `test_tox_runner.py`, or all four in the new file.
+
+5. Local interpreter: `[testenv:coverage]` with no `base_python` uses whatever invoked tox. CI sets up 3.11 first; this machine’s bare `python3` is 3.10 (`tomllib`). Pin `base_python = py311` on the coverage env so `tox -e coverage` cannot silently use 3.10.
+
+6. CI hygiene: copy stockroom’s `permissions: contents: read` and concurrency group on the new workflow (not the engine working-directory / Make / uv / flags).
+
+Radical innovation (advisory only; plan not changed): drive the live test from `[testenv:coverage] commands` — parse the command string with the existing ini reader, substitute `{posargs}` with the narrow `test_version` node and `{env:COVERAGE_DIR:coverage}` with `tmp_path`, subprocess that argv (not `tox`). Same four behaviors, one command line with CI. That is stockroom’s “one argv surface” lesson without Make or nested tox.

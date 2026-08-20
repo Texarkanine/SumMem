@@ -101,6 +101,6 @@ PoC (2026-08-20, `uvx --with pytest --with pytest-cov --python 3.11`): `pytest t
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
+- [x] Preflight
 - [ ] Build
 - [ ] QA
