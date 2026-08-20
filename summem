@@ -929,7 +929,7 @@ def prompt_text() -> str:
     return f"""\
 # Project Memory
 
-Shared memory for this repository. Run `{AGENT_BIN}`. `--path` aims at a store, not at that file. This block is how the repository opts in; the driver alone is not activation.
+Shared memory for this repository is managed through SumMem: run `{AGENT_BIN} -h` for usage information. Scoped memory stores may exist; `--path` aimed at a file retrieves memories from the nearest store.
 
 ## At Session Start: Activating SumMem (Mandatory)
 
@@ -948,9 +948,8 @@ Never invent filenames, rewrite note bytes, or delete memory files by hand. The 
 ## Other commands
 
 - `{AGENT_BIN} recall <regex>` — search remembered text word for word
-- `{AGENT_BIN} zoom <id>` — open a nap for more detail
+- `{AGENT_BIN} zoom <id>` — any memory with a `x<N> <hash>: …` prefix is a nap that can be zoomed in on.
 - `{AGENT_BIN} wake --path <path>` — when you work under a cataloged path, pull that store if its wake is not already in this conversation. Ignore `--path` if the root wake didn't have a catalog.
-- `{AGENT_BIN} start <dir>` — start a new store in that directory (only when asked), such as for a package in a monorepo
 """
 
 
