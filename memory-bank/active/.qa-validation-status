@@ -1,0 +1,3 @@
+PASS
+
+The implementation adheres exactly to the plan. `_recall_nested` efficiently implements the recursive text/caption discovery without impacting `_note_children`, and the stderr warning is correctly limited to the sibling loop / `recall_text` continue blocks. Documentation is fully updated, and all tests pass with appropriate bounds on paths and outputs.

@@ -47,3 +47,26 @@
     - Built to plan; omit-paths test requires a hit so empty output cannot pass
 * Insights
     - `_note_children` left note-only; rematerialize/`_nap_stem` untouched
+
+## 2026-08-19 - QA - COMPLETE
+
+* Result
+    - `PASS`
+* Findings
+    - Implementation fully matches the L2 plan for nested caption recall and sibling pack warnings.
+    - KISS/YAGNI: The new helpers `_recall_nested` and `_warn_skipped_pack` are concise and precisely bounded.
+    - Completeness: Tests cover all new and existing paths for errors and standard output without leaking paths.
+    - Architecture docs are properly updated.
+
+## 2026-08-19 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-recall-zoom-packs.md`
+    - Persistent-file probe: no surgical updates
+* Decisions made
+    - productContext: skip — search use case still accurate; nested-caption scope lives in the atlas
+    - systemPatterns: skip — wake wait-free already covers silence; skip-line identity is zoom/recall-local
+    - techContext: skip — no stack, runner, or driver change
+* Insights
+    - `_note_children` is rematerialize, not search
+    - Omit-paths tests must assert a hit first
