@@ -75,6 +75,23 @@ def test_prompt_text_invariants():
     assert "./summem/summem" not in prompt
 
 
+def test_prompt_text_notes_are_part_of_the_work():
+    """prompt_text() treats script-written files as part of your work, not a separate git procedure."""
+    m = load_summem()
+    prompt = m.prompt_text()
+    lower = prompt.lower()
+    assert "part of your work" in lower
+    assert "untracked" in lower
+    assert "git add" not in prompt
+    assert "own commit" not in lower
+    assert "the tool manages them" not in prompt
+    assert "invent filenames" in lower
+    assert "rewrite" in lower
+    assert "the only writer" in lower
+    assert "notes/" not in prompt
+    assert "naps/" not in prompt
+
+
 def test_agents_md_starts_with_prompt_text():
     """This repo's AGENTS.md starts with prompt_text() so the paste does not drift."""
     m = load_summem()

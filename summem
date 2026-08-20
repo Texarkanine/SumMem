@@ -923,7 +923,7 @@ Otherwise run `{AGENT_BIN} wake` from the repository root.
 
 Do not register redundant memories.
 
-Never edit or delete the memory files; the tool manages them.
+Never invent filenames, rewrite note bytes, or delete memory files by hand. The script is the only writer. The files it writes are part of your work; do not leave them untracked.
 
 ## Other commands
 

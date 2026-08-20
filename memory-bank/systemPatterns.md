@@ -28,7 +28,7 @@ graph TD
 
 ## Script is the only writer
 
-Agents never create, edit, or delete store files. Invented filenames and rewritten notes are the failure this boundary prevents. The backend is swappable only if this holds.
+Agents never create, edit, or delete store files. Invented filenames and rewritten notes are the failure this boundary prevents. The backend is swappable only if this holds. The files the script writes are part of your work; leaving them untracked is a publish failure, not a writer-boundary success. CLI output stays silent on git.
 
 ## A scope is a started directory
 
