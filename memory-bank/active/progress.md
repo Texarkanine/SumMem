@@ -28,3 +28,11 @@
     - Do not change `_note_children`
 * Insights
     - A view caption line and a nested caption line can both match the same regex and are different rows; `seen` should not collapse them
+
+## 2026-08-19 - PREFLIGHT - COMPLETE
+
+* Result
+    - `PASS WITH ADVISORY`
+* Findings
+    - TDD ordering, project conventions, dependencies, public behavior, and requirement coverage all pass against the current codebase
+    - Advisory only: a future redesign could consolidate the purpose-specific recursive tree walkers behind one typed traversal; this task should keep its focused helper
