@@ -355,8 +355,8 @@ def test_ignored_store_omitted_from_catalog(tmp_path, monkeypatch, capsys):
     assert "wake --path secret" not in out
 
 
-def test_empty_catalog_adds_no_output(tmp_path, monkeypatch, capsys):
-    """A repo with only the git-root store prints the decaying document only."""
+def test_root_only_wake_labels_nonempty_document(tmp_path, monkeypatch, capsys):
+    """A repo with only the git-root store labels a non-empty document."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
@@ -364,7 +364,6 @@ def test_empty_catalog_adds_no_output(tmp_path, monkeypatch, capsys):
     capsys.readouterr()
     assert m.main(["wake"]) == 0
     out = capsys.readouterr().out
-    assert out == m.wake_text(repo) + "You are up to speed.\n"
+    assert out == "== Project-root Memories ==\n" + m.wake_text(repo) + "You are up to speed.\n"
     assert "== Additional SumMem Catalogs ==" not in out
-    assert "== Project-root Memories ==" not in out
 
