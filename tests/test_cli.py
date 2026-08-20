@@ -437,5 +437,10 @@ def test_cli_zoom_nested_id_skips_sibling_bad_tree(tmp_path, monkeypatch, capsys
     first.tree_path.write_bytes(b"{not json")
     capsys.readouterr()
     assert m.main(["zoom", child_id]) == 0
-    out = capsys.readouterr().out
-    assert tree.kids[0].text in out
+    captured = capsys.readouterr()
+    assert tree.kids[0].text in captured.out
+    assert captured.err == "skipped a pack\n"
+    assert "notes/" not in captured.err
+    assert "naps/" not in captured.err
+    assert "git" not in captured.err
+    assert "Traceback" not in captured.err

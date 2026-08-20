@@ -55,11 +55,9 @@ Agents invoke `.summem/summem`. Bare `summem` is the printed name of this invoca
 
 ## Developing
 
-Tests load repo-root `summem` (the path has no `.py` suffix). Use `uv`, not this machine’s bare `python3`:
+Tests load repo-root `summem` (the path has no `.py` suffix). The suite command is `tox`. It runs pytest on `tests/` for every declared non-EOL CPython from the 3.11 floor (3.11–3.14) that is installed. `tox -e py311` is the single-interpreter form. If tox is not on `PATH`, `uvx --with tox tox` is the same command without a global install.
 
-```bash
-uv run --python 3.11 --with pytest pytest
-```
+There is no test-result cache. This suite is heavy on `tmp_path`, git worktrees, and a no-suffix script loaded via `SourceFileLoader`; coverage-based selection (pytest-testmon and the like) is not proven not to skip a test that should run.
 
 ## License
 

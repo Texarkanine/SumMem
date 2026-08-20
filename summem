@@ -591,6 +591,11 @@ def _find_in_tree(tree: Tree, cid: str) -> NapChild | str | None:
     return None
 
 
+def _warn_skipped_pack() -> None:
+    """Write one agent-safe line when a sibling children file is unreadable."""
+    sys.stderr.write("skipped a pack\n")
+
+
 def zoom_text(parent, token: str) -> str:
     """Return one-level zoom of *token* (full id or unique prefix), or raise ValueError if unknown."""
     cid = resolve_id(token, named_ids(parent))
@@ -612,6 +617,7 @@ def zoom_text(parent, token: str) -> str:
         try:
             found = _find_in_tree(loads_tree(node.tree_path.read_bytes()), cid)
         except _TREE_PARSE_ERRORS:
+            _warn_skipped_pack()
             continue
         if found is None:
             continue
@@ -838,8 +844,28 @@ def fold_request(parent, wake_lines: int | None = None) -> str:
     )
 
 
+def _recall_nested(tree: Tree, rx, lines: list[str], seen: set[str]) -> None:
+    """Append recall hits from *tree* (original notes and nested nap captions) to *lines*."""
+    for child in tree.kids:
+        if isinstance(child, NoteChild):
+            if not rx.search(child.text):
+                continue
+            cid = leafset_id([note_digest(note_file_bytes(child.text))])
+            line = f"{cid}  {child.text}"
+            if line not in seen:
+                lines.append(line)
+                seen.add(line)
+            continue
+        if rx.search(child.sum):
+            line = f"{child.id}  {child.sum}"
+            if line not in seen:
+                lines.append(line)
+                seen.add(line)
+        _recall_nested(child.tree, rx, lines, seen)
+
+
 def recall_text(parent, pattern: str) -> str:
-    """Return matching view lines and nested original notes for *pattern*."""
+    """Return matching view lines, nested nap captions, and original notes for *pattern*."""
     rx = re.compile(pattern)
     lines = []
     seen: set[str] = set()
@@ -854,17 +880,10 @@ def recall_text(parent, pattern: str) -> str:
         if node.kind != "nap" or node.tree_path is None or not node.tree_path.is_file():
             continue
         try:
-            children = _note_children(loads_tree(node.tree_path.read_bytes()))
+            _recall_nested(loads_tree(node.tree_path.read_bytes()), rx, lines, seen)
         except _TREE_PARSE_ERRORS:
+            _warn_skipped_pack()
             continue
-        for child in children:
-            if not rx.search(child.text):
-                continue
-            cid = leafset_id([note_digest(note_file_bytes(child.text))])
-            line = f"{cid}  {child.text}"
-            if line not in seen:
-                lines.append(line)
-                seen.add(line)
     if not lines:
         return ""
     return "\n".join(lines) + "\n"
