@@ -1,13 +1,13 @@
 # Active Context
 
 ## Current Task: prompt-membership
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
 
-- Intent confirmed: land the prompt-structure split from `creative-note-membership.md`.
-- Classified Level 2: self-contained enhancement to `prompt_text()` / `AGENTS.md`; store and CLI out of scope; design already decided in standalone creative.
+- Level 2 plan: one executable unit — `test_prompt_text_invariants` (clone + split-sentence), then `prompt_text()` / `AGENTS.md`.
+- No new test files. No store/CLI. No OptMem in the prompt. No redact.
 
 ## Next Step
 
-- Load the Level 2 workflow and run the plan phase.
+- Preflight via subagent, then build if PASS / PASS WITH ADVISORY.
