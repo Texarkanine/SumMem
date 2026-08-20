@@ -38,6 +38,6 @@ The product succeeds when the file-backend proofs in `tests/test_proof_*.py` hol
 - Personal and machine facts stay out of the repository.
 - SumMem is not Niko's `memory-bank/` and must not be folded into it.
 - Wake never refuses to print. "Cannot wake, go nap first" is a defect.
-- CLI output does not mention store files, hashes as paths, or git. The activation block may tell agents to `git add` and commit the files the script wrote.
+- CLI output does not mention store files, hashes as paths, or git. The activation block treats the files the script wrote as part of the work, not a separate publish procedure.
 - A scope is not a package manifest. `start` is how a directory becomes a store.
 - The git root auto-creates on first `wake`, `note`, `nap`, `zoom`, or `recall`. Other stores appear only via `start`. Outside a repository, store commands fail. Help and `init` still print.

@@ -75,14 +75,15 @@ def test_prompt_text_invariants():
     assert "./summem/summem" not in prompt
 
 
-def test_prompt_text_teaches_git_publish():
-    """prompt_text() tells agents to git add/commit files the script wrote; script stays the only writer."""
+def test_prompt_text_notes_are_part_of_the_work():
+    """prompt_text() treats script-written files as part of the work, not a separate git procedure."""
     m = load_summem()
     prompt = m.prompt_text()
     lower = prompt.lower()
-    assert "git add" in prompt
-    assert "commit them" in lower
-    assert "own commit" in lower
+    assert "part of the work" in lower
+    assert "untracked" in lower
+    assert "git add" not in prompt
+    assert "own commit" not in lower
     assert "the tool manages them" not in prompt
     assert "invent filenames" in lower
     assert "rewrite" in lower

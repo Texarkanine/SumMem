@@ -91,3 +91,13 @@ Tweak `prompt_text()` and the committed `AGENTS.md` block so agents `git add` an
     - productContext and techContext already correct from build; skip further edits
 * Insights
     - Prompt-content asserts must name the instruction, not a word other sentences can grow
+
+## 2026-08-20 - REWORK - prompt rides with the work
+
+* Work completed
+    - Replaced the After-note `git add` / own-commit procedure with one constraint: the files the script writes are part of the work; do not leave them untracked
+    - Briefing (productContext, systemPatterns, atlas) matches
+* Decisions made
+    - Operator: an explicit git add/commit recipe layers a second tool-call sequence. Notes should ride on the commits the work already makes.
+* Insights
+    - "Do not leave them untracked" names the failure without inventing a procedure

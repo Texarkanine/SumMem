@@ -14,9 +14,7 @@ Otherwise run `.summem/summem wake` from the repository root.
 
 Do not register redundant memories.
 
-Never invent filenames, rewrite note bytes, or delete memory files by hand. The script is the only writer.
-
-After `note` or `nap`, `git add` the files the script just wrote. Commit them with the rest of the work, or as their own commit.
+Never invent filenames, rewrite note bytes, or delete memory files by hand. The script is the only writer. The files it writes are part of the work; do not leave them untracked.
 
 ## Other commands
 
