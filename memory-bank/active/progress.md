@@ -45,3 +45,15 @@ Split the baked SumMem note prompt so the mandatory-note workflow and the clone-
     - Keep existing lockstep and invariant tests; do not add `clone` / split-sentence checks. Do not take the labeled-heading advisory unless asked.
 * Insights
     - `test_agents_md_starts_with_prompt_text` still belongs: it fails when the two copies drift, not when the wording changes.
+
+## 2026-08-20 - PREFLIGHT - COMPLETE (replan)
+
+* Work completed
+    - Preflighted the replanned tasks that reclassified the unit as prose/policy.
+    - Wrote `memory-bank/active/.preflight-status` (first line: `PASS`).
+* Decisions made
+    - TDD checks passed because the modification applies to a prose/policy artifact which requires no tests.
+    - Plan convention compliance, dependency impact, conflict detection, and completeness all passed with no advisories.
+* Insights
+    - The plan to just rewrite the prompt text and test lockstep correctly respects the rule that change-detectors for prose should not be included.
+
