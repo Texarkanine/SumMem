@@ -30,3 +30,37 @@ Replace the bare `note is too long` rejection with an OptMem-style ratchet for `
 * Insights
     - Existing proofs already lock substrings (`unknown id`, the range token); keep those phrases
     - `require_entry` is the single write path for both commands
+
+## 2026-08-20 - PREFLIGHT - FAIL (fixable)
+
+* Work completed
+    - [Preflight](1b1f8b7c-d52d-4955-891e-a5fc3b443028) judged the first plan; first line of `.preflight-status` was `FAIL (fixable)`
+* Decisions made
+    - Do not build on that plan
+* Insights
+    - `require_entry` is shared; “note each line” is false for nap
+    - `unknown id` is two causes: identity miss vs missing `.tree`
+
+## 2026-08-20 - PLAN - COMPLETE
+
+* Work completed
+    - Rewrote the plan against those two findings and the cheap advisories
+* Decisions made
+    - Multi-line next step is merge-only
+    - Wake hint only on `resolve_id`, `_adjacent_nodes`, and `zoom_text`’s final raise
+    - Leave `note is empty`
+    - Assert 94 × `你` → `282`; extend the existing CLI note leak test; new CLI nap-overlong test; drain `capsys` per tight-store failure
+* Insights
+    - A unique-string table is the wrong key when one phrase has two causes
+
+## 2026-08-20 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Validated the Level 2 plan against `summem` call sites and existing tests
+    - First line of `.preflight-status`: `FAIL (fixable)`
+* Decisions made
+    - TDD encoding, conventions, and the must-ship `require_entry` length path are acceptable
+    - Plan must change before build: multi-line next step is note-only inside shared `require_entry`; `unknown id` next step must not attach to missing-tree raises
+* Insights
+    - `unknown id` is one string and two causes (identity miss vs missing `.tree`)
+    - `tests/test_cli.py::test_note_error_text_omits_store_paths_and_git` already owns the CLI over-long note path
