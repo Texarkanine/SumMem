@@ -1,6 +1,31 @@
 # Active Context
 
 **Current Task:** version-tracking
-**Phase:** PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
-**What Was Done:** Preflight validated the re-planned Level 2 implementation plan. TDD ordering passes for Units 1–2; Unit 3 workflow stays prose/policy per operator ruling. Advisories: update the catalog `--path` footer when adding `version`, and consider a declarative command registry.
-**Next Step:** Build (`/niko-build`).
+**Phase:** BUILD - COMPLETE
+**What Was Done:** Implemented `summem version`, Release Please `simple` + generic extra-files on repo-root `summem`, stockroom helper-bot workflow, and living-doc updates. 8 new tests in `tests/test_version.py`. Extended catalog and `--path` tests.
+**Next Step:** QA review.
+
+## Files created or modified
+
+- `/home/mobaxterm/.cursor/worktrees/versioning-c0076e5c/SumMem-4f7b2f511995/summem`
+- `/home/mobaxterm/.cursor/worktrees/versioning-c0076e5c/SumMem-4f7b2f511995/tests/test_version.py`
+- `/home/mobaxterm/.cursor/worktrees/versioning-c0076e5c/SumMem-4f7b2f511995/tests/test_cli.py`
+- `/home/mobaxterm/.cursor/worktrees/versioning-c0076e5c/SumMem-4f7b2f511995/release-please-config.json`
+- `/home/mobaxterm/.cursor/worktrees/versioning-c0076e5c/SumMem-4f7b2f511995/.release-please-manifest.json`
+- `/home/mobaxterm/.cursor/worktrees/versioning-c0076e5c/SumMem-4f7b2f511995/.github/workflows/release-please.yaml`
+- `/home/mobaxterm/.cursor/worktrees/versioning-c0076e5c/SumMem-4f7b2f511995/README.md`
+- `/home/mobaxterm/.cursor/worktrees/versioning-c0076e5c/SumMem-4f7b2f511995/docs/architecture/index.md`
+- `/home/mobaxterm/.cursor/worktrees/versioning-c0076e5c/SumMem-4f7b2f511995/memory-bank/systemPatterns.md`
+- `/home/mobaxterm/.cursor/worktrees/versioning-c0076e5c/SumMem-4f7b2f511995/memory-bank/techContext.md`
+
+## Decisions
+
+- CLI is `summem version`; output is `__version__` plus newline
+- Catalog footer now excludes `version` from `--path` (preflight advisory)
+- Did not take the command-registry advisory
+- Did not add `--version`
+
+## Deviations
+
+- Catalog footer update was an advisory, done in Unit 1 step 4
+- Full `tox` : 229 passed, 1 failed (`test_agents_md_starts_with_prompt_text`). Pre-existing on this branch: `AGENTS.md` is missing two spaces (`cloneon`, `napbefore`) vs `prompt_text()`. Not introduced by this change; left alone

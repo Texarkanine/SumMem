@@ -43,6 +43,7 @@ summem zoom    [--path PATH] ID                 open a nap to its children
 summem recall  [--path PATH] PATTERN            search remembered text
 summem start <path>                             create a store in that directory
 summem init                                     print the agent prompt
+summem version                                  print this script's version
 ```
 
 Agents invoke `.summem/summem`. Bare `summem` is the printed name of this invocation. If `note` asks for a nap, do that nap before the next action. Never edit store files by hand.

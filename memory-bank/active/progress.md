@@ -53,3 +53,15 @@ Instrument Release Please for semantically versioned tags, keep `summem` one fil
 * Findings
     - TDD ordering passes for CLI and Release Please lockstep units; workflow unit correctly stays prose/policy after the operator ruling
     - Advisory: schedule updating the `usage_text()` `--path` footer to exclude `version`, and consider a declarative command registry for future commands
+
+## 2026-08-20 - BUILD - COMPLETE
+
+* Work completed
+    - `summem version` prints `__version__`
+    - Release Please config, manifest, and helper-bot workflow
+    - Docs: README, architecture, systemPatterns, techContext
+    - `tox` 229 passed; 1 pre-existing AGENTS.md lockstep fail left alone
+* Decisions made
+    - Took the catalog-footer advisory; left the command-registry advisory
+* Insights
+    - `AGENTS.md` on this SHA already drifted from `prompt_text()` (`cloneon`, `napbefore`)

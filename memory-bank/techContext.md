@@ -16,6 +16,8 @@ None. The product is one shebang file; there is no packaging step and no separat
 
 License: GNU AGPL v3, in `LICENSE`.
 
+Semver tags come from Release Please (`release-type: simple`) on `main`. Generic extra-files bump `__version__` in repo-root `summem` (`x-release-please-version`). `summem version` prints that string. Helper-bot auth is repository variable `HELPER_APP_ID` and repository secret `HELPER_APP_PRIVATE_KEY`, provisioned after merge. GitHub Actions YAML that only invokes that third-party action is not product TDD in this repo.
+
 ## Testing Process
 
 Tests are pytest as configured in `pytest.ini` (`testpaths = tests`). The one command is `tox`: `tox.ini` declares `py311`–`py314`, skips packaging the shebang script, and runs `pytest {posargs}`. Missing interpreters are skipped (`skip_missing_interpreters = true`); `tox -e py311` runs one version. If tox is not on `PATH`, `uvx --with tox tox` is the same command. Do not use this machine's bare `python3` (3.10). They load repo-root `summem` via `SourceFileLoader` (the path has no `.py` suffix). There is no test-result cache: this suite is heavy on `tmp_path`, git worktrees, and a no-suffix script, and coverage-based selection is not proven safe here. Executable behavior is TDD-governed by `.cursor/rules/shared/always-tdd.mdc`. The acceptance proofs the file backend must satisfy live in `tests/test_proof_*.py`. Those are product tests, not a change-detector on a document.
