@@ -28,7 +28,14 @@ Existing tests that must stay green (not new work, not new assertions):
 
 ## Implementation Plan
 
-### 1. Baked prompt membership — prose/policy
+### 1. Baked prompt membership — prose/policy ✅
+
+- Files: `summem` (`prompt_text()`), `AGENTS.md`
+- No tests: prose/policy artifact
+
+1. Rewrite the Register Memories body in `prompt_text()` per the creative: workflow (when to note) in one sentence; membership as its own sentence ending on clone-portability (true after a fresh clone on another machine; personal, machine-local, and preference facts stay out). Nap-if-asked stays. Do not name OptMem. Do not quote the leaked uv/rc3 line. Do not add a denylist or a wake reminder. Keep words the existing invariants already require (`personal`, `contributor`, `.summem/summem`).
+2. Copy the new `prompt_text()` prefix into `AGENTS.md`. Do not edit the Agent context section below the baked block.
+3. Run `tests/test_init.py`, then full `tox`, so lockstep and current invariants stay green.
 
 - Files: `summem` (`prompt_text()`), `AGENTS.md`
 - No tests: prose/policy artifact
@@ -66,5 +73,5 @@ No new technology - validation not required
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
 - [x] Preflight
-- [ ] Build
+- [x] Build
 - [ ] QA

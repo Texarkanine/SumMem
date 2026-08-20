@@ -1,13 +1,18 @@
 # Active Context
 
 ## Current Task: prompt-membership
-**Phase:** PREFLIGHT - COMPLETE (PASS)
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
 
-- Operator: cut the planned phrase tests. `init` printing text does not make those asserts executable behavior. They are change-detectors.
-- Replanned as one prose/policy unit: rewrite `prompt_text()` Register Memories, lockstep `AGENTS.md`, run existing `tests/test_init.py` + `tox`. No new tests.
+- Rewrote Register Memories in `prompt_text()`: dump line no longer says “git forever”; membership is its own clone-portability sentence. Lockstep `AGENTS.md`.
+- No new tests. Existing `tests/test_init.py` stayed green. Full `tox`: 215 passed on py311–py314.
+
+## Files modified
+
+- `/home/mobaxterm/git/SumMem/summem` (`prompt_text()`)
+- `/home/mobaxterm/git/SumMem/AGENTS.md` (baked prefix only)
 
 ## Next Step
 
-- Preflight via subagent, then build if PASS / PASS WITH ADVISORY.
+- QA via subagent.

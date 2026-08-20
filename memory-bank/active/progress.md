@@ -57,3 +57,13 @@ Split the baked SumMem note prompt so the mandatory-note workflow and the clone-
 * Insights
     - The plan to just rewrite the prompt text and test lockstep correctly respects the rule that change-detectors for prose should not be included.
 
+## 2026-08-20 - BUILD - COMPLETE
+
+* Work completed
+    - Split Register Memories in `prompt_text()` / `AGENTS.md`. `tox`: 215 passed × py311–py314.
+* Decisions made
+    - Workflow: note a fact another contributor would still need. Membership: still true after a fresh clone on another machine; personal/machine-local/preference stay out.
+    - Dropped “acceptable in git forever” from the dump sentence.
+* Insights
+    - None beyond the creative.
+
