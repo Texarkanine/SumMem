@@ -81,3 +81,13 @@ Tweak `prompt_text()` and the committed `AGENTS.md` block so agents `git add` an
     - QA PASS. Two advisories recorded, neither blocking: the weak `rewrite` token assert, and README saying nothing about publishing.
 * Insights
     - The round-1 finding named the wrong witness (`committed AGENTS.md` is not in `prompt_text()`), but the underlying weakness was real: a bare `commit` substring does not name the instruction it guards.
+
+## 2026-08-19 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-prompt-commit-notes.md`
+    - Reconciled `systemPatterns.md` (publish vs authorship)
+* Decisions made
+    - productContext and techContext already correct from build; skip further edits
+* Insights
+    - Prompt-content asserts must name the instruction, not a word other sentences can grow

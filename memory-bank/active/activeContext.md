@@ -1,13 +1,11 @@
 # Active Context
 
 ## Current Task: prompt-commit-notes
-**Phase:** QA - COMPLETE (PASS)
+**Phase:** REFLECT COMPLETE
 
 ## What Was Done
-- Re-reviewed the implementation against the Level 2 plan and acceptance criteria.
-- Round-1 blocker closed: `commit them`, `own commit`, and `git add` occur only in the publish sentence, so the test protects it.
-- Documentation reconciled; writer-only invariants intact; CLI output still silent on git.
-- 208 pytest passed.
+- Reflection written. `systemPatterns.md` now states publish-vs-authorship so the "only writer" section is not read as "do not git add."
+- productContext and techContext already matched the work; no further persistent edits.
 
 ## Next Step
-- Reflect
+- `/niko-archive` to finalize. Draft PR for #14 after this commit.
