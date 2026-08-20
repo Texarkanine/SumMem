@@ -57,7 +57,7 @@ Git’s job is to merge a directory of files. It is not a timestamp server and n
 - `leafset` is the 64-hex content id of the original notes.
 - `leaves` is the original-note count wake prints as grain.
 
-A nap stem is those four fields. Same children produce the same `leafset` and the same `.tree` bytes. Different wording produces the same id and a different `.sum`.
+A nap stem is those four fields. The leaf-set id is a digest of original note bytes, never of captions. `dumps_tree` is deterministic for one `Tree` object: same child order, nested captions, and grouping produce the same bytes. Two agents who nap the same two loose notes get the same `.tree` and, if they word the caption differently, a different `.sum`. The same leaf set folded in a different grouping, or with different nested captions, is the same id and different `.tree` bytes.
 
 `config.toml` is a commented template. The script reads it with stdlib `tomllib` and fills missing values from built-in defaults (`ENTRY_CHARS`, `WAKE_LINES`). It does not rewrite the file unless someone runs `start`. Settings are not environment variables.
 
@@ -88,10 +88,10 @@ Ingest is wait-free union. Integrate is cooperative fold. Wake is wait-free proj
 flowchart TD
     Note["note: write a new path"] --> View["Directory listing"]
     Nap["nap: write parent, then unlink children"] --> View
-    View --> Count{"File count vs WAKE_LINES"}
-    Count -->|"at or over"| Files["Print files; do not open .tree"]
+    View --> Count{"View-node count vs WAKE_LINES"}
+    Count -->|"at or over"| Files["Print view nodes; do not open .tree"]
     Count -->|"under"| Expand["Expand the newest nap in memory"]
-    Note --> Over{"File count still over?"}
+    Note --> Over{"View still over budget?"}
     Nap --> Over
     Over -->|yes| Pair["Request the oldest equal-grain adjacent pair"]
     Over -->|no| Done["No fold request"]
@@ -107,17 +107,17 @@ Wake’s on-disk sequence is the mixed listing: loose notes plus nap stems (a `.
 
 ### Fold
 
-When **file** count exceeds `WAKE_LINES`, `note` and `nap` ask for the oldest adjacent pair with the same leaf count. Never 16+1. The agent supplies a caption. Fold writes a new pair for the union leaf set, then deletes the children from the view. Children leave the working tree only after the parent `.tree` exists on disk.
+When **view-node** count exceeds `WAKE_LINES`, `note` and `nap` ask for the oldest adjacent pair with the same leaf count. A view node is one loose note or one nap stem (`.sum` and `.tree` together). Never 16+1. The agent supplies a caption. Fold writes a new pair for the union leaf set, then deletes the children from the view. Children leave the working tree only after the parent `.tree` exists on disk.
 
-`WAKE_LINES` is how many lines wake prints. Catch-up after `nap` prints the next equal-grain pair if the directory is still over budget. Fold requests still unlink; they do not keep children on disk “because wake will expand.”
+`WAKE_LINES` is how many lines wake prints. Catch-up after `nap` prints the next equal-grain pair if the view is still over budget. Fold requests still unlink; they do not keep children on disk “because wake will expand.”
 
 `nap` of two overlapping packs is rejected. Overlap is the zipper’s job.
 
 ### Expand
 
-When file count is short of the budget, wake opens `.tree` and splits the newest expandable nap in memory until it has enough lines, or until nothing left will split. It does not write those children back. Expanded ids are printable and zoomable. This milestone still naps view-file ids only.
+When the view is short of the budget, wake opens `.tree` and splits the newest expandable nap in memory until it has enough lines, or until nothing left will split. It does not write those children back. Expanded ids are printable and zoomable. `nap` still takes view-node ids, not ids that exist only in that in-memory expansion.
 
-When file count meets or exceeds the budget, wake lists files. It does not open `.tree` to list, and it does not zipper.
+When the view meets or exceeds the budget, wake lists view nodes. It does not open `.tree` to list, and it does not zipper.
 
 ### Zipper
 
@@ -131,7 +131,7 @@ flowchart TD
     Kids --> Unlink["Drop the smaller pack"]
 ```
 
-Note-note pairs are skipped. A vanished nap id after heal is success: the leaves still live in the survivor. Later adjacent **disjoint** naps still concat. Aligned `cover(T)` after merge is not this algorithm; see [Notes](../notes.md).
+Note-note pairs are skipped. Heal runs before `nap` resolves the requested ids. If heal drops a requested overlapping id, the command exits 1 and does not concat; the leaves still live in the survivor. Later adjacent **disjoint** naps still concat. Aligned `cover(T)` after merge is not this algorithm; see [Notes](../notes.md).
 
 ### Zoom and recall
 
@@ -158,7 +158,7 @@ These look optional and are not.
 | Script is the only writer | Agents never create, edit, or delete store files. | Boundary of the CLI; no proof module (taste + review) |
 | Ingest commutes | Two notes are two paths. No next id. No shared mutable index. | `tests/test_proof_ingest.py` |
 | Sequence is in the filename | Writer UTC for notes; leftmost child’s `{stamp}-{rand}` for naps. Not `git log`. | Store layout; squash proof assumes it |
-| `.tree` is write-once and canonical | Same leaves, same bytes. Fold creates a new path. | `tests/test_proof_conflict.py`, `tests/test_proof_squash.py` |
+| `.tree` is write-once and canonical | The same `Tree` dumps to the same bytes. Fold writes a new path; it does not patch. Same leaf set is not the same bytes when grouping or nested captions differ. | `tests/test_proof_conflict.py`, `tests/test_proof_squash.py` |
 | `.sum` is the only honest conflict | Either caption, or a mashup, is valid for those leaves. | `tests/test_proof_conflict.py` |
 | Zoom is a property of `HEAD` | Every owed sentence lives in a file at the tip. | `tests/test_proof_squash.py` |
 | Wake is wait-free | Missing or dirty captions degrade. Wake never refuses to print. | `tests/test_proof_conflict.py` |

@@ -118,4 +118,11 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA — FAIL; Build rework complete; QA must rerun
+
+## QA Findings
+
+- [x] Replace physical “file count” with view-node count in the architecture algorithm, diagram, and Fold / Expand prose.
+- [x] Narrow “same leaves, same `.tree` bytes” to the deterministic serialization guarantee the implementation actually provides.
+- [x] Correct the claim that a requested nap id vanishing during heal is CLI success; the command exits 1 while preserving the leaves.
+- [x] Remove temporal “This milestone” language from the present-tense atlas.

@@ -1,14 +1,11 @@
 # Active Context
 
 ## Current Task: docs-sunset
-**Phase:** BUILD - COMPLETE
+**Phase:** BUILD - COMPLETE (QA rework)
 
 ## What Was Done
-- Triaged and deleted `VISION.md` and `ROADMAP.md`.
-- Wrote `/home/mobaxterm/git/SumMem/docs/architecture/index.md`, `/home/mobaxterm/git/SumMem/docs/notes.md`, `/home/mobaxterm/git/SumMem/docs/index.md`, `/home/mobaxterm/git/SumMem/README.md`.
-- Reconciled `/home/mobaxterm/git/SumMem/memory-bank/productContext.md`, `systemPatterns.md`, `techContext.md`.
-- Added one `AGENTS.md` When-to-load pointer to the atlas (after the baked prompt, so `prompt_text` lockstep still holds).
-- Named architecture invariants and pointed them at existing `tests/test_proof_*.py` modules. Did not edit test docstrings (preflight advisory, no operator direction).
+- Corrected the architecture atlas: budget is view-node count; `.tree` bytes are canonical per `Tree`, not per leaf set; heal-dropped nap ids make `nap` exit 1 while leaves survive.
+- Removed “This milestone” wording. Aligned `systemPatterns.md` and `docs/notes.md` with the same facts.
 
 ## Next Step
-- QA review.
+- Rerun QA.

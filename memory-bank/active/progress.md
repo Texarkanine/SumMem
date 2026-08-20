@@ -65,3 +65,26 @@ Sunset `VISION.md` and `ROADMAP.md`: drop what is true of the tree or what we bu
     - Leftovers page is the Later items and unbuilt knobs only
 * Insights
     - Living citations of the deleted files are gone from persistent memory-bank; archives keep history
+
+## 2026-08-19 - BUILD - COMPLETE (QA rework)
+
+* Work completed
+    - Atlas: view-node budget; `.tree` canonical per `Tree` not per leaf set; heal-dropped id → `nap` exit 1
+    - Aligned `systemPatterns.md` and `docs/notes.md`
+* Decisions made
+    - Same facts in briefing and atlas so QA cannot treat them as a new drift
+* Insights
+    - Nested captions are inside `.tree`; leaf-set identity never covered that
+
+## 2026-08-19 - QA - COMPLETE (FAIL)
+
+* Work completed
+    - Reviewed the committed docs-sunset implementation against the brief, plan, implementation, proof tests, and sibling README genre
+    - Confirmed the README, docs landing, leftovers page, memory-bank reconciliation, and retired-file deletion are complete
+    - Wrote `memory-bank/active/.qa-validation-status`
+* Decisions made
+    - Build must rerun; the plan remains valid
+    - Three atlas claims block acceptance: physical file count is not the view-node budget, leaf-set identity does not guarantee identical nested `.tree` bytes, and a requested id removed by heal causes CLI `nap` to exit 1 rather than succeed
+* Insights
+    - Canonical JSON guarantees deterministic bytes for the same full tree object, not for every tree with the same leaf set
+    - The zipper preserves leaves when it removes an overlapping requested id, but preservation and command success are separate outcomes
