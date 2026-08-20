@@ -226,10 +226,12 @@ def test_resolve_id_rejects_ambiguous_or_unknown_prefix():
     m = load_summem()
     a = "a3f2c1b8" + "0" * 56
     b = "a3f2c1b8" + "1" * 56
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="ambiguous") as caught:
         m.resolve_id("a3f2c1b8", [a, b])
-    with pytest.raises(ValueError):
+    assert "Give a longer prefix" in str(caught.value)
+    with pytest.raises(ValueError, match="unknown id") as caught:
         m.resolve_id("deadbeef", [a, b])
+    assert "Copy an id from wake" in str(caught.value)
 
 
 def test_short_id_is_8_hex_when_id_repeats():

@@ -90,12 +90,39 @@ def test_note_without_text_fails(tmp_path, monkeypatch):
     assert m.main(["note"]) != 0
 
 
+def test_cli_nap_overlong_prints_ratchet(tmp_path, monkeypatch, capsys):
+    """CLI nap with an over-long caption prints the length ratchet and writes no nap."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["note", "alpha"]) == 0
+    assert m.main(["note", "beta"]) == 0
+    ids = [node.id for node in m.list_view(repo)]
+    capsys.readouterr()
+    caption = "x" * (m.ENTRY_CHARS + 1)
+    assert m.main(["nap", ids[0], ids[1], caption]) == 1
+    err = capsys.readouterr().err
+    assert str(len(caption.encode("utf-8"))) in err
+    assert str(m.ENTRY_CHARS) in err
+    assert "Accented characters cost 2 bytes" in err
+    assert "Compress it further" in err
+    assert "notes/" not in err
+    assert "naps/" not in err
+    assert "git" not in err
+    naps = repo / ".summem" / "naps"
+    assert not naps.exists() or not any(p.is_file() and not p.name.startswith(".") for p in naps.iterdir())
+
+
 def test_note_error_text_omits_store_paths_and_git(tmp_path, monkeypatch, capsys):
     """Rejection text for an over-long note mentions neither notes/, naps/, nor git."""
     m = load_summem()
     monkeypatch.chdir(init_repo(tmp_path / "r"))
     assert m.main(["note", "x" * 281]) == 1
     err = capsys.readouterr().err
+    assert "281" in err
+    assert "280" in err
+    assert "Accented characters cost 2 bytes" in err
+    assert "Compress it further" in err
     assert "notes/" not in err
     assert "naps/" not in err
     assert "git" not in err
@@ -184,6 +211,7 @@ def test_unknown_prefix_is_error(tmp_path, monkeypatch, capsys):
     assert m.main(["nap", "deadbeef", "cafebabe", "pair"]) == 1
     err = capsys.readouterr().err
     assert "unknown id" in err
+    assert "Copy an id from wake" in err
     assert list((repo / ".summem" / "naps").glob("*.sum")) == []
 
 
@@ -202,6 +230,7 @@ def test_ambiguous_prefix_is_error(tmp_path, monkeypatch, capsys):
     assert m.main(["nap", "aabbccdd", "aabbccdd", "pair"]) == 1
     err = capsys.readouterr().err
     assert "ambiguous" in err
+    assert "Give a longer prefix" in err
     assert list((repo / ".summem" / "naps").glob("*.sum")) == []
 
 
@@ -363,6 +392,16 @@ def test_unknown_token_does_not_write_a_note(tmp_path, monkeypatch, capsys):
     assert written == []
     assert m.main(["note", "ok"]) == 0
     assert any(p.is_file() and not p.name.startswith(".") for p in notes.iterdir())
+
+
+def test_cli_zoom_range_token_is_not_a_content_id(tmp_path, monkeypatch, capsys):
+    """CLI zoom of a range token names the token and says to copy an id from wake."""
+    m = load_summem()
+    monkeypatch.chdir(init_repo(tmp_path / "r"))
+    assert m.main(["zoom", "16-31"]) == 2
+    err = capsys.readouterr().err
+    assert "not a content id: 16-31" in err
+    assert "Copy an id from wake" in err
 
 
 def test_cli_zoom_malformed_tree_returns_1(tmp_path, monkeypatch, capsys):

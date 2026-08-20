@@ -76,3 +76,14 @@ Replace the bare `note is too long` rejection with an OptMem-style ratchet for `
 * Insights
     - `zoom_text` unknown tokens raise from `resolve_id` first; missing-`.tree` is the view-nap loop at line 609
     - `test_config_entry_chars_is_per_store_for_notes_and_naps` has no `capsys` today and uses 7-byte `toolong`
+
+## 2026-08-20 - BUILD - COMPLETE
+
+* Work completed
+    - Length ratchet in `require_entry`; other raise-site next steps as planned
+    - Six new tests plus extensions; `tox` 221 passed on py311–py314
+* Decisions made
+    - Tight-store fixture stays `toolong` (7 bytes); assert that length
+    - No invented `zoom_text` line-627 fixture
+* Insights
+    - Missing-`.tree` tests were already green before the identity-miss copy change, which is the split working

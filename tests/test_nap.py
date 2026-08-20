@@ -159,6 +159,24 @@ def test_nap_rejects_overlong_caption(tmp_path):
     assert _payload_names(repo) == before
 
 
+def test_nap_overlong_caption_message_is_a_ratchet(tmp_path):
+    """An over-long nap caption names actual UTF-8 bytes, the limit, and the compress hint."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    _two_notes(m, repo)
+    ids = _ids(m, repo)
+    before = _payload_names(repo)
+    caption = "x" * (m.ENTRY_CHARS + 1)
+    with pytest.raises(ValueError) as caught:
+        m.write_nap(repo, ids[0], ids[1], caption)
+    err = str(caught.value)
+    assert str(len(caption.encode("utf-8"))) in err
+    assert str(m.ENTRY_CHARS) in err
+    assert "Accented characters cost 2 bytes" in err
+    assert "Compress it further" in err
+    assert _payload_names(repo) == before
+
+
 def test_nap_rejects_newline_caption(tmp_path):
     """A caption with a newline is rejected and the store is unchanged."""
     m = load_summem()
@@ -166,8 +184,12 @@ def test_nap_rejects_newline_caption(tmp_path):
     _two_notes(m, repo)
     ids = _ids(m, repo)
     before = _payload_names(repo)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as caught:
         m.write_nap(repo, ids[0], ids[1], "hello\n")
+    err = str(caught.value)
+    assert "One line only" in err
+    assert "Merge the lines" in err
+    assert "note each line" not in err.lower()
     assert _payload_names(repo) == before
 
 
@@ -183,6 +205,8 @@ def test_nap_rejects_non_adjacent_ids(tmp_path):
     with pytest.raises(ValueError) as caught:
         m.write_nap(repo, ids[0], ids[2], "skip")
     err = str(caught.value)
+    assert "not adjacent" in err
+    assert "sit next to each other in wake" in err
     assert "notes/" not in err
     assert "naps/" not in err
     assert "git" not in err
@@ -199,10 +223,30 @@ def test_nap_rejects_unknown_id(tmp_path):
     with pytest.raises(ValueError) as caught:
         m.write_nap(repo, ids[0], "0" * 64, "pair")
     err = str(caught.value)
+    assert "unknown id" in err
+    assert "Copy an id from wake" in err
     assert "notes/" not in err
     assert "naps/" not in err
     assert "git" not in err
     assert _payload_names(repo) == before
+
+
+def test_nap_missing_tree_unknown_id_has_no_wake_hint(tmp_path):
+    """A view nap with no .tree raises unknown id and does not say to copy from wake."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    _two_notes(m, repo)
+    ids = _ids(m, repo)
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    m.write_note(repo, "gamma", datetime(2026, 1, 1, 0, 0, 3, tzinfo=UTC), Random(3))
+    nap = next(n for n in m.list_view(repo) if n.kind == "nap")
+    note = next(n for n in m.list_view(repo) if n.kind == "note")
+    nap.tree_path.unlink()
+    with pytest.raises(ValueError) as caught:
+        m.write_nap(repo, nap.id, note.id, "nope")
+    err = str(caught.value)
+    assert "unknown id" in err
+    assert "Copy an id from wake" not in err
 
 
 def test_nap_of_two_naps_nests_napchild_and_unions_digests(tmp_path):

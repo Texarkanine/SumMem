@@ -49,6 +49,7 @@ def test_nap_range_16_31_rejected_without_writing(tmp_path):
     err = result.stderr.decode("utf-8", "replace")
     assert result.returncode != 0
     assert "16-31" in err
+    assert "Copy an id from wake" in err
     assert "invalid choice" not in err.lower()
     assert _payload_files(repo) == []
 
@@ -60,6 +61,7 @@ def test_nap_hash_range_rejected_without_writing(tmp_path):
     err = result.stderr.decode("utf-8", "replace")
     assert result.returncode != 0
     assert "#2-5" in err
+    assert "Copy an id from wake" in err
     assert "invalid choice" not in err.lower()
     assert _payload_files(repo) == []
 
@@ -81,4 +83,5 @@ def test_nap_unknown_ids_rejected_without_writing(tmp_path):
     err = result.stderr.decode("utf-8", "replace")
     assert result.returncode != 0
     assert "unknown id" in err
+    assert "Copy an id from wake" in err
     assert _payload_files(repo) == []

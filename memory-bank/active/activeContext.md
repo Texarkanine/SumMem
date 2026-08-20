@@ -1,11 +1,24 @@
 # Active Context
 
 ## Current Task: noting-ratchet
-**Phase:** PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Preflight [FAIL (fixable)](1b1f8b7c-d52d-4955-891e-a5fc3b443028): shared multi-line copy was note-only; `unknown id` next step would have hit missing-tree raises.
-- Plan rewrite: `One line only. Merge the lines.`; wake hint only at identity-miss sites; leave `note is empty`; UTF-8 282-byte assert; extend existing CLI note leak test; drain `capsys` on the tight store.
+- `require_entry` over-long footer: `Too long: {n} bytes, limit {limit}. Accented characters cost 2 bytes. Compress it further.`
+- Multi-line: `One line only. Merge the lines.`
+- Wake hint only on identity-miss `unknown id` (`resolve_id`, `_adjacent_nodes`, `zoom_text` final raise) and range tokens.
+- Missing-`.tree` `unknown id` and `unreadable pack` unchanged.
+- `tox` 221 passed on py311–py314.
+
+## Files
+- `/home/mobaxterm/.cursor/worktrees/noting-ratchet-2ccf816c/SumMem-4f7b2f511995/summem`
+- `/home/mobaxterm/.cursor/worktrees/noting-ratchet-2ccf816c/SumMem-4f7b2f511995/tests/test_store.py`
+- `/home/mobaxterm/.cursor/worktrees/noting-ratchet-2ccf816c/SumMem-4f7b2f511995/tests/test_nap.py`
+- `/home/mobaxterm/.cursor/worktrees/noting-ratchet-2ccf816c/SumMem-4f7b2f511995/tests/test_cli.py`
+- `/home/mobaxterm/.cursor/worktrees/noting-ratchet-2ccf816c/SumMem-4f7b2f511995/tests/test_scopes.py`
+- `/home/mobaxterm/.cursor/worktrees/noting-ratchet-2ccf816c/SumMem-4f7b2f511995/tests/test_zoom.py`
+- `/home/mobaxterm/.cursor/worktrees/noting-ratchet-2ccf816c/SumMem-4f7b2f511995/tests/test_wake.py`
+- `/home/mobaxterm/.cursor/worktrees/noting-ratchet-2ccf816c/SumMem-4f7b2f511995/tests/test_proof_reject.py`
 
 ## Next Step
-- Build the length ratchet, then the other raise-site ratchets.
+- QA review.

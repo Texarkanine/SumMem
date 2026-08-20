@@ -63,9 +63,26 @@ def test_zoom_unknown_id_omits_store_paths_and_git(tmp_path):
     with pytest.raises(ValueError) as caught:
         m.zoom_text(repo, "0" * 64)
     err = str(caught.value)
+    assert "unknown id" in err
+    assert "Copy an id from wake" in err
     assert "notes/" not in err
     assert "naps/" not in err
     assert "git" not in err
+
+
+def test_zoom_missing_tree_unknown_id_has_no_wake_hint(tmp_path):
+    """Zoom of a view nap with no .tree says unknown id and does not say to copy from wake."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    ids = _two_notes(m, repo)
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    nap = m.list_view(repo)[0]
+    nap.tree_path.unlink()
+    with pytest.raises(ValueError) as caught:
+        m.zoom_text(repo, nap.id)
+    err = str(caught.value)
+    assert "unknown id" in err
+    assert "Copy an id from wake" not in err
 
 
 def test_zoom_nap_of_naps_prints_two_children_not_leaves(tmp_path):
@@ -108,8 +125,9 @@ def test_ambiguous_prefix_is_error(tmp_path, monkeypatch):
     a = "a3f2c1b8" + "0" * 56
     b = "a3f2c1b8" + "1" * 56
     monkeypatch.setattr(m, "named_ids", lambda _parent: [a, b])
-    with pytest.raises(ValueError, match="ambiguous"):
+    with pytest.raises(ValueError, match="ambiguous") as caught:
         m.zoom_text(repo, "a3f2c1b8")
+    assert "Give a longer prefix" in str(caught.value)
 
 
 def test_zoom_skips_unreadable_sibling_warns(tmp_path, capsys):
