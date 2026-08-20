@@ -94,7 +94,7 @@ Session start is still mandatory and once. The first wake must **resolve to the 
 
 That root wake prints two things:
 
-1. A labeled catalog of every other started store: `== Additional memory catalogs ==` and one `./path` line each. No note counts. No `wake --path` command line — that line was being run as an instruction.
+1. A labeled catalog of every other started store: `== Additional SumMem Catalogs ==` and one `./path` line each. No note counts. No `wake --path` command line — that line was being run as an instruction.
 2. The root store’s decaying document under `== Project-root memories ==` (the push), omitted when that document is empty.
 
 The catalog is computed by walking the tree for store directories. It is not a committed index file. If in a git repo, it should honor git ignore (not .gitignore - but `git ignore` - this includes .git/info/exclude). If there are no other stores, both extra headers are omitted. If the root document is empty, the memories header is omitted.

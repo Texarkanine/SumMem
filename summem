@@ -155,7 +155,7 @@ WAKE_LINES = 32
 CLI_NAME = "summem"
 
 CONFIG_TEMPLATE = """\
-# SumMem per-store knobs. Missing names mean script defaults.
+# SumMem per-store settings. Missing values take the script's defaults.
 # ENTRY_CHARS = 280
 # WAKE_LINES = 32
 """
@@ -267,7 +267,7 @@ def catalog_text(git_root, resolved_parent) -> str:
     found.sort()
     if not found:
         return ""
-    lines = ["== Additional memory catalogs =="]
+    lines = ["== Additional SumMem Catalogs =="]
     for parent in found:
         rel = parent.relative_to(root).as_posix()
         lines.append(f"./{rel}")

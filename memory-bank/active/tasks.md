@@ -7,4 +7,11 @@
 - **Broke:** Root wake with a catalog always printed `== Project-root memories ==`. Empty `wake_text` left the closer under that header like a memory.
 - **Why:** `if cat:` concatenated the header unconditionally.
 - **Changed:** Print the memories header only when `cat` and `doc` are both non-empty. Empty extra-store list still omits both headers. Pull wakes unchanged.
-- **Files:** `summem`, `tests/test_scopes.py`, `VISION.md`
+- **Files:** `summem`, `tests/test_scopes.py`, `tests/test_proof_scopes.py`, `VISION.md`
+
+## QA Result
+
+- **Status:** FAIL (first pass)
+- **Blocking:** Catalog heading rename looked unplanned. Operator confirmed they did it.
+- **Next:** Heading is `== Additional SumMem Catalogs ==` in code, tests, and VISION. Re-QA.
+

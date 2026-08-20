@@ -239,7 +239,7 @@ def test_root_wake_catalog_is_labeled_paths_not_commands(tmp_path, monkeypatch, 
     assert m.main(["wake"]) == 0
     out = capsys.readouterr().out
     lines = out.splitlines()
-    assert lines[0] == "== Additional memory catalogs =="
+    assert lines[0] == "== Additional SumMem Catalogs =="
     assert "./pkg" in lines
     assert "summem wake --path pkg" not in out
     assert "wake --path" not in out
@@ -257,7 +257,7 @@ def test_empty_root_omits_project_root_header(tmp_path, monkeypatch, capsys):
     capsys.readouterr()
     assert m.main(["wake"]) == 0
     out = capsys.readouterr().out
-    assert out == "== Additional memory catalogs ==\n./pkg\nYou are up to speed.\n"
+    assert out == "== Additional SumMem Catalogs ==\n./pkg\nYou are up to speed.\n"
     assert "== Project-root memories ==" not in out
 
 
@@ -274,7 +274,7 @@ def test_root_wake_catalogs_other_store(tmp_path, monkeypatch, capsys):
     out = capsys.readouterr().out
     assert "root-note" in out
     assert "./pkg" in out
-    assert "== Additional memory catalogs ==" in out
+    assert "== Additional SumMem Catalogs ==" in out
     assert "== Project-root memories ==" in out
     assert "summem wake --path pkg" not in out
     assert ".summem/summem" not in out
@@ -320,7 +320,7 @@ def test_pull_wake_omits_catalog_and_root_notes(tmp_path, monkeypatch, capsys):
     assert "pkg-note" in out
     assert "root-note" not in out
     assert "wake --path pkg" not in out
-    assert "== Additional memory catalogs ==" not in out
+    assert "== Additional SumMem Catalogs ==" not in out
     assert "== Project-root memories ==" not in out
 
 
@@ -353,6 +353,6 @@ def test_empty_catalog_adds_no_output(tmp_path, monkeypatch, capsys):
     assert m.main(["wake"]) == 0
     out = capsys.readouterr().out
     assert out == m.wake_text(repo) + "You are up to speed.\n"
-    assert "== Additional memory catalogs ==" not in out
+    assert "== Additional SumMem Catalogs ==" not in out
     assert "== Project-root memories ==" not in out
 

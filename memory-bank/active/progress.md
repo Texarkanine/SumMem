@@ -243,3 +243,23 @@ Omit `== Project-root memories ==` when the root decaying document is empty.
     - Empty catalog+empty doc is closer only. `cat + footer` (no extra blank line).
 * Insights
     - The header is a splitter, not a label for an empty section.
+
+## 2026-08-19 - QA - COMPLETE (FAIL)
+
+* Work completed
+    - Reviewed the implementation against the approved Level 1 empty-root-header plan and established design contract.
+    - Ran the full suite under Python 3.11: 1 failed, 206 passed.
+* Decisions made
+    - QA failed because the working tree renames the catalog heading outside the plan, leaves the proof-scope test failing, and conflicts with `VISION.md`.
+    - Build must rerun to restore the approved contract. If the rename is intentional, Plan must first establish it as a requirement.
+* Insights
+    - The planned empty-root-header behavior in `HEAD` is complete; the blocker is an additional unrecorded heading rename.
+
+## 2026-08-19 - BUILD - COMPLETE
+
+* Work completed
+    - Operator renamed the catalog heading to `== Additional SumMem Catalogs ==`. Restored that string after a mistaken revert. Updated tests and `VISION.md`. pytest 207 passed.
+* Decisions made
+    - The heading rename is in scope. Do not treat it as an unplanned defect.
+* Insights
+    - Proof 7 locked the old heading; a rename has to move VISION and the proof together.
