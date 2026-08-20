@@ -350,7 +350,7 @@ SumMem is also not:
 
 | If you are changing | Read |
 |---|---|
-| What an agent is allowed to know or type | The README command table and the activation block. Do not leak store paths into the agent interface. CLI output stays silent on git. The activation block treats the files the script wrote as part of the work, not a separate publish procedure. |
+| What an agent is allowed to know or type | The README command table and the activation block. Do not leak store paths into the agent interface. CLI output stays silent on git. The activation block treats the files the script wrote as part of your work, not a separate publish procedure. |
 | How notes land under concurrency | Notes. Recording a note must still commute. |
 | How summaries and originals survive squash | Naps. Fold. Zoom is a property of the current commit. |
 | Merge behavior or a new file that every note updates | Zipper. Recording a note commutes. No shared mutable index. |

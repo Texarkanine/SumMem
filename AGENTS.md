@@ -14,7 +14,7 @@ Otherwise run `.summem/summem wake` from the repository root.
 
 Do not register redundant memories.
 
-Never invent filenames, rewrite note bytes, or delete memory files by hand. The script is the only writer. The files it writes are part of the work; do not leave them untracked.
+Never invent filenames, rewrite note bytes, or delete memory files by hand. The script is the only writer. The files it writes are part of your work; do not leave them untracked.
 
 ## Other commands
 
