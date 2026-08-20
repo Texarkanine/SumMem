@@ -26,6 +26,10 @@ graph TD
     Root --> Catalog["Catalog of other started stores"]:::script
 ```
 
+## Agent-facing errors are ratchets
+
+Stderr states the problem. It adds a next step only when that step is known and not obvious. Do not invent a repair. The same words can name two causes: `unknown id` on an identity miss says to copy an id from wake; `unknown id` when a view nap has no children file does not. Shared `require_entry` copy must be true for both `note` and `nap`.
+
 ## Script is the only writer
 
 Agents never create, edit, or delete store files. Invented filenames and rewritten notes are the failure this boundary prevents. The backend is swappable only if this holds.

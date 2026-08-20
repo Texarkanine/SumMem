@@ -98,3 +98,13 @@ Replace the bare `note is too long` rejection with an OptMem-style ratchet for `
     - Build does not need to rerun
 * Insights
     - Per-site copy kept the missing-`.tree` lie out of the wake hint without a helper or a `kind` argument
+
+## 2026-08-20 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-noting-ratchet.md`
+    - Added the ratchet / two-cause `unknown id` contract to `systemPatterns.md`
+* Decisions made
+    - productContext and techContext need no update
+* Insights
+    - Unique error string ≠ unique cause
