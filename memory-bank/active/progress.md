@@ -15,3 +15,15 @@ Bake a SumMem agent prompt into the driver, print it from `summem init`, land it
     - Recommend `AGENTS.md` top plus thin `CLAUDE.md` pointer, not OptMem’s “AGENTS.md or CLAUDE.md.”
 * Insights
     - OptMem’s useful half is bake-and-print. The halves we must not copy: “before any other tool call,” and treating CLAUDE.md as an equal paste target.
+
+## 2026-08-19 - PLAN - COMPLETE
+
+* Work completed
+    - Wrote Level 2 plan: `init` + `prompt_text()`, AGENTS.md lockstep, design-contract docs, Composer 2.5 instrument.
+* Decisions made
+    - `init` is help-shaped: no `--path`, works outside a repo, writes nothing.
+    - Prompt heading is `## SumMem`, not OptMem’s `## Memory`.
+    - Test invariants and lockstep, not a golden prompt file.
+    - Composer 2.5 probes are Build verification, not pytest.
+* Insights
+    - Existing CLI tests encode “every command except start takes `--path`”; `init` must join `start` in those assertions in the same unit.
