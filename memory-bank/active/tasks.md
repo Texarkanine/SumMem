@@ -25,7 +25,7 @@ Add `tox.ini` as the one documented way to run pytest on every non-EOL CPython f
 
 ## Implementation Plan
 
-### 1. Tox runner contract — executable
+### 1. Tox runner contract — executable ✅
 
 - Files: `tests/test_tox_runner.py`, `tox.ini`, `.gitignore`
 
@@ -39,7 +39,7 @@ Add `tox.ini` as the one documented way to run pytest on every non-EOL CPython f
     - Do not subprocess tox
 4. Write code and run green: set `min_version = 4.0`, `env_list = py311, py312, py313, py314`, `skip_missing_interpreters = true`, `[testenv] package = skip`, `deps = pytest`, `commands = pytest {posargs}`. Append `.tox/` to `.gitignore`. Re-run the new tests.
 
-### 2. Document the one command — prose/policy
+### 2. Document the one command — prose/policy ✅
 
 - Files: `README.md`, `memory-bank/techContext.md`
 - No tests: prose/policy artifact
@@ -49,7 +49,7 @@ Add `tox.ini` as the one documented way to run pytest on every non-EOL CPython f
 3. Record the cache skip: no pytest-testmon / no custom cache. This suite is heavy on `tmp_path`, git worktrees, and a no-suffix `SourceFileLoader` script; coverage-based selection is not proven not to skip a test that should run.
 4. Record the 3.14 machine gap: this uv (0.8.22) provisioned `3.14.0rc3`, not a final 3.14. `py314` stays in `env_list` and was creatable here.
 
-### 3. Build verification — executable, not a nested pytest case
+### 3. Build verification — executable, not a nested pytest case ✅
 
 - Files: none new
 
@@ -93,6 +93,6 @@ Validated on this machine, 2026-08-19:
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
-- [ ] Build
+- [x] Preflight
+- [x] Build
 - [ ] QA

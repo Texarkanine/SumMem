@@ -43,3 +43,15 @@ Add tox as the one documented pytest command, covering CPython 3.11 through curr
     - No change-detectors found in the test plan
 * Insights
     - The plan correctly distinguishes between executable units and prose/policy artifacts
+
+## 2026-08-19 - BUILD - COMPLETE
+
+* Work completed
+    - TDD: stub tests and stub `tox.ini`, red (3 failed / 1 passed on existing pytest.ini), then filled `tox.ini` and `.gitignore`
+    - Docs: README Developing and techContext Testing Process name `tox`
+    - `uvx --with tox tox`: 211 passed × py311, py312, py313, py314
+* Decisions made
+    - Built to plan; no product CLI change
+* Insights
+    - configparser needs `interpolation=None` or `{posargs}` is treated as interpolation
+    - 4 new tests; prior suite was 207
