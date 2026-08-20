@@ -112,7 +112,35 @@ def test_ambiguous_prefix_is_error(tmp_path, monkeypatch):
         m.zoom_text(repo, "a3f2c1b8")
 
 
-def test_zoom_unreadable_tree_is_unreadable_pack(tmp_path):
+def test_zoom_skips_unreadable_sibling_warns(tmp_path, capsys):
+    """Zoom of a nested id still works and warns when a sibling children file is unreadable."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "A", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "B", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    ab = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ab[0], ab[1], "ab")
+    m.write_note(repo, "C", datetime(2026, 1, 1, 0, 0, 3, tzinfo=UTC), Random(3))
+    m.write_note(repo, "D", datetime(2026, 1, 1, 0, 0, 4, tzinfo=UTC), Random(4))
+    notes = [node for node in m.list_view(repo) if node.kind == "note"]
+    m.write_nap(repo, notes[0].id, notes[1].id, "cd")
+    naps = [node for node in m.list_view(repo) if node.kind == "nap"]
+    first, second = naps[0], naps[1]
+    tree = m.loads_tree(second.tree_path.read_bytes())
+    child_id = m.leafset_id([m.note_digest(m.note_file_bytes(tree.kids[0].text))])
+    first.tree_path.write_bytes(b"{not json")
+    capsys.readouterr()
+    out = m.zoom_text(repo, child_id)
+    assert tree.kids[0].text in out
+    err = capsys.readouterr().err
+    assert err == "skipped a pack\n"
+    assert "notes/" not in err
+    assert "naps/" not in err
+    assert "git" not in err
+    assert "Traceback" not in err
+
+
+def test_zoom_unreadable_tree_is_unreadable_pack(tmp_path, capsys):
     """zoom_text on a nap whose .tree is not JSON raises unreadable pack."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
@@ -120,9 +148,11 @@ def test_zoom_unreadable_tree_is_unreadable_pack(tmp_path):
     m.write_nap(repo, ids[0], ids[1], "pair")
     nap = m.list_view(repo)[0]
     nap.tree_path.write_bytes(b"{not json")
+    capsys.readouterr()
     with pytest.raises(ValueError, match="unreadable pack") as caught:
         m.zoom_text(repo, nap.id)
     err = str(caught.value)
     assert "notes/" not in err
     assert "naps/" not in err
     assert "git" not in err
+    assert capsys.readouterr().err == ""

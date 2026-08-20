@@ -36,3 +36,14 @@
 * Findings
     - TDD ordering, project conventions, dependencies, public behavior, and requirement coverage all pass against the current codebase
     - Advisory only: a future redesign could consolidate the purpose-specific recursive tree walkers behind one typed traversal; this task should keep its focused helper
+
+## 2026-08-19 - BUILD - COMPLETE
+
+* Work completed
+    - Nested caption recall via `_recall_nested`; sibling skip warning via `_warn_skipped_pack`
+    - Atlas § Zoom and recall updated
+    - Full suite 211 passed
+* Decisions made
+    - Built to plan; omit-paths test requires a hit so empty output cannot pass
+* Insights
+    - `_note_children` left note-only; rematerialize/`_nap_stem` untouched

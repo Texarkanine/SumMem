@@ -29,7 +29,7 @@
 
 ## Implementation Plan
 
-### 1. Nested nap caption recall — executable
+### 1. Nested nap caption recall — executable — done
 
 - Files: `tests/test_recall.py`, `summem`
 
@@ -38,7 +38,7 @@
 3. Write tests and run red: nap-of-naps fixture (four notes → two naps with captions `pack-a` / `pack-b` → parent `both`); `recall_text(repo, "pack-a")` contains `pack-a` and a `{id}  pack-a` line; second test asserts no `notes/`, `naps/`, `git`. Run those two tests; they fail because `_note_children` never yields `NapChild.sum`
 4. Write code and run green: implement `_recall_nested` to walk `NoteChild.text` (existing `{cid}  text` line) and `NapChild.sum` (`{child.id}  {child.sum}`), then recurse; `recall_text` calls it instead of `_note_children`. Dedup via the existing `seen` set. Run the new tests plus `tests/test_recall.py`
 
-### 2. Sibling pack skip warning — executable
+### 2. Sibling pack skip warning — executable — done
 
 - Files: `tests/test_recall.py`, `tests/test_zoom.py`, `tests/test_cli.py`, `summem`
 
@@ -47,7 +47,7 @@
 3. Write tests and run red: two-nap fixtures; corrupt one sibling children file; recall a unique leaf from the good pack / zoom a nested id from the good pack; assert stdout still answers and stderr is exactly one agent-safe line `skipped a pack\n` (or contains that phrase as the whole line) with no paths/traceback. Update `test_cli_zoom_nested_id_skips_sibling_bad_tree` to assert the same on CLI stderr while exit stays 0. Update `test_recall_malformed_tree_does_not_raise` to accept/require the skip line when the only children file is unreadable. Run the new tests; they fail because `continue` is silent
 4. Write code and run green: `_warn_skipped_pack` writes `skipped a pack\n` to stderr. Call it on the `except _TREE_PARSE_ERRORS: continue` paths in `recall_text` and in `zoom_text`'s *second* loop only (sibling walk). Do not call it on `zoom_text`'s first loop (asked-for view nap still raises `unreadable pack`). Do not touch wake, `named_ids`, or heal. Run `tests/test_recall.py`, `tests/test_zoom.py`, `tests/test_cli.py`, then the full suite
 
-### 3. Atlas zoom/recall sentences — prose/policy
+### 3. Atlas zoom/recall sentences — prose/policy — done
 
 - Files: `docs/architecture/index.md`
 - No tests: prose/policy artifact
@@ -89,5 +89,5 @@ No new technology - validation not required
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
 - [x] Preflight
-- [ ] Build
+- [x] Build
 - [ ] QA
