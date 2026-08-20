@@ -1,16 +1,14 @@
 # Active Context
 
 ## Current Task: open-issue-wave
-**Phase:** PLAN - COMPLETE
+**Phase:** MILESTONE-EXECUTION - IN-PROGRESS
 
 ## What Was Done
 
-- Intent locked: parent operates two Grok 4.6 xhigh niko-in-worktree workers; no bounce; draft PRs are the output.
-- Docs-sunset #11 merged at `185c686`; fan-out was held for that and is now resumed.
-- Classified Level 4. Two parallel milestones (product #8+#7 estimated L2; infra #6+#9 estimated L2).
-- Skipped parent L4 preflight of this milestone list: each worker runs `/niko` (own plan/preflight) per operator instruction.
+- Product milestone done: draft [PR #12](https://github.com/Texarkanine/SumMem/pull/12) (`feat/recall-zoom-packs`). Nested captions in recall; `skipped a pack` on stderr for unreadable sibling packs. Wake stays silent. 211 pytest. `memory-bank/active/` not on the branch.
+- Infra worker still in flight.
 
 ## Next Step
 
-- Spawn the two workers. On each reflect (or L1 end), they archive then open a draft PR.
-- Tick milestones when those PRs exist.
+- Wait for the infra worker's draft PR, then tick #6+#9.
+- Leftover from product (not this wave): `named_ids` still skips bad trees quietly.

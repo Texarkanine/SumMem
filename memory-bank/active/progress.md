@@ -25,3 +25,12 @@ Operate two parallel niko-in-worktree agents to close open issues #6–#9 as two
     - Parent L4 preflight of the milestone list is skipped; children preflight their own work.
 * Insights
     - `VISION.md` / `ROADMAP.md` are gone. QA must not treat them as the contract.
+
+## 2026-08-19 - PRODUCT MILESTONE - COMPLETE
+
+* Work completed
+    - Draft PR #12: nested nap captions in recall; zoom/recall warn `skipped a pack` on stderr.
+* Decisions made
+    - Shared children-file walker deferred (preflight advisory).
+* Insights
+    - `named_ids` still skips unreadable trees silently — leftover, not in this wave.
