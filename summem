@@ -281,9 +281,13 @@ def require_entry(text: str, entry_chars: int | None = None) -> None:
     if text == "":
         raise ValueError("note is empty")
     if "\n" in text or "\r" in text:
-        raise ValueError("note must be one line")
-    if len(text.encode("utf-8")) > limit:
-        raise ValueError("note is too long")
+        raise ValueError("One line only. Merge the lines.")
+    n = len(text.encode("utf-8"))
+    if n > limit:
+        raise ValueError(
+            f"Too long: {n} bytes, limit {limit}. "
+            "Accented characters cost 2 bytes. Compress it further."
+        )
 
 
 def _replace_bytes(dest: Path, data: bytes) -> None:
@@ -523,7 +527,7 @@ def _adjacent_nodes(nodes: list[ViewNode], id_a: str, id_b: str) -> tuple[ViewNo
     hits_a = [i for i, node in enumerate(nodes) if node.id == id_a]
     hits_b = [i for i, node in enumerate(nodes) if node.id == id_b]
     if not hits_a or not hits_b:
-        raise ValueError("unknown id")
+        raise ValueError("unknown id. Copy an id from wake.")
     for ia in hits_a:
         for ib in hits_b:
             if ia == ib:
@@ -531,7 +535,7 @@ def _adjacent_nodes(nodes: list[ViewNode], id_a: str, id_b: str) -> tuple[ViewNo
             if abs(ia - ib) == 1:
                 lo, hi = (ia, ib) if ia < ib else (ib, ia)
                 return nodes[lo], nodes[hi]
-    raise ValueError("not adjacent")
+    raise ValueError("not adjacent. Nap two ids that sit next to each other in wake.")
 
 
 def write_nap(parent, id_a, id_b, caption, entry_chars: int | None = None):
@@ -624,7 +628,7 @@ def zoom_text(parent, token: str) -> str:
         if isinstance(found, str):
             return f"{cid}  {found}\n"
         return _zoom_kids(found.tree)
-    raise ValueError("unknown id")
+    raise ValueError("unknown id. Copy an id from wake.")
 
 
 def _collect_ids(tree: Tree, ids: list[str]) -> None:
@@ -774,8 +778,8 @@ def resolve_id(token: str, ids: list[str]) -> str:
     if len(matches) == 1:
         return matches[0]
     if not matches:
-        raise ValueError("unknown id")
-    raise ValueError("ambiguous id")
+        raise ValueError("unknown id. Copy an id from wake.")
+    raise ValueError("ambiguous id. Give a longer prefix.")
 
 
 def format_wake_line(node, ids: list[str]) -> str:
@@ -1048,7 +1052,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "nap":
         for token in (args.id_a, args.id_b):
             if is_range_token(token):
-                sys.stderr.write(f"not a content id: {token}\n")
+                sys.stderr.write(f"not a content id: {token}. Copy an id from wake.\n")
                 return 2
         try:
             require_entry(args.caption, k["ENTRY_CHARS"])
@@ -1073,7 +1077,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.cmd == "zoom":
         if is_range_token(args.id):
-            sys.stderr.write(f"not a content id: {args.id}\n")
+            sys.stderr.write(f"not a content id: {args.id}. Copy an id from wake.\n")
             return 2
         try:
             sys.stdout.write(zoom_text(parent, args.id))

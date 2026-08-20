@@ -179,7 +179,7 @@ def test_config_wake_lines_is_per_store(tmp_path, monkeypatch, capsys):
     assert pkg_out == ""
 
 
-def test_config_entry_chars_is_per_store_for_notes_and_naps(tmp_path, monkeypatch):
+def test_config_entry_chars_is_per_store_for_notes_and_naps(tmp_path, monkeypatch, capsys):
     """ENTRY_CHARS applies per store to notes and nap captions, including above 280."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
@@ -188,12 +188,24 @@ def test_config_entry_chars_is_per_store_for_notes_and_naps(tmp_path, monkeypatc
     assert m.main(["start", "wide"]) == 0
     (repo / "tight" / ".summem" / "config.toml").write_text("ENTRY_CHARS = 5\n", encoding="utf-8")
     (repo / "wide" / ".summem" / "config.toml").write_text("ENTRY_CHARS = 300\n", encoding="utf-8")
-    assert m.main(["note", "--path", "tight", "toolong"]) == 1
-    assert m.main(["note", "toolong"]) == 0
+    too_long = "toolong"
+    n = len(too_long.encode("utf-8"))
+    assert n == 7
+    assert m.main(["note", "--path", "tight", too_long]) == 1
+    note_err = capsys.readouterr().err
+    assert str(n) in note_err
+    assert "5" in note_err
+    assert "280" not in note_err
+    assert m.main(["note", too_long]) == 0
     assert m.main(["note", "--path", "tight", "ok"]) == 0
     assert m.main(["note", "--path", "tight", "ab"]) == 0
     ids = [node.id for node in m.list_view(repo / "tight")]
-    assert m.main(["nap", "--path", "tight", ids[0], ids[1], "toolong"]) == 1
+    capsys.readouterr()
+    assert m.main(["nap", "--path", "tight", ids[0], ids[1], too_long]) == 1
+    nap_err = capsys.readouterr().err
+    assert str(n) in nap_err
+    assert "5" in nap_err
+    assert "280" not in nap_err
     assert m.main(["note", "--path", "wide", "x" * 281]) == 0
 
 

@@ -36,14 +36,45 @@ def test_note_rejects_over_280_bytes(tmp_path):
         _write(m, repo, text="x" * (m.ENTRY_CHARS + 1))
 
 
+def test_note_overlong_message_is_a_ratchet(tmp_path):
+    """An over-long note names actual UTF-8 bytes, the limit, and the compress hint."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    ascii_text = "x" * (m.ENTRY_CHARS + 1)
+    with pytest.raises(ValueError) as caught:
+        _write(m, repo, text=ascii_text)
+    err = str(caught.value)
+    assert str(len(ascii_text.encode("utf-8"))) in err
+    assert str(m.ENTRY_CHARS) in err
+    assert "Accented characters cost 2 bytes" in err
+    assert "Compress it further" in err
+    han = "你" * 94
+    assert len(han.encode("utf-8")) == 282
+    assert len(han) != 282
+    with pytest.raises(ValueError) as caught:
+        _write(m, repo, text=han)
+    err = str(caught.value)
+    assert "282" in err
+    assert str(m.ENTRY_CHARS) in err
+    assert "Accented characters cost 2 bytes" in err
+    assert "Compress it further" in err
+
+
 def test_note_rejects_newline(tmp_path):
     """A note containing a newline or carriage return is rejected."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as caught:
         _write(m, repo, text="hello\n")
-    with pytest.raises(ValueError):
+    err = str(caught.value)
+    assert "One line only" in err
+    assert "Merge the lines" in err
+    assert "note each line" not in err.lower()
+    with pytest.raises(ValueError) as caught:
         _write(m, repo, text="hello\rworld")
+    err = str(caught.value)
+    assert "One line only" in err
+    assert "Merge the lines" in err
 
 
 def test_note_accepts_280_bytes(tmp_path):
