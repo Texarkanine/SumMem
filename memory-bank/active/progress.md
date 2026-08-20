@@ -152,3 +152,13 @@ Rework: `ensure_store` must not copy the driver. Align the baked prompt, `AGENTS
 * Work completed
     - Added unit 4: Composer 2.5 probes of the rewritten prompt. Collapsed unit 1 leftover stub/code overlap.
 
+## 2026-08-19 - PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+
+* Work completed
+    - Validated the Level 2 rework plan against the implementation, tests, documentation, and project brief.
+    - Confirmed TDD plan encoding is acceptable.
+* Decisions made
+    - Found an incorrect string `./summem/summem` in the `AGENTS.md` draft instead of `.summem/summem` and recorded it as an advisory.
+    - Recorded a radical innovation advisory for `ensure_store` to write `.summem/summem` as a relative symlink to the root script to completely prevent nested execution issues.
+* Insights
+    - Lockstep test is valid and not a change-detector; it enforces the contract between the executable and `AGENTS.md`.

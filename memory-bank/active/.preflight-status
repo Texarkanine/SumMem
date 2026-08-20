@@ -1,0 +1,5 @@
+PASS WITH ADVISORY
+
+Findings:
+1. **Advisory**: The draft changes currently in `AGENTS.md` incorrectly use `./summem/summem` instead of `.summem/summem`. The implementation plan already specifies rewriting `AGENTS.md` to match the corrected `prompt_text()`, so this will be resolved naturally during the lockstep phase, but the builder should take care to correct this typo.
+2. **Advisory (Radical Innovation)**: The plan prevents `ensure_store` from copying the driver into nested stores. However, if agents are instructed to simply run `.summem/summem`, they will fail if they invoke it while `cd`'d into a nested store directory. A radically accretive change would be for `ensure_store` to create `.summem/summem` as a *relative symlink* pointing to the root store's `.summem/summem`. This would allow agents to successfully run `.summem/summem` seamlessly from anywhere a store exists, eliminating path ambiguity and failures in nested mono-repo directories.

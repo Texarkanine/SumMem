@@ -1,10 +1,11 @@
 # Active Context
 
 ## Current Task: agents-prompt
-**Phase:** PLAN - COMPLETE
+**Phase:** PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
 
 ## What Was Done
-- Replanned after second preflight FAIL (fixable): added Composer 2.5 verification of the rewritten prompt (unit 4).
+- Validated the revised plan in Preflight and passed with an advisory regarding a typo in the `AGENTS.md` draft and a radical innovation suggestion.
+- Updated `.preflight-status` and `progress.md`.
 
 ## Next Step
-- Preflight validation of the revised plan.
+- Execute the `/niko-build` phase.
