@@ -98,3 +98,12 @@ Split the baked SumMem note prompt so the mandatory-note workflow and the clone-
 * Insights
     - None.
 
+## 2026-08-20 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-prompt-membership.md`. Persistent files unchanged.
+* Decisions made
+    - Prompt wording is policy; lockstep across `prompt_text()` and `AGENTS.md` is the test that belongs.
+* Insights
+    - The buried clause was `git forever` in the dump sentence, not the already-separate stay-out sentence.
+
