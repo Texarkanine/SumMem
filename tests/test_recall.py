@@ -68,7 +68,32 @@ def test_recall_matches_loose_note_outside_wake_window(tmp_path, monkeypatch):
     assert "n0" in m.recall_text(repo, "n0")
 
 
-def test_recall_malformed_tree_does_not_raise(tmp_path):
+def test_recall_skips_unreadable_sibling_warns(tmp_path, capsys):
+    """Recall still matches a good pack and warns when a sibling children file is unreadable."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    ab = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ab[0], ab[1], "ab")
+    m.write_note(repo, "unique-good-leaf", datetime(2026, 1, 1, 0, 0, 3, tzinfo=UTC), Random(3))
+    m.write_note(repo, "other-good", datetime(2026, 1, 1, 0, 0, 4, tzinfo=UTC), Random(4))
+    notes = [node for node in m.list_view(repo) if node.kind == "note"]
+    m.write_nap(repo, notes[0].id, notes[1].id, "cd")
+    first = next(node for node in m.list_view(repo) if node.kind == "nap")
+    first.tree_path.write_bytes(b"{not json\n")
+    capsys.readouterr()
+    out = m.recall_text(repo, "unique-good-leaf")
+    assert "unique-good-leaf" in out
+    err = capsys.readouterr().err
+    assert err == "skipped a pack\n"
+    assert "notes/" not in err
+    assert "naps/" not in err
+    assert "git" not in err
+    assert "Traceback" not in err
+
+
+def test_recall_malformed_tree_does_not_raise(tmp_path, capsys):
     """A nap whose .tree is not JSON does not make recall raise."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
@@ -77,8 +102,51 @@ def test_recall_malformed_tree_does_not_raise(tmp_path):
     ids = [node.id for node in m.list_view(repo)]
     m.write_nap(repo, ids[0], ids[1], "pair")
     next((repo / ".summem" / "naps").glob("*.tree")).write_bytes(b"{not json\n")
+    capsys.readouterr()
     out = m.recall_text(repo, "alpha")
     assert isinstance(out, str)
+    err = capsys.readouterr().err
+    assert err == "skipped a pack\n"
+    assert "notes/" not in err
+    assert "naps/" not in err
+    assert "git" not in err
+    assert "Traceback" not in err
+
+
+def test_recall_matches_nested_nap_caption(tmp_path):
+    """Recall finds a nap caption that lives only inside a parent children file."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    for i, text in enumerate(["a1", "a2", "b1", "b2"], start=1):
+        m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "pack-a")
+    pack_a_id = next(node.id for node in m.list_view(repo) if node.kind == "nap")
+    m.write_nap(repo, ids[2], ids[3], "pack-b")
+    nap_ids = [node.id for node in m.list_view(repo) if node.kind == "nap"]
+    m.write_nap(repo, nap_ids[0], nap_ids[1], "both")
+    out = m.recall_text(repo, "pack-a")
+    assert "pack-a" in out
+    assert f"{pack_a_id}  pack-a" in out
+    assert "both" not in out
+
+
+def test_recall_nested_caption_omits_notes_naps_and_git(tmp_path):
+    """A nested-caption hit does not mention notes/, naps/, or git."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    for i, text in enumerate(["a1", "a2", "b1", "b2"], start=1):
+        m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "pack-a")
+    m.write_nap(repo, ids[2], ids[3], "pack-b")
+    nap_ids = [node.id for node in m.list_view(repo) if node.kind == "nap"]
+    m.write_nap(repo, nap_ids[0], nap_ids[1], "both")
+    out = m.recall_text(repo, "pack-a")
+    assert "pack-a" in out
+    assert "notes/" not in out
+    assert "naps/" not in out
+    assert "git" not in out
 
 
 def test_recall_invalid_pattern_is_cli_error(tmp_path, monkeypatch, capsys):

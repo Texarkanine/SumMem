@@ -303,7 +303,9 @@ Rebuilding an age-aligned cover of the whole merged leaf list is not this algori
 
 Zoom walks a children file in the current commit. Every sentence zoom still owes lives in a file at the tip, inside a children file if not still a loose note. An older commit is not an index.
 
-Everyday recall is the view, with captions standing in for napped children. Recall that must see original sentences reads children files as well.
+Everyday recall is the view, with captions standing in for napped children. Recall that must see original sentences or nested nap captions reads children files as well.
+
+Zoom and recall print one agent-safe line when they skip an unreadable sibling children file, and do not fail if another pack answered. Wake stays silent.
 
 ## Scopes
 
