@@ -119,4 +119,16 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
+
+## QA Results
+
+**Result:** PASS
+
+No blocking findings. Implementation is string edits at the planned raise sites only: OptMem length crib in `require_entry` (interpolated `limit`, not 280), merge-only multi-line copy, wake hint only on identity-miss and range tokens, missing-`.tree` `unknown id` left bare. Atlas untouched. Tests lock footer facts and the identity-miss / missing-tree split.
+
+### Advisories
+
+- Library over-long note test asserts the footer, not “store unchanged.” `require_entry` still raises before `write_note` writes; the existing reject case covers the raise.
+- Plan behavior line still says tight-store text of 6 bytes; tests correctly assert 7 for `toolong`, per preflight.
+- “Accented characters cost 2 bytes” is false for CJK (3 bytes). The plan required OptMem’s crib; do not trim it in this task.

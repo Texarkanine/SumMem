@@ -87,3 +87,14 @@ Replace the bare `note is too long` rejection with an OptMem-style ratchet for `
     - No invented `zoom_text` line-627 fixture
 * Insights
     - Missing-`.tree` tests were already green before the identity-miss copy change, which is the split working
+
+## 2026-08-20 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Semantic review of `summem` raise sites and the new/extended tests against the raise-site plan
+    - First line of `.qa-validation-status`: `PASS`
+* Decisions made
+    - Accept as-is; advisories only (store-unchanged not re-asserted on the library note footer test; tight-store byte count stays 7; OptMem accented-character crib kept)
+    - Build does not need to rerun
+* Insights
+    - Per-site copy kept the missing-`.tree` lie out of the wake hint without a helper or a `kind` argument

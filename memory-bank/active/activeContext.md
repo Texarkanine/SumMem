@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: noting-ratchet
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
 - `require_entry` over-long footer: `Too long: {n} bytes, limit {limit}. Accented characters cost 2 bytes. Compress it further.`
@@ -21,4 +21,4 @@
 - `/home/mobaxterm/.cursor/worktrees/noting-ratchet-2ccf816c/SumMem-4f7b2f511995/tests/test_proof_reject.py`
 
 ## Next Step
-- QA review.
+- Reflect.
