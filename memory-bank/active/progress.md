@@ -67,3 +67,23 @@ Split the baked SumMem note prompt so the mandatory-note workflow and the clone-
 * Insights
     - None beyond the creative.
 
+## 2026-08-20 - QA - COMPLETE (FAIL)
+
+* Work completed
+    - Reviewed the Build commit against the approved replan, creative decision, project brief, and system patterns.
+    - Reverified the full suite with `uvx --with tox tox`: 215 passed on each of Python 3.11–3.14.
+* Decisions made
+    - The implementation itself matches the approved prompt-only design and scope.
+    - QA fails because `tasks.md` contains a duplicated three-step implementation-plan block introduced during Build; Build must remove the debris before acceptance.
+* Insights
+    - No implementation, regression, test-integrity, or scope issue was found beyond the duplicated task record.
+
+## 2026-08-20 - BUILD - COMPLETE (rework)
+
+* Work completed
+    - Removed the duplicated implementation-plan block from `tasks.md`. `summem` / `AGENTS.md` unchanged.
+* Decisions made
+    - First QA FAIL was documentation debris from checking off the prose unit, not a product miss.
+* Insights
+    - Marking a plan unit complete by pasting its body again is how the duplicate happened.
+

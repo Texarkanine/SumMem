@@ -1,18 +1,12 @@
 # Active Context
 
 ## Current Task: prompt-membership
-**Phase:** BUILD - COMPLETE
+**Phase:** BUILD - COMPLETE (rework)
 
 ## What Was Done
 
-- Rewrote Register Memories in `prompt_text()`: dump line no longer says “git forever”; membership is its own clone-portability sentence. Lockstep `AGENTS.md`.
-- No new tests. Existing `tests/test_init.py` stayed green. Full `tox`: 215 passed on py311–py314.
-
-## Files modified
-
-- `/home/mobaxterm/git/SumMem/summem` (`prompt_text()`)
-- `/home/mobaxterm/git/SumMem/AGENTS.md` (baked prefix only)
+- First QA FAIL: `tasks.md` duplicated the three-step plan when the unit was marked ✅. Removed the duplicate. Product files unchanged.
 
 ## Next Step
 
-- QA via subagent.
+- Rerun QA.
