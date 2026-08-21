@@ -15,3 +15,15 @@ Make `summem note` acknowledge a successful write before any fold request, and r
 * Insights
     - Current `note_locked` returns only `fold_request`; `nap` shares that helper. ACK must not live inside `fold_request`.
     - `tests/test_fold.py::test_over_budget_note_prints_nothing_when_16_plus_1` encodes the bug (`out == ""`).
+
+## 2026-08-21 - PLAN - COMPLETE
+
+* Work completed
+    - Wrote the Level 2 implementation plan in `tasks.md`: note ACK on the `note` path, prompt nap-sentence reword, test retargets.
+* Decisions made
+    - ACK text is `Saved.` (not a `notes/` path, not a content-id prefix).
+    - ACK is prefixed in `main` after a successful `note` lock, not inside `fold_request`.
+    - No new `prompt_text()` phrase-lock tests; lockstep files are the contract.
+* Insights
+    - `test_config_wake_lines_is_per_store` also encodes silent under-budget `note` (`pkg_out == ""`).
+    - Write-then-ACK-then-fold matches OptMem; delaying the write is out of scope.
