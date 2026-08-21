@@ -61,3 +61,15 @@ Make `summem note` acknowledge a successful write before any fold request, and r
     - Accept as-is. Advisories (post-lock ACK; atlas silent on `Saved.`) do not require a rebuild.
 * Insights
     - Wire contract is `Saved.\n` then optional blank line plus `fold_request`; write still happens inside `note_locked` before that print.
+
+## 2026-08-21 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-note-ack.md`.
+    - Standing-contract probe: added one sentence to `memory-bank/systemPatterns.md` (`note` ACK vs `nap` / `fold_request`).
+* Decisions made
+    - `productContext.md`: skip — no new constituency or retired use case.
+    - `techContext.md`: skip — suite and tools unchanged.
+    - Atlas left as-is (QA advisory; agent-facing surface is README + baked prompt).
+* Insights
+    - Shared `fold_request` is why ACK cannot live in the helper. Silent-stdout tests were the bug encoding.

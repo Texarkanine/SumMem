@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: note-ack
-**Phase:** QA - COMPLETE (PASS)
+**Phase:** REFLECT - COMPLETE
 
 ## What Was Done
 - Unit 1: `note` prints `Saved.` after a successful lock, then a blank line and `fold_request` when over budget. Write still happens inside `note_locked` before ACK. `fold_request` / `nap` unchanged.
@@ -25,4 +25,4 @@
 - Took the optional over-budget-nap `Saved.` assertion. Did not move ACK inside `note_locked`.
 
 ## Next Step
-- Level 2 Reflect.
+- Archive (`memory-bank/archive/bug-fixes/20260821-note-ack.md`), then draft PR closing #27.
