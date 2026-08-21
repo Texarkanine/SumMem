@@ -176,7 +176,8 @@ def test_config_wake_lines_is_per_store(tmp_path, monkeypatch, capsys):
     assert m.main(["note", "--path", "pkg", "pkg-a"]) == 0
     assert m.main(["note", "--path", "pkg", "pkg-b"]) == 0
     pkg_out = capsys.readouterr().out
-    assert pkg_out == ""
+    assert "Saved." in pkg_out
+    assert "Run:" not in pkg_out
 
 
 def test_config_entry_chars_is_per_store_for_notes_and_naps(tmp_path, monkeypatch, capsys):

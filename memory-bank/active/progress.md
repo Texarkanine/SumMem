@@ -39,3 +39,15 @@ Make `summem note` acknowledge a successful write before any fold request, and r
 * Insights
     - Silent-stdout encodings that would go red are the 16+1 fold test and per-store `pkg_out == ""`; over-budget nap does not currently forbid `Saved.`.
     - Printing ACK after the whole lock still satisfies the wire contract; printing it immediately after `write_note` would match OptMem more closely.
+
+## 2026-08-21 - BUILD - COMPLETE
+
+* Work completed
+    - TDD unit 1: retargeted silent-stdout tests; added under-budget and rejected-note cases; `note` prints `Saved.` then maybe fold text.
+    - Unit 2: `prompt_text()` / `docs/agents-prompt.md` / `AGENTS.md` / README nap protocol (already stored; do not retry).
+    - Full suite: 238 pytest on py311–py314.
+* Decisions made
+    - ACK after lock on the `note` branch, not inside `fold_request`.
+    - Took the cheap over-budget-nap `Saved.` assertion; left ACK placement as planned (post-lock).
+* Insights
+    - Red run was five failures (empty stdout vs `Saved.`); rejected-note and under-budget nap already forbade `Saved.`.

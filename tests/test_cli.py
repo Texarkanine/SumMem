@@ -114,6 +114,15 @@ def test_cli_nap_overlong_prints_ratchet(tmp_path, monkeypatch, capsys):
     assert not naps.exists() or not any(p.is_file() and not p.name.startswith(".") for p in naps.iterdir())
 
 
+def test_rejected_note_does_not_print_saved(tmp_path, monkeypatch, capsys):
+    """A too-long note exits 1 and does not print Saved."""
+    m = load_summem()
+    monkeypatch.chdir(init_repo(tmp_path / "r"))
+    assert m.main(["note", "x" * 281]) == 1
+    captured = capsys.readouterr()
+    assert "Saved." not in captured.out
+
+
 def test_note_error_text_omits_store_paths_and_git(tmp_path, monkeypatch, capsys):
     """Rejection text for an over-long note mentions neither notes/, naps/, nor git."""
     m = load_summem()
