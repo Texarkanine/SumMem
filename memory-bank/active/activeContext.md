@@ -1,12 +1,14 @@
 # Active Context
 
 ## Current Task: surgery
-**Phase:** PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Classified Level 2 (self-contained `surgery.py` + tests + operator docs).
-- Planned TDD units: locate target; break-out + unlink + heal; CLI; operator docs.
-- Forks locked: targeted walk in `surgery.py` (not `heal_view`); zip-again is `heal_view` not `write_nap`; `--contains` + `--dry-run` in scope; do not edit `summem`.
+- Repo-root `surgery.py`: `locate_note`, `plan_break_out`, `excise_note`, CLI (`--contains`, `--dry-run`, `--path`, optional NAME).
+- Loads sibling `summem` via `SourceFileLoader`. Calls `rematerialize_child`, `_unlink_node`, `heal_view`, `with_store_lock`. Never `write_nap`. No `heal_view` during break-out.
+- Tests: `tests/test_surgery.py` (16). tox 252 passed on py311–py314.
+- Operator docs: `docs/surgery.md` linked from README and `docs/index.md`.
+- Did not edit `summem`, `prompt_text()`, `docs/agents-prompt.md`, or `AGENTS.md`.
 
 ## Next Step
-- Build may proceed (`PASS WITH ADVISORY`). Do not start Build from this Preflight session.
+- QA review via `/niko-qa` subagent.

@@ -55,6 +55,7 @@ Agents invoke `.summem/summem`. Bare `summem` is the printed name of this invoca
 ## Documentation
 
 - [Architecture](docs/architecture/index.md) — algorithm, store layout, invariants
+- [Emergency surgery](docs/surgery.md) — zipper-excise one raw note at the branch tip (not a shipped command)
 - [Notes](docs/notes.md) — what this backend is not yet
 - [docs/agents-prompt.md](docs/agents-prompt.md) — the baked session-start prompt (also printed by `init`)
 - [AGENTS.md](AGENTS.md) — this repository's activation plus extra agent context
