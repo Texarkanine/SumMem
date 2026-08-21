@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 
 from conftest import ROOT, load_summem
+from test_surgery import load_surgery
 
 
 def test_version_prints_script_version(capsys):
@@ -76,4 +77,29 @@ def test_release_config_generic_extra_file_is_summem():
     generic_paths = {ef.get("path") for ef in extra_files if ef.get("type") == "generic"}
     assert "summem" in generic_paths
     assert ".summem/summem" not in generic_paths
+
+
+def test_surgery_version_matches_summem():
+    """surgery.py and summem print the same in-script version (lockstep, not enforced at runtime)."""
+    s = load_surgery()
+    m = load_summem()
+    assert s.__version__ == m.__version__
+
+
+def test_surgery_version_line_has_release_please_marker():
+    """Repo-root surgery.py __version__ carries x-release-please-version."""
+    text = (ROOT / "surgery.py").read_text(encoding="utf-8")
+    version_lines = [
+        line for line in text.splitlines() if line.lstrip().startswith("__version__")
+    ]
+    assert version_lines, "no __version__ assignment in surgery.py"
+    assert any("x-release-please-version" in line for line in version_lines)
+
+
+def test_release_config_generic_extra_files_include_surgery():
+    """release-please generic extra-files also bump repo-root surgery.py."""
+    config = json.loads((ROOT / "release-please-config.json").read_text(encoding="utf-8"))
+    extra_files = config["packages"]["."]["extra-files"]
+    generic_paths = {ef.get("path") for ef in extra_files if ef.get("type") == "generic"}
+    assert "surgery.py" in generic_paths
 

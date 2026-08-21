@@ -16,7 +16,7 @@ None. The product is one shebang file; there is no packaging step and no separat
 
 License: GNU AGPL v3, in `LICENSE`.
 
-Semver tags come from Release Please (`release-type: simple`) on `main`. Generic extra-files bump `__version__` in repo-root `summem` (`x-release-please-version`). `summem version` prints that string. Helper-bot auth is repository variable `HELPER_APP_ID` and repository secret `HELPER_APP_PRIVATE_KEY`, provisioned after merge. GitHub Actions YAML that only invokes that third-party action is not product TDD in this repo.
+Semver tags come from Release Please (`release-type: simple`) on `main`. Generic extra-files bump `__version__` in repo-root `summem` and `surgery.py` (`x-release-please-version`). `summem version` and `surgery.py version` print that string. Helper-bot auth is repository variable `HELPER_APP_ID` and repository secret `HELPER_APP_PRIVATE_KEY`, provisioned after merge. GitHub Actions YAML that only invokes that third-party action is not product TDD in this repo.
 
 ## Testing Process
 

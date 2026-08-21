@@ -9,6 +9,10 @@
                 {
                     "type": "generic",
                     "path": "summem"
+                },
+                {
+                    "type": "generic",
+                    "path": "surgery.py"
                 }
             ],
             "pull-request-header": ":service_dog: I have created a release \\*bark\\* \\*woof\\*"
