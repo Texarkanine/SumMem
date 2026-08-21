@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: surgery
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
 - Repo-root `surgery.py`: `locate_note`, `plan_break_out`, `excise_note`, CLI (`--contains`, `--dry-run`, `--path`, optional NAME).
@@ -11,4 +11,4 @@
 - Did not edit `summem`, `prompt_text()`, `docs/agents-prompt.md`, or `AGENTS.md`.
 
 ## Next Step
-- QA review via `/niko-qa` subagent.
+- Reflect may proceed (`/niko-reflect`).

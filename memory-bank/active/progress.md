@@ -52,3 +52,14 @@ Emergency-only repo-root `surgery.py`: zipper-excise one whole raw note at the b
 * Insights
     - Injected conftest `load_summem()` into locate/excise so the `write_nap` monkeypatch hits the same module; CLI loads a second copy.
 
+## 2026-08-21 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Semantic review of `surgery.py`, `tests/test_surgery.py`, and operator docs against the Level 2 plan, brief, and issue #28.
+    - Wrote `memory-bank/active/.qa-validation-status`; first line is `PASS`.
+* Decisions made
+    - Accept as-is. Advisories are lockstep notes, not build defects.
+* Insights
+    - Dry-run and mutate are two walks by plan (`plan_break_out` vs `_naps_containing`); both depend on `list_view` filename order.
+    - Forbidden files (`summem`, prompt, `AGENTS.md`) stayed out of the build commit.
+

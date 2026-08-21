@@ -104,4 +104,20 @@ No new technology - validation not required. `surgery.py` is a shebang script th
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
+
+## QA Results
+
+**Result:** PASS (advisories, none blocking)
+
+Reviewed `surgery.py`, `tests/test_surgery.py`, and operator docs against the plan, brief, and issue #28.
+
+- **KISS:** Repo-root script + locate / plan / excise / CLI. No extra store format. `plan_break_out` simulation is the dry-run walk the plan named.
+- **DRY:** Calls `list_view`, `rematerialize_child`, `_unlink_node`, `heal_view`, `with_store_lock`, `resolve_parent`, `require_python`. Does not copy zipper logic into `summem`.
+- **YAGNI:** No `write_nap`, no shipped CLI fold-in, no history rewrite, no `fold_request` aftercare print.
+- **Completeness:** All planned tests and helpers are real. `--contains` / filename / dry-run / lock / `--path` / SourceFileLoader / `require_python` are implemented. Docs cover tip-then-rewrite and agent aftercare.
+- **Regression:** `summem` CLI, `usage_text`, `AGENTS.md`, and `docs/agents-prompt.md` untouched. Surgery is not in the command table.
+- **Integrity:** No TODOs, debug leftovers, or invented captions. Break-out does not call `heal_view`. Mutate locks; dry-run does not.
+- **Documentation:** `docs/surgery.md` linked from README Documentation and `docs/index.md`.
+
+Advisories: dual dry-run/mutate walks must stay filename-ordered; unreadable `.tree` files are skipped like `summem`; no `fold_request` print (correct).

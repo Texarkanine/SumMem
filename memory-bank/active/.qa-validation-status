@@ -1,0 +1,8 @@
+PASS
+
+Reviewed `surgery.py`, `tests/test_surgery.py`, `docs/surgery.md`, README Documentation, and `docs/index.md` against the Level 2 plan, project brief, and https://github.com/Texarkanine/SumMem/issues/28. Build commit `c19b730` does not touch `summem`, `docs/agents-prompt.md`, or `AGENTS.md`. Command table unchanged.
+
+Acceptable as-is. Advisories (do not block reflect):
+1. Dry-run chain is `plan_break_out`'s in-memory walk; mutate re-walks `_naps_containing` + rematerialize. Both pick the first containing view nap in filename order (`list_view` already sorts by name). Keep those selection rules aligned if either walk changes.
+2. Unreadable or invalid-stem `.tree` files are skipped, same as `summem`. A corrupt pack that still embeds the sentence is outside the readable view and would not be split. Not a gap versus the zipper contract.
+3. Preflight's optional `fold_request` print after mutate was not taken. Correct YAGNI: aftercare stays agent `wake`/`nap`.
