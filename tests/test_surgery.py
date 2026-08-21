@@ -342,3 +342,64 @@ def test_main_usage_without_target(tmp_path, monkeypatch, capsys):
     assert s.main([]) == 2
     err = capsys.readouterr().err
     assert err
+
+
+def test_main_version_prints_script_version(capsys):
+    """main(['version']) exits 0 and prints surgery.__version__ plus a newline."""
+    s = load_surgery()
+    assert s.main(["version"]) == 0
+    assert capsys.readouterr().out == f"{s.__version__}\n"
+
+
+def test_main_version_outside_repository(tmp_path, monkeypatch, capsys):
+    """version outside a repository exits 0 and creates no store."""
+    s = load_surgery()
+    monkeypatch.chdir(tmp_path)
+    assert s.main(["version"]) == 0
+    assert capsys.readouterr().out == f"{s.__version__}\n"
+    assert not (tmp_path / ".summem").exists()
+
+
+def test_main_version_rejects_extra_args():
+    """version with an extra token exits nonzero."""
+    s = load_surgery()
+    assert s.main(["version", "x"]) != 0
+
+
+def test_main_prints_fold_request_when_over_budget(tmp_path, monkeypatch, capsys):
+    """After excision, stdout includes fold_request so an agent can start the nap cascade."""
+    s = load_surgery()
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    secret = "sentinel-fold-secret-kk11"
+    paths = _write_notes(m, repo, [secret, "keep-b", "keep-c", "keep-d"])
+    (repo / ".summem" / "config.toml").write_text("WAKE_LINES = 2\n", encoding="utf-8")
+    ids_before = [node.id for node in m.list_view(repo)]
+    monkeypatch.chdir(repo)
+    assert s.main(["--contains", secret]) == 0
+    out = capsys.readouterr().out
+    assert paths[0].name in out.splitlines()
+    assert "Compress these two into one line of at most 280 characters." in out
+    assert 'Run: .summem/summem nap ' in out
+    remain = [node for node in m.list_view(repo) if node.kind == "note"]
+    assert len(remain) == 3
+    remain_ids = [node.id for node in remain]
+    pa = m.short_id(remain_ids[0], remain_ids)
+    pb = m.short_id(remain_ids[1], remain_ids)
+    assert f"nap {pa} {pb} " in out
+    assert ids_before[0] not in out
+
+
+def test_main_dry_run_omits_fold_request(tmp_path, monkeypatch, capsys):
+    """Dry-run does not print a fold request; the store is unchanged."""
+    s = load_surgery()
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    secret = "sentinel-dryfold-secret-ll22"
+    _write_notes(m, repo, [secret, "keep-b", "keep-c", "keep-d"])
+    (repo / ".summem" / "config.toml").write_text("WAKE_LINES = 2\n", encoding="utf-8")
+    monkeypatch.chdir(repo)
+    assert s.main(["--dry-run", "--contains", secret]) == 0
+    out = capsys.readouterr().out
+    assert "Compress these two" not in out
+    assert "Run: .summem/summem nap" not in out

@@ -25,6 +25,8 @@ import sys
 from importlib.machinery import SourceFileLoader
 from pathlib import Path
 
+__version__ = "0.2.1"  # x-release-please-version
+
 
 def load_summem():
     """Load sibling repo-root `summem` via SourceFileLoader (no .py suffix)."""
@@ -184,11 +186,13 @@ def _usage() -> str:
     return """\
 Emergency zipper excision of one raw SumMem note. Not a shipped command.
 
+  surgery.py version
   surgery.py [--path PATH] [--dry-run] --contains TEXT
   surgery.py [--path PATH] [--dry-run] NAME
 
 NAME is a notes/ filename or unique prefix. --contains matches note text only.
 If both are given, NAME selects the file and TEXT must appear in it.
+version prints this script's version (lockstep with summem; not enforced).
 """
 
 
@@ -197,6 +201,12 @@ def main(argv: list[str] | None = None) -> int:
     m = load_summem()
     m.require_python()
     args_list = list(argv) if argv is not None else sys.argv[1:]
+    if args_list[:1] == ["version"]:
+        if args_list[1:]:
+            sys.stderr.write(_usage())
+            return 2
+        sys.stdout.write(f"{__version__}\n")
+        return 0
     parser = argparse.ArgumentParser(prog="surgery.py")
     parser.add_argument("--path", help="aim at this file or directory")
     parser.add_argument("--contains", help="unique substring of the note text")
@@ -232,6 +242,10 @@ def main(argv: list[str] | None = None) -> int:
         sys.stderr.write(f"{exc}\n")
         return 1
     sys.stdout.write("".join(f"{item}\n" for item in chain))
+    if not args.dry_run:
+        nap = m.fold_request(parent, m.knobs(parent)["WAKE_LINES"])
+        if nap:
+            sys.stdout.write("\n" + nap)
     return 0
 
 

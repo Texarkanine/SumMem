@@ -29,24 +29,29 @@ It must not write nap captions. It must not delete a nap as if it were a leaf. I
 From a clone of this repository, with Python 3.11+:
 
 ```text
+./surgery.py version
 ./surgery.py [--path PATH] [--dry-run] --contains TEXT
 ./surgery.py [--path PATH] [--dry-run] NAME
 ```
+
+`./surgery.py version` prints the same string as `summem version`. They advance in lockstep. Prefer a surgery that matches your `summem`, or a newer surgery; do not use an older surgery on a newer `summem`. This is not enforced — compare the two prints.
 
 `--path` aims at a started store the same way `summem` does.
 
 `--contains` matches **note text** only (loose or nested). It does not treat a nap caption as a delete target. If two notes share the same text, the match is ambiguous: pass `NAME` (the `notes/` filename, or a unique prefix of it). If both `--contains` and `NAME` are given, `NAME` selects the file and `TEXT` must appear in it.
 
-`--dry-run` prints the rematerialize chain (nap stems in split order, then the note filename) and writes nothing.
+`--dry-run` prints the rematerialize chain (nap stems in split order, then the note filename) and writes nothing. It does not print a fold request.
 
 ## Aftercare
 
-Excision can invalidate captions. `surgery.py` will not nap those back up. Leaving the hole is allowed; the next honest worker will hit a wall of nap requests. It is polite for the surgeon to finish them.
+Excision can invalidate captions. `surgery.py` will not nap those back up. After a real excision (not `--dry-run`), if the view is still over budget, stdout includes the same first fold request `note` would print (`Compress these two` / `Run: .summem/summem nap …`). Feed that to an agent; each `nap` that is still over budget prints the next pair. `wake` does not demand a nap, so without this print you would have to `note` something else to start the cascade.
+
+Leaving the hole is allowed; the next honest `note` will also print a fold request. It is polite for the surgeon to finish the naps.
 
 After you commit the clean tip, run an agent in that repository:
 
-1. `.summem/summem wake` (skip if a root wake is already in the conversation).
-2. When `note` or the wake listing asks for a nap, `.summem/summem nap` the two adjacent ids with a caption that is true of the **surviving** children. Do not invent filenames. Do not patch `.tree` bytes.
-3. Repeat until wake no longer asks.
+1. If surgery printed a fold request, feed that `Run:` line to the agent (or run it yourself). Caption the surviving children. Do not invent filenames. Do not patch `.tree` bytes.
+2. Each over-budget `nap` prints the next pair. Repeat until there is no fold request.
+3. `.summem/summem wake` still shows the view; it will not demand a nap.
 
 The files the script writes are part of the work; do not leave them untracked.
