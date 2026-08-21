@@ -124,8 +124,8 @@ def test_equal_grain_pair_duplicate_ids_when_same_text(tmp_path):
     assert m.equal_grain_pair(nodes) == (nodes[0].id, nodes[1].id)
 
 
-def test_over_budget_note_prints_nothing_when_16_plus_1(tmp_path, monkeypatch, capsys):
-    """WAKE_LINES=1, a 16-pack plus a new note prints no fold request."""
+def test_over_budget_note_prints_saved_when_16_plus_1(tmp_path, monkeypatch, capsys):
+    """WAKE_LINES=1, a 16-pack plus a new note prints Saved. and no fold request."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     _add_notes(m, repo, 16, 0, "n")
@@ -133,7 +133,22 @@ def test_over_budget_note_prints_nothing_when_16_plus_1(tmp_path, monkeypatch, c
     monkeypatch.chdir(repo)
     monkeypatch.setattr(m, "WAKE_LINES", 1)
     assert m.main(["note", "later"]) == 0
-    assert capsys.readouterr().out == ""
+    out = capsys.readouterr().out
+    assert out == "Saved.\n"
+    assert "Run:" not in out
+    assert "Compress these two" not in out
+
+
+def test_under_budget_note_prints_saved(tmp_path, monkeypatch, capsys):
+    """Under-budget note exits 0 with stdout Saved. and no fold request."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["note", "hello"]) == 0
+    out = capsys.readouterr().out
+    assert out == "Saved.\n"
+    assert "Run:" not in out
+    assert "Compress these two" not in out
 
 
 def test_long_stream_same_second_grains_are_powers_of_two(tmp_path, monkeypatch):
@@ -186,6 +201,7 @@ def test_nap_prints_remaining_ones_not_parent_plus_one(tmp_path, monkeypatch, ca
     nodes = m.list_view(repo)
     assert m.main(["nap", nodes[0].id, nodes[1].id, "pair"]) == 0
     out = capsys.readouterr().out
+    assert "Saved." not in out
     assert "  c\n" in out
     assert "  d\n" in out
     assert "Run: .summem/summem nap " in out
@@ -217,6 +233,8 @@ def test_over_budget_note_requests_equal_grain_ones(tmp_path, monkeypatch, capsy
     ids = [node.id for node in m.list_view(repo)]
     assert m.main(["note", "delta"]) == 0
     out = capsys.readouterr().out
+    assert out.startswith("Saved.\n")
+    assert out.index("Saved.") < out.index("Compress these two")
     assert "Compress these two into one line of at most 280 characters." in out
     assert "Invent nothing." in out
     assert "  alpha\n" in out
@@ -250,6 +268,8 @@ def test_config_toml_wake_lines_is_read(tmp_path, monkeypatch, capsys):
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     assert m.main(["note", "beta"]) == 0
     out = capsys.readouterr().out
+    assert out.startswith("Saved.\n")
+    assert out.index("Saved.") < out.index("Run:")
     assert "Run: .summem/summem nap " in out
     assert "Invent nothing." in out
     notes = [p for p in (repo / ".summem" / "notes").iterdir() if not p.name.startswith(".")]

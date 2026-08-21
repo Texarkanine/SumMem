@@ -1,0 +1,1 @@
+Draft PR #29 feat/note-ack closes #27: successful note prints Saved. then maybe a fold request; do not retry the same note.
