@@ -171,7 +171,7 @@ WAKE_LINES = 32
 CLI_NAME = "summem"
 AGENT_BIN = ".summem/summem"
 PROMPT_DOC = "docs/agents-prompt.md"
-__version__ = "0.2.1"  # x-release-please-version
+__version__ = "0.3.0"  # x-release-please-version
 
 CONFIG_TEMPLATE = """\
 # SumMem per-store settings. Missing values take the script's defaults.

@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0](https://github.com/Texarkanine/SumMem/compare/v0.2.1...v0.3.0) (2026-08-21)
+
+
+### Features
+
+* add emergency zipper excision via repo-root surgery.py [[#28](https://github.com/Texarkanine/SumMem/issues/28)] ([#30](https://github.com/Texarkanine/SumMem/issues/30)) ([0c7de72](https://github.com/Texarkanine/SumMem/commit/0c7de727ea5cbfb2ba94f231818e25bcd9c59f84))
+
+
+### Bug Fixes
+
+* print Saved. after a successful note [[#27](https://github.com/Texarkanine/SumMem/issues/27)] ([#29](https://github.com/Texarkanine/SumMem/issues/29)) ([b350e59](https://github.com/Texarkanine/SumMem/commit/b350e594ee6fd976eda262d262048756c525cd04))
+
 ## [0.2.1](https://github.com/Texarkanine/SumMem/compare/v0.2.0...v0.2.1) (2026-08-20)
 
 
