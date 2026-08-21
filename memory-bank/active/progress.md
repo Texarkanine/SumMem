@@ -26,3 +26,15 @@ Emergency-only repo-root `surgery.py`: zipper-excise one whole raw note at the b
     - `surgery.py` loads sibling `summem` via `SourceFileLoader`.
 * Insights
     - Calling `heal_view` mid-break-out can subset-drop the rematerialized note back into a larger overlapping pack.
+
+## 2026-08-21 - PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+
+* Work completed
+    - Validated the Level 2 surgery plan against repo-root `summem` helpers, zipper tests, CLI/`--path` patterns, and issue #28.
+    - Wrote `memory-bank/active/.preflight-status`; first line is `PASS WITH ADVISORY`.
+* Decisions made
+    - No in-phase plan edits (TDD order is already test-first; no change-detectors).
+    - Build may proceed; advisories are implementer notes, not plan rewrites.
+* Insights
+    - `heal_view` subset-drop of a loose note still covered by a larger overlapping pack is real (`test_heal_note_covered_by_nap_dropped`); skipping `heal_view` during break-out is required.
+    - `with_store_lock` is `with_store_lock(parent, fn)`, not a context manager; `_unlink_node` takes a `ViewNode`.
