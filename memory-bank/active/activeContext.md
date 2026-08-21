@@ -1,11 +1,11 @@
 # Active Context
 
 ## Current Task: note-ack
-**Phase:** PLAN - COMPLETE
+**Phase:** BUILD - READY
 
 ## What Was Done
-- Fresh standalone `/niko` classified Level 2 for [SumMem#27](https://github.com/Texarkanine/SumMem/issues/27).
-- Plan: ACK `Saved.` on `main`'s `note` branch after write-inside-lock; `fold_request` unchanged; retarget silent-stdout tests; reword `prompt_text()` / lockstep docs / README without new phrase-lock tests.
+- Preflight PASS WITH ADVISORY ([Preflight](1c63c184-7666-42c7-a184-99d3c71ec269)): TDD order, ACK on note path, named silent-stdout retargets.
+- Optional advisories: print `Saved.` inside `note_locked` right after `write_note`; assert over-budget nap has no `Saved.`.
 
 ## Next Step
-- Preflight validation (subagent). Standing consent: on PASS, continue to build without waiting.
+- Execute Level 2 build (TDD unit 1, then prompt lockstep).

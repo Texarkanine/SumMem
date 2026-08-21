@@ -27,3 +27,15 @@ Make `summem note` acknowledge a successful write before any fold request, and r
 * Insights
     - `test_config_wake_lines_is_per_store` also encodes silent under-budget `note` (`pkg_out == ""`).
     - Write-then-ACK-then-fold matches OptMem; delaying the write is out of scope.
+
+## 2026-08-21 - PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+
+* Work completed
+    - Validated the Level 2 plan against `summem` `main`/`note_locked`/`fold_request`, the named fold/cli/scopes tests, lockstep prompt tests, and issue #27.
+    - Wrote `memory-bank/active/.preflight-status` with first line `PASS WITH ADVISORY`.
+* Decisions made
+    - No in-phase plan edits (TDD order is already test-first; no change-detector steps to strike).
+    - Build may proceed; advisories are optional.
+* Insights
+    - Silent-stdout encodings that would go red are the 16+1 fold test and per-store `pkg_out == ""`; over-budget nap does not currently forbid `Saved.`.
+    - Printing ACK after the whole lock still satisfies the wire contract; printing it immediately after `write_note` would match OptMem more closely.
