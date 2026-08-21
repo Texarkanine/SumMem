@@ -15,3 +15,14 @@ Emergency-only repo-root `surgery.py`: zipper-excise one whole raw note at the b
     - Do not extend `tox -e coverage` `--cov=` unless needed; default tox stays coverage-free.
 * Insights
     - Sibling #27 owns `summem` / prompt / AGENTS.md; colliding those files would break the wave.
+
+## 2026-08-21 - PLAN - COMPLETE
+
+* Work completed
+    - Wrote Level 2 TDD plan: locate, break-out/unlink/heal, CLI, operator docs.
+* Decisions made
+    - Break-out loops every view nap whose tree still contains the target name; `heal_view` only after the loose unlink.
+    - `--contains` matches note text only, never nap captions as delete targets.
+    - `surgery.py` loads sibling `summem` via `SourceFileLoader`.
+* Insights
+    - Calling `heal_view` mid-break-out can subset-drop the rematerialized note back into a larger overlapping pack.

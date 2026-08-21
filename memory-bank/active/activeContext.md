@@ -1,12 +1,12 @@
 # Active Context
 
 ## Current Task: surgery
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Fresh standalone `/niko` in isolated worktree `feat/surgery` (no prior `memory-bank/active/`).
-- Standing consent: skip intent wait; spec is GitHub issue #28 as currently written.
-- Classified **Level 2**: self-contained enhancement (new repo-root script + tests + operator docs). Does not change store format, shipped CLI, or `summem`. Decision tree: not a bug; small enhancement; self-contained → L2.
+- Classified Level 2 (self-contained `surgery.py` + tests + operator docs).
+- Planned TDD units: locate target; break-out + unlink + heal; CLI; operator docs.
+- Forks locked: targeted walk in `surgery.py` (not `heal_view`); zip-again is `heal_view` not `write_nap`; `--contains` + `--dry-run` in scope; do not edit `summem`.
 
 ## Next Step
-- Load Level 2 workflow and execute plan phase.
+- Preflight validation via `/niko-preflight` subagent.
