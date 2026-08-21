@@ -51,3 +51,13 @@ Make `summem note` acknowledge a successful write before any fold request, and r
     - Took the cheap over-budget-nap `Saved.` assertion; left ACK placement as planned (post-lock).
 * Insights
     - Red run was five failures (empty stdout vs `Saved.`); rejected-note and under-budget nap already forbade `Saved.`.
+
+## 2026-08-21 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Semantic review of the note-ACK build against the Level 2 plan, brief, and acceptance criteria.
+    - Wrote `memory-bank/active/.qa-validation-status` (`PASS`).
+* Decisions made
+    - Accept as-is. Advisories (post-lock ACK; atlas silent on `Saved.`) do not require a rebuild.
+* Insights
+    - Wire contract is `Saved.\n` then optional blank line plus `fold_request`; write still happens inside `note_locked` before that print.

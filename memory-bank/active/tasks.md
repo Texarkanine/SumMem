@@ -81,4 +81,18 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
+
+## QA Results
+
+PASS. Implementation matches the plan as-is.
+
+- KISS: ACK is two `stdout.write` calls on `main`'s `note` branch after a successful lock. No new public function.
+- DRY: `fold_request` is unchanged. `nap` still prints only that helper.
+- YAGNI: marker is the planned `Saved.`; no phrase-lock tests on `prompt_text()`.
+- Completeness: successful `note` always prints `Saved.` before any fold text; write stays inside `note_locked`; rejected `note` has no `Saved.`; named silent-stdout tests retargeted; prompt lockstep and README nap sentence updated.
+- Regression: under-budget `nap` still empty; over-budget `nap` still only `fold_request` (now also asserts no `Saved.`).
+- Integrity: no `notes/` path, no content-id prefix, no leftover stubs.
+- Documentation: `prompt_text()`, `docs/agents-prompt.md`, `AGENTS.md`, README updated as planned.
+
+Advisories (do not block): ACK after the whole lock (heal hang still looks silent); atlas fold section does not mention `Saved.`.
