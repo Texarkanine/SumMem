@@ -63,3 +63,18 @@ Emergency-only repo-root `surgery.py`: zipper-excise one whole raw note at the b
     - Dry-run and mutate are two walks by plan (`plan_break_out` vs `_naps_containing`); both depend on `list_view` filename order.
     - Forbidden files (`summem`, prompt, `AGENTS.md`) stayed out of the build commit.
 
+## 2026-08-21 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-surgery.md`.
+    - Reconciled persistent files: all three skipped.
+* Decisions made
+    - Standing-contract probe: zipper delete algorithm stays in `surgery.py` / `docs/surgery.md`; briefing files already say the script is the only writer.
+* Insights
+    - `heal_view` mid-break-out subset-drops a rematerialized target still covered by a larger pack.
+* Persistent skip receipts
+    - productContext: skip — agent use cases and “script is the only writer” still hold; surgery.py is an emergency script, not a new audience use case.
+    - systemPatterns: skip — unrelated changes (wake, recall) are not damaged by not knowing `surgery.py`; later CLI fold-in is not this issue.
+    - techContext: skip — shipped product is still the no-suffix shebang; tox/SourceFileLoader/`--cov=summem` unchanged.
+
+
