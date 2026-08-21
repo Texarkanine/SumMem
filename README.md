@@ -48,7 +48,7 @@ summem init                                     print the agent prompt
 summem version                                  print this script's version
 ```
 
-Agents invoke `.summem/summem`. Bare `summem` is the printed name of this invocation. If `note` asks for a nap, the note is already stored; do that nap before the next action. Never edit store files by hand.
+Agents invoke `.summem/summem`. Sometimes recording a `note` will ask for a `nap` - a compression of two adjacent notes into one summary. Agents do that and then continue on with their work; thus the memories are intelligently compressed.
 
 `--path` aims at work in the tree. The script walks from that path (or from `$PWD`) to the nearest started store.
 
