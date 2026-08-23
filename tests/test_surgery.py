@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import shlex
 import sys
 from datetime import datetime, timedelta, timezone
 from importlib.machinery import SourceFileLoader
@@ -388,6 +389,26 @@ def test_main_prints_fold_request_when_over_budget(tmp_path, monkeypatch, capsys
     pb = m.short_id(remain_ids[1], remain_ids)
     assert f"nap {pa} {pb} " in out
     assert ids_before[0] not in out
+
+
+def test_main_path_fold_request_is_copy_paste_safe(tmp_path, monkeypatch, capsys):
+    """After --path excision over budget, Run: naps that store from $PWD."""
+    s = load_surgery()
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["start", "pkg"]) == 0
+    secret = "sentinel-fold-path-secret-mm33"
+    _write_notes(m, repo / "pkg", [secret, "keep-b", "keep-c", "keep-d"])
+    (repo / "pkg" / ".summem" / "config.toml").write_text("WAKE_LINES = 2\n", encoding="utf-8")
+    assert s.main(["--path", "pkg", "--contains", secret]) == 0
+    out = capsys.readouterr().out
+    run = next(line for line in out.splitlines() if line.startswith("Run: "))
+    tokens = shlex.split(run.removeprefix("Run: "))
+    tokens[-1] = "pair"
+    assert m.main(tokens[1:]) == 0
+    view = m.list_view(repo / "pkg")
+    assert any(node.kind == "nap" and node.caption == "pair" for node in view)
 
 
 def test_main_dry_run_omits_fold_request(tmp_path, monkeypatch, capsys):

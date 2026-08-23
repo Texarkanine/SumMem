@@ -281,6 +281,7 @@ def test_fold_request_mentions_remaining(tmp_path, monkeypatch):
     """Five notes at budget 3: fold_request says compressions remain after this one."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
     monkeypatch.setattr(m, "WAKE_LINES", 3)
     for i, text in enumerate(("a", "b", "c", "d", "e"), start=1):
         m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
@@ -296,6 +297,7 @@ def test_fold_request_identical_notes_use_short_prefix(tmp_path, monkeypatch):
     """Two identical notes over budget emit 8-hex prefixes, not 64-hex ids."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
     monkeypatch.setattr(m, "WAKE_LINES", 1)
     m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -311,6 +313,7 @@ def test_fold_request_uses_config_entry_chars(tmp_path, monkeypatch):
     """A store ENTRY_CHARS value appears in the fold prompt."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
     m.ensure_store(repo)
     (repo / ".summem" / "config.toml").write_text("ENTRY_CHARS = 140\n", encoding="utf-8")
     monkeypatch.setattr(m, "WAKE_LINES", 1)
@@ -319,3 +322,36 @@ def test_fold_request_uses_config_entry_chars(tmp_path, monkeypatch):
     out = m.fold_request(repo, 1)
     assert "140 characters" in out
     assert "280 characters" not in out
+
+
+def test_fold_request_includes_path_when_cwd_misses_store(tmp_path, monkeypatch):
+    """Walk-up from $PWD is a different store: Run: includes --path to the folded store."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    nested = repo / "foo" / "packages" / "baz"
+    nested.mkdir(parents=True)
+    m.ensure_store(nested)
+    monkeypatch.chdir(repo)
+    monkeypatch.setattr(m, "WAKE_LINES", 1)
+    m.write_note(nested, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(nested, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    out = m.fold_request(nested, 1)
+    assert "nap --path foo/packages/baz " in out
+
+
+def test_fold_request_omits_path_when_cwd_selects_store(tmp_path, monkeypatch):
+    """Walk-up from $PWD already finds the folded store: Run: has no --path."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    pkg = repo / "pkg"
+    pkg.mkdir()
+    m.ensure_store(pkg)
+    nested = pkg / "src"
+    nested.mkdir()
+    monkeypatch.chdir(nested)
+    monkeypatch.setattr(m, "WAKE_LINES", 1)
+    m.write_note(pkg, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(pkg, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    out = m.fold_request(pkg, 1)
+    assert " --path " not in out
+    assert "Run: .summem/summem nap " in out
