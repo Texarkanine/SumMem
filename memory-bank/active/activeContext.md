@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: fold-request-path
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
 - Confirmed issue #34: `fold_request()` omitted `--path` for nested stores; copy-paste from repo root failed with `unknown id`.
@@ -9,4 +9,4 @@
 - Tests: unit (include/omit), CLI copy-paste after `note --path`, surgery `--path` copy-paste. `tox` 266 passed py311–py314.
 
 ## Next Step
-- QA via `/niko-qa` subagent
+- L1 wrap-up. No archive phase; operator deletes `memory-bank/active/` when satisfied.

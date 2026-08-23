@@ -27,3 +27,14 @@ Investigate [issue #34](https://github.com/Texarkanine/SumMem/issues/34) and, if
     - `surgery.py` stays a consumer; no signature change
 * Insights
     - Existing `fold_request` unit tests that did not `chdir` to the store would have gained a `--path` to the tmp repo; they now `chdir` so they still assert the in-store `Run:` line
+
+## 2026-08-23 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Semantic review of `_fold_path_flag` / `fold_request` against the brief and acceptance criteria
+    - Recorded PASS in `memory-bank/active/.qa-validation-status`
+* Decisions made
+    - PASS as-is: one helper, surgery inherits, tests cover include/omit and copy-paste
+    - Unquoted `REL` is an advisory, not a blocker
+* Insights
+    - Computing the hint from cwd vs `parent` (not echoing the original `--path` argv) is why a file-aimed `--path` still prints the store directory
