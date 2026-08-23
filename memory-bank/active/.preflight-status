@@ -1,0 +1,19 @@
+PASS WITH ADVISORY
+
+Planning is complete. Level 3 creative documents exist (`creative-legal-instruments.md`, `creative-authority-echoes.md`). The plan has four prose/policy units and no new executable behavior.
+
+TDD Plan Encoding: pass. All four units are instructional comments or docs, which always-tdd excludes. The plan schedules no tests and no change-detectors. There is no executable unit without test steps. No step-order swap and no change-detector strike.
+
+Convention: pass. Targets match the tree: FSF AGPL short notices on `summem` and `surgery.py` (copyright line, standard paragraphs, then the module docstring), `README.md` `## License` (link-only today), and `memory-bank/techContext.md`. Insert-after-short-notice keeps that header shape. Neither file has an SPDX identifier today; the plan does not add `WITH`. `LICENSE` is verbatim AGPL. No `COPYING`, `LICENSING.md`, `REUSE.toml`, or `LICENSES/` exists.
+
+Dependency: pass. `prompt_text` / `init_text` / `docs/agents-prompt.md` / `AGENTS.md` lockstep is a named non-edit; `tests/test_init.py` stays the accidental-edit net. `version` and Release Please `__version__` lines are out of scope. `tests/test_cli.py::test_shebang_and_executable_bit` asserts only line 0 (`#!/usr/bin/env python3`). Comments do not change `SourceFileLoader` behavior. Repo-root `.summem/summem` is a symlink to `summem` and inherits the header without a separate unit.
+
+Conflict: pass. No existing §7 grant or overlapping license machinery. `docs/` does not mention AGPL. `productContext.md` has no license clause that would outrank the script.
+
+Completeness: pass. Brief requirements 1–5 map to unit 1 (full grant in `summem`), units 2–3 (echoes), and the explicit non-edits (`LICENSE`, paste files, `version`, no REUSE). Requirement 6 is the unused REUSE branch. Build copies the draft terms in `creative-legal-instruments.md`, including the “even if” sentence and the distributing-copies limit.
+
+Advisory (radical innovation, not applied): redesign header order, not the grant. After the copyright line, add a three-line use-versus-fork capsule (running / agent invocation is permitted; distributing copies of the Program or a modified version stays AGPL). Keep the stock FSF short notice next. After that notice, introduce the two copied paragraphs with the conventional sentence “Additional permission under GNU AGPL version 3 section 7:” and then paste the Creative draft terms. The plan as written appends the full grant after sixteen lines of boilerplate a skimmer already knows, so the meeting-winning distinction is last. Placement and labeling only.
+
+Advisory: `tests/test_init.py` rejects the substring “paste” in `init` output. The Creative prompt paragraph contains “pasting”. That is a Build tripwire if grant text lands in `prompt_text()` or `init_text()`, which the plan already forbids.
+
+Advisory: unit 4 updates the “License: GNU AGPL v3, in `LICENSE`” sentence in `techContext.md`. The Canonical documents bullet “`LICENSE` — AGPL-3.0” can stay; it remains true.

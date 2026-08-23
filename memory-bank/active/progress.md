@@ -53,3 +53,14 @@ Add two AGPL carve-outs (obligation-free prompt text; full permission for AI-age
     - Build copies §7 draft terms from the legal-instruments creative doc
 * Insights
     - Existing `test_init.py` lockstep is a safety net against accidentally editing the paste, not a license test
+
+## 2026-08-23 - PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+
+* Work completed
+    - Validated the four prose/policy units against current headers, README License section, lockstep tests, and the two creative drafts
+    - Wrote `memory-bank/active/.preflight-status` with first line `PASS WITH ADVISORY`
+* Decisions made
+    - Plan is acceptable as-is; no TDD step swap and no change-detector strike
+* Insights
+    - Comment insertion after the FSF short notice does not touch the shebang test or version machinery
+    - The `init` “paste” substring check is a tripwire if Build accidentally puts grant text in the prompt
