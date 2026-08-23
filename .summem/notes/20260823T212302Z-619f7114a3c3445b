@@ -1,0 +1,1 @@
+fold_request Run: includes --path REL when walk-up from $PWD would not select the folded store.

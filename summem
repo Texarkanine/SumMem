@@ -873,6 +873,22 @@ def equal_grain_pair(nodes: list[ViewNode]) -> tuple[str, str] | None:
     return None
 
 
+def _fold_path_flag(parent) -> str:
+    """Return `` --path REL`` when walk-up from cwd would not select *parent*, else empty.
+
+    *REL* is the path from cwd to *parent*. The fold request's Run: line is
+    meant to be pasted from the same directory that printed it.
+    """
+    try:
+        walked = resolve_parent(Path.cwd())
+    except ValueError:
+        walked = None
+    if walked is not None and Path(walked).resolve() == Path(parent).resolve():
+        return ""
+    rel = os.path.relpath(Path(parent).resolve(), Path.cwd().resolve())
+    return f" --path {Path(rel).as_posix()}"
+
+
 def fold_request(parent, wake_lines: int | None = None) -> str:
     """Return an OptMem-style nap prompt for the oldest equal-grain pair when over *wake_lines*."""
     if wake_lines is None:
@@ -902,7 +918,7 @@ def fold_request(parent, wake_lines: int | None = None) -> str:
         f"  {format_wake_line(left, ids)}\n"
         f"  {format_wake_line(right, ids)}\n"
         "\n"
-        f'Run: {AGENT_BIN} nap {short_id(left.id, ids)} {short_id(right.id, ids)} "<your line>"\n'
+        f'Run: {AGENT_BIN} nap{_fold_path_flag(parent)} {short_id(left.id, ids)} {short_id(right.id, ids)} "<your line>"\n'
         f"{extra}"
     )
 

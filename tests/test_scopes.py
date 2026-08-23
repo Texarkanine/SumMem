@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import shlex
 import tomllib
 
 from conftest import load_summem
@@ -156,6 +157,27 @@ def test_nap_zoom_recall_path_use_started_store(tmp_path, monkeypatch, capsys):
     recalled = capsys.readouterr().out
     assert "alpha" in recalled
     assert "root-only" not in recalled
+
+
+def test_note_path_fold_request_is_copy_paste_safe(tmp_path, monkeypatch, capsys):
+    """A fold request after note --path is a command that naps that store from $PWD."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["start", "pkg"]) == 0
+    (repo / "pkg" / ".summem" / "config.toml").write_text("WAKE_LINES = 1\n", encoding="utf-8")
+    assert m.main(["note", "--path", "pkg", "alpha"]) == 0
+    capsys.readouterr()
+    assert m.main(["note", "--path", "pkg", "beta"]) == 0
+    out = capsys.readouterr().out
+    run = next(line for line in out.splitlines() if line.startswith("Run: "))
+    tokens = shlex.split(run.removeprefix("Run: "))
+    tokens[-1] = "pair"
+    assert m.main(tokens[1:]) == 0
+    view = m.list_view(repo / "pkg")
+    assert len(view) == 1
+    assert view[0].kind == "nap"
+    assert view[0].caption == "pair"
 
 
 def test_config_wake_lines_is_per_store(tmp_path, monkeypatch, capsys):
