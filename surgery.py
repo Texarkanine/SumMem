@@ -25,7 +25,7 @@ import sys
 from importlib.machinery import SourceFileLoader
 from pathlib import Path
 
-__version__ = "0.3.0"  # x-release-please-version
+__version__ = "0.4.0"  # x-release-please-version
 
 
 def load_summem():
