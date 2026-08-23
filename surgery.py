@@ -19,20 +19,25 @@
 #
 # Invocation. Invoking this Program through ordinary process
 # invocation — a shell, a subprocess call, or an AI agent acting on a
-# prompt — is not conveyance.
+# prompt — does not make this Program a shared library or dynamically
+# linked subprogram that the invoking work is specifically designed
+# to require, and is not intimate data communication or control flow
+# within the meaning of section 1. The invoking program is not a
+# covered work or a work based on the Program by reason of that
+# invocation. For these additional permissions, "your organization"
+# means you and every entity under common control with you, and
+# "your personnel" means persons acting for your organization.
 #
-# You may invoke the unmodified Program, including when users interact
-# with it remotely through a computer network, even if that use would
-# otherwise be treated as conveyance.
+# Invocation directed by you, by your personnel, or by an agent
+# acting for your organization, including where that direction
+# reaches the Program over a computer network, is not users
+# interacting with the Program remotely within the meaning of
+# section 13.
 #
-# You may modify the Program and invoke the modified version,
-# including through your own agents. The invoking program is not a covered work
-# or a work based on the Program by reason of that invocation.
-#
-# If users interact with a modified version remotely through a
-# computer network, these additional permissions do not apply:
-# section 13 and the rest of this License do. Distributing a modified
-# version is not covered by this permission.
+# If you make a modified version available to anyone outside your
+# organization — by distributing it, or by offering remote
+# interaction with it — the preceding paragraph does not apply to
+# that modified version: section 13 and the rest of this License do.
 
 """Emergency zipper excision of one raw SumMem note. Not a shipped CLI command."""
 
