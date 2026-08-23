@@ -65,16 +65,19 @@ Add two AGPL carve-outs (obligation-free prompt text; full permission for AI-age
     - Comment insertion after the FSF short notice does not touch the shebang test or version machinery
     - The `init` “paste” substring check is a tripwire if Build accidentally puts grant text in the prompt
 
-## 2026-08-23 - BUILD - IN-PROGRESS (header settled)
+## 2026-08-23 - BUILD - COMPLETE
 
 * Work completed
     - Drafted §7 Invocation + 0BSD Prompt template in `summem`; echoed Invocation on `surgery.py`; README License points at the script
     - Operator iterated wording (AGPL-first, org vs network, no “must retain”, drop unmodified-source paragraph, keep outside-org override)
-    - Operator: likes current header as-is; `/handoff`
+    - Operator: likes current header as-is after further manual revision; do not reopen wording
+    - Four planned units landed; `LICENSE` and paste files untouched
+    - Full suite: 262 pytest via `uvx --with tox tox` on py311–py314
 * Decisions made
     - 0BSD on the prompt, not a dual-license of the Program
     - §1 + covered-work never revoked; only the §13 paragraph is withdrawn for outside-org modified availability
     - “Agent acting for your organization” covers autonomous internal invoke; common-control is affiliates only
+    - Preflight capsule-before-AGPL advisory not applied (operator chose AGPL-first)
 * Insights
     - §13’s own “users / remotely / network” words catch employees on a VPN; the live cut is organizational
     - A conveyor may strip additional permissions; a stripped fork is still AGPL, not more permissive

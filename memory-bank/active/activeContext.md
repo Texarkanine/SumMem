@@ -1,16 +1,17 @@
 # Active Context
 
 ## Current Task: agpl-carve-outs
-**Phase:** BUILD - header settled, operator likes as-is
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Program stays AGPL. Prompt template is 0BSD (full terms in the `summem` header). No REUSE. `LICENSE` stays verbatim AGPL. Script is authoritative; `surgery.py` echoes invocation only; README points at the header.
+- Program stays AGPL. Prompt template is 0BSD (full terms in the `summem` header). No REUSE. `LICENSE` stays verbatim AGPL. Script is the authoritative source; `surgery.py` echoes invocation only; README points at the header.
 - Invocation is three paragraphs under §7: (1) §1 intimate-link denial + caller is not a covered work; org/personnel definitions (common control); (2) §13 carve-out for invocation directed by you, personnel, or an agent acting for the org, including over a network; (3) if a modified version is made available outside the org (distribute or offer remote interaction), paragraph 2 does not apply and §13 does. Paragraph 3 must not revoke paragraph 1.
-- Dropped: capsule-before-AGPL, “must retain” carve-outs, unmodified-no-Corresponding-Source paragraph, “you may invoke” restatements, network-only §13 trigger.
-- Operator likes the current header as-is. Checkpoint `b3a44df`; later header edits may still be uncommitted.
+- Prompt template block is 0BSD, after the invocation grant.
+- Operator likes the current header as-is after manual revision. Do not reopen wording.
+- Full suite: 262 pytest on py311–py314.
 
 ## Next Step
-- Finish BUILD bookkeeping if needed, then `/niko-qa`. Do not reopen header wording unless the operator asks.
+- QA review.
 
 ## Operator decisions after preflight
 - Dual-license refusal is the **program** only. Prompt is 0BSD.
