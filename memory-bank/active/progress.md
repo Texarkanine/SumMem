@@ -43,3 +43,13 @@ Add two AGPL carve-outs (obligation-free prompt text; full permission for AI-age
 * Insights
     - REUSE is for mixed licenses; Q1 refused a second license on the program
     - A `LICENSE` preamble can break GitHub detection; COPYING was tied to the REUSE branch we are not taking
+
+## 2026-08-23 - PLAN - COMPLETE
+
+* Work completed
+    - Wrote the Level 3 plan: four prose/policy units, no new executable behavior
+* Decisions made
+    - No tests for header/README/license wording
+    - Build copies §7 draft terms from the legal-instruments creative doc
+* Insights
+    - Existing `test_init.py` lockstep is a safety net against accidentally editing the paste, not a license test

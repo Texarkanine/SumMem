@@ -1,11 +1,12 @@
 # Active Context
 
 ## Current Task: agpl-carve-outs
-**Phase:** PLAN - IN-PROGRESS
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Component analysis: script header, prompt lockstep, LICENSE/README, surgery.py, optional version notice.
-- Flagged two open questions: legal instruments, then authority/echoes.
+- Legal instruments: AGPL §7 additional permissions in the source.
+- Authority: `summem` header is the full grant; no REUSE; `LICENSE` verbatim; README echo; `surgery.py` invocation echo.
+- Plan: four prose/policy units; no new executable behavior.
 
 ## Next Step
-- Finish the Level 3 plan (test plan, implementation steps, pre-mortem), then preflight.
+- Preflight, then wait for `/niko-build` if it passes.
