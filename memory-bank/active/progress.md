@@ -93,3 +93,14 @@ Add two AGPL carve-outs (obligation-free prompt text; full permission for AI-age
 * Insights
     - §7 additional permissions plus the §1 / covered-work paragraph are the “even if” instrument; the brief’s extra sentence is not load-bearing once the operator locked the three-paragraph form
     - Paragraph 3 withdraws only the §13 paragraph, so unmodified customer-facing invoke stays carved out and a modified version offered outside the org does not
+
+## 2026-08-23 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-agpl-carve-outs.md`
+    - Reconciled persistent files (no further edits)
+* Decisions made
+    - Treat the operator-settled three-paragraph header as the grant; Creative draft is historical
+* Insights
+    - Organizational cut, not network-shaped; §7 + covered-work paragraph is the “even if” instrument
+    - License L3 plan steps that say “copy Creative” will disagree with QA after the operator rewrites the grant
