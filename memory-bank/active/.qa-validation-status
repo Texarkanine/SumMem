@@ -1,7 +1,0 @@
-PASS
-
-Semantic review of agpl-carve-outs against the Level 3 plan, creative docs, and operator-settled header. Implementation is acceptable as-is.
-
-Units: `summem` holds the full §7 invocation grant plus 0BSD prompt terms after the FSF short notice (AGPL-first). `surgery.py` echoes the three invocation paragraphs only, same words. README License is premise + pointer at the script, with two short restatements. `techContext.md` keeps “License: GNU AGPL v3, in `LICENSE`” and names the header as authoritative. `LICENSE` is unmodified stock AGPL. No `COPYING`, `LICENSING.md`, `REUSE.toml`, `LICENSES/`, or `SPDX-License-Identifier` `WITH`. `prompt_text()` / `init_text()` / `docs/agents-prompt.md` / `AGENTS.md` have no grant, SPDX, or license notice. `version` and executable body untouched.
-
-Advisories (non-blocking): the live invocation text is the operator-revised three-paragraph form, not the Creative one-paragraph draft and not the brief’s literal “even if” / “not conveyance” sentences; do not reopen wording. README restates two legal conclusions that currently match the header; if either side is edited, update the other or shrink README back to a pointer.
