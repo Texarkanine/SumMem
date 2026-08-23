@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/Texarkanine/SumMem/compare/v0.3.0...v0.4.0) (2026-08-23)
+
+
+### Features
+
+* **docs:** add AGPL section 7 invocation and 0BSD prompt terms ([#32](https://github.com/Texarkanine/SumMem/issues/32)) ([01f8266](https://github.com/Texarkanine/SumMem/commit/01f826646ba420f195fe97babe4927a618e5a927))
+
 ## [0.3.0](https://github.com/Texarkanine/SumMem/compare/v0.2.1...v0.3.0) (2026-08-21)
 
 
