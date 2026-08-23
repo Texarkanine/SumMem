@@ -1,43 +1,19 @@
 #!/usr/bin/env python3
 
 # Copyright (C) 2026 Texarkanine
-#
+
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
 # by the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-#
+
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
-#
+
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#
-# Additional permission under GNU AGPL version 3 section 7:
-#
-# Invocation. Invoking this Program through ordinary process
-# invocation — a shell, a subprocess call, or an AI agent acting on a
-# prompt — does not make this Program a shared library or dynamically
-# linked subprogram that the invoking work is specifically designed
-# to require, and is not intimate data communication or control flow
-# within the meaning of section 1. The invoking program is not a
-# covered work or a work based on the Program by reason of that
-# invocation. For these additional permissions, "your organization"
-# means you and every entity under common control with you, and
-# "your personnel" means persons acting for your organization.
-#
-# Invocation directed by you, by your personnel, or by an agent
-# acting for your organization, including where that direction
-# reaches the Program over a computer network, is not users
-# interacting with the Program remotely within the meaning of
-# section 13.
-#
-# If you make a modified version available to anyone outside your
-# organization — by distributing it, or by offering remote
-# interaction with it — the preceding paragraph does not apply to
-# that modified version: section 13 and the rest of this License do.
 
 """Emergency zipper excision of one raw SumMem note. Not a shipped CLI command."""
 

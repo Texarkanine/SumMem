@@ -104,3 +104,11 @@ Add two AGPL carve-outs (obligation-free prompt text; full permission for AI-age
 * Insights
     - Organizational cut, not network-shaped; §7 + covered-work paragraph is the “even if” instrument
     - License L3 plan steps that say “copy Creative” will disagree with QA after the operator rewrites the grant
+
+## 2026-08-23 - REWORK - surgery vanilla
+
+* Work completed
+    - Restored `surgery.py` to the stock AGPL short notice (`origin/main`)
+    - Dropped the techContext claim that `surgery.py` echoes the running permission
+* Decisions made
+    - Operator: `surgery.py` stays vanilla; the grant lives only in `summem`
