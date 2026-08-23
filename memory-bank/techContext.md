@@ -14,7 +14,7 @@ Hashing is SHA-256 from the language standard library (`hashlib` in Python 3). D
 
 None. The product is one shebang file; there is no packaging step and no separate database to provision.
 
-License: GNU AGPL v3, in `LICENSE`.
+License: GNU AGPL v3, in `LICENSE`. Additional permission for running (including by an AI agent) and 0BSD terms for the agent prompt template are in the `summem` header (authoritative). `surgery.py` stays stock AGPL; it does not echo those terms.
 
 Semver tags come from Release Please (`release-type: simple`) on `main`. Generic extra-files bump `__version__` in repo-root `summem` and `surgery.py` (`x-release-please-version`). `summem version` and `surgery.py version` print that string. Helper-bot auth is repository variable `HELPER_APP_ID` and repository secret `HELPER_APP_PRIVATE_KEY`, provisioned after merge. GitHub Actions YAML that only invokes that third-party action is not product TDD in this repo.
 

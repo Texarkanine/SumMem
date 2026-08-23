@@ -68,4 +68,4 @@ There is no test-result cache. This suite is heavy on `tmp_path`, git worktrees,
 
 ## License
 
-[GNU Affero General Public License v3.0](LICENSE)
+The program is [GNU AGPL v3](LICENSE). Additional permissions for invocation and the 0BSD terms for the agent prompt template live in the comment block at the top of `summem`. That block is the authoritative statement. A typical install copies that file. Invoking the script does not make the caller a covered work. Making a modified version available outside your organization — by distributing it, or by offering remote interaction with it — remains AGPL.
