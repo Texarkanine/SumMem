@@ -10,4 +10,8 @@
 - Preflight: PASS WITH ADVISORY (plan acceptable as-is).
 
 ## Next Step
-- Wait for `/niko-build`.
+- Talk through the prompt's permissive license (which one) before rewriting Creative/plan. Do not treat preflight as build-ready until that lands.
+
+## Operator decisions after preflight
+- Dual-license refusal is the **program** only. The prompt should be licensed under something permissive.
+- The script must stay self-contained. REUSE does not travel and cannot be the grant — those points from the no-REUSE decision remain correct even if this repo later uses REUSE as an echo.

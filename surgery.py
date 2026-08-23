@@ -1,19 +1,38 @@
 #!/usr/bin/env python3
 
 # Copyright (C) 2026 Texarkanine
-
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
 # by the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
-
+#
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+# Additional permission under GNU AGPL version 3 section 7:
+#
+# Invocation. Invoking this Program through ordinary process
+# invocation — a shell, a subprocess call, or an AI agent acting on a
+# prompt — is not conveyance.
+#
+# You may invoke the unmodified Program, including when users interact
+# with it remotely through a computer network, even if that use would
+# otherwise be treated as conveyance.
+#
+# You may modify the Program and invoke the modified version,
+# including through your own agents. The invoking program is not a covered work
+# or a work based on the Program by reason of that invocation.
+#
+# If users interact with a modified version remotely through a
+# computer network, these additional permissions do not apply:
+# section 13 and the rest of this License do. Distributing a modified
+# version is not covered by this permission.
 
 """Emergency zipper excision of one raw SumMem note. Not a shipped CLI command."""
 

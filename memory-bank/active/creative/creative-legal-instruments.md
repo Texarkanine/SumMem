@@ -68,6 +68,10 @@ graph TD
 
 **Prompt (part of the Program):** The agent prompt template this Program emits for pasting into `AGENTS.md` may be copied, modified, and published without restriction and without retaining any copyright notice, permission notice, or license text. The copyright holder claims no copyright in that template.
 
-**Invocation (whole Program, running only):** Running this Program — including invocation by an AI agent, whether that agent is used only by its operator or is offered to customers — is permitted without the obligations this License attaches to conveying a covered work and without the obligations of section 13. If such running would otherwise be treated as conveyance or as remote network interaction, it is still permitted under this additional permission. This permission does not apply to distributing copies of the Program or of a modified version of the Program.
+**Invocation (whole Program):** Invoking through ordinary process invocation is not conveyance and is not, by itself, “users interacting with it remotely through a computer network” under §13. The invoking program is not a covered work or a work based on the Program by reason of that invocation. Unmodified Program may be run even when users interact with it that way. Modified Program may be run by you and your agents; if users interact with that modified version remotely through a computer network, this permission does not apply and §13 does. Distributing a modified version is not covered by this permission. Do not say a fork “must retain” the carve-outs: §7 lets a conveyor strip additional permissions. A stripped fork is still AGPL, not more permissive.
 
 - Placement of echoes (`COPYING`, REUSE, `surgery.py`, `version`) is the next open question.
+
+## Operator amendment
+
+After preflight, the operator chose **0BSD** as the separately written license for the prompt template (not a dual-license of the Program). The invocation grant stays the §7 paragraph above. Put the 0BSD terms in the `summem` header so the file is self-contained. Do not add REUSE. Verbatim root `LICENSE` does not revoke these terms.

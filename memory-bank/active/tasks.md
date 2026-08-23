@@ -77,16 +77,16 @@ None. No cross-component executable interaction changes.
 
 ## Implementation Plan
 
-### 1. summem header — prose/policy
+### 1. summem header — prose/policy ✅
 
 - Files: `summem`
 - No tests: prose/policy artifact
 - Creative ref: `memory-bank/active/creative/creative-legal-instruments.md`, `memory-bank/active/creative/creative-authority-echoes.md`
 
-1. After the existing AGPL short notice, insert an additional-permissions block whose two paragraphs are the draft terms from `creative-legal-instruments.md` (prompt: no-copyright + unrestricted copy without notice; invocation: running / agent / customer-facing agent, including “even if”, and explicitly not distributing copies of the Program).
-2. Do not add `SPDX-License-Identifier` with `WITH`. Do not dual-license. Do not put grant text, SPDX tags, or license notices inside `prompt_text()`, `init_text()`, `docs/agents-prompt.md`, or `AGENTS.md`.
+1. After the existing AGPL short notice, insert the §7 invocation paragraph from `creative-legal-instruments.md` and the 0BSD terms for the prompt template (operator amendment). A short use-versus-fork capsule may sit above the FSF short notice (preflight advisory).
+2. Do not add `SPDX-License-Identifier` with `WITH`. Do not dual-license the Program. Do not put grant text, SPDX tags, or license notices inside `prompt_text()`, `init_text()`, `docs/agents-prompt.md`, or `AGENTS.md`.
 
-### 2. surgery.py header — prose/policy
+### 2. surgery.py header — prose/policy ✅
 
 - Files: `surgery.py`
 - No tests: prose/policy artifact
@@ -95,7 +95,7 @@ None. No cross-component executable interaction changes.
 1. After the existing AGPL short notice, add the **invocation** permission only, using the same words as the invocation paragraph in `summem`.
 2. Do not add the prompt permission (this file does not emit the template).
 
-### 3. README License section — prose/policy
+### 3. README License section — prose/policy ✅
 
 - Files: `README.md`
 - No tests: prose/policy artifact
@@ -104,7 +104,7 @@ None. No cross-component executable interaction changes.
 1. Rewrite the `## License` section: the program is AGPL (link `LICENSE`); additional permissions for the prompt and for agent invocation live in the comment block at the top of `summem` and are the authoritative statement; a typical install copies that file.
 2. Do not add `COPYING`, `LICENSING.md`, `REUSE.toml`, or `LICENSES/`. Do not edit `LICENSE`.
 
-### 4. techContext pointer — prose/policy
+### 4. techContext pointer — prose/policy ✅
 
 - Files: `memory-bank/techContext.md`
 - No tests: prose/policy artifact
@@ -138,5 +138,5 @@ No new technology - validation not required
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
 - [x] Preflight
-- [ ] Build
+- [x] Build
 - [ ] QA

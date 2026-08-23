@@ -25,7 +25,7 @@ A typical install copies only the script into the target repo. The script is the
 ## Requirements
 
 1. SumMem the program stays AGPL. Do not dual-license the program.
-2. The “paste this” agent prompt (`prompt_text()` / `init` output / `docs/agents-prompt.md`) carries no copyright and no obligation.
+2. The agent prompt template (`prompt_text()` / `init` output / `docs/agents-prompt.md`) is licensed 0BSD. Inserting it into someone else’s `AGENTS.md` does not pull AGPL or a notice-retention duty.
 3. Full invocation carve-out: an AI agent running SumMem is not conveyance and not AGPL §13 network performance; **and even if it is**, that use is explicitly permitted outside AGPL’s terms. Covers developer-machine agents and customer-facing agents that invoke SumMem to do the work.
 4. Publishing a modified or forked SumMem still fires AGPL.
 5. The script is the authoritative source. Anything said in the SumMem repo about these grants must also appear in the script.
