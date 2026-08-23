@@ -29,3 +29,17 @@ Add two AGPL carve-outs (obligation-free prompt text; full permission for AI-age
 * Insights
     - §7 already requires the terms (or a pointer) in the relevant source files; a repo-only `LICENSING.md` would fail both the license and the script-as-authority rule
     - Recipients may strip additional permissions; the fork remains AGPL
+
+## 2026-08-23 - CREATIVE - COMPLETE
+
+* Work completed
+    - Explored where the grant lives so a script-only install is complete
+* Decisions made
+    - Script-complete, no REUSE: authority is the `summem` header
+    - `LICENSE` stays verbatim AGPL (detector-safe)
+    - README License section is a short premise + pointer
+    - `surgery.py` echoes the invocation permission only
+    - `version` unchanged; no grant text in the paste prompt
+* Insights
+    - REUSE is for mixed licenses; Q1 refused a second license on the program
+    - A `LICENSE` preamble can break GitHub detection; COPYING was tied to the REUSE branch we are not taking

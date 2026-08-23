@@ -8,4 +8,4 @@
 - Flagged two open questions: legal instruments, then authority/echoes.
 
 ## Next Step
-- Creative on authority and echoes (architecture).
+- Finish the Level 3 plan (test plan, implementation steps, pre-mortem), then preflight.

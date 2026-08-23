@@ -31,9 +31,8 @@ Two AGPL carve-outs (obligation-free prompt text; full permission for AI-agent i
 - [x] **Legal instruments** — How do we write the prompt dedication and the invocation permission so they are real grants, the program stays AGPL, and scanners still see AGPL?
   - Resolved: AGPL §7 additional permissions in the source (prompt = part-of-program, no-copyright + unrestricted copy; invocation = running only, including “even if”). No dual-license, no SPDX `WITH` exception. See `memory-bank/active/creative/creative-legal-instruments.md`.
 
-- [ ] **Authority and echoes** — Given the instruments, where does the text live so a script-only install is complete?
-  - Ambiguous because the operator prefers the script as the full authority, and said *if* REUSE then drop `LICENSE` for `COPYING`; the Claude thread recommended the opposite layout (keep `LICENSE`, add `LICENSING.md`, REUSE snippets).
-  - Must satisfy: script is authoritative; repo trappings echo and do not outrank; typical install copies only the script.
+- [x] **Authority and echoes** — Given the instruments, where does the text live so a script-only install is complete?
+  - Resolved: script-complete, no REUSE. Full §7 text in the `summem` header; `LICENSE` stays verbatim AGPL; README premise + pointer; `surgery.py` echoes invocation only. No `COPYING` / `LICENSING.md` / REUSE. See `memory-bank/active/creative/creative-authority-echoes.md`.
 
 ## Status
 
