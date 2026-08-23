@@ -139,4 +139,15 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
+
+## QA Results
+
+✅ PASS
+
+- **KISS / DRY / YAGNI** — Comment-only grant and echoes. Invocation text is duplicated on `surgery.py` by design. No new files, SPDX `WITH`, REUSE, or `version` output.
+- **Completeness** — Four planned units landed. Script-only reader sees AGPL, invocation permission, and 0BSD prompt terms. Paste files and `LICENSE` were not edited.
+- **Regression / Integrity** — FSF short-notice shape kept (blank lines became `#` separators). No stubs, TODOs, placeholders, or grant leakage into `prompt_text()` / lockstep files.
+- **Documentation** — README License and `techContext.md` updated as planned. `productContext.md` and `docs/` have no license clause that needed a change.
+- **Advisory** — Live invocation wording is the operator-settled three-paragraph form, not the Creative draft’s “even if” / “not conveyance” sentences. Do not reopen.
+- **Advisory** — README restates two header conclusions (caller not a covered work; outside-org modified availability stays AGPL). Consistent today; drift if only one side is edited.

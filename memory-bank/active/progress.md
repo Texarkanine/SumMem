@@ -81,3 +81,15 @@ Add two AGPL carve-outs (obligation-free prompt text; full permission for AI-age
 * Insights
     - §13’s own “users / remotely / network” words catch employees on a VPN; the live cut is organizational
     - A conveyor may strip additional permissions; a stripped fork is still AGPL, not more permissive
+
+## 2026-08-23 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Semantic review of the four prose/policy units against the plan, creative docs, and operator-settled header
+    - Wrote `memory-bank/active/.qa-validation-status` (`PASS`)
+* Decisions made
+    - Accept the live header as-is; wording divergence from the Creative draft is operator-approved, not a rebuild
+    - Advisories only: missing literal “even if” / “not conveyance” sentences; README restates two header conclusions
+* Insights
+    - §7 additional permissions plus the §1 / covered-work paragraph are the “even if” instrument; the brief’s extra sentence is not load-bearing once the operator locked the three-paragraph form
+    - Paragraph 3 withdraws only the §13 paragraph, so unmodified customer-facing invoke stays carved out and a modified version offered outside the org does not

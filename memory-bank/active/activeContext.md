@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: agpl-carve-outs
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
 - Program stays AGPL. Prompt template is 0BSD (full terms in the `summem` header). No REUSE. `LICENSE` stays verbatim AGPL. Script is the authoritative source; `surgery.py` echoes invocation only; README points at the header.
@@ -11,7 +11,7 @@
 - Full suite: 262 pytest on py311–py314.
 
 ## Next Step
-- QA review.
+- QA PASSED — proceed to `/niko-reflect`.
 
 ## Operator decisions after preflight
 - Dual-license refusal is the **program** only. Prompt is 0BSD.
