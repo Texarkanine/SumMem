@@ -17,3 +17,15 @@ Add two AGPL carve-outs (obligation-free prompt text; full permission for AI-age
 * Insights
     - Typical install copies only the script; a repo-only rider would not travel
     - Creative must choose REUSE/COPYING vs keeping `LICENSE`, and how to write the additional permission without turning AGPL into `LicenseRef-`
+
+## 2026-08-23 - CREATIVE - COMPLETE
+
+* Work completed
+    - Explored legal instruments for the two carve-outs
+* Decisions made
+    - AGPL §7 additional permissions in the source, not an interpretation-only rider, not a dual-license, not an SPDX exception
+    - Prompt: part-of-program permission plus no-copyright claim; no 0BSD/MIT on the program
+    - Invocation: exception for *running* only; distributing copies of the Program stays AGPL
+* Insights
+    - §7 already requires the terms (or a pointer) in the relevant source files; a repo-only `LICENSING.md` would fail both the license and the script-as-authority rule
+    - Recipients may strip additional permissions; the fork remains AGPL
