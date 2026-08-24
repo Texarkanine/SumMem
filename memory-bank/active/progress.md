@@ -47,3 +47,15 @@ Unify agent-facing recall/zoom lines with wake’s grammar, make recall match se
     - No parallel dated_* test names; change the existing functions.
 * Insights
     - `conftest` imports `gitutil`, so `zoom_reaches` cannot call `load_summem`; it must `SourceFileLoader` `SCRIPT`.
+
+## 2026-08-24 - PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+
+* Work completed
+    - Re-validated the reworked plan against `summem` zoom/recall printers, leftover `{id}  text` / `split("  ")` tests, and `tests/gitutil.py` walkers.
+    - Wrote `memory-bank/active/.preflight-status` with first line `PASS WITH ADVISORY`.
+* Decisions made
+    - Did not edit the implementation plan (no TDD order swap; no change-detector strike).
+    - Prior FAIL (walkers parse zoom stdout; leftover exact-format tests) is now scheduled; not a new fail.
+* Insights
+    - `conftest.py` does not currently import `gitutil`; SourceFileLoader on `SCRIPT` is still the right load for `zoom_reaches`.
+    - Wake still unique-prefixes against view ids; the plan's recall/zoom `named_ids` can print a longer prefix for the same view pack.
