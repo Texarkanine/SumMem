@@ -19,3 +19,12 @@ Parentheses on leaf wake lines were a human “not an id” marker. Agents get o
 - `AGENTS.md`
 - `memory-bank/systemPatterns.md`
 - `docs/architecture/index.md`
+
+## QA Results
+
+**Result:** PASS
+
+Advisories (do not block):
+
+- `docs/architecture/index.md` Identity still says wake prints a unique prefix of the id. Pack-only, as after tree-schema. The invariant this rework named was updated.
+- `projectbrief.md` use-cases still show parenthetical days. The Rework section is the current contract; that history is not product copy.

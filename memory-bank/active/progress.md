@@ -111,4 +111,16 @@ Print leaf `wake` rows as `x1 YYYY-MM-DD: text` from the note stamp. Leave nap l
 * Insights
     - Changing `dated_leaf` was the red; production followed
 
+## 2026-08-24 - QA - COMPLETE
+
+* Work completed
+    - Semantic review of the paren-drop rework against the Rework brief
+    - Wrote `memory-bank/active/.qa-validation-status` with `PASS`
+* Decisions made
+    - Accept as-is: printer, `dated_leaf` oracle, briefing, and prompt lockstep all emit `x1 YYYY-MM-DD:`
+    - Architecture Identity’s unique-prefix sentence stays an advisory, same as the first QA
+* Insights
+    - One grammar means the day is a TOKEN, not a human-scan marker; hyphens already keep it off `resolve_id`
+    - Leftover parentheses live only in ephemeral history (original brief, old reflection), not in the product
+
 
