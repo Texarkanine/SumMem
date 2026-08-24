@@ -715,7 +715,7 @@ def named_ids(parent) -> list[str]:
         try:
             nested: list[str] = []
             _collect_ids(loads_tree(node.tree_path.read_bytes()), nested)
-        except (OSError, UnicodeDecodeError, ValueError, TypeError, KeyError):
+        except _TREE_PARSE_ERRORS:
             continue
         for cid in nested:
             add(cid)
