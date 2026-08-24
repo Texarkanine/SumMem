@@ -29,3 +29,16 @@ Print leaf `wake` rows as `x1 (YYYY-MM-DD): text` from the note stamp. Leave nap
 * Insights
     - `format_wake_line` already feeds wake, expand, recall’s view pass, and fold_request — dating notes there is the whole print surface
     - The 2026-08-19 dated-every-line format is the failure mode to avoid, not the template
+
+## 2026-08-24 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Validated the dated-leaf-wake plan against `summem`, the test tree, and briefing docs
+    - Wrote `memory-bank/active/.preflight-status` with first line `PASS WITH ADVISORY`
+* Decisions made
+    - Plan is acceptable as-is; no TDD step swap or change-detector strike
+    - Unlisted `tests/test_proof_ingest.py` exact wake-line set is an advisory, not a blocking gap (`tox` is already the unit-done gate)
+* Insights
+    - `format_wake_line` already feeds wake, expand, fold, and recall's view pass; recall tests use stored-sentence substrings and stay green
+    - `_day_from_stamp` is gone from the script; restoring it is not duplication
+    - CLI proof notes use writer-now UTC; retarget that proof from the filename stamp, not `date.today()`

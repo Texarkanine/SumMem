@@ -35,7 +35,7 @@ Print each loose note on `wake` as `x1 (YYYY-MM-DD): text` from the filename sta
 
 ### 1. Dated leaf printer — executable
 
-- Files: `summem` (`_day_from_stamp`, `format_wake_line`); `tests/test_wake.py`; `tests/test_wake_expand.py`; `tests/test_fold.py`
+- Files: `summem` (`_day_from_stamp`, `format_wake_line`); `tests/test_wake.py`; `tests/test_wake_expand.py`; `tests/test_fold.py`; `tests/test_proof_ingest.py` (preflight advisory: exact `{"alpha", "beta"}` set)
 
 1. Stub tests: in `tests/test_wake.py` add empty `test_day_from_stamp_formats_utc_calendar_date`, `test_wake_line_is_dated_grain_for_a_note` (replace `test_wake_line_is_text_for_a_note`), `test_wake_pack_line_has_no_date`, `test_format_wake_line_grain1_pack_is_undated_caption`, `test_resolve_id_rejects_hyphenated_day`. Keep using `tests/test_wake.py` for printer unit cases. In `tests/test_fold.py` stub no new names; existing fold-body cases will be rewritten in step 3.
 2. Stub interface: add `_day_from_stamp(stamp: str) -> str` with project-style docstring; leave the body empty / `raise NotImplementedError`. Do not change `format_wake_line` yet.
@@ -92,6 +92,6 @@ No new technology - validation not required
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
+- [x] Preflight
 - [ ] Build
 - [ ] QA
