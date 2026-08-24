@@ -71,3 +71,18 @@ Unify agent-facing recall/zoom lines with wake’s grammar, make recall match se
 * Insights
     - `conftest.py` does not currently import `gitutil`; SourceFileLoader on `SCRIPT` is still the right load for `zoom_reaches`.
     - Wake still unique-prefixes against view ids; the plan's recall/zoom `named_ids` can print a longer prefix for the same view pack.
+
+## 2026-08-24 - BUILD - COMPLETE
+
+* Work completed
+    - Unit 1: `reaches` / `zoom_reaches` enqueue `_nap_child_ids` from `Tree.kids`; `tests/test_gitutil.py` monkeypatches `zoom_text` to wake grammar.
+    - Unit 2: zoom children print `format_wake_line(_projected_child(...), named_ids)`; dropped `_zoom_note_line`; `_find_in_tree` returns `NoteChild | NapChild`.
+    - Unit 3: recall matches `node.caption` / nested text and sum, prints the same grammar.
+    - Unit 4: Register Memories clause is clone-portability membership; lockstep `prompt_text()` / `AGENTS.md` / `docs/agents-prompt.md`.
+    - Unit 5: atlas § Zoom and recall and `systemPatterns.md` wake-dates-leaves paragraph updated.
+    - `uvx --with tox tox`: py311–py314, 275 passed each.
+* Decisions made
+    - Took preflight advisories: one listing renderer (`_projected_child` + `format_wake_line` only); did not reopen the wake printer; both walkers changed in unit 1.
+    - `zoom_reaches` loads the driver as `summem_gitutil` (register in `sys.modules` before `exec_module`) so it does not import `conftest`.
+* Insights
+    - Uncommitted product files in this workspace were restored to HEAD more than once during plan/preflight. Stage and commit as soon as a slice is green.

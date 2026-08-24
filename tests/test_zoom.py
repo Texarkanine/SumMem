@@ -7,7 +7,7 @@ from random import Random
 
 import pytest
 
-from conftest import load_summem
+from conftest import dated_leaf, load_summem
 from gitutil import init_repo
 
 UTC = timezone.utc
@@ -29,8 +29,8 @@ def test_zoom_two_note_nap_prints_both_texts(tmp_path):
     out = m.zoom_text(repo, nap_id)
     lines = out.splitlines()
     assert len(lines) == 2
-    assert lines[0] == f"{ids[0]}  alpha"
-    assert lines[1] == f"{ids[1]}  beta"
+    assert lines[0] == dated_leaf("20260101T000001Z", "alpha")
+    assert lines[1] == dated_leaf("20260101T000002Z", "beta")
 
 
 def test_zoom_conflict_sum_still_prints_leaves(tmp_path):
@@ -53,7 +53,7 @@ def test_zoom_loose_note_id_prints_the_note(tmp_path):
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "hello", datetime(2026, 1, 1, tzinfo=UTC), Random(0))
     cid = m.list_view(repo)[0].id
-    assert m.zoom_text(repo, cid) == f"{cid}  hello\n"
+    assert m.zoom_text(repo, cid) == dated_leaf("20260101T000000Z", "hello") + "\n"
 
 
 def test_zoom_unknown_id_omits_store_paths_and_git(tmp_path):
@@ -96,12 +96,15 @@ def test_zoom_nap_of_naps_prints_two_children_not_leaves(tmp_path):
     m.write_nap(repo, ids[2], ids[3], "pack-b")
     nap_ids = [node.id for node in m.list_view(repo)]
     m.write_nap(repo, nap_ids[0], nap_ids[1], "both")
-    parent_id = m.list_view(repo)[0].id
-    out = m.zoom_text(repo, parent_id)
+    parent = m.list_view(repo)[0]
+    out = m.zoom_text(repo, parent.id)
     lines = out.splitlines()
     assert len(lines) == 2
-    captions = [line.split("  ", 1)[1] for line in lines]
-    assert captions == ["pack-a", "pack-b"]
+    ids = m.named_ids(repo)
+    tree = m.loads_tree(parent.tree_path.read_bytes())
+    want = [m.format_wake_line(m._projected_child(child), ids) for child in tree.kids]
+    assert lines == want
+    assert all(len(m.short_id(child.id, ids)) == 8 for child in tree.kids)
 
 
 def test_zoom_accepts_unique_prefix(tmp_path):
@@ -174,3 +177,17 @@ def test_zoom_unreadable_tree_is_unreadable_pack(tmp_path, capsys):
     assert "naps/" not in err
     assert "git" not in err
     assert capsys.readouterr().err == ""
+
+
+def test_zoom_nested_note_id_prints_dated_leaf(tmp_path):
+    """Zoom of a note id that lives only inside a children file prints a dated leaf."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    ids = _two_notes(m, repo)
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    nap = m.list_view(repo)[0]
+    tree = m.loads_tree(nap.tree_path.read_bytes())
+    child = tree.kids[0]
+    cid = m.leafset_id([m.note_digest(m.note_file_bytes(child.text))])
+    stamp = child.name.split("-")[0]
+    assert m.zoom_text(repo, cid) == dated_leaf(stamp, child.text) + "\n"

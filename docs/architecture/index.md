@@ -305,6 +305,8 @@ Zoom walks a children file in the current commit. Every sentence zoom still owes
 
 Everyday recall is the view, with captions standing in for napped children. Recall that must see original sentences or nested nap captions reads children files as well.
 
+Listings share `format_wake_line`: dated leaves and unique-prefix packs. Recall searches note text and nap captions, not grain, prefix, or day. Pack prefixes are unique among `named_ids` (view plus nested tree ids). 64-hex stays on disk; agent stdout uses `short_id` unless uniqueness requires the full id.
+
 Zoom and recall print one agent-safe line when they skip an unreadable sibling children file, and do not fail if another pack answered. Wake stays silent.
 
 ## Scopes

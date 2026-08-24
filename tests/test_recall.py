@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from random import Random
 
-from conftest import load_summem
+from conftest import dated_leaf, load_summem
 from gitutil import init_repo
 
 UTC = timezone.utc
@@ -17,7 +17,7 @@ def test_recall_matches_loose_note(tmp_path):
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha hello", datetime(2026, 1, 1, tzinfo=UTC), Random(0))
     out = m.recall_text(repo, "hello")
-    assert "alpha hello" in out
+    assert out == dated_leaf("20260101T000000Z", "alpha hello") + "\n"
 
 
 def test_recall_matches_caption(tmp_path, monkeypatch):
@@ -42,8 +42,7 @@ def test_recall_matches_sentence_inside_tree(tmp_path):
     ids = [node.id for node in m.list_view(repo)]
     m.write_nap(repo, ids[0], ids[1], "pair")
     out = m.recall_text(repo, "unique-leaf-sentence")
-    assert "unique-leaf-sentence" in out
-    assert "pair" not in out
+    assert out == dated_leaf("20260101T000001Z", "unique-leaf-sentence") + "\n"
 
 
 def test_recall_output_omits_notes_naps_and_git(tmp_path):
@@ -121,13 +120,18 @@ def test_recall_matches_nested_nap_caption(tmp_path):
         m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
     ids = [node.id for node in m.list_view(repo)]
     m.write_nap(repo, ids[0], ids[1], "pack-a")
-    pack_a_id = next(node.id for node in m.list_view(repo) if node.kind == "nap")
     m.write_nap(repo, ids[2], ids[3], "pack-b")
     nap_ids = [node.id for node in m.list_view(repo) if node.kind == "nap"]
     m.write_nap(repo, nap_ids[0], nap_ids[1], "both")
     out = m.recall_text(repo, "pack-a")
-    assert "pack-a" in out
-    assert f"{pack_a_id}  pack-a" in out
+    parent = m.list_view(repo)[0]
+    tree = m.loads_tree(parent.tree_path.read_bytes())
+    child = next(c for c in tree.kids if c.sum == "pack-a")
+    want = m.format_wake_line(m._projected_child(child), m.named_ids(repo))
+    assert out.splitlines() == [want]
+    prefix = want.split()[1].rstrip(":")
+    zoomed = m.zoom_text(repo, prefix)
+    assert dated_leaf("20260101T000001Z", "a1") in zoomed.splitlines()
     assert "both" not in out
 
 
@@ -147,6 +151,23 @@ def test_recall_nested_caption_omits_notes_naps_and_git(tmp_path):
     assert "notes/" not in out
     assert "naps/" not in out
     assert "git" not in out
+
+
+def test_recall_does_not_match_grain_day_or_prefix(tmp_path):
+    """Recall matches captions and note text, not grain, day, or id prefix."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "folded pair")
+    assert m.recall_text(repo, "x2") == ""
+    assert m.recall_text(repo, "2026-01-01") == ""
+    node = m.list_view(repo)[0]
+    line = m.format_wake_line(node, m.named_ids(repo))
+    prefix = line.split()[1].rstrip(":")
+    ch = next(c for c in prefix if c not in node.caption)
+    assert "folded pair" not in m.recall_text(repo, ch)
 
 
 def test_recall_invalid_pattern_is_cli_error(tmp_path, monkeypatch, capsys):

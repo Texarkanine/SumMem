@@ -87,6 +87,9 @@ def test_prompt_text_invariants():
     assert ".summem/summem" in prompt
     assert "AGENTS.md or CLAUDE.md" not in prompt
     assert "./summem/summem" not in prompt
+    assert "must still be true after a fresh clone" not in prompt
+    assert "clone" in lower
+    assert "another machine" in lower
 
 
 def test_prompt_text_notes_are_part_of_the_work():
