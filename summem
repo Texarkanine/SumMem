@@ -874,14 +874,6 @@ def wake_text(parent) -> str:
     return "\n".join(lines) + "\n"
 
 
-def equal_grain_pair(nodes: list[ViewNode]) -> tuple[str, str] | None:
-    """Return the oldest adjacent same-leaf-count file ids, or None."""
-    for i in range(len(nodes) - 1):
-        if nodes[i].leaves == nodes[i + 1].leaves:
-            return nodes[i].id, nodes[i + 1].id
-    return None
-
-
 def _fold_path_flag(parent) -> str:
     """Return `` --path REL`` when walk-up from cwd would not select *parent*, else empty.
 

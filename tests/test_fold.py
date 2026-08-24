@@ -37,6 +37,14 @@ def _max_note_depth(m, tree, depth=1) -> int:
     return deepest
 
 
+def _equal_grain_pair(nodes):
+    """Return the oldest adjacent same-leaf-count file ids, or None."""
+    for i in range(len(nodes) - 1):
+        if nodes[i].leaves == nodes[i + 1].leaves:
+            return nodes[i].id, nodes[i + 1].id
+    return None
+
+
 def test_nap_stem_inherits_left_child_seq_prefix(tmp_path):
     """Nap stem is {left.stamp}-{left.rand}-{leafset}-2 from the left child's filename."""
     m = load_summem()
@@ -72,7 +80,7 @@ def test_equal_grain_pair_returns_two_oldest_ids_when_all_ones(tmp_path):
     for i, text in enumerate(("alpha", "beta", "gamma"), start=1):
         m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
     nodes = m.list_view(repo)
-    assert m.equal_grain_pair(nodes) == (nodes[0].id, nodes[1].id)
+    assert _equal_grain_pair(nodes) == (nodes[0].id, nodes[1].id)
 
 
 def test_equal_grain_pair_returns_none_for_16_plus_1(tmp_path):
@@ -82,7 +90,7 @@ def test_equal_grain_pair_returns_none_for_16_plus_1(tmp_path):
     _add_notes(m, repo, 16, 0, "n")
     _fold_loose_notes(m, repo, "pack")
     m.write_note(repo, "later", datetime(2026, 1, 1, 0, 1, 0, tzinfo=UTC), Random(99))
-    assert m.equal_grain_pair(m.list_view(repo)) is None
+    assert _equal_grain_pair(m.list_view(repo)) is None
 
 
 def test_equal_grain_pair_returns_two_8s_not_16_plus_8(tmp_path):
@@ -97,7 +105,7 @@ def test_equal_grain_pair_returns_two_8s_not_16_plus_8(tmp_path):
     _fold_loose_notes(m, repo, "eight-c")
     nodes = m.list_view(repo)
     assert [node.leaves for node in nodes] == [16, 8, 8]
-    assert m.equal_grain_pair(nodes) == (nodes[1].id, nodes[2].id)
+    assert _equal_grain_pair(nodes) == (nodes[1].id, nodes[2].id)
 
 
 def test_equal_grain_pair_returns_two_1s_not_2_plus_1(tmp_path):
@@ -110,7 +118,7 @@ def test_equal_grain_pair_returns_two_1s_not_2_plus_1(tmp_path):
     m.write_nap(repo, nodes[0].id, nodes[1].id, "pair")
     nodes = m.list_view(repo)
     assert [node.leaves for node in nodes] == [2, 1, 1]
-    assert m.equal_grain_pair(nodes) == (nodes[1].id, nodes[2].id)
+    assert _equal_grain_pair(nodes) == (nodes[1].id, nodes[2].id)
 
 
 def test_equal_grain_pair_duplicate_ids_when_same_text(tmp_path):
@@ -121,7 +129,7 @@ def test_equal_grain_pair_duplicate_ids_when_same_text(tmp_path):
     m.write_note(repo, "same", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
     nodes = m.list_view(repo)
     assert nodes[0].id == nodes[1].id
-    assert m.equal_grain_pair(nodes) == (nodes[0].id, nodes[1].id)
+    assert _equal_grain_pair(nodes) == (nodes[0].id, nodes[1].id)
 
 
 def test_over_budget_note_prints_saved_when_16_plus_1(tmp_path, monkeypatch, capsys):
@@ -161,7 +169,7 @@ def test_long_stream_same_second_grains_are_powers_of_two(tmp_path, monkeypatch)
     for i in range(24):
         m.write_note(repo, f"n{i}", now, rng)
         while len(m.list_view(repo)) > 8:
-            pair = m.equal_grain_pair(m.list_view(repo))
+            pair = _equal_grain_pair(m.list_view(repo))
             if pair is None:
                 break
             m.write_nap(repo, pair[0], pair[1], "fold")
@@ -179,7 +187,7 @@ def test_sixteen_leaf_pack_tree_depth_is_log(tmp_path):
     repo = init_repo(tmp_path / "r")
     _add_notes(m, repo, 16, 0, "n")
     while True:
-        pair = m.equal_grain_pair(m.list_view(repo))
+        pair = _equal_grain_pair(m.list_view(repo))
         if pair is None:
             break
         m.write_nap(repo, pair[0], pair[1], "fold")
