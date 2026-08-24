@@ -13,3 +13,14 @@ Delete unused `equal_grain_pair` from `summem` and keep the equal-grain selector
     - Do not wire `fold_request` to the helper. Duplicate the four-line walk in `tests/test_fold.py`.
 * Insights
     - `fold_request` needs adjacent ViewNodes; the test helper returns ids. The copies can differ for that reason.
+
+## 2026-08-24 - BUILD - COMPLETE
+
+* Work completed
+    - Local `_equal_grain_pair` in `tests/test_fold.py`; production function removed from `summem`.
+    - `fold_request` left with its own ViewNode walk.
+    - `tox` 275 passed py311–py314.
+* Decisions made
+    - Same four-line walk in tests; no production symbol.
+* Insights
+    - Tests stayed green after the move, then stayed green after the deletion.

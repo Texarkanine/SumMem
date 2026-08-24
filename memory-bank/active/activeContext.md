@@ -1,11 +1,12 @@
 # Active Context
 
 ## Current Task: drop-equal-grain-pair
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Operator overruled close-without-PR: unused-in-production is enough; tests being easier is not a reason to keep the helper in the copied driver.
-- Classified Level 1: isolated deletion in one script plus its fold tests.
+- Moved the four-line selector into `tests/test_fold.py` as `_equal_grain_pair`.
+- Deleted `equal_grain_pair` from `summem`. Did not wire `fold_request` to it.
+- Fold tests 21 passed, then full `tox` 275 passed on py311–py314.
 
 ## Next Step
-- Load the Level 1 workflow and enter Build.
+- Spawn `/niko-qa`.
