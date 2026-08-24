@@ -99,3 +99,14 @@ Unify agent-facing recall/zoom lines with wake’s grammar, make recall match se
 * Insights
     - Proof suites indirectly validate `zoom_reaches` after the walker retarget; a dedicated wake-grammar test exists for in-process `reaches` only.
     - `prompt_text()` still labels pack prefixes `<hash>` in Other commands while stdout uses `short_id`; harmless but could be tightened in a follow-up.
+
+## 2026-08-24 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-agent-display-unify.md`.
+    - Reconciled persistent files: systemPatterns already carried the listing contract from Build; productContext and techContext unchanged.
+* Decisions made
+    - Left QA advisories as follow-ups (dedicated `zoom_reaches` test, prompt `<hash>` wording, shared gitutil helpers in the monkeypatch test).
+* Insights
+    - Stdout-as-id in proof walkers was the real plan gap, not the printer.
+    - Uncommitted product files do not survive overlapping plan/preflight in this workspace.
