@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 import stat
 import subprocess
 import sys
@@ -163,6 +164,62 @@ def test_refuses_python_before_311():
     assert caught.value.code == 1
     m.require_python((3, 11, 0))
     m.require_python((3, 12, 0))
+
+
+def test_version_info_is_checked_before_import_tomllib():
+    """The driver reads sys.version_info after import sys and before import tomllib."""
+    text = SCRIPT.read_text(encoding="utf-8")
+    marker = "\nimport sys\n"
+    sys_at = text.find(marker)
+    assert sys_at != -1
+    after_sys = text[sys_at + len(marker) :]
+    gate_at = after_sys.find("version_info")
+    tomllib_at = after_sys.find("import tomllib")
+    assert tomllib_at != -1
+    assert 0 <= gate_at < tomllib_at
+
+
+def _cpython_310() -> str | None:
+    """Return a CPython 3.10 executable, or None if this host has none."""
+    candidates: list[str] = []
+    uv = shutil.which("uv")
+    if uv:
+        found = subprocess.run(
+            [uv, "python", "find", "3.10"],
+            capture_output=True,
+            text=True,
+        )
+        path = found.stdout.strip()
+        if found.returncode == 0 and path:
+            candidates.append(path)
+    which = shutil.which("python3.10")
+    if which:
+        candidates.append(which)
+    for path in candidates:
+        probe = subprocess.run(
+            [path, "-c", "import sys; print(sys.version_info[:2])"],
+            capture_output=True,
+            text=True,
+        )
+        if probe.returncode == 0 and probe.stdout.strip() == "(3, 10)":
+            return path
+    return None
+
+
+def test_driver_refuses_python_310_before_tomllib():
+    """On Python 3.10 the driver prints the floor message, not a tomllib ImportError."""
+    py310 = _cpython_310()
+    if py310 is None:
+        pytest.skip("Python 3.10 is not available")
+    result = subprocess.run(
+        [py310, str(SCRIPT), "version"],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 1
+    assert "SumMem needs Python 3.11 or newer" in result.stderr
+    assert "tomllib" not in result.stderr
+    assert "Traceback" not in result.stderr
 
 
 def test_shebang_and_executable_bit():

@@ -1,15 +1,15 @@
 # Active Context
 
 ## Current Task: require-python
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
 
-- Confirmed issue #38 is real: `/usr/bin/python3.10 summem version` dies at `summem:72` with `ModuleNotFoundError: No module named 'tomllib'`
-- `require_python()` lives at `summem:989` and is called from `main()` at `summem:1071` and from `surgery.py` after `load_summem()` already `exec_module`'d the script
-- `tests/test_cli.py::test_refuses_python_before_311` only calls `require_python((3, 10, 12))` after `load_summem()`
-- Classified Level 1: bug fix, single component (import-time floor on `summem`)
+- TDD: two new tests in `tests/test_cli.py` went red (`version_info` after `import tomllib`; 3.10 subprocess `ModuleNotFoundError`), then green after the import-time floor
+- `summem` now checks `sys.version_info < (3, 11)` immediately after `import sys` and before `import tomllib`
+- `/usr/bin/python3.10 summem version` and `surgery.py version` both print `SumMem needs Python 3.11 or newer` and exit 1
+- Full `tox`: 277 passed on py311, py312, py313, py314
 
 ## Next Step
 
-- Load the Level 1 workflow and go to BUILD
+- Spawn `/niko-qa` child (subagent, no memo)
