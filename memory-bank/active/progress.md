@@ -24,3 +24,15 @@ Delete unused `equal_grain_pair` from `summem` and keep the equal-grain selector
     - Same four-line walk in tests; no production symbol.
 * Insights
     - Tests stayed green after the move, then stayed green after the deletion.
+
+## 2026-08-24 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Semantic review against projectbrief and build checklist.
+    - Verified `summem` has no `equal_grain_pair`; `fold_request` keeps its own ViewNode walk.
+    - Verified `_equal_grain_pair` covers all former oracle call sites in `tests/test_fold.py`.
+    - Reconcile: productContext / systemPatterns / techContext skip — fold rule unchanged; test-oracle location is not a standing contract in those files.
+* Decisions made
+    - PASS: implementation acceptable as-is; advisories only.
+* Insights
+    - Intentional test/production duplication is the correct trade for a copied driver consumers should not inherit test oracles from.

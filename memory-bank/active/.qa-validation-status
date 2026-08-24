@@ -1,0 +1,17 @@
+PASS
+
+Reviewed drop-equal-grain-pair (issue #39) against projectbrief and build checklist.
+
+Acceptance:
+- summem has no equal_grain_pair symbol
+- fold_request retains its own adjacent same-leaf-count ViewNode walk (lines 898-901)
+- tests/test_fold.py defines _equal_grain_pair; all pins and nap-cascade oracles call it
+- no remaining m.equal_grain_pair references
+- build reported tox 275 passed py311-py314
+
+Advisories (non-blocking):
+- intentional duplication between _equal_grain_pair and fold_request loop (plan-required)
+- test helper omits type hints the deleted production function had
+- branch includes incidental .summem nap compaction from dogfooding note
+
+Verdict: acceptable as-is. Proceed to Level 1 wrap-up (reconcile-persistent, final commit).
