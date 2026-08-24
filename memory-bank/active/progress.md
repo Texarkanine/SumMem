@@ -36,3 +36,14 @@ Unify agent-facing recall/zoom lines with wake’s grammar, make recall match se
     - Did not edit the implementation plan (no TDD order swap; no change-detector strike).
 * Insights
     - `reaches` / `zoom_reaches` treat the first whitespace token of a zoom line as a content id. After `format_wake_line` that token is grain (`x1` / `xN`), so proof/zipper/surgery walks break unless the helpers are retargeted.
+
+## 2026-08-24 - PLAN - COMPLETE (rework)
+
+* Work completed
+    - Added unit 1: proof walkers enqueue from trees; `tests/test_gitutil.py` monkeypatches `zoom_text` to wake grammar so the old `split()[0]` path goes red first.
+    - Unit 2 now retargets `test_zoom_two_note_nap_prints_both_texts`, `test_zoom_loose_note_id_prints_the_note`, `test_zoom_nap_of_naps_prints_two_children_not_leaves`, and the zoom parse in `test_nap_of_two_naps_nests_napchild_and_unions_digests`.
+* Decisions made
+    - Do not parse the new `xN prefix:` line for ids. Walk `Tree.kids`. Keep `sentence in` zoom output so squash proofs still exercise zoom.
+    - No parallel dated_* test names; change the existing functions.
+* Insights
+    - `conftest` imports `gitutil`, so `zoom_reaches` cannot call `load_summem`; it must `SourceFileLoader` `SCRIPT`.

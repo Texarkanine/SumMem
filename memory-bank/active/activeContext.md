@@ -1,12 +1,12 @@
 # Active Context
 
 ## Current Task: agent-display-unify
-**Phase:** PREFLIGHT - COMPLETE (FAIL (fixable))
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Level 2 plan: zoom and recall print `format_wake_line` (leaves dated, packs `short_id` among `named_ids`); recall matches caption/text only; prompt membership sentence loses the eternal-currency reading.
-- 64-hex is on-disk identity. Agent stdout uses unique prefixes; longest print is only what `short_id` needs.
-- Preflight judged the plan FAIL (fixable): TDD order and conventions hold; `tests/gitutil.py` plus leftover `{id}  text` zoom/nap assertions are not in the plan.
+- Re-planned after [Preflight](91f58f56-1d4c-4e6a-94e0-5139beb09f30) FAIL (fixable).
+- Unit 1: `reaches` / `zoom_reaches` enqueue `NapChild.id` from `Tree.kids`; `sentence in` zoom output stays the hit check. New `tests/test_gitutil.py` goes red under wake-grammar zoom output.
+- Unit 2 retargets existing `{id}  text` zoom/nap tests rather than adding parallel names.
 
 ## Next Step
-- Re-plan: retarget `reaches` / `zoom_reaches` and remaining `{id}  text` zoom/nap tests, then spawn `/niko-preflight` again.
+- Preflight validation (spawn `/niko-preflight`).
