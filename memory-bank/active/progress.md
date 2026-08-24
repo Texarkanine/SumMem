@@ -110,3 +110,12 @@ Unify agent-facing recall/zoom lines with wake’s grammar, make recall match se
 * Insights
     - Stdout-as-id in proof walkers was the real plan gap, not the printer.
     - Uncommitted product files do not survive overlapping plan/preflight in this workspace.
+
+## 2026-08-24 - ARCHIVE - IN-PROGRESS
+
+* Work completed
+    - Operator invoked `/niko-archive` then `/handoff`.
+* Decisions made
+    - Category: enhancements (unify existing listing printers; not a new command).
+* Insights
+    - Working tree was already clean at REFLECT COMPLETE (`6de680b`).

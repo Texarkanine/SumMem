@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: agent-display-unify
-**Phase:** REFLECT - COMPLETE
+**Phase:** ARCHIVE - IN-PROGRESS
 
 ## What Was Done
 - QA PASS (advisories only). Reflection written.
