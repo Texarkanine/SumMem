@@ -68,3 +68,14 @@ Print leaf `wake` rows as `x1 (YYYY-MM-DD): text` from the note stamp. Leave nap
 * Insights
     - Dating only `kind == "note"` is what keeps grain-1 packs and missing/conflict `.sum` lines undated
     - Zoom and nested recall staying `{id}  {text}` is what keeps those proofs green
+
+## 2026-08-24 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-dated-leaf-wake.md`
+    - Reconciled persistent files: systemPatterns already updated in build; productContext and techContext unchanged
+* Decisions made
+    - No further briefing edit for the architecture Identity prefix sentence (QA advisory, pre-existing pack-only wording)
+* Insights
+    - Wake-format plans must grep exact line sets across all of `tests/`, not only the named files
+    - Leaf-only dating is the OptMem shape; dating packs with the leftmost stamp would lie about span
