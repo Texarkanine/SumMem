@@ -56,3 +56,15 @@ Print leaf `wake` rows as `x1 (YYYY-MM-DD): text` from the note stamp. Leave nap
 * Insights
     - Splitting `kind == "note"` from `leaves <= 1` is what keeps a grain-1 pack undated
     - `dated_leaf` and `_day_from_stamp` slice the same 16-char stamp; the unit test on the helper is the lock
+
+## 2026-08-24 - QA - COMPLETE
+
+* Work completed
+    - Semantic review of dated-leaf-wake against the brief and plan
+    - Wrote `memory-bank/active/.qa-validation-status` with `PASS`
+* Decisions made
+    - Accept as-is: printer, tests, briefing, and prompt lockstep match the plan
+    - Architecture Identity's "unique prefix" sentence is a pre-existing pack-only description, not a missing update
+* Insights
+    - Dating only `kind == "note"` is what keeps grain-1 packs and missing/conflict `.sum` lines undated
+    - Zoom and nested recall staying `{id}  {text}` is what keeps those proofs green

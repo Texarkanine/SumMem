@@ -94,4 +94,13 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
+
+## QA Results
+
+**Result:** PASS
+
+Advisories (do not block):
+
+- `docs/architecture/index.md` Identity still says wake prints a unique prefix of the id. That remains pack-only, as it was after tree-schema. The invariant this plan named was updated.
+- `dated_leaf` in `tests/conftest.py` re-slices the stamp the same way as `_day_from_stamp`. Preflight asked for that helper; the unit test on `_day_from_stamp` is the lock.
