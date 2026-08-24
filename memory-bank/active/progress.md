@@ -40,3 +40,18 @@ Move the versioned agent how-to from the committed `AGENTS.md` prefix onto the r
     - No new test files. Extend `tests/test_init.py` and `tests/test_scopes.py`; retarget two proofs.
 * Insights
     - `test_proof_scopes.py` and several `test_scopes.py` cases will fail for the right reason: they treat the whole root-wake stdout as catalog-only.
+
+## 2026-08-24 - PREFLIGHT - FAIL (fixable)
+
+* Work completed
+    - [Preflight](d8071f20-8b3c-40b3-89be-65162e355185) wrote `FAIL (fixable)` to `memory-bank/active/.preflight-status`.
+* Insights
+    - Two leftover pins were not named in numbered steps: `clone` / `another machine` on `test_prompt_text_invariants`, and `set(lines[1:-1])` on the ingest proof. Surgical “retarget this test” steps that list only some tokens leave the unlisted asserts in place.
+
+## 2026-08-24 - PLAN - COMPLETE
+
+* Work completed
+    - Re-planned those two pins. Unit 1 pins clone-portability on `how_to_text()` and forbids `git`. Unit 2 drops `clone` / `another machine` from prompt invariants. Unit 3 slices ingest from the memories header to the footer.
+    - Picked README-only for the one-time fat-prefix sentence. `init_text()` stays the new-install recipe. Dropped `test_cli.py` from unit 3 files.
+* Decisions made
+    - Do not version-key the Usage header (preflight radical advisory, not applied).

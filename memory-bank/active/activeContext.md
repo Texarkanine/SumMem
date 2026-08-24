@@ -4,9 +4,8 @@
 **Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Intent approved. Level 3. Branch `feat/wake-usage-prompt`.
-- Creative: Stable verbs. Bootstrap = wake-if-needed + note + writer-only. Root wake prints `how_to_text()` under `== SumMem Usage ==`.
-- Plan: four units (`how_to_text`, bootstrap `prompt_text`, root-wake composition, briefing). TDD in `tests/test_init.py` and `tests/test_scopes.py`; retarget catalog/proof stdout pins.
+- Creative: Stable verbs. First preflight FAIL (fixable) on two leftover test pins.
+- Re-plan: clone-portability moves to `how_to_text()` tests; ingest proof slices from the memories header to the footer; README-only one-time shrink; no version-keyed Usage header.
 
 ## Next Step
-- Preflight.
+- Preflight again.

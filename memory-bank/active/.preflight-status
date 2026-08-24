@@ -1,0 +1,29 @@
+FAIL (fixable)
+
+TDD Plan Encoding: PASS. Units 1–3 are stub-tests → stub-interface (or none) → write-tests → write-code. Unit 4 is prose/policy and schedules no tests. Token pins on how_to_text()/prompt_text() are the existing product-output contract style (same as today’s test_prompt_text_invariants), not document change-detectors. Lockstep tests are dual-file contracts. No step swap or strike.
+
+Convention: PASS. how_to_text() beside catalog_text()/prompt_text()/usage_text(); composition stays in the existing wake branch; usage_text remains the operator -h catalog (CLI_NAME); AGENT_BIN stays on agent-facing text. Test files are the ones already used for prompt and root-wake shape.
+
+Conflicts: none that break the public contract. No existing how_to_text(). Pull omit of catalog is already the pattern; Usage-omit is the same gate (parent is root). Plan correctly puts the Usage header inside how_to_text() (catalog_text() shape), resolving the creative’s “header plus how_to_text()” wording.
+
+Completeness vs brief: the four requirements and the pull/init/lockstep/0BSD constraints have concrete files and steps.
+
+FAIL (fixable) — leftover pins the numbered steps do not move. A surgical follow of the plan leaves these asserts in place; they then either stay red or pull membership/document-shape back onto the wrong artifact.
+
+1. tests/test_init.py::test_prompt_text_invariants still requires "clone" and "another machine". Those tokens live in the current membership sentence (“fresh clone on another machine”), which the creative moves onto how_to. Unit 2 step 1 only names adding Usage-skip tokens and dropping grammar / the old skip sentence. Grammar and that skip sentence are not even in this test. Unit 1’s how_to pins also omit clone-portability. Known fix: unit 2 drops clone / another machine from the prompt invariants; unit 1 pins them on how_to_text() if membership must stay tested. Without that, a green bootstrap can keep membership in AGENTS.md.
+
+2. tests/test_proof_ingest.py is not only lines[0] == "== Project-root Memories ==". After that header it does set(lines[1:-1]) == expected note lines, which assumes the whole document is header + notes + footer. Usage lines sit in that slice. Unit 3 only says “find the header instead of requiring lines[0]”. Known fix: name the retarget — slice from the memories header to the footer, then compare that body to the expected notes.
+
+Advisory (not blocking on their own):
+
+- test_root_wake_catalogs_other_store still forbids "git" in the entire root-wake stdout. Unit 3 drops only the .summem/summem whole-stdout forbid. how_to must not say "git", or that pin moves too. Unit 1 already forbids "git add" in how_to_text(); the leftover pin is the bare substring.
+
+- WAKE_LINES / fold pressure is listed under Behaviors to Verify and in unit 3 step 4 (“do not pass Usage through expand_frontier”), but no test is scheduled. Existing fold tests call wake_text()/fold_request(), which never see Usage. Low risk if composition stays in the wake branch.
+
+- Creative and Challenge 4 say the init recipe mentions the one-time fat-prefix replace. Unit 2 leaves init_text() a wrapper; unit 4 puts that sentence only in the README. Pick one and say so.
+
+- test_cli.py is listed on unit 3 but its wake cases only check note text and footer-last; they stay green. No change required.
+
+- test_ignored_store_omitted_from_catalog forbids "wake --path pkg" / "wake --path secret", not a generic "wake --path". how_to that teaches wake --path <path> still passes.
+
+Radical innovation (advisory, not applied): version-key the skip. how_to_text() starts with "== SumMem Usage {__version__} ==". Bootstrap skip becomes: skip only if you can see and follow a Usage heading whose version equals `{AGENT_BIN} version`. Mid-session script copy then re-wakes; today’s header-only skip keeps a stale how-to until compaction. Cost is one version-check sentence in the bootstrap (changes when the skip rule changes, not when grammar changes).
