@@ -1,0 +1,13 @@
+FAIL (fixable)
+
+TDD Plan Encoding: PASS. Units 1–3 (zoom, recall, prompt) each put stub tests, stub interface, write-tests-red, then write-code-green. Unit 4 is prose/policy with no tests. No change-detector steps to strike; no test/code order swap.
+
+Convention Compliance: PASS. Touchpoints stay in repo-root `summem` and existing `tests/test_zoom.py`, `tests/test_recall.py`, `tests/test_init.py`. Reuses `format_wake_line`, `_projected_child`, `short_id`, `named_ids`, `dated_leaf`. Prompt lockstep via existing `test_agents_md_starts_with_prompt_text` / `test_shipped_prompt_matches_prompt_text` matches techContext.
+
+Dependency Impact: FAIL (fixable). After zoom children print `format_wake_line`, two helpers in `tests/gitutil.py` break: `reaches` and `zoom_reaches` take `line.split()[0]` as a content id. Today that token is 64-hex. After this plan it is `x1` / `xN` (grain). Proof tests (`tests/test_proof_squash.py`, `tests/test_proof_branches.py`), zipper tests, and surgery tests use those helpers to walk nested packs. They will enqueue `x2`, call `zoom x2`, and fail. Known fix: schedule a retarget of both helpers in unit 1 (or a test-infra step before zoom code). Enqueue pack prefixes from the wake grammar (`xN <prefix>:`); do not enqueue dated leaf lines. `tests/test_nap.py` `test_nap_of_two_naps_nests_napchild_and_unions_digests` also splits zoom output on two spaces and will IndexError on `x1 2026-01-01: a1`.
+
+Conflict Detection: PASS. Replacing `_zoom_note_line` / `{id}  text` is the intended change. No second addressing scheme. Wake/fold printer stays closed per constraint 1. Public CLI flags unchanged.
+
+Completeness Precheck: FAIL (fixable). Requirements 1–8 have concrete steps, except the plan does not schedule retargets for existing success-path zoom assertions that encode the old grammar: `test_zoom_two_note_nap_prints_both_texts`, `test_zoom_loose_note_id_prints_the_note`. Challenges only name `test_zoom_nap_of_naps_prints_two_children_not_leaves` and `test_recall_matches_nested_nap_caption`. Known fix: add those retargets (and `tests/test_nap.py`) to unit 1 test steps. All stated product requirements otherwise have a path.
+
+Radical Innovation (advisory): Do not parse agent stdout to walk the zoom tree in proofs. `reaches` / `zoom_reaches` should recurse `Tree.kids` (`NoteChild.text` / `NapChild.id`) and only use `zoom_text` as an optional display check. Display grammar can then change without rewriting acceptance proofs.

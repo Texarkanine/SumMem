@@ -26,3 +26,13 @@ Unify agent-facing recall/zoom lines with wake’s grammar, make recall match se
     - Match haystack is caption/text; printer stays `format_wake_line`.
 * Insights
     - Dogfood `zoom 01b18901` dumping 64-hex is the pre-wake-listing printer (`_zoom_note_line`); wake-listing never updated it.
+
+## 2026-08-24 - PREFLIGHT - COMPLETE (FAIL (fixable))
+
+* Work completed
+    - Validated the plan against `summem` zoom/recall printers, existing tests, and `tests/gitutil.py`.
+    - Wrote `memory-bank/active/.preflight-status` with first line `FAIL (fixable)`.
+* Decisions made
+    - Did not edit the implementation plan (no TDD order swap; no change-detector strike).
+* Insights
+    - `reaches` / `zoom_reaches` treat the first whitespace token of a zoom line as a content id. After `format_wake_line` that token is grain (`x1` / `xN`), so proof/zipper/surgery walks break unless the helpers are retargeted.
