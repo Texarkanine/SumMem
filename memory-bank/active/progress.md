@@ -15,3 +15,14 @@ Unify agent-facing recall/zoom lines with wake’s grammar, make recall match se
 * Insights
     - Wake-listing already moved agent ids to unique prefixes; zoom/nested recall were left on the old `{64hex}  text` printer.
     - LlamaPReview’s “note must remain true after clone” reading is a prompt defect, not a store defect.
+
+## 2026-08-24 - PLAN - COMPLETE
+
+* Work completed
+    - Wrote TDD plan: zoom children + recall match/print + prompt invariant + atlas/briefing.
+    - Mapped tests onto `tests/test_zoom.py`, `tests/test_recall.py`, `tests/test_init.py`; no new test files.
+* Decisions made
+    - Printed pack prefixes always `short_id` against `named_ids` so a recall/zoom line is a zoom handle.
+    - Match haystack is caption/text; printer stays `format_wake_line`.
+* Insights
+    - Dogfood `zoom 01b18901` dumping 64-hex is the pre-wake-listing printer (`_zoom_note_line`); wake-listing never updated it.

@@ -1,11 +1,11 @@
 # Active Context
 
 ## Current Task: agent-display-unify
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Operator approved the three-part intent (prompt wording, unified leaf/pack display, recall matches the sentence) and added that wake’s short prefixes are the convention; recall mixing and zoom’s 64-hex are the surprise.
-- Classified Level 2: corrective unification across recall, zoom, and the baked prompt; addressing scheme already exists (`short_id` / `resolve_id` / `named_ids`). Full 64-hex is on-disk identity, not an agent-facing default.
+- Level 2 plan: zoom and recall print `format_wake_line` (leaves dated, packs `short_id` among `named_ids`); recall matches caption/text only; prompt membership sentence loses the eternal-currency reading.
+- 64-hex is on-disk identity. Agent stdout uses unique prefixes; longest print is only what `short_id` needs.
 
 ## Next Step
-- Load the Level 2 workflow and execute Plan.
+- Preflight validation (spawn `/niko-preflight`).
