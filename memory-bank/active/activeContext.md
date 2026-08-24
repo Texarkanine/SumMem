@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: require-python
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
 
@@ -12,4 +12,4 @@
 
 ## Next Step
 
-- Spawn `/niko-qa` child (subagent, no memo)
+- L1 wrap-up: reconcile-persistent done; delete `memory-bank/active/` and open the PR

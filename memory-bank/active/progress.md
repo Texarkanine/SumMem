@@ -28,3 +28,13 @@ Move the Python 3.11 floor check to immediately after `import sys` so a 3.10 pro
 * Insights
     - `load_summem()` in `surgery.py` inherits the import-time gate; no surgery.py edit was required
 
+## 2026-08-24 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Semantic review of the import-time 3.11 floor against projectbrief / issue #38
+    - Wrote `memory-bank/active/.qa-validation-status` (`PASS`)
+* Decisions made
+    - PASS as-is; two advisories do not require a Build rerun
+* Insights
+    - The duplicate floor (import-time vs `require_python()`) is the cost of not moving a function while sibling workers edit other regions of `summem`
+

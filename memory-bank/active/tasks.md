@@ -11,4 +11,11 @@
 
 ## QA
 
-- (pending)
+- Result: PASS
+- Review baseline: projectbrief (issue #38 floor before `tomllib`); Level 1, no creative docs
+- Implementation matches the plan: 3-line `sys.version_info < (3, 11)` gate immediately after `import sys` and before `import tomllib`; same stderr line and `SystemExit(1)` as `require_python()`; `require_python()` left in place; surgical edit only; docs-toolchain pins untouched
+- Tests: source-order contract always runs; live 3.10 subprocess skips if no 3.10 interpreter; existing injected-tuple test unchanged
+- Advisories (non-blocking):
+  - Import-time gate duplicates `require_python()` body — required by the sibling-safe / leave-function-in-place plan
+  - No dedicated `surgery.py` 3.10 subprocess test; same `exec_module` path as the driver
+
