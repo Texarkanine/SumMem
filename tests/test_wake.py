@@ -46,7 +46,7 @@ def test_day_from_stamp_formats_utc_calendar_date():
 
 
 def test_wake_line_is_dated_grain_for_a_note(tmp_path):
-    """A note wake line is x1 (YYYY-MM-DD): text from the filename stamp."""
+    """A note wake line is x1 YYYY-MM-DD: text from the filename stamp."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     now = datetime(2026, 8, 18, 12, 30, 5, tzinfo=UTC)
@@ -88,7 +88,7 @@ def test_format_wake_line_grain1_pack_is_undated_caption():
 
 
 def test_format_wake_line_empty_note_caption_keeps_trailing_colon():
-    """A note with an empty caption prints x1 (day): with no extra space."""
+    """A note with an empty caption prints x1 day: with no extra space."""
     m = load_summem()
     node = m.ProjectedNode(
         id="cd" * 32,

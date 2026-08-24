@@ -851,8 +851,8 @@ def format_wake_line(node, ids: list[str]) -> str:
     if node.kind == "note":
         day = _day_from_stamp(node.stamp)
         if node.caption:
-            return f"x1 ({day}): {node.caption}"
-        return f"x1 ({day}):"
+            return f"x1 {day}: {node.caption}"
+        return f"x1 {day}:"
     if node.leaves <= 1:
         return node.caption
     prefix = short_id(node.id, ids)
@@ -1017,7 +1017,7 @@ Never invent filenames, rewrite note bytes, or delete memory files by hand. The 
 ## Other commands
 
 - `{AGENT_BIN} recall <regex>` — search remembered text word for word
-- `{AGENT_BIN} zoom <id>` — any memory with a `x<N> <hash>: …` prefix is a nap that can be zoomed in on. A leaf is `x1 (YYYY-MM-DD):` and is not a zoom target.
+- `{AGENT_BIN} zoom <id>` — any memory with a `x<N> <hash>: …` prefix is a nap that can be zoomed in on. A leaf is `x1 YYYY-MM-DD:` and is not a zoom target.
 - `{AGENT_BIN} wake --path <path>` — when you work under a cataloged path, pull that store if its wake is not already in this conversation. Ignore `--path` if the root wake didn't have a catalog.
 """
 

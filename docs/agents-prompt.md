@@ -19,5 +19,5 @@ Never invent filenames, rewrite note bytes, or delete memory files by hand. The 
 ## Other commands
 
 - `.summem/summem recall <regex>` — search remembered text word for word
-- `.summem/summem zoom <id>` — any memory with a `x<N> <hash>: …` prefix is a nap that can be zoomed in on. A leaf is `x1 (YYYY-MM-DD):` and is not a zoom target.
+- `.summem/summem zoom <id>` — any memory with a `x<N> <hash>: …` prefix is a nap that can be zoomed in on. A leaf is `x1 YYYY-MM-DD:` and is not a zoom target.
 - `.summem/summem wake --path <path>` — when you work under a cataloged path, pull that store if its wake is not already in this conversation. Ignore `--path` if the root wake didn't have a catalog.

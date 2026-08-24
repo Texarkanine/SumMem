@@ -1,6 +1,6 @@
 # Progress
 
-Print leaf `wake` rows as `x1 (YYYY-MM-DD): text` from the note stamp. Leave nap lines undated. Update the shared printer, tests, and agent-facing copy so leaves are distinct rows and dates are not burned in prose.
+Print leaf `wake` rows as `x1 YYYY-MM-DD: text` from the note stamp. Leave nap lines undated. Same `xN TOKEN: body` grammar as packs; no parentheses.
 
 **Complexity:** Level 1
 
@@ -99,4 +99,16 @@ Print leaf `wake` rows as `x1 (YYYY-MM-DD): text` from the note stamp. Leave nap
     - Task id stays `dated-leaf-wake`
 * Insights
     - `x1 YYYY-MM-DD:` is the OptMem-shaped slot given SumMem cannot use `#id`
+
+## 2026-08-24 - BUILD - COMPLETE
+
+* Work completed
+    - Dropped parentheses from `format_wake_line` and `dated_leaf`
+    - Updated prompt lockstep and briefing
+    - `tox` 272 passed py311–py314
+* Decisions made
+    - One grammar: `xN TOKEN: body`. Day stays before the colon.
+* Insights
+    - Changing `dated_leaf` was the red; production followed
+
 

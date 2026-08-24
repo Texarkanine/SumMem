@@ -1,11 +1,11 @@
 # Active Context
 
 ## Current Task: dated-leaf-wake
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Rework classified as Level 1: drop parentheses so a leaf is `x1 YYYY-MM-DD: text`.
-- Same `xN TOKEN: body` grammar as packs. Print-only.
+- Leaf wake is `x1 YYYY-MM-DD: text`. Packs unchanged.
+- Same `xN TOKEN: body` grammar. Prompt lockstep updated.
 
 ## Next Step
-- Level 1 build (no plan/preflight).
+- QA
