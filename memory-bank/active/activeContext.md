@@ -1,13 +1,13 @@
 # Active Context
 
 ## Current Task: named-ids-tree-errors
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Verified issue #40 on this worktree: `_TREE_PARSE_ERRORS` includes `AttributeError`; `named_ids` excepts `(OSError, UnicodeDecodeError, ValueError, TypeError, KeyError)` and skips it
-- `_tree_from_dict` does `child.get("type")`; a non-mapping child (`{"c":[1]}`) raises `AttributeError`
-- Existing skip tests use `{not json` (`JSONDecodeError` ⊂ `ValueError`), so they do not catch this gap
-- Classified Level 1: bug fix, single function
+- Added three tests in `tests/test_zoom.py` for a non-mapping tree child (`{"c":[1]}`): `named_ids` does not raise; zoom of that pack is `unreadable pack`; zoom of a sibling nested id warns `skipped a pack`
+- Tests failed with `AttributeError: 'int' object has no attribute 'get'`
+- Changed `named_ids` to `except _TREE_PARSE_ERRORS:`
+- `tox` 278 passed on py311–py314
 
 ## Next Step
-- Load Level 1 workflow and enter BUILD
+- Spawn `/niko-qa` child
