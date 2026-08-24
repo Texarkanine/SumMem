@@ -1,5 +1,0 @@
-PASS
-
-Advisories (non-blocking):
-- Import-time gate duplicates require_python() body (same comparison, stderr line, SystemExit). Intentional: plan left require_python() for injected-tuple tests and main(); did not move the function.
-- Use-case 2 (surgery.py on 3.10) has no dedicated subprocess test. load_summem() execs the same module, so the import-time gate covers it; the driver 3.10 test plus source-order contract are enough.
