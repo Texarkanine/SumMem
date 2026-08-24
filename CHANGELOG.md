@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.5.0](https://github.com/Texarkanine/SumMem/compare/v0.4.0...v0.5.0) (2026-08-24)
+
+
+### Features
+
+* date wake leaves and unify recall/zoom listings ([#37](https://github.com/Texarkanine/SumMem/issues/37)) ([c003779](https://github.com/Texarkanine/SumMem/commit/c0037791f4540cbdacb1d6c4ad1f4d7fd8319006))
+
+
+### Bug Fixes
+
+* catch _TREE_PARSE_ERRORS in named_ids ([#41](https://github.com/Texarkanine/SumMem/issues/41)) ([6803ac5](https://github.com/Texarkanine/SumMem/commit/6803ac5ef9bf35a4486976b82265a2beeb9d6f69))
+* drop unused equal_grain_pair from the driver [[#39](https://github.com/Texarkanine/SumMem/issues/39)] ([#43](https://github.com/Texarkanine/SumMem/issues/43)) ([eefd5e3](https://github.com/Texarkanine/SumMem/commit/eefd5e3b3dbec61e16855bf41baa289973bf7c12))
+* include --path on nested-store fold_request Run: line ([#35](https://github.com/Texarkanine/SumMem/issues/35)) ([35f5cd0](https://github.com/Texarkanine/SumMem/commit/35f5cd021114c549439d9fcc185a390885c940f9))
+* refuse Python 3.10 before import tomllib ([#42](https://github.com/Texarkanine/SumMem/issues/42)) ([475541f](https://github.com/Texarkanine/SumMem/commit/475541f82d9980e70fed5e08bbf9cafd21d2f506))
+
 ## [0.4.0](https://github.com/Texarkanine/SumMem/compare/v0.3.0...v0.4.0) (2026-08-23)
 
 
