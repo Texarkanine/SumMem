@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: named-ids-tree-errors
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
 - Added three tests in `tests/test_zoom.py` for a non-mapping tree child (`{"c":[1]}`): `named_ids` does not raise; zoom of that pack is `unreadable pack`; zoom of a sibling nested id warns `skipped a pack`
@@ -10,4 +10,4 @@
 - `tox` 278 passed on py311–py314
 
 ## Next Step
-- Spawn `/niko-qa` child
+- Wrap-up: reconcile persistent files, then delete `memory-bank/active/` per standalone L1

@@ -25,3 +25,13 @@
     - No CLI-only test: `zoom_text` is the CLI path and already covers the abort
 * Insights
     - `JSONDecodeError` ⊂ `ValueError`, so `{not json` never exercised `AttributeError`
+
+## 2026-08-24 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Semantic review of BUILD at HEAD (`feat/named-ids-tree-errors`) against `projectbrief.md` and issue #40
+    - Wrote `memory-bank/active/.qa-validation-status` (`PASS`)
+* Decisions made
+    - PASS as-is; one advisory (no dedicated `recall_text` non-mapping test) does not block
+* Insights
+    - The abort was `named_ids` raising before `zoom_text` / `recall_text` reached their own `_TREE_PARSE_ERRORS` handlers
