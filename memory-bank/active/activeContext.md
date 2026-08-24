@@ -1,12 +1,11 @@
 # Active Context
 
 ## Current Task: wake-usage-prompt
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - IN-PROGRESS
 
 ## What Was Done
-- Intent approved: small `AGENTS.md` bootstrap that stays put; root `wake` prints the versioned how-to so a consumer upgrade is copy-the-script only.
-- Created branch `feat/wake-usage-prompt`.
-- Level 3 determined: enhancement to activation that is not self-contained (prompt, root-wake document, `init`, lockstep tests, skip/re-wake rule) and needs design before a plan can name the split.
+- Intent approved. Level 3. Branch `feat/wake-usage-prompt`.
+- Creative resolved agent-document split: Stable verbs. Bootstrap = wake-if-needed + note + writer-only. Root wake prints `== SumMem Usage ==` / `how_to_text()`. Skip keys off a readable Usage block.
 
 ## Next Step
-- Load the Level 3 workflow and execute the Plan phase.
+- Finish the Level 3 plan (TDD, implementation steps, pre-mortem) from the creative decision.
