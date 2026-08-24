@@ -55,3 +55,13 @@ Move the versioned agent how-to from the committed `AGENTS.md` prefix onto the r
     - Picked README-only for the one-time fat-prefix sentence. `init_text()` stays the new-install recipe. Dropped `test_cli.py` from unit 3 files.
 * Decisions made
     - Do not version-key the Usage header (preflight radical advisory, not applied).
+
+## 2026-08-24 - PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+
+* Work completed
+    - Second preflight on the re-plan wrote `PASS WITH ADVISORY` to `memory-bank/active/.preflight-status`.
+* Decisions made
+    - Prior leftover pins (clone / another machine on prompt invariants; ingest `lines[1:-1]`) are named in numbered steps; no further re-plan.
+* Insights
+    - Advisories are implementer cautions (drop ingest `lines[0]`, keep how_to free of `git` / `notes/` / `naps/` / other section headers, teach `wake --path <path>` not `pkg`), not plan defects.
+    - Radical advisory this run: named-section wake assembler plus section-keyed tests, so exact-stdout / `lines[0]` pins cannot recur. Not applied.
