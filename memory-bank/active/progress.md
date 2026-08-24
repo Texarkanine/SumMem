@@ -37,6 +37,18 @@ Unify agent-facing recall/zoom lines with wake’s grammar, make recall match se
 * Insights
     - `reaches` / `zoom_reaches` treat the first whitespace token of a zoom line as a content id. After `format_wake_line` that token is grain (`x1` / `xN`), so proof/zipper/surgery walks break unless the helpers are retargeted.
 
+## 2026-08-24 - PLAN - COMPLETE (re-plan)
+
+* Work completed
+    - Retargeted leftover `{id}  text` zoom/nap/recall success tests into unit 1.
+    - Scheduled `tests/gitutil.py` walkers to enqueue `NapChild` ids from the children tree, not `line.split()[0]`.
+    - Kept prompt membership and atlas/briefing units; lockstep still `prompt_text()` first.
+* Decisions made
+    - Take the preflight advisory as the walker fix (test infra only). Do not parse a second stdout grammar.
+    - Walker tests and zoom tests are written together in unit 1 step 3; walker and printer ship together in step 4.
+* Insights
+    - Uncommitted product edits appeared during this re-plan (zoom/nap/gitutil/summem). They were restored to HEAD so the plan stays a plan.
+
 ## 2026-08-24 - PLAN - COMPLETE (rework)
 
 * Work completed
