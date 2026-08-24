@@ -1,1 +1,0 @@
-docs-sunset plan: VISION/ROADMAP retire; architecture lives at docs/architecture/; leftovers (sqlite, hooks, cover(T), pack-size, hot margin) at docs/notes.md; README is the public face.

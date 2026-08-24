@@ -6,7 +6,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from conftest import SCRIPT
+from conftest import SCRIPT, dated_leaf
 from gitutil import init_repo
 
 
@@ -51,4 +51,13 @@ def test_two_worktrees_note_merge_without_conflict(tmp_path):
     lines = [line for line in out.splitlines() if line]
     assert lines[0] == "== Project-root Memories =="
     assert lines[-1] == "You are up to speed."
-    assert set(lines[1:-1]) == {"alpha", "beta"}
+    notes = [
+        path
+        for path in (main / ".summem" / "notes").iterdir()
+        if path.is_file() and not path.name.startswith(".")
+    ]
+    expected = {
+        dated_leaf(path.name.split("-")[0], path.read_text(encoding="utf-8").removesuffix("\n"))
+        for path in notes
+    }
+    assert set(lines[1:-1]) == expected

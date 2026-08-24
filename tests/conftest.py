@@ -13,6 +13,14 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "summem"
 
 
+def dated_leaf(stamp: str, text: str) -> str:
+    """Return the expected leaf wake line for a 16-character UTC stamp and note text."""
+    day = f"{stamp[0:4]}-{stamp[4:6]}-{stamp[6:8]}"
+    if text:
+        return f"x1 ({day}): {text}"
+    return f"x1 ({day}):"
+
+
 def load_summem():
     """Load repo-root `summem` via SourceFileLoader (no .py suffix)."""
     loader = SourceFileLoader("summem", str(SCRIPT))

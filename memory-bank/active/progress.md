@@ -42,3 +42,17 @@ Print leaf `wake` rows as `x1 (YYYY-MM-DD): text` from the note stamp. Leave nap
     - `format_wake_line` already feeds wake, expand, fold, and recall's view pass; recall tests use stored-sentence substrings and stay green
     - `_day_from_stamp` is gone from the script; restoring it is not duplication
     - CLI proof notes use writer-now UTC; retarget that proof from the filename stamp, not `date.today()`
+
+## 2026-08-24 - BUILD - COMPLETE
+
+* Work completed
+    - Restored `_day_from_stamp`; `format_wake_line` dates notes only
+    - Retargeted wake/expand/fold/ingest exact lines; added grain-1, empty-caption, hyphenated-day, and nested-expand cases
+    - Updated systemPatterns, architecture invariant, and prompt lockstep
+    - `tox` 272 passed py311–py314
+* Decisions made
+    - Adopted preflight `dated_leaf` helper in `tests/conftest.py`; ingest proof reads filename stamps
+    - Empty-caption and nested-expand got dedicated tests (listed behaviors, not a re-plan)
+* Insights
+    - Splitting `kind == "note"` from `leaves <= 1` is what keeps a grain-1 pack undated
+    - `dated_leaf` and `_day_from_stamp` slice the same 16-char stamp; the unit test on the helper is the lock

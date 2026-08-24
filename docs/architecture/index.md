@@ -331,7 +331,7 @@ These look optional and are not.
 - **Empty packages stay empty.** The root auto-creates; every other store is `start`. Walking up does not create a store.
 - **Root pushes; other stores pull.** Root wake catalogs. A pull is a wake aimed at a path.
 - **Settings live in the store.** Not in the environment. Missing settings mean script defaults.
-- **Wake prints undated lines, never ranges.** Fold and zoom take a unique prefix of a content id.
+- **Wake dates leaves only, never ranges.** A note is `x1 (YYYY-MM-DD): text` from the filename stamp. A pack is `xN <prefix>: caption` with no day. Fold and zoom take a unique prefix of a content id.
 - **Personal and machine facts stay out.** This store is facts about this directory hierarchy.
 
 Two branches whose naps do not overlap merge, then fold from the oldest neighbors. Overlapping merge is zipper, not that case.

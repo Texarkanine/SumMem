@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from random import Random
 
-from conftest import load_summem
+from conftest import dated_leaf, load_summem
 from gitutil import fold_ids, init_repo
 
 UTC = timezone.utc
@@ -202,8 +202,8 @@ def test_nap_prints_remaining_ones_not_parent_plus_one(tmp_path, monkeypatch, ca
     assert m.main(["nap", nodes[0].id, nodes[1].id, "pair"]) == 0
     out = capsys.readouterr().out
     assert "Saved." not in out
-    assert "  c\n" in out
-    assert "  d\n" in out
+    assert f"  {dated_leaf('20260101T000003Z', 'c')}\n" in out
+    assert f"  {dated_leaf('20260101T000004Z', 'd')}\n" in out
     assert "Run: .summem/summem nap " in out
     assert "Invent nothing." in out
 
@@ -237,8 +237,8 @@ def test_over_budget_note_requests_equal_grain_ones(tmp_path, monkeypatch, capsy
     assert out.index("Saved.") < out.index("Compress these two")
     assert "Compress these two into one line of at most 280 characters." in out
     assert "Invent nothing." in out
-    assert "  alpha\n" in out
-    assert "  beta\n" in out
+    assert f"  {dated_leaf('20260101T000001Z', 'alpha')}\n" in out
+    assert f"  {dated_leaf('20260101T000002Z', 'beta')}\n" in out
     assert 'Run: .summem/summem nap ' in out
     assert '"<your line>"' in out
     pa = m.short_id(ids[0], ids)
@@ -287,8 +287,8 @@ def test_fold_request_mentions_remaining(tmp_path, monkeypatch):
         m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
     out = m.fold_request(repo, 3)
     assert "1 compression remains after this one." in out
-    assert "  a\n" in out
-    assert "  b\n" in out
+    assert f"  {dated_leaf('20260101T000001Z', 'a')}\n" in out
+    assert f"  {dated_leaf('20260101T000002Z', 'b')}\n" in out
     assert "Run: .summem/summem nap " in out
     assert "Run: summem nap " not in out
 
