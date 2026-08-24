@@ -28,3 +28,15 @@ Move the versioned agent how-to from the committed `AGENTS.md` prefix onto the r
 * Insights
     - Existing consumers need one shrink of the old fat prefix. After that, script copies leave `AGENTS.md` alone.
     - Root-wake tests that forbid `.summem/summem` and `wake --path` in the whole stdout will fight Usage. Those pins belong on the catalog section only.
+
+## 2026-08-24 - PLAN - COMPLETE
+
+* Work completed
+    - Wrote the Level 3 plan in `memory-bank/active/tasks.md`.
+    - Mapped TDD onto `how_to_text`, bootstrap `prompt_text`, root-wake composition, and briefing docs.
+* Decisions made
+    - `how_to_text()` includes the `== SumMem Usage ==` header (same shape as `catalog_text()`).
+    - Usage does not count against `WAKE_LINES`.
+    - No new test files. Extend `tests/test_init.py` and `tests/test_scopes.py`; retarget two proofs.
+* Insights
+    - `test_proof_scopes.py` and several `test_scopes.py` cases will fail for the right reason: they treat the whole root-wake stdout as catalog-only.
