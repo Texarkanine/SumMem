@@ -1,1 +1,0 @@
-tox is the suite (py311-py314, no result cache). Files the script writes are part of the work: git-add them; the script is the only writer.

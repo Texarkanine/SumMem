@@ -1,1 +1,0 @@
-{"c":[{"name":"20260820T040400Z-6f72c4e24f7307a3","text":"tox is the suite command: tox.ini package=skip, py311-py314, no test-result cache; 211 pytest. This uv only had 3.14.0rc3.","type":"note"},{"name":"20260820T044725Z-82b67eae5e042401","text":"After note or nap, git add the files the script wrote and commit them; the script stays the only writer.","type":"note"}]}
