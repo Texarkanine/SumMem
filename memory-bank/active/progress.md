@@ -16,3 +16,16 @@ Print leaf `wake` rows as `x1 (YYYY-MM-DD): text` from the note stamp. Leave nap
 * Insights
     - OptMem already dates leaves only; dating packs with the leftmost stamp would misrepresent span
     - Dates were on every wake line after wake-listing and were dropped in tree-schema; this restores a leaf-only, parenthetical form rather than that old shape
+
+## 2026-08-24 - PLAN - COMPLETE
+
+* Work completed
+    - Wrote the Level 2 plan: dated leaf printer (TDD) then briefing/prompt lockstep
+    - Mapped exact-line tests in `test_wake.py`, `test_wake_expand.py`, and `test_fold.py`
+* Decisions made
+    - One printer change; zoom and nested recall stay undated `{id}  {text}`
+    - Fold CLI tests match `  x1 (` + `): text` so they do not depend on `date.today()`
+    - `_day_from_stamp` slices the existing 16-char UTC stamp; no new clock
+* Insights
+    - `format_wake_line` already feeds wake, expand, recall’s view pass, and fold_request — dating notes there is the whole print surface
+    - The 2026-08-19 dated-every-line format is the failure mode to avoid, not the template

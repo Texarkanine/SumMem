@@ -1,12 +1,12 @@
 # Active Context
 
 ## Current Task: dated-leaf-wake
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Intent locked: script-authored days on leaf wake lines only (`x1 (YYYY-MM-DD): text`); naps stay undated; date stays out of the caption slot.
-- Classified as Level 2: one printer (`format_wake_line`) plus tests and briefing/prompt copy. No store-format or architecture change.
-- Task id: `dated-leaf-wake`
+- Intent locked: `x1 (YYYY-MM-DD): text` on leaves only; naps undated; date not in the caption slot.
+- Level 2 plan: one executable unit (`_day_from_stamp` + `format_wake_line` + retargeted wake/expand/fold tests), then prose/policy for briefing + prompt lockstep.
+- Grain-1 packs stay caption-only. Zoom and nested recall stay `{id}  {text}`.
 
 ## Next Step
-- Load the Level 2 workflow and enter plan.
+- Preflight validation of the plan.
