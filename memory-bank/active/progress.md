@@ -2,7 +2,7 @@
 
 Print leaf `wake` rows as `x1 (YYYY-MM-DD): text` from the note stamp. Leave nap lines undated. Update the shared printer, tests, and agent-facing copy so leaves are distinct rows and dates are not burned in prose.
 
-**Complexity:** Level 2
+**Complexity:** Level 1
 
 ## 2026-08-24 - COMPLEXITY-ANALYSIS - COMPLETE
 
@@ -89,3 +89,14 @@ Print leaf `wake` rows as `x1 (YYYY-MM-DD): text` from the note stamp. Leave nap
     - Same slot grammar as packs: `xN TOKEN: body`
 * Insights
     - Parens were a human “not an id” marker. Hyphens already make a day unusable as a content-id prefix. OptMem dates leaves with a bare field and no hash in that slot.
+
+## 2026-08-24 - COMPLEXITY-ANALYSIS - COMPLETE
+
+* Work completed
+    - Classified the paren-drop rework as Level 1
+* Decisions made
+    - Level 1: one printer glyph, existing `dated_leaf` oracle, no new subsystem
+    - Task id stays `dated-leaf-wake`
+* Insights
+    - `x1 YYYY-MM-DD:` is the OptMem-shaped slot given SumMem cannot use `#id`
+
