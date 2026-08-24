@@ -118,4 +118,4 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight (PASS WITH ADVISORY)
 - [x] Build
-- [ ] QA
+- [x] QA (PASS)

@@ -86,3 +86,16 @@ Unify agent-facing recall/zoom lines with wake’s grammar, make recall match se
     - `zoom_reaches` loads the driver as `summem_gitutil` (register in `sys.modules` before `exec_module`) so it does not import `conftest`.
 * Insights
     - Uncommitted product files in this workspace were restored to HEAD more than once during plan/preflight. Stage and commit as soon as a slice is green.
+
+## 2026-08-24 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Semantic review of all five plan units against `summem`, `tests/gitutil.py`, zoom/recall/init tests, prompt lockstep, and atlas/briefing updates.
+    - Verified walkers enqueue `NapChild.id` from trees (not zoom stdout tokens); zoom/recall share `_projected_child` + `format_wake_line`; recall matches sentences; prompt clone-portability wording; docs aligned.
+    - Re-ran `uvx --with tox tox`: 275 passed on py311–py314.
+    - Wrote `memory-bank/active/.qa-validation-status` with first line `PASS`.
+* Decisions made
+    - PASS with advisories only; no Build rework required.
+* Insights
+    - Proof suites indirectly validate `zoom_reaches` after the walker retarget; a dedicated wake-grammar test exists for in-process `reaches` only.
+    - `prompt_text()` still labels pack prefixes `<hash>` in Other commands while stdout uses `short_id`; harmless but could be tightened in a follow-up.

@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: agent-display-unify
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
 - Preflight PASS WITH ADVISORY, then Build of all five units.
@@ -25,4 +25,4 @@
 None — built to plan, including preflight advisories.
 
 ## Next Step
-- Spawn `/niko-qa`.
+- Proceed to `/niko-reflect`.
