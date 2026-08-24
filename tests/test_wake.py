@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import os
+import re
 from datetime import datetime, timezone
 from random import Random
 
 import pytest
 
-from conftest import load_summem
+from conftest import dated_leaf, load_summem
 from gitutil import init_repo
 
 UTC = timezone.utc
@@ -34,20 +35,77 @@ def test_wake_lists_two_notes_sorted_by_filename(tmp_path):
     m.write_note(repo, "first", earlier, Random(1))
     lines = m.wake_text(repo).splitlines()
     assert len(lines) == 2
-    assert lines[0] == "first"
-    assert lines[1] == "second"
+    assert lines[0] == dated_leaf("20260101T000001Z", "first")
+    assert lines[1] == dated_leaf("20260101T000002Z", "second")
 
 
-def test_wake_line_is_text_for_a_note(tmp_path):
-    """A note wake line is the text, with no date and no hash."""
+def test_day_from_stamp_formats_utc_calendar_date():
+    """_day_from_stamp maps a 16-char UTC filename stamp to YYYY-MM-DD."""
+    m = load_summem()
+    assert m._day_from_stamp("20260824T123005Z") == "2026-08-24"
+
+
+def test_wake_line_is_dated_grain_for_a_note(tmp_path):
+    """A note wake line is x1 YYYY-MM-DD: text from the filename stamp."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     now = datetime(2026, 8, 18, 12, 30, 5, tzinfo=UTC)
     path = m.write_note(repo, "hello", now, Random(42))
     os.utime(path, (0, 0))
     line = m.wake_text(repo).splitlines()[0]
-    assert line == "hello"
+    assert line == dated_leaf("20260818T123005Z", "hello")
+    assert path.read_bytes() == b"hello\n"
     assert len(m.list_view(repo)[0].id) == 64
+
+
+def test_wake_pack_line_has_no_date(tmp_path, monkeypatch):
+    """A pack wake line has grain and prefix and contains no YYYY-MM-DD."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    monkeypatch.setattr(m, "WAKE_LINES", 1)
+    nap_id = m.list_view(repo)[0].id
+    prefix = m.short_id(nap_id, [nap_id])
+    line = m.wake_text(repo).splitlines()[0]
+    assert line == f"x2 {prefix}: pair"
+    assert re.search(r"\d{4}-\d{2}-\d{2}", line) is None
+
+
+def test_format_wake_line_grain1_pack_is_undated_caption():
+    """A grain-1 pack (kind nap, leaves 1) prints the caption only."""
+    m = load_summem()
+    node = m.ProjectedNode(
+        id="ab" * 32,
+        kind="nap",
+        caption="solo",
+        leaves=1,
+        stamp="20260824T123005Z",
+    )
+    assert m.format_wake_line(node, [node.id]) == "solo"
+
+
+def test_format_wake_line_empty_note_caption_keeps_trailing_colon():
+    """A note with an empty caption prints x1 day: with no extra space."""
+    m = load_summem()
+    node = m.ProjectedNode(
+        id="cd" * 32,
+        kind="note",
+        caption="",
+        leaves=1,
+        stamp="20260824T123005Z",
+    )
+    assert m.format_wake_line(node, [node.id]) == dated_leaf("20260824T123005Z", "")
+
+
+def test_resolve_id_rejects_hyphenated_day():
+    """A YYYY-MM-DD token is not a content-id prefix."""
+    m = load_summem()
+    cid = "a3f2c1b8" + "ab" * 28
+    with pytest.raises(ValueError, match="unknown id"):
+        m.resolve_id("2026-08-24", [cid])
 
 
 def test_wake_output_omits_notes_naps_and_git(tmp_path):
@@ -101,7 +159,7 @@ def test_wake_mixed_view_sorts_by_filename(tmp_path, monkeypatch):
     assert len(lines) == 2
     prefix = m.short_id(m.list_view(repo)[0].id, [node.id for node in m.list_view(repo)])
     assert lines[0] == f"x2 {prefix}: pair"
-    assert lines[1] == "gamma"
+    assert lines[1] == dated_leaf("20260101T000003Z", "gamma")
 
 
 def test_wake_missing_sum_prints_id_and_grain_without_caption(tmp_path, monkeypatch):
@@ -180,7 +238,10 @@ def test_wake_prints_at_most_wake_lines_newest(tmp_path, monkeypatch):
         m.write_note(repo, f"n{i}", datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
     monkeypatch.setattr(m, "WAKE_LINES", 4)
     lines = m.wake_text(repo).splitlines()
-    assert lines == [f"n{i}" for i in range(7, 11)]
+    assert lines == [
+        dated_leaf(datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC).strftime("%Y%m%dT%H%M%SZ"), f"n{i}")
+        for i in range(7, 11)
+    ]
     assert all(len(part) != 64 for line in lines for part in line.split())
 
 

@@ -1,1 +1,0 @@
-tox is the suite command: tox.ini package=skip, py311-py314, no test-result cache; 211 pytest. This uv only had 3.14.0rc3.

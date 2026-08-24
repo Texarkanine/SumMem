@@ -46,9 +46,9 @@ Two notes are two paths. There is no next id and no shared index. A nap's identi
 
 Note names carry writer time in UTC. Nap names carry the leftmost child's `{stamp}-{rand}`, not when compaction ran. Git-add date, squash commit time, and `git log` are the wrong clock.
 
-## Wake prints undated lines, never positional ranges
+## Wake dates leaves only, never positional ranges
 
-A range such as `#16-31` is a picture of one listing and a lie after the next merge. Wake prints `text` for a note and `xN <prefix>: caption` for a pack. `nap` and `zoom` accept the unique prefix of a content id they can already name; a command that looks like a range is rejected. Filenames and `.tree` identity stay 64 hex. A content id names leaves, not a unique view row: two notes with the same text share an id, and adjacency must keep both. Prefix uniqueness is among distinct ids, not view-row count; a repeated id is still that one prefix.
+A range such as `#16-31` is a picture of one listing and a lie after the next merge. Wake prints `x1 YYYY-MM-DD: text` for a note. The day is the UTC calendar date of the filename stamp, not note prose. Packs print `xN <prefix>: caption` with no date. `nap` and `zoom` accept the unique prefix of a content id they can already name; a leaf line is not a zoom target. A command that looks like a range is rejected. Filenames and `.tree` identity stay 64 hex. Wake, recall hits, and zoom children share that grammar. Recall searches the sentence (note text / nap caption), not the formatted line. Proofs walk `Tree.kids` for nested pack ids; they do not parse zoom stdout. A content id names leaves, not a unique view row: two notes with the same text share an id, and adjacency must keep both. Prefix uniqueness is among distinct ids, not view-row count; a repeated id is still that one prefix. Recall and zoom unique-prefix against `named_ids`, which can print a longer prefix than wake for the same view pack.
 
 ## Payloads are write-once; captions are the honest conflict
 

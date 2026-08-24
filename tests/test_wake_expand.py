@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from random import Random
 
-from conftest import load_summem
+from conftest import dated_leaf, load_summem
 from gitutil import fold_ids, init_repo
 
 UTC = timezone.utc
@@ -96,7 +96,7 @@ def test_lone_note_does_not_split(tmp_path, monkeypatch):
     monkeypatch.setattr(m, "WAKE_LINES", 32)
     lines = [line for line in m.wake_text(repo).splitlines() if line]
     assert len(lines) == 1
-    assert lines[0] == "solo"
+    assert lines[0] == dated_leaf("20260101T000000Z", "solo")
 
 
 def test_expand_writes_nothing(tmp_path, monkeypatch):
@@ -212,6 +212,22 @@ def test_malformed_tree_is_loaded_at_most_once(tmp_path, monkeypatch):
     lines = [line for line in m.wake_text(repo).splitlines() if line]
     assert len(lines) == 4
     assert seen.count(bad) == 1
+
+
+def test_expand_prints_dated_nested_notes(tmp_path, monkeypatch):
+    """An under-budget nap expands to dated leaf lines from each child's name stamp."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    nodes = m.list_view(repo)
+    m.write_nap(repo, nodes[0].id, nodes[1].id, "pair")
+    monkeypatch.setattr(m, "WAKE_LINES", 2)
+    lines = [line for line in m.wake_text(repo).splitlines() if line]
+    assert lines == [
+        dated_leaf("20260101T000001Z", "alpha"),
+        dated_leaf("20260101T000002Z", "beta"),
+    ]
 
 
 def test_zoom_expanded_child_id(tmp_path, monkeypatch):

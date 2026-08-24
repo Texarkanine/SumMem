@@ -305,6 +305,8 @@ Zoom walks a children file in the current commit. Every sentence zoom still owes
 
 Everyday recall is the view, with captions standing in for napped children. Recall that must see original sentences or nested nap captions reads children files as well.
 
+Listings share `format_wake_line`: dated leaves and unique-prefix packs. Recall searches note text and nap captions, not grain, prefix, or day. Pack prefixes are unique among `named_ids` (view plus nested tree ids). 64-hex stays on disk; agent stdout uses `short_id` unless uniqueness requires the full id.
+
 Zoom and recall print one agent-safe line when they skip an unreadable sibling children file, and do not fail if another pack answered. Wake stays silent.
 
 ## Scopes
@@ -331,7 +333,7 @@ These look optional and are not.
 - **Empty packages stay empty.** The root auto-creates; every other store is `start`. Walking up does not create a store.
 - **Root pushes; other stores pull.** Root wake catalogs. A pull is a wake aimed at a path.
 - **Settings live in the store.** Not in the environment. Missing settings mean script defaults.
-- **Wake prints undated lines, never ranges.** Fold and zoom take a unique prefix of a content id.
+- **Wake dates leaves only, never ranges.** A note is `x1 YYYY-MM-DD: text` from the filename stamp. A pack is `xN <prefix>: caption` with no day. Fold and zoom take a unique prefix of a content id.
 - **Personal and machine facts stay out.** This store is facts about this directory hierarchy.
 
 Two branches whose naps do not overlap merge, then fold from the oldest neighbors. Overlapping merge is zipper, not that case.

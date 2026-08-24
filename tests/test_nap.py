@@ -8,7 +8,7 @@ from random import Random
 
 import pytest
 
-from conftest import load_summem
+from conftest import dated_leaf, load_summem
 from gitutil import init_repo
 
 UTC = timezone.utc
@@ -270,8 +270,10 @@ def test_nap_of_two_naps_nests_napchild_and_unions_digests(tmp_path):
     assert trees[0].name.split("-")[-2] == m.leafset_id(digests)
     assert {kid.sum for kid in tree.kids} == {"pack-a", "pack-b"}
     out = m.zoom_text(repo, tree.kids[0].id)
-    suffixes = [line.split("  ", 1)[1] for line in out.splitlines()]
-    assert suffixes == ["a1", "a2"]
+    assert out.splitlines() == [
+        dated_leaf("20260101T000001Z", "a1"),
+        dated_leaf("20260101T000002Z", "a2"),
+    ]
 
 
 def test_napchild_sum_empty_when_child_sum_missing(tmp_path):

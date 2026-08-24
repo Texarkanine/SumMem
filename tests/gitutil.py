@@ -2,12 +2,69 @@
 
 from __future__ import annotations
 
+import importlib.util
 import subprocess
 import sys
+from importlib.machinery import SourceFileLoader
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "summem"
+
+
+def _load_driver():
+    """Load repo-root summem without importing conftest."""
+    name = "summem_gitutil"
+    existing = sys.modules.get(name)
+    if existing is not None:
+        return existing
+    loader = SourceFileLoader(name, str(SCRIPT))
+    spec = importlib.util.spec_from_loader(name, loader)
+    if spec is None or spec.loader is None:
+        raise RuntimeError("could not load summem")
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[name] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _find_nap_child(m, tree, cid: str):
+    """Return the NapChild named *cid* under *tree*, or None."""
+    for child in tree.kids:
+        if isinstance(child, m.NoteChild):
+            continue
+        if child.id == cid:
+            return child
+        found = _find_nap_child(m, child.tree, cid)
+        if found is not None:
+            return found
+    return None
+
+
+def _tree_for_id(m, parent, cid: str):
+    """Return the children tree of *cid* (view nap or nested NapChild), or None."""
+    errors = m._TREE_PARSE_ERRORS
+    for node in m.list_view(parent):
+        if node.kind != "nap" or node.tree_path is None or not node.tree_path.is_file():
+            continue
+        try:
+            loaded = m.loads_tree(node.tree_path.read_bytes())
+        except errors:
+            continue
+        if node.id == cid:
+            return loaded
+        found = _find_nap_child(m, loaded, cid)
+        if found is not None:
+            return found.tree
+    return None
+
+
+def _nap_child_ids(m, parent, cid: str) -> list[str]:
+    """Return direct NapChild ids of one zoom level for *cid*, or empty."""
+    tree = _tree_for_id(m, parent, cid)
+    if tree is None:
+        return []
+    return [child.id for child in tree.kids if isinstance(child, m.NapChild)]
 
 
 def init_repo(path: Path) -> Path:
@@ -51,6 +108,7 @@ def fold_ids(m, repo, ids, caption: str) -> str:
 
 def zoom_reaches(cwd: Path, start_id: str, sentence: str, bound: int = 200) -> None:
     """Repeatedly zoom from *start_id* until *sentence* appears, or fail."""
+    m = _load_driver()
     pending = [start_id]
     seen = 0
     while pending:
@@ -68,10 +126,7 @@ def zoom_reaches(cwd: Path, start_id: str, sentence: str, bound: int = 200) -> N
         out = result.stdout.decode("utf-8")
         if sentence in out:
             return
-        for line in out.splitlines():
-            child = line.split()[0]
-            if child != cid:
-                pending.append(child)
+        pending.extend(_nap_child_ids(m, cwd, cid))
     raise AssertionError(f"did not reach {sentence!r}")
 
 
@@ -103,8 +158,5 @@ def reaches(m, repo, sentence: str) -> bool:
             continue
         if sentence in out:
             return True
-        for line in out.splitlines():
-            child = line.split()[0]
-            if child != cid:
-                pending.append(child)
+        pending.extend(_nap_child_ids(m, repo, cid))
     return False
