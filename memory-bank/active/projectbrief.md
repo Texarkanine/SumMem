@@ -45,3 +45,11 @@ When `fold_request` quotes two leaf view nodes, those lines use the same `format
 4. `zoom` still accepts the unique prefix of a pack; `x1 (YYYY-MM-DD)` is not treated as a pack id.
 5. Existing proofs still hold under the new line format.
 6. `systemPatterns.md`, `docs/architecture/index.md`, and the baked prompt (`prompt_text` / `docs/agents-prompt.md`) describe dated leaves and undated packs.
+
+## Rework
+
+Operator after reflect: parentheses optimize for human eyes. Optimize for agents. Drop them.
+
+Leaf line is `x1 YYYY-MM-DD: text` — the same `xN TOKEN: body` grammar as a pack. TOKEN is a day on a leaf and a hash prefix on a nap. The colon still keeps the day out of the stored sentence. Do not put the date after the colon. Do not date packs.
+
+Acceptance: a note at `2026-08-24T12:30:05Z` wakes as `x1 2026-08-24: <text>`. Prompt and briefing name `x1 YYYY-MM-DD:`, not parenthetical days.

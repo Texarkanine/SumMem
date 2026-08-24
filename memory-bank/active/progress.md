@@ -79,3 +79,13 @@ Print leaf `wake` rows as `x1 (YYYY-MM-DD): text` from the note stamp. Leave nap
 * Insights
     - Wake-format plans must grep exact line sets across all of `tests/`, not only the named files
     - Leaf-only dating is the OptMem shape; dating packs with the leftmost stamp would lie about span
+
+## 2026-08-24 - REWORK INITIATED
+
+* Work completed
+    - Operator rejected parentheses after reflect: optimize for agents, not human scan
+* Decisions made
+    - Manual-QA rework of dated-leaf-wake: leaf line becomes `x1 YYYY-MM-DD: text` (no parens)
+    - Same slot grammar as packs: `xN TOKEN: body`
+* Insights
+    - Parens were a human “not an id” marker. Hyphens already make a day unusable as a content-id prefix. OptMem dates leaves with a bare field and no hash in that slot.
