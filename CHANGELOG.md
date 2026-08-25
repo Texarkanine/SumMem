@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/Texarkanine/SumMem/compare/v0.5.0...v0.6.0) (2026-08-25)
+
+
+### Features
+
+* print versioned how-to on root wake ([#44](https://github.com/Texarkanine/SumMem/issues/44)) ([15feb23](https://github.com/Texarkanine/SumMem/commit/15feb23887f5a0ccfa48264df21209f853ac302b))
+
 ## [0.5.0](https://github.com/Texarkanine/SumMem/compare/v0.4.0...v0.5.0) (2026-08-24)
 
 
