@@ -1,14 +1,13 @@
 # Active Context
 
 ## Current Task: nap-variant-stems
-**Phase:** PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+**Phase:** BUILD - IN-PROGRESS
 
 ## What Was Done
 
-- Preflight verified the re-planned implementation against the codebase.
-- Confirmed blocking TDD Plan Encoding check passes.
-- Generated an advisory to consider a dry-run flag for the migration script to build operator trust.
+- Preflight verified the re-planned implementation against the codebase (PASS WITH ADVISORY).
+- Entered Build. Creative decision remains sibling `migrate.py` hashing on-disk pair bytes.
 
 ## Next Step
 
-- Wait for `/niko-build`.
+- Execute the eight implementation units in order (TDD).

@@ -68,3 +68,12 @@ Give naps a five-part stem with a pair-bytes variant tag so concurrent same-bloc
     - Blocking TDD Plan Encoding check passes: all seven executable units order tests before production code.
 * Insights
     - The plan thoroughly covers the issues found in the previous preflight and includes concrete steps for tests. Suggested a dry-run flag for the migration script to improve operator trust.
+
+## 2026-08-25 - BUILD - IN-PROGRESS
+
+* Work completed
+    - Left Preflight (PASS WITH ADVISORY) and started the TDD implementation.
+* Decisions made
+    - Follow the eight-unit plan in order. Dry-run on `migrate.py` stays out of this build: it was an advisory, not a planned unit, and would need its own tests.
+* Insights
+    - Creative decision is still sibling `migrate.py`; hash on-disk bytes, never re-dump.
