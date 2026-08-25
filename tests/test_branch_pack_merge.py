@@ -1,4 +1,4 @@
-"""First proof 6: disjoint branch packs merge, then nap the two neighbors."""
+"""Disjoint branch packs merge, then nap the two neighbors."""
 
 from __future__ import annotations
 

@@ -238,7 +238,12 @@ def test_zoom_expanded_child_id(tmp_path, monkeypatch):
     monkeypatch.setattr(m, "WAKE_LINES", 4)
     file_ids = {node.id for node in m.list_view(repo)}
     frontier = m.expand_frontier(m.list_view(repo), 4)
-    child_ids = [row.id for row in frontier if row.id not in file_ids]
-    assert child_ids
-    out = m.zoom_text(repo, child_ids[0])
-    assert out
+    child = next(row for row in frontier if row.id not in file_ids)
+    out = m.zoom_text(repo, child.id)
+    assert child.kind == "nap"
+    ids = m.named_ids(repo)
+    pack, leaf = child.tree.kids
+    assert out.splitlines() == [
+        f"x5 {m.short_id(pack.id, ids)}: eight-b-3",
+        dated_leaf(leaf.name.split("-")[0], "b5"),
+    ]

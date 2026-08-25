@@ -1,4 +1,4 @@
-"""First proofs 7 and 8: --path walk-up and root-wake catalog."""
+"""--path walk-up and root-wake catalog."""
 
 from __future__ import annotations
 

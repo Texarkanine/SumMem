@@ -54,7 +54,7 @@ def test_nap_stem_inherits_left_child_seq_prefix(tmp_path):
     leafset = m.leafset_id([m.note_digest(pa.read_bytes()), m.note_digest(pb.read_bytes())])
     nodes = m.list_view(repo)
     m.write_nap(repo, nodes[0].id, nodes[1].id, "pair")
-    stem = f"{m._seq_prefix(pa.name)}-{leafset}-2"
+    stem = f"{pa.name}-{leafset}-2"
     naps = repo / ".summem" / "naps"
     assert (naps / f"{stem}.summ").is_file()
     assert (naps / f"{stem}.tree").is_file()

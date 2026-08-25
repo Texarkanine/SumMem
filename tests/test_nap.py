@@ -107,7 +107,8 @@ def test_first_unlink_sees_both_parent_files(tmp_path, monkeypatch):
 
     monkeypatch.setattr(m.Path, "unlink", wrapped)
     m.write_nap(repo, ids[0], ids[1], "pair")
-    assert seen["sum"] and seen["tree"]
+    assert len(seen["sum"]) == 1
+    assert len(seen["tree"]) == 1
 
 
 def test_tree_replace_failure_leaves_children(tmp_path, monkeypatch):
@@ -142,7 +143,7 @@ def test_nap_rejects_empty_caption(tmp_path):
     _two_notes(m, repo)
     ids = _ids(m, repo)
     before = _payload_names(repo)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="note is empty"):
         m.write_nap(repo, ids[0], ids[1], "")
     assert _payload_names(repo) == before
 
@@ -154,7 +155,7 @@ def test_nap_rejects_overlong_caption(tmp_path):
     _two_notes(m, repo)
     ids = _ids(m, repo)
     before = _payload_names(repo)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Too long"):
         m.write_nap(repo, ids[0], ids[1], "x" * (m.ENTRY_CHARS + 1))
     assert _payload_names(repo) == before
 

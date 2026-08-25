@@ -1,0 +1,1 @@
+2026-08-25 SLOBAC all-smells audit of tests/ (284 tests): 63 deduplicated findings; largest clusters loose-text-oracle 30, vacuous-assertion 12, implementation-coupled 10; cross-suite confirmed 4 redundancies and proof-file fossils.

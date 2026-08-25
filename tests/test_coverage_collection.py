@@ -59,7 +59,7 @@ def test_cov_summem_emits_lcov_with_summem_sf(tmp_path):
 def test_default_pytest_does_not_write_lcov(tmp_path):
     """A narrow pytest without --cov does not write coverage/lcov.info."""
     watched = ROOT / "coverage" / "lcov.info"
-    existed = watched.exists()
+    before = watched.read_bytes() if watched.exists() else None
     result = subprocess.run(
         [sys.executable, "-m", "pytest", _NARROW],
         cwd=ROOT,
@@ -69,5 +69,5 @@ def test_default_pytest_does_not_write_lcov(tmp_path):
     )
     assert result.returncode == 0, result.stdout + result.stderr
     assert not (tmp_path / "lcov.info").exists()
-    if not existed:
-        assert not watched.exists()
+    after = watched.read_bytes() if watched.exists() else None
+    assert after == before

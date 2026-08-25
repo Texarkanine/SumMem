@@ -29,7 +29,7 @@ This product is not a single-actor local diary (that is OptMem, including its ma
 
 ## Success Criteria
 
-The product succeeds when the file-backend proofs in `tests/test_proof_*.py` hold: concurrent notes merge cleanly; same-block naps conflict only on the caption; originals survive squash onto `main`; positional ids are rejected; long-lived branches union then fold lazily; a path flag resolves to the nearest started store; root wake catalogs other stores and a pull prints only that store.
+The product succeeds when these process-level tests hold: concurrent notes merge cleanly; same-block naps conflict only on the caption; originals survive squash onto `main`; positional ids are rejected; long-lived branches union then fold lazily; a path flag resolves to the nearest started store; root wake catalogs other stores and a pull prints only that store.
 
 ## Key Constraints
 

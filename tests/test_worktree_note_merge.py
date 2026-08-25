@@ -1,4 +1,4 @@
-"""First proof 1: two worktrees note, merge, both notes in the view."""
+"""Two worktrees note, merge, both notes in the view."""
 
 from __future__ import annotations
 

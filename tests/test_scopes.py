@@ -98,7 +98,7 @@ def test_start_without_dir_is_usage(tmp_path, monkeypatch):
     """start without a directory exits nonzero."""
     m = load_summem()
     monkeypatch.chdir(init_repo(tmp_path / "r"))
-    assert m.main(["start"]) != 0
+    assert m.main(["start"]) == 2
 
 
 def test_note_path_writes_started_store(tmp_path, monkeypatch):

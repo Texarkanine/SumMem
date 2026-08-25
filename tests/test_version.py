@@ -27,7 +27,7 @@ def test_version_outside_repository_writes_nothing(tmp_path, monkeypatch, capsys
 def test_version_rejects_extra_args():
     """version with an extra token exits nonzero."""
     m = load_summem()
-    assert m.main(["version", "x"]) != 0
+    assert m.main(["version", "x"]) == 2
 
 
 def test_version_rejects_path_flag(capsys):
