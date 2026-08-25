@@ -1,0 +1,1 @@
+3.14 pathlib imports fcntl; startup isolation tests must trace the driver's __import__, not assert fcntl absent from sys.modules
