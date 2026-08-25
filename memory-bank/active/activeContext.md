@@ -1,10 +1,11 @@
 # Active Context
 
 ## Current Task: slobac-audit-ratchet
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Level 1 determined: single-test oracle fix on `test_zoom_expanded_child_id`.
+- Pinned `test_zoom_expanded_child_id` to `x5 …: eight-b-3` and dated `b5`.
+- `tox` py311–py314: 284 passed.
 
 ## Next Step
-- Load the Level 1 workflow and build.
+- `/niko-qa`

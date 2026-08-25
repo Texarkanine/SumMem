@@ -240,7 +240,10 @@ def test_zoom_expanded_child_id(tmp_path, monkeypatch):
     frontier = m.expand_frontier(m.list_view(repo), 4)
     child = next(row for row in frontier if row.id not in file_ids)
     out = m.zoom_text(repo, child.id)
-    if child.kind == "note":
-        assert child.caption in out
-    else:
-        assert any(f"b{i}" in out or f"eight-b-{i}" in out for i in range(8))
+    assert child.kind == "nap"
+    ids = m.named_ids(repo)
+    pack, leaf = child.tree.kids
+    assert out.splitlines() == [
+        f"x5 {m.short_id(pack.id, ids)}: eight-b-3",
+        dated_leaf(leaf.name.split("-")[0], "b5"),
+    ]

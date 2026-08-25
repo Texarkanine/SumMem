@@ -127,3 +127,15 @@ Apply obviously wrong and fixable remediations from the 2026-08-25 SLOBAC audit 
     - Bug fix, single component. L1 skips plan, creative, and preflight; go to build.
 * Insights
     - The first non-file frontier child is the `eight-b-4` nap; its zoom is `x5 …: eight-b-3` plus dated `b5`.
+
+## 2026-08-25 - BUILD - COMPLETE
+
+* Work completed
+    - `test_zoom_expanded_child_id` asserts exact public wake lines from `child.tree.kids`.
+    - Probe: new expected lines ≠ `wake_text` and ≠ `x2 00b0aaaa: eight-a-0`; they match real `zoom_text`.
+    - `tox` py311–py314: 284 passed.
+* Decisions made
+    - Drop the dead note branch; this fixture's first expanded child is a nap.
+    - No substring-absent `b6`/`b7`.
+* Insights
+    - `dated_leaf` plus `short_id` on the tree child's public id is enough; no `_projected_child`.
