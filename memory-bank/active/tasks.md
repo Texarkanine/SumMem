@@ -175,4 +175,26 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
+
+## QA Results
+
+**Result:** PASS (advisories allowed; nothing must change before acceptance)
+
+Reviewed `how_to_text()`, bootstrap `prompt_text()`, root-wake composition, lockstep `docs/agents-prompt.md` / `AGENTS.md` prefix, retargeted prompt/scope/proof tests, and the briefing files named in the plan, against `tasks.md` and `creative-agent-document-split.md`.
+
+### Findings
+
+- **KISS** — Composition stays in the existing `wake` branch with inlined prepends. That matches the plan and the declined preflight radical (named-section assembler). Not over-engineered.
+- **DRY** — Note verb in both bootstrap and Usage is the Stable-verbs split (always-on duty vs membership detail), not accidental duplication. Catalog-section slicing exists twice (`_catalog_section` in `test_scopes.py`, inline in `test_proof_scopes.py`). Advisory only.
+- **YAGNI** — No `summem upgrade`, no version-keyed Usage header, no new test files. `usage_text()` remains the operator `-h` catalog.
+- **Completeness** — Units 1–4 are implemented. Root wake prints Usage then catalog then memories; pulls omit Usage, catalog, and Project-root header; `WAKE_LINES` still counts the view only; `init` still writes nothing; lockstep holds. Skip keys off a Usage block the agent can see and follow.
+- **Regression** — Store, fold, note, nap, zoom, and recall paths are untouched except the root-wake document. Footer remains last. `surgery.py` is untouched.
+- **Integrity** — No TODOs, placeholders, or `Run:` in how-to. Catalog lines stay `./path`. How-to teaches `wake --path <path>`, not `pkg`.
+- **Documentation** — README (one-time fat-prefix replace), `systemPatterns.md`, `techContext.md`, `docs/architecture/index.md`, and `docs/notes.md` match the new document split.
+
+### Advisories (non-blocking)
+
+- Usage still says `x<N> <hash>:` for packs; listings print unique prefixes. Carried over from the previous prompt.
+- Plan unit 1 listed "ignore `--path` without catalog" among red-test tokens; the how-to test does not assert `ignore`. The product sentence is present.
+- `test_root_wake_catalogs_other_store` still forbids substring `git` on the whole root-wake stdout. Plan kept that pin; it is a future wording trap.

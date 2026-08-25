@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: wake-usage-prompt
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
 - `how_to_text()` prints the versioned how-to under `== SumMem Usage ==`.
@@ -28,4 +28,4 @@ None — built to plan. Preflight advisories applied as implementer cautions.
 284 passed (`tox` py311–py314), including retargeted ingest and scopes proofs.
 
 ## Next Step
-- QA review runs automatically
+- Reflect (`/niko-reflect`) — QA passed

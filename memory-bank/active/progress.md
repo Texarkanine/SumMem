@@ -75,3 +75,14 @@ Move the versioned agent how-to from the committed `AGENTS.md` prefix onto the r
     - Kept inlined prepends in the existing wake branch. Applied preflight cautions (`<path>` not `pkg`; no other section headers in how-to; ingest slices from the memories header).
 * Insights
     - Catalog-section helpers keep Usage's `{AGENT_BIN}` and `wake --path` from fighting leftover whole-stdout forbids.
+
+## 2026-08-24 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Semantic review of the wake-usage-prompt implementation against the plan and `creative-agent-document-split.md`.
+    - Wrote `memory-bank/active/.qa-validation-status` (`PASS`).
+* Decisions made
+    - PASS with advisories. Nothing must change before acceptance.
+* Insights
+    - Preflight leftover-pin class did not recur as a product miss: ingest slices from the memories header; how-to teaches `<path>` not `pkg`; skip is see-and-follow.
+    - Remaining whole-stdout `git` forbid on `test_root_wake_catalogs_other_store` is plan-kept test fragility, not an incomplete split.
