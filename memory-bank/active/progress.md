@@ -39,3 +39,18 @@ Cut the per-invocation import floor: drop dataclasses, lazy-import command-only 
     - Preflight passed (PASS).
 * Insights
     - Plan is solid. Suggested implementing `replace` as a method on the classes rather than a standalone function.
+
+## 2026-08-25 - BUILD - COMPLETE
+
+* Work completed
+    - Replaced five dataclasses with `__slots__` + `_replace` + `_eq_by_slots`
+    - Lazy-imported tomllib/fcntl/subprocess/random; early-out version/init/-h before argparse
+    - Isolation tests in a fresh interpreter; 3.14 probe traces driver `__import__`
+    - tox 287 passed on py311–py314; Python 3.10 still prints the floor message
+* Decisions made
+    - Kept `_replace` as a helper (preflight advisory was method-on-class)
+    - Added `__eq__` only after codec round-trip tests failed
+    - Unit 4 shipped: argparse was the leftover
+* Insights
+    - 3.14 pathlib imports fcntl; absence from `sys.modules` is not portable
+    - Wall `version` dropped from ~110–135 ms to ~60–80 ms on this machine (pyenv shim still extra)
