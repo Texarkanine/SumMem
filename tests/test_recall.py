@@ -56,14 +56,13 @@ def test_recall_output_omits_notes_naps_and_git(tmp_path):
     assert "git" not in out
 
 
-def test_recall_matches_loose_note_outside_wake_window(tmp_path, monkeypatch):
-    """A loose note older than WAKE_LINES is still found."""
+def test_recall_matches_loose_note_when_over_budget(tmp_path, monkeypatch):
+    """Recall still finds a loose note when the view is over WAKE_LINES."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     for i in range(11):
         m.write_note(repo, f"n{i}", datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
     monkeypatch.setattr(m, "WAKE_LINES", 4)
-    assert "n0" not in m.wake_text(repo)
     assert "n0" in m.recall_text(repo, "n0")
 
 
