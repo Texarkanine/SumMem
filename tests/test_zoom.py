@@ -330,3 +330,60 @@ def test_zoom_nested_note_id_prints_dated_leaf(tmp_path):
     cid = m.leafset_id([m.note_digest(m.note_file_bytes(child.text))])
     stamp = child.name.split("-")[0]
     assert m.zoom_text(repo, cid) == dated_leaf(stamp, child.text) + "\n"
+
+
+def test_zoom_shared_id_prints_first_view_row_children(tmp_path):
+    """Zoom of a shared leaf-set id prints the first list_view row's children."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    ids = _two_notes(m, repo)
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    first = m.list_view(repo)[0]
+    tree = m.loads_tree(first.tree_path.read_bytes())
+    stamp, _rand, leafset, leaves = m._parse_nap_stem(first.name)
+    later = f"{stamp}-{'f' * 16}-{leafset}-{leaves}"
+    naps = repo / ".summem" / "naps"
+    naps.joinpath(f"{later}.tree").write_bytes(m.dumps_tree(m.Tree(kids=list(reversed(tree.kids)))))
+    naps.joinpath(f"{later}.summ").write_bytes(m.note_file_bytes("later"))
+    rows = [node for node in m.list_view(repo) if node.kind == "nap"]
+    assert len(rows) == 2
+    assert rows[0].id == rows[1].id == first.id
+    assert rows[0].name == first.name
+    assert rows[0].name != rows[1].name
+    assert rows[0].tree_path.read_bytes() != rows[1].tree_path.read_bytes()
+    out = m.zoom_text(repo, first.id)
+    assert out.splitlines() == [
+        dated_leaf("20260101T000001Z", "alpha"),
+        dated_leaf("20260101T000002Z", "beta"),
+    ]
+
+
+def test_named_ids_skips_unprojectable_note_name(tmp_path):
+    """A note child whose name is not a string does not make named_ids raise."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    ids = _two_notes(m, repo)
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    nap = m.list_view(repo)[0]
+    nap.tree_path.write_bytes(b'{"c":[{"type":"note","name":1,"text":"x"}]}\n')
+    named = m.named_ids(repo)
+    assert nap.id in named
+
+
+def test_zoom_unprojectable_note_name_is_unreadable_pack(tmp_path, capsys):
+    """zoom_text on a note child whose name is not a string raises unreadable pack."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    ids = _two_notes(m, repo)
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    nap = m.list_view(repo)[0]
+    nap.tree_path.write_bytes(b'{"c":[{"type":"note","name":1,"text":"x"}]}\n')
+    capsys.readouterr()
+    with pytest.raises(ValueError, match="unreadable pack") as caught:
+        m.zoom_text(repo, nap.id)
+    err = str(caught.value)
+    assert "notes/" not in err
+    assert "naps/" not in err
+    assert "git" not in err
+    assert capsys.readouterr().err == ""
+

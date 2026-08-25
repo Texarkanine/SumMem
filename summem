@@ -646,13 +646,13 @@ def zoom_text(parent, token: str) -> str:
     ids, packs = _view_packs(parent)
     prefixes = unique_prefixes(ids)
     cid = resolve_id(token, ids)
-    pack_by_id = {pack["node"].id: pack for pack in packs}
+    pack_by_name = {pack["node"].name: pack for pack in packs}
     for node in list_view(parent):
         if node.id != cid:
             continue
         if node.kind == "note":
             return format_wake_line(node, prefixes) + "\n"
-        pack = pack_by_id.get(node.id)
+        pack = pack_by_name.get(node.name)
         if pack is None or pack["status"] == "missing":
             raise ValueError("unknown id")
         if pack["status"] == "unreadable":
@@ -779,10 +779,10 @@ def _view_packs(parent) -> tuple[list[str], list[dict]]:
             continue
         try:
             tree = loads_tree(node.tree_path.read_bytes())
+            index = _index_tree(tree)
         except _TREE_PARSE_ERRORS:
             packs.append(_empty_pack(node, "unreadable"))
             continue
-        index = _index_tree(tree)
         for cid in index["ids"]:
             add(cid)
         packs.append({"node": node, "status": "ok", "tree": tree, **index})

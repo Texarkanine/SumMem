@@ -250,6 +250,25 @@ def test_recall_does_not_call_short_id_per_hit(tmp_path, monkeypatch):
     assert out.split()[0].startswith("x")
 
 
+def test_recall_unprojectable_note_name_skips(tmp_path, capsys):
+    """Recall does not traceback when a note child's name is not a string."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    next((repo / ".summem" / "naps").glob("*.tree")).write_bytes(
+        b'{"c":[{"type":"note","name":1,"text":"x"}]}\n'
+    )
+    capsys.readouterr()
+    out = m.recall_text(repo, "x")
+    assert isinstance(out, str)
+    err = capsys.readouterr().err
+    assert err == "skipped a pack\n"
+    assert "Traceback" not in err
+
+
 def test_recall_invalid_pattern_is_cli_error(tmp_path, monkeypatch, capsys):
     """An invalid regex is a CLI error and does not mention store paths."""
     m = load_summem()
