@@ -997,7 +997,7 @@ def how_to_text() -> str:
     return f"""\
 == SumMem Usage ==
 
-`{AGENT_BIN} note "…"` records one short line for a fact another contributor would still need: designs, decisions, invariants, and the like. It has to belong in a fresh clone on another machine. Personal, machine-local, and user preference facts stay out. Do not register redundant memories.
+`{AGENT_BIN} note "…"` records one short line for a fact another contributor would still need: designs, decisions, invariants, and the like. It has to belong in this repository's shared history - even when cloned on another machine. Personal, machine-local, and user preference facts stay out. Do not register redundant memories.
 
 If `note` asks for a nap, the note is already stored; do not retry the same note. The nap is extra work on two older view nodes. Do that nap before your next action.
 
@@ -1014,11 +1014,11 @@ def prompt_text() -> str:
 
 Shared memory for this repository is managed through SumMem, invoked as `{AGENT_BIN}`.
 
-## At Session Start: Activating SumMem
+## At Session Start: Activating SumMem (mandatory)
 
 Run `{AGENT_BIN} wake` from the repository root. If you can see a prior project-root SumMem wake in this conversation's history, do not run it again.
 
-## While Working: Register Memories
+## While Working: Register Memories (mandatory)
 
 `{AGENT_BIN} note "…"` records one short line for a fact another contributor would still need. Personal, machine-local, and user preference facts stay out. `note` may sometimes print further instructions; always follow them.
 
