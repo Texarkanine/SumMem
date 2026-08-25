@@ -38,3 +38,14 @@ Make `recall` and `zoom` unique-prefix in linear time and parse each view `.tree
     - The first line of `.preflight-status` is PASS
 * Insights
     - The implementation plan is structurally sound and strictly follows TDD requirements.
+
+## 2026-08-25 - BUILD - COMPLETE
+
+* Work completed
+    - Prefix table, shared view-tree walk, recall one pass, zoom one pass, atlas update
+    - `uvx --with tox tox` 292 passed on py311–py314
+* Decisions made
+    - `short_id` delegates to `unique_prefixes([*ids, cid], floor)`
+    - Wake expand still uses `_projected_child`; recall/zoom use indexed rows
+* Insights
+    - Eight new tests (292 total, was 284). Proof walkers still enqueue from `Tree.kids`.

@@ -124,6 +124,14 @@ No new technology - validation not required
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
-- [ ] Build
+- [x] Preflight
+- [x] Build
 - [ ] QA
+
+### Build progress
+
+- [x] 1. Prefix table
+- [x] 2. Shared view-tree walk
+- [x] 3. Recall one pass
+- [x] 4. Zoom one pass
+- [x] 5. Atlas zoom and recall
