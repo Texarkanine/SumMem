@@ -1,0 +1,1 @@
+Issue #50: recall/zoom unique-prefix once per command (sort+neighbor LCP) and parse each view .tree at most once; named_ids shares that walk. Catalog/heal/dataclasses stay out.
