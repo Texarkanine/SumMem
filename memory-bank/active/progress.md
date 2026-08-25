@@ -29,3 +29,13 @@ Cut the per-invocation import floor: drop dataclasses, lazy-import command-only 
     - Runtime `sys.modules` probe, not a source-scan change-detector, is the dataclasses/import contract
 * Insights
     - Bare `-h` already returns `usage_text()` before the parser; moving `import argparse` below that early-out is enough if unit 4 runs
+
+## 2026-08-25 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Validated implementation plan against codebase reality.
+    - Verified TDD plan encoding, convention compliance, and dependency impact.
+* Decisions made
+    - Preflight passed (PASS).
+* Insights
+    - Plan is solid. Suggested implementing `replace` as a method on the classes rather than a standalone function.
