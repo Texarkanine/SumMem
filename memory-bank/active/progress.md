@@ -16,3 +16,16 @@ Make `recall` and `zoom` unique-prefix in linear time and parse each view `.tree
 * Insights
     - Wake listing is already cheap; leave wake/fold `short_id` call sites alone unless a shared table is free
     - `test_zoom.py` monkeypatches `named_ids` for the ambiguous-prefix case; parse-once must not silently drop that seam without updating the test
+
+## 2026-08-25 - PLAN - COMPLETE
+
+* Work completed
+    - Wrote the Level 2 plan in `memory-bank/active/tasks.md`
+    - Mapped TDD onto existing recall/zoom/wake tests; no new test files
+* Decisions made
+    - `unique_prefixes` via sort plus neighbor LCP; `short_id` becomes a lookup so wake/fold output stays equivalent
+    - `format_wake_line` accepts a prefix `dict` for O(1) lines; list path stays for wake/fold
+    - `_view_packs` records parse status only; commands decide warn vs raise
+    - No process-global parse cache; no 5k-leaf pytest fixture
+* Insights
+    - `test_ambiguous_prefix_is_error` must move off a `named_ids` patch if zoom no longer calls it
