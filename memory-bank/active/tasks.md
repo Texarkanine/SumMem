@@ -45,21 +45,21 @@ sequenceDiagram
 ### Affected Components
 
 - **Stem grammar** (`_parse_nap_stem`, new `variant_tag` / `nap_stem`): today four-part `{seq}-{leafset}-{grain}`. Add five-part `-{variant}`; parse both; constructor is the only writer of new names.
-- **Fold write** (`write_nap`): today interpolates a four-part stem and dumps twice (once per file). Serialize `dumps_tree` / `note_file_bytes` once, hash those bytes, write those bytes.
-- **Rematerialize** (`_nap_stem`, `rematerialize_child`): today `{leftmost-seq}-{child.id}-{leaves}`. Same constructor from child tree + `child.sum`. `surgery.py` already calls `_nap_stem`.
+- **Fold write** (`write_nap`): today interpolates a four-part stem and dumps twice (once per file). Serialize once, hash those bytes, write those bytes via shared `_write_pair`.
+- **Rematerialize** (`rematerialize_child`): today `_nap_stem` interpolates `{leftmost-seq}-{child.id}-{leaves}`. Delete `_nap_stem`. Serialize child pair bytes once, `nap_stem`, `_write_pair`. `surgery.py` `plan_break_out` uses the same `nap_stem` call (stem computation now serializes; that cost is required to name a five-part dest).
 - **View** (`list_view`): already groups by stem and sorts by `node.name`. Dual-read only; public `ViewNode.id` stays the leaf-set field.
 - **Heal** (`heal_view`, `_first_overlap`, `_unlink_node`): no algorithm change. Equal leaf sets already `<=`; list order makes the lex-smaller complete pair the one unlinked. Pin that consequence.
 - **CLI** (`note`, `nap`, `wake`, `zoom`, `recall`): no new verbs, no new id grammar. Transient duplicate wake rows are allowed.
-- **Migration helper** (`migrate.py`): new sibling operator tool. Loads `summem`, renames complete four-part pairs. See creative.
+- **Migration helper** (`migrate.py`): new sibling operator tool. Loads `summem`, uses `started_stores` + `variant_tag` on on-disk bytes, renames complete four-part pairs. See creative.
+- **Store listing** (`catalog_text`): extract `started_stores(git_root)` so catalog and migrate share ignore rules. `catalog_text` still prints other stores only.
 - **Docs**: atlas nap naming + invariants; `systemPatterns.md` “honest conflict”; `productContext.md` success criteria.
 - **This repo’s stores**: committed `.summem/naps` (root and `dogfood`) rewritten with `migrate.py` in the same breaking change.
 
 ### Cross-Module Dependencies
 
-- `write_nap` → `dumps_tree` + `note_file_bytes` → `variant_tag` → `nap_stem` → `_replace_bytes` → unlink children.
-- `rematerialize_child` / `surgery.py` → `_nap_stem` → same constructor.
+- `write_nap` / `rematerialize_child` / `surgery.py` → serialize pair bytes once → `nap_stem` → `_write_pair`.
 - `list_view` → `_parse_nap_stem` (4 or 5 parts) → `heal_view` / `wake` / `zoom` / `recall`.
-- `migrate.py` → `SourceFileLoader` `summem` → `variant_tag` on **on-disk** bytes → rename both suffixes. Does not call `heal_view`.
+- `migrate.py` → `SourceFileLoader` `summem` → `started_stores` + `variant_tag` on **on-disk** bytes → rename both suffixes. Does not call `heal_view`.
 
 ### Boundary Changes
 
@@ -94,6 +94,9 @@ sequenceDiagram
 - `write_nap` path is five-part; `{stem}.tree` / `{stem}.summ` bytes equal the hashed buffers; `dumps_tree` / `note_file_bytes` run once per fold.
 - `rematerialize_child` of a `NapChild` reconstructs the same five-part paths as `write_nap` of that tree+caption; a second call is a no-op; nested grain-4 child uses the child’s pair bytes, not the parent’s.
 - `list_view` lists both four-part and five-part complete pairs; `ViewNode.id` is the leaf-set field; a four-part stem of the same logical block sorts before the matching five-part stem.
+- Atomic identity at unit level: two repos fold the same notes with captions "one" and "two" → identical `.tree` bytes, different complete stems, different `.summ` bytes (`test_same_children_same_tree_bytes_and_paths`).
+- Grain-2 process test: two worktrees, different captions → `git merge` returncode 0, no unmerged `.summem/` paths, two same-id view rows (`test_same_pair_two_captions_conflict_only_on_sum` inverted in unit 2).
+- Variant tag is not the public id: a five-part nap’s wake line uses a prefix of the leaf-set id, not the 16-hex tag; `zoom`/`nap` of that tag is `unknown id` when it is not a unique prefix of any named leaf-set id.
 - Heal equal variants: two five-part equal-set pairs → one complete survivor, lex-greatest stem; three variants collapse to that same survivor regardless of insert order; four-part + five-part same set → five-part remains.
 - Next `note` and next `nap` each heal before fold selection (existing `nap_locked` / `note_locked` threading stays).
 - Different captions, same grain-2 leaves, two worktrees: `git merge` has zero unmerged `.summem/` paths; wake may show two same-id rows; after `note` or `nap`, one complete pair; both original notes zoom.
@@ -130,27 +133,27 @@ sequenceDiagram
 - Creative ref: n/a (algorithm is issue #61)
 
 1. Stub tests: `test_variant_tag_is_16_lowercase_hex`, `test_variant_tag_changes_with_caption_or_tree`, `test_variant_tag_length_prefixes_are_unambiguous`, `test_nap_stem_is_five_part`, `test_parse_nap_stem_four_and_five_part`, `test_parse_nap_stem_rejects_bad_shape`.
-2. Stub interface: `variant_tag(tree_bytes: bytes, caption_bytes: bytes) -> str`; `nap_stem(seq_prefix: str, leafset: str, grain: int, tree_bytes: bytes, caption_bytes: bytes) -> str`; change `_parse_nap_stem` signature to return `(stamp, rand, leafset, grain, variant) | None` with `variant=""` on four-part. Keep `_nap_stem` / `write_nap` on four-part until later steps.
+2. Stub interface: `variant_tag(tree_bytes: bytes, caption_bytes: bytes) -> str`; `nap_stem(seq_prefix: str, leafset: str, grain: int, tree_bytes: bytes, caption_bytes: bytes) -> str`; change `_parse_nap_stem` signature to return `(stamp, rand, leafset, grain, variant) | None` with `variant=""` on four-part. Keep `write_nap` on four-part until unit 2. Leave `_nap_stem` as-is until unit 3 deletes it.
 3. Write tests and run red: pin domain tag `b"SumMem nap pair v1\0"`, 8-byte big-endian lengths, SHA-256 then `[:16]`; pin parse of a real four-part fixture and a five-part fixture.
 4. Write code and run green: implement those three functions. Update the one existing unpack in `tests/test_zoom.py` (`stamp, _rand, leafset, leaves = m._parse_nap_stem(...)`) to the five-tuple so the suite compiles; do not change that test’s planted four-part sibling yet.
 
 ### 2. `write_nap` five-part, bytes hashed are bytes written — executable
 
-- Files: `summem` (`write_nap`), `tests/test_fold.py`, `tests/test_nap.py`, `tests/test_view.py`, `tests/test_wake.py`
+- Files: `summem` (`write_nap`, `_write_pair`), `tests/test_fold.py`, `tests/test_nap.py`, `tests/test_view.py`, `tests/test_wake.py`, `tests/test_caption_conflict.py`, `tests/test_zoom.py`
 
-1. Stub tests: replace `test_nap_stem_inherits_left_child_seq_prefix` expected path with `nap_stem(...)`; add `test_write_nap_hashes_the_bytes_it_writes` (read back `.tree`/`.summ` and assert they equal the buffers passed to `variant_tag`); add `test_write_nap_serializes_tree_once` (wrap `dumps_tree`).
-2. Stub interface: none new. `write_nap` still four-part until step 4 of this unit.
-3. Write tests and run red: expected stems include the variant tag; `tests/test_nap.py` `stem = f"{pa.name}-{leafset}-2"` and `split("-")[-2]` oracles updated to constructor / `_parse_nap_stem`; same for `test_view.py` and `test_wake.py` leaf-set extraction.
-4. Write code and run green: `write_nap` serializes once, `stem = nap_stem(_seq_prefix(left.name), leafset, leaves, tree_bytes, caption_bytes)`, writes those bytes.
+1. Stub tests: replace `test_nap_stem_inherits_left_child_seq_prefix` expected path with `nap_stem(...)`; add `test_write_nap_hashes_the_bytes_it_writes` (read back `.tree`/`.summ` and assert they equal the buffers passed to `variant_tag`); add `test_write_nap_serializes_tree_once` (wrap `dumps_tree`); add `test_wake_pack_line_uses_leafset_prefix_not_variant_tag`. Rewrite `test_same_children_same_tree_bytes_and_paths` (same `.tree` bytes, different stems, different `.summ`). Invert `test_same_pair_two_captions_conflict_only_on_sum` here (merge returncode 0, no `--diff-filter=U` paths, two same-id view rows) — do not wait until unit 5. Keep `test_planted_conflict_markers_wake_skips_caption_zoom_prints_leaves`.
+2. Stub interface: add `_write_pair(naps_dir, stem, tree_bytes, caption_bytes)` that temp-replaces `{stem}.tree` then `{stem}.summ`. `write_nap` still four-part until step 4.
+3. Write tests and run red: expected stems include the variant tag; `tests/test_nap.py` line 45 stem literal, line 68 same-path assertion, and line 271 `split("-")[-2]` oracle; `test_view.py` / `test_wake.py` leaf-set extraction via `_parse_nap_stem`; inverted caption-conflict merge assertions.
+4. Write code and run green: `write_nap` serializes once, `stem = nap_stem(_seq_prefix(left.name), leafset, leaves, tree_bytes, caption_bytes)`, writes those bytes. Suite including `test_nap.py` and `test_caption_conflict.py` is green before unit 3.
 
 ### 3. Rematerialize uses the same constructor — executable
 
-- Files: `summem` (`_nap_stem`, `rematerialize_child`), `tests/test_zipper.py`
+- Files: `summem` (`rematerialize_child`, delete `_nap_stem`), `surgery.py` (one call site), `tests/test_zipper.py`, `tests/test_surgery.py` if a dest-name pin exists
 
-1. Stub tests: rewrite `test_rematerialize_nap_stem_uses_leftmost_seq_child_id_and_leaves` to expect `nap_stem` of `dumps_tree(inner)` + `note_file_bytes("pair")`; add `test_rematerialize_nap_is_idempotent_on_five_part`; add `test_rematerialize_nested_child_uses_child_pair_bytes`.
-2. Stub interface: `_nap_stem(child)` becomes the NapChild wrapper around `nap_stem` (serialize child tree + `child.sum`).
+1. Stub tests: rewrite `test_rematerialize_nap_stem_uses_leftmost_seq_child_id_and_leaves` to expect `nap_stem` of the **same** `tree_bytes`/`caption_bytes` buffers later written; add `test_rematerialize_nap_is_idempotent_on_five_part`; add `test_rematerialize_nested_child_uses_child_pair_bytes`; add `test_rematerialize_serializes_tree_once`.
+2. Stub interface: delete `_nap_stem`. Rematerialize and `surgery.py` (`plan_break_out`, line 145) call `nap_stem` with child pair bytes. Share `_write_pair` with `write_nap` so hashed bytes are written bytes by construction, not by a second `dumps_tree`.
 3. Write tests and run red.
-4. Write code and run green. `surgery.py` keeps calling `_nap_stem`; no surgery source change unless a test pins a four-part surgery dest.
+4. Write code and run green. Surgery dest names become five-part as a consequence; update a surgery test only if it pins a four-part dest.
 
 ### 4. Equal-set heal survivor — executable
 
@@ -163,11 +166,11 @@ sequenceDiagram
 
 ### 5. Concurrent union proofs — executable
 
-- Files: `tests/test_nap_variants.py` (new), `tests/test_caption_conflict.py`
+- Files: `tests/test_nap_variants.py` (new)
 
-1. Stub tests in `test_nap_variants.py`: grain-2 different captions merge clean; identical bytes share a stem; atomic identity (tree vs caption); `note` heals twins; `nap` heals twins; reversed merge order; three variants; triple-worker 1→2→4; sequence-prefix order; squash clone; no conflict markers / no mismatched pair. In `test_caption_conflict.py`, invert `test_same_pair_two_captions_conflict_only_on_sum` to “zero unmerged paths, two view rows” (keep `test_planted_conflict_markers_wake_skips_caption_zoom_prints_leaves`).
+1. Stub tests in `test_nap_variants.py` only (caption-conflict inversion already landed in unit 2): identical bytes share a stem; `note` heals twins; `nap` heals twins; reversed merge order; three variants; triple-worker 1→2→4; sequence-prefix order; squash clone; no conflict markers / no mismatched pair.
 2. Stub interface: none.
-3. Write tests and run red: use the worktree pattern in `tests/test_caption_conflict.py` / `tests/test_worktree_note_merge.py`; `git diff --name-only --diff-filter=U` empty; scan `.summem` for `<<<<<<<`.
+3. Write tests and run red: use the worktree pattern in `tests/test_caption_conflict.py` / `tests/test_worktree_note_merge.py`; scan `.summem` for `<<<<<<<`. Confirm `tests/test_branch_pack_merge.py` stays green (disjoint packs and overlapping heal-on-mutate); rewrite it only if a stem literal pins four-part names.
 4. Write code and run green: production change only if union still conflicts (means step 2 stem constructor is wrong).
 
 ### 6. Legacy read and rematerialize-from-legacy — executable
@@ -184,10 +187,10 @@ sequenceDiagram
 - Files: `migrate.py`, `tests/test_migrate.py`
 - Creative ref: `memory-bank/active/creative/creative-nap-stem-migrate.md`
 
-1. Stub tests: load via `SourceFileLoader` like `tests/test_surgery.py`; four-part complete pair renamed to `nap_stem` of on-disk bytes; second run exit 0; incomplete pair skipped, exit non-zero; `--path` leaves a second store untouched; default run rewrites root and a cataloged child store.
-2. Stub interface: `migrate.py` with `load_summem()`, `main()`, AGPL header like `surgery.py`, no `__version__`.
+1. Stub tests: load via `SourceFileLoader` like `tests/test_surgery.py`; four-part complete pair renamed to `nap_stem` of on-disk bytes; second run exit 0; incomplete pair skipped, exit non-zero; `--path` leaves a second store untouched; default run rewrites root and a cataloged child store. Add `test_started_stores_includes_root_and_other_parents` next to existing catalog tests.
+2. Stub interface: `started_stores(git_root) -> list[Path]` in `summem` (root if `is_store`, plus parents of git-visible `/.summem/` paths, same ls-files ignore rules as `catalog_text`). `catalog_text` filters that list to “other” stores. `migrate.py` with `load_summem()`, `main()`, AGPL header like `surgery.py`, no `__version__`.
 3. Write tests and run red.
-4. Write code and run green: git ls-files discovery (root `.summem/` plus `/.summem/` parents, same ignore rules as catalog); hash on-disk bytes; rename both files; do not heal; do not re-`dumps_tree`. Then run the helper on this clone so committed `.summem/naps` and `dogfood/.summem/naps` (if four-part stems exist) become five-part; `git add` those rewritten files — they are store output the script wrote.
+4. Write code and run green: `migrate.py` calls `started_stores` (or `--path` / `resolve_parent`); hash on-disk bytes; rename both files; do not heal; do not re-`dumps_tree`. Then run the helper on this clone so committed `.summem/naps` and `dogfood/.summem/naps` become five-part; `git add` those rewritten files — they are store output the script wrote.
 
 ### 8. Atlas, patterns, product copy — prose/policy
 
@@ -195,8 +198,8 @@ sequenceDiagram
 - No tests: prose/policy artifact
 - Creative ref: migrate invocation lives in the atlas change-surface row, not the README command table
 
-1. Nap naming: five-part stem; logical id vs variant tag; sequence prefix inherited.
-2. Replace “the caption is the only honest conflict” / “same-block naps conflict only on the caption” with union then zipper-reduce; transient duplicate wake rows are valid; equal-set survivor is hash-order; `.tree`/`.summ` are one atomic variant pair; file count returns to O(view) after heal; legacy drivers are unsupported once five-part stems exist.
+1. Nap naming: five-part stem; logical id vs variant tag; sequence prefix inherited. Replace atlas naming sentence that currently ends “the rest of the name is the leaf-set id and the grain” (`docs/architecture/index.md` ~line 63).
+2. Replace “the caption is the only honest conflict” / “same-block naps conflict only on the caption” with union then zipper-reduce; transient duplicate wake rows are valid; equal-set survivor is hash-order; `.tree`/`.summ` are one atomic variant pair; file count returns to O(view) after heal; legacy drivers are unsupported once five-part stems exist. Rewrite the atlas paragraph that currently says two agents who nap the same two loose notes get the same children file and a different caption file (`docs/architecture/index.md` ~line 95): different pair bytes are different paths; git unions them.
 3. Add a change-surface row for upgrading on-disk nap names: run `migrate.py`; do not `mv` by hand.
 4. Close #59 as superseded in the PR body (no code).
 
@@ -207,17 +210,19 @@ No new technology - validation not required. `hashlib` and `SourceFileLoader` ar
 ## Challenges & Mitigations
 
 - **Tests still parse leaf-set as `split("-")[-2]`**: five-part names make that grain. Mitigation: unit 2 rewrites those oracles to `_parse_nap_stem` in the same red/green cycle as `write_nap`.
-- **`write_nap` hashes a second `dumps_tree` call**: canonical JSON should match, but nested float/key drift would fork tags. Mitigation: serialize once; unit 2 asserts call count and disk bytes.
+- **Existing tests assert same dest paths / caption-only merge conflict**: `test_same_children_same_tree_bytes_and_paths` and `test_same_pair_two_captions_conflict_only_on_sum` invert in unit 2 so units 2–4 can go green. Unit 5 does not repeat that inversion.
+- **`write_nap` hashes a second `dumps_tree` call**: Mitigation: serialize once; `_write_pair`; unit 2 and unit 3 both assert call count and disk bytes.
 - **`migrate.py` re-serializes and disagrees with on-disk JSON**: Mitigation: creative decision — hash file bytes, never re-dump.
 - **Heal does not drop the lex-smaller equal variant**: Mitigation: unit 4 fails first; only then change `_first_overlap` (do not pre-emptively rewrite heal).
 - **Windows path length**: Mitigation: issue already counts 121+d; add no full 64-hex suffix. No extra Windows CI; keep ASCII-only names.
 - **This repo stays on four-part stems and never dogfoods**: Mitigation: unit 7’s green step runs `migrate.py` on this clone and commits the rewritten store.
 - **`test_zoom` planted four-part sibling unpack breaks**: Mitigation: unit 1 updates the unpack to five-tuple immediately; keep the planted four-part file as a dual-read fixture until unit 6 replaces or complements it.
+- **Single-file `.nap` instead of `.tree`+`.summ`**: out of scope. A conflict-marked caption must still degrade wake while the payload stays zoomable. Do not collapse the pair.
 
 ## Pre-Mortem
 
 - **The plan treats heal as “already correct” and ships without pinning survivor order**: unit 4 exists specifically to pin lex-greatest / legacy-loses-to-new. Already covered by Challenge “Heal does not drop…”.
-- **Caption-conflict process test is left asserting unmerged `.summ`**: the inverted test in unit 5 is load-bearing; deleting it without replacement would hide a regression. Plan response: invert in place, do not delete the file.
+- **Caption-conflict process test is left asserting unmerged `.summ`**: inversion now lives in unit 2, not unit 5. Already covered by Challenge “Existing tests assert same dest paths…”.
 - **Migration is documented but operators `mv` and mismatch `.tree`/`.summ`**: change-surface row plus “script is the only writer” already forbids hand `mv`; `migrate.py` renames both suffixes together. Already covered.
 - **L3 was the wrong level because triple-worker git proofs balloon**: those proofs are additional tests on one constructor, not extra subsystems. No re-level. If preflight disagrees, stop.
 

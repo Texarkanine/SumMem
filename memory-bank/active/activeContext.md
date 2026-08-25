@@ -5,9 +5,9 @@
 
 ## What Was Done
 
-- Level 3 plan written: shared `variant_tag`/`nap_stem`, `write_nap`+`rematerialize` use it, dual-read parse, pin equal-set heal, invert caption-conflict proofs, sibling `migrate.py`, atlas/product copy.
-- Creative: `migrate.py` is a surgery analogue, not a `summem` verb (`memory-bank/active/creative/creative-nap-stem-migrate.md`).
+- Preflight FAIL (fixable): two existing tests still asserted four-part same-path / caption-only conflict, scheduled too late.
+- Plan revised: those inversions move into unit 2; `_nap_stem` is deleted in unit 3 in favor of `nap_stem` + `_write_pair`; `started_stores` is extracted for catalog and migrate.
 
 ## Next Step
 
-- Preflight subagent validates the plan. On PASS / PASS WITH ADVISORY, stop and wait for `/niko-build`.
+- Re-run preflight. On PASS / PASS WITH ADVISORY, stop and wait for `/niko-build`.

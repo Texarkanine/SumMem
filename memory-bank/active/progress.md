@@ -37,3 +37,26 @@ Give naps a five-part stem with a pair-bytes variant tag so concurrent same-bloc
 * Insights
     - `surgery.py` already calls `_nap_stem`; rematerialize constructor reuse covers surgery without a surgery source change unless a test pins old dest names.
 
+## 2026-08-25 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Validated the Level 3 plan against the codebase; wrote `memory-bank/active/.preflight-status` with first line `FAIL (fixable)`.
+    - Verified the heal survivor claim, `_seq_prefix` shape-independence, `Path.stem` grouping, both committed four-part stores, and the Release Please version lockstep. Confirmed every unit-8 doc target exists.
+* Decisions made
+    - Blocking TDD Plan Encoding check passes: all seven executable units order tests before production code; unit 8 is prose/policy and owes none; no change-detectors scheduled. No in-phase edits to `tasks.md`.
+    - FAIL is sequencing, not design: two existing tests assert the behavior unit 2 reverses, and neither is retired in unit 2's cycle.
+* Insights
+    - `tests/test_nap.py::test_same_children_same_tree_bytes_and_paths` is unnamed in the plan and needs a semantic inversion, not an oracle swap.
+    - `tests/test_caption_conflict.py::test_same_pair_two_captions_conflict_only_on_sum` is scheduled three units after it goes red, so units 2-4 cannot end green.
+    - `_nap_stem` (private wrapper) and `nap_stem` (new public constructor) would coexist with different signatures, and only `write_nap` gets a serialize-once guarantee.
+
+## 2026-08-25 - PLAN - COMPLETE
+
+* Work completed
+    - Re-planned after preflight FAIL (fixable): unit 2 now names and inverts `test_same_children_same_tree_bytes_and_paths` and `test_same_pair_two_captions_conflict_only_on_sum`; unit 3 deletes `_nap_stem` and shares `_write_pair`; unit 7 extracts `started_stores`; unit 8 names atlas lines 63 and 95.
+* Decisions made
+    - Caption-conflict inversion lives in unit 2 so units 2–4 can go green; unit 5 is only the new `test_nap_variants.py` proofs.
+    - Do not collapse `.tree`+`.summ` into one `.nap` file; a dirty caption must still degrade wake while the payload stays zoomable.
+* Insights
+    - The first plan’s “invert in unit 5” left the suite red across three units of progress commits. Scheduling the inversion with the behavior change is the TDD constraint, not just completeness.
+
