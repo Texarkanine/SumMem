@@ -12,7 +12,7 @@ This product is not a single-actor local diary (that is OptMem, including its ma
 
 ## Use Cases
 
-- An agent starts a session, wakes the repository's root memory once, reads a bounded decaying view of what the repo has learned, and sees a catalog of other started memories it may pull when it works under those paths.
+- An agent starts a session, wakes the repository's root memory once, receives the current how-to, reads a bounded decaying view of what the repo has learned, and sees a catalog of other started memories it may pull when it works under those paths.
 - An agent that learned a fact records one short line through the script. It does not invent filenames or edit store files.
 - When asked to compact, the agent supplies a summary for a sealed block the script already identified. The original sentences remain recoverable.
 - An agent searches remembered text word for word, or opens a summary back to its original sentences — including after a squash-merge, from a fresh clone of the branch tip.

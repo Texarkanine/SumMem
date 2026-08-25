@@ -86,3 +86,14 @@ Move the versioned agent how-to from the committed `AGENTS.md` prefix onto the r
 * Insights
     - Preflight leftover-pin class did not recur as a product miss: ingest slices from the memories header; how-to teaches `<path>` not `pkg`; skip is see-and-follow.
     - Remaining whole-stdout `git` forbid on `test_root_wake_catalogs_other_store` is plan-kept test fragility, not an incomplete split.
+
+## 2026-08-24 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-wake-usage-prompt.md`.
+    - Reconciled persistent files: session-start use case in `productContext.md` now includes the how-to.
+* Decisions made
+    - Named-section assembler stays declined. QA advisories stay non-blocking.
+* Insights
+    - Leftover pins are the recurring failure mode: a retarget step that names only some tokens leaves the rest in place.
+    - Catalog-shape tests must slice the catalog section once Usage contains `{AGENT_BIN}` and `wake --path`.
