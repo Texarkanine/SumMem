@@ -25,3 +25,24 @@ Rename nap caption files from `.sum` to `.summ` in the script, tests, docs, and 
     - Find recipe stays out of the tree; PR body only
 * Insights
     - `path.suffix` for `.summ` is `.summ`; stem grouping stays the same
+
+## 2026-08-25 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Preflight PASS WITH ADVISORY (Gemini quota; Grok ran the skill)
+* Decisions made
+    - Do not add `CAPTION_SUFFIX` this build (advisory: radical innovation)
+    - Architecture edit is suffixes on the existing Naps pair bullets
+* Insights
+    - `_unlink_node` follows `sum_path`; leftover `.sum` after the suffix drop is an ignored orphan, avoided by `git mv` / the find recipe
+
+## 2026-08-25 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Validated the Level 2 plan against `summem`, `tests/`, committed naps, README, and the architecture Naps section
+    - Wrote `memory-bank/active/.preflight-status` with first line `PASS WITH ADVISORY`
+* Decisions made
+    - Plan is acceptable as-is; advisories are not plan edits
+* Insights
+    - Three hardcoded suffix sites plus eight test files are the complete pin set; `_unlink_node` follows `sum_path`
+    - A single `CAPTION_SUFFIX` / `_caption_path` helper is the accretive change the plan does not make

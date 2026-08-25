@@ -1,0 +1,17 @@
+PASS WITH ADVISORY
+
+TDD plan encoding: Unit 1 (Caption suffix — executable) orders stub tests, then interface-left-alone, then red assertions on `.summ`, then the three `summem` writes. That is test-first enough that an implementer cannot follow the numbered steps by coding first. Units 2–4 are prose/policy and owe no tests. No scheduled change-detectors; the leftover-`.sum` case is product behavior (old suffix ignored), not a document pin.
+
+Convention: file list matches the shebang + `tests/` layout. The three production sites are real and complete: `list_view` suffix set + `files.get(".sum")` (summem ~423/431), `rematerialize_child` dest (507), `write_nap` dest and docstring (603/618). `_unlink_node` follows `ViewNode.sum_path` and does not hardcode a suffix; it is not a fourth site. `dumps_tree` / `NapChild` / `kid.sum` / `ViewNode.sum_path` are not in any step (pre-mortem condition holds). `path.suffix` of `*.summ` is `.summ`; `path.stem` grouping is unchanged.
+
+Tests: every `*.sum` glob, `f"{stem}.sum"`, `endswith(".sum")`, and `path.suffix == ".sum"` pin in `tests/` lives in the eight listed files (`test_nap.py`, `test_view.py`, `test_wake.py`, `test_fold.py`, `test_cli.py`, `test_zoom.py`, `test_zipper.py`, `test_proof_conflict.py`). `surgery.py` and `tests/test_surgery.py` construct no caption suffix. `_sum_sentences` in `test_zipper.py` must retarget the file-suffix branch only; `kid.sum` stays the JSON caption.
+
+Dependencies: `heal_view`, `write_nap` unlink, and `surgery.excise_note` consume `list_view` / `rematerialize_child` and pick up the new suffix automatically. This repo has exactly four committed captions (two under `.summem/naps/`, two under `dogfood/.summem/naps/`); unit 2 `git mv` after green `tmp_path` tests is required in the same change or root/dogfood wake loses captions. README `git st` example and “`.sum` contains our summary” bullet are the user-facing suffix pins; architecture Naps currently says “caption” / “children file” without suffixes — unit 3’s pair naming belongs on those two bullets.
+
+Conflicts: no existing `.summ` helper to reuse; no dual-read; find recipe stays PR-body-only. Completeness: brief requirements 1–4 map to units 1–4. Constraints (store dir, no shipped recipe, temp-tree find) are in the plan.
+
+Advisory — radical innovation (do not apply in this preflight): bind the suffix once. Add `CAPTION_SUFFIX = ".summ"` and `_caption_path(naps, stem)` on `summem`, and have `list_view`, `rematerialize_child`, and `write_nap` use them. Retargeted tests glob `f"*{m.CAPTION_SUFFIX}"` / `stem + m.CAPTION_SUFFIX` instead of a third copy of the string. The collision that caused this task is “`.sum` lived in too many places”; a named constant is the change that makes that failure mode harder to reintroduce. Same steps, one shared token.
+
+Advisory — leftover orphans: `_unlink_node` will not delete a leftover `{stem}.sum` after the suffix set drops it (`sum_path` is None). A later nap of that stem leaves an ignored `.sum` in `naps/`. This repo’s `git mv` and the consumer find recipe avoid that; no plan change required.
+
+Advisory — architecture edit shape: put `.summ` / `.tree` on the existing Naps pair bullets; do not add a layout table or rewrite archives / `NapChild.sum` schema docs (already stated).
