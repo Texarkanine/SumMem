@@ -1,1 +1,0 @@
-summem checks sys.version_info immediately after import sys and before import tomllib; Python 3.10 prints SumMem needs Python 3.11 or newer instead of ModuleNotFoundError.

@@ -1,1 +1,0 @@
-require_python in main() is too late: module-level import tomllib dies on Python 3.10 before SumMem needs Python 3.11 or newer.

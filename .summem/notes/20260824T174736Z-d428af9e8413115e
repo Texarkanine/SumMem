@@ -1,1 +1,0 @@
-named_ids catches _TREE_PARSE_ERRORS like the other tree readers, including AttributeError when a children-file child is not a mapping.

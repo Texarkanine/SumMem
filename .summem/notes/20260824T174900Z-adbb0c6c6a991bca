@@ -1,1 +1,0 @@
-equal_grain_pair is a fold-test oracle only; the copied driver does not keep it. fold_request still walks adjacent same-grain ViewNodes itself.
