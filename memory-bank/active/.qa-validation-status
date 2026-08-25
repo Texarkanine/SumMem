@@ -1,0 +1,14 @@
+PASS
+
+# QA Result
+
+1. **Findings**
+    - No blocking findings.
+    - The exact two-line oracle is materially stronger than the removed substring search: it fails if `zoom_text` ignores `child.id` and returns this fixture's wake text or the reported fake `eight-a` line.
+    - The test derives the nested pack prefix and leaf date from the selected projected child's public tree data, while independently fixing the expected captions (`eight-b-3`, `b5`); it does not reuse `zoom_text` or a private projection formatter as its oracle.
+    - The fixture deterministically selects a nap, so removing the unreachable note branch and asserting `child.kind == "nap"` is complete, simpler, and within the Level 1 rework scope.
+    - No product behavior, dependency, documentation contract, or unrelated test was changed.
+
+2. **Verification**
+    - Targeted py311 test: 1 passed.
+    - Full `tox` matrix: 284 passed on each of py311, py312, py313, and py314.

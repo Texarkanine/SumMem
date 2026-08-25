@@ -139,3 +139,15 @@ Apply obviously wrong and fixable remediations from the 2026-08-25 SLOBAC audit 
     - No substring-absent `b6`/`b7`.
 * Insights
     - `dated_leaf` plus `short_id` on the tree child's public id is enough; no `_projected_child`.
+
+## 2026-08-25 - QA - COMPLETE
+
+* Work completed
+    - Reviewed the reworked `test_zoom_expanded_child_id` against the operator's PR feedback and Level 1 baseline.
+    - Confirmed the exact two-line oracle rejects both known wrong-child outputs and uses the selected projected child's public tree data.
+    - Reran the full `tox` matrix on py311–py314: 284 passed in each environment.
+* Decisions made
+    - Assessed as PASS with no blocking or advisory findings.
+    - The deterministic nap assertion and removal of the dead note branch are complete and within scope.
+* Insights
+    - Fixing expected captions while deriving only ids and dates from the selected child avoids both a self-fulfilling formatter oracle and brittle hex-substring negatives.
