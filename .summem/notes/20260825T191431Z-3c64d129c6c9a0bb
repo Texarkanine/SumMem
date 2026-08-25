@@ -1,0 +1,1 @@
+Perf audit: wake view ~1ms@5k leaves. Costs: ~120ms startup (compile 29ms; dataclasses/argparse/tomllib imports), heal reparses every .tree per note (81ms@5k), recall per-line short_id rescan (19s@5k common word), catalog os.walk+check-ignore 44ms vs git ls-files 2.5ms
