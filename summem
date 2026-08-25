@@ -863,11 +863,9 @@ def named_ids(parent) -> list[str]:
 
 
 def expand_frontier(nodes: list[ViewNode], budget: int) -> list[ProjectedNode]:
-    """Return a printed frontier of *nodes*, expanding naps while shorter than *budget*."""
+    """Return every view node, expanding naps only while the frontier is shorter than *budget*."""
     if budget <= 0:
         return []
-    if len(nodes) >= budget:
-        nodes = nodes[-budget:]
     frontier = [
         ProjectedNode(
             id=node.id,
@@ -893,8 +891,6 @@ def expand_frontier(nodes: list[ViewNode], budget: int) -> list[ProjectedNode]:
         if kids is None:
             break
         frontier = [*frontier[:idx], *kids, *frontier[idx + 1 :]]
-    if len(frontier) > budget:
-        frontier = frontier[-budget:]
     return frontier
 
 

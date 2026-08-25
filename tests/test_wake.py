@@ -230,8 +230,8 @@ def test_wake_pack_line_is_grain_prefix_caption(tmp_path, monkeypatch):
     assert m.wake_text(repo) == f"x2 {prefix}: pair\n"
 
 
-def test_wake_prints_at_most_wake_lines_newest(tmp_path, monkeypatch):
-    """Eleven notes at WAKE_LINES=4 print the newest four texts, no hashes."""
+def test_wake_over_budget_prints_every_view_node(tmp_path, monkeypatch):
+    """Eleven notes at WAKE_LINES=4 print all eleven texts, oldest first."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     for i in range(11):
@@ -240,9 +240,32 @@ def test_wake_prints_at_most_wake_lines_newest(tmp_path, monkeypatch):
     lines = m.wake_text(repo).splitlines()
     assert lines == [
         dated_leaf(datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC).strftime("%Y%m%dT%H%M%SZ"), f"n{i}")
-        for i in range(7, 11)
+        for i in range(11)
     ]
     assert all(len(part) != 64 for line in lines for part in line.split())
+
+
+def test_wake_over_budget_keeps_oldest_pack(tmp_path, monkeypatch):
+    """A pack older than the budget still prints when later notes overflow it."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    m.write_note(repo, "gamma", datetime(2026, 1, 1, 0, 0, 3, tzinfo=UTC), Random(3))
+    m.write_note(repo, "delta", datetime(2026, 1, 1, 0, 0, 4, tzinfo=UTC), Random(4))
+    m.write_note(repo, "epsilon", datetime(2026, 1, 1, 0, 0, 5, tzinfo=UTC), Random(5))
+    monkeypatch.setattr(m, "WAKE_LINES", 3)
+    lines = m.wake_text(repo).splitlines()
+    nap_id = next(node.id for node in m.list_view(repo) if node.kind == "nap")
+    prefix = m.short_id(nap_id, [node.id for node in m.list_view(repo)])
+    assert lines[0] == f"x2 {prefix}: pair"
+    assert lines[1:] == [
+        dated_leaf("20260101T000003Z", "gamma"),
+        dated_leaf("20260101T000004Z", "delta"),
+        dated_leaf("20260101T000005Z", "epsilon"),
+    ]
 
 
 def test_wake_does_not_print_a_nap_request(tmp_path, monkeypatch):

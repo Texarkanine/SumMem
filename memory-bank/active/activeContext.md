@@ -1,11 +1,12 @@
 # Active Context
 
 ## Current Task: wake-never-cut
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Intent approved: wake never drops oldest view lines; over-budget is fine until the next `note` folds back.
-- Classified Level 1: one projection (`expand_frontier` slices `nodes[-budget:]`); tests and the atlas already say an at-or-over-budget wake lists view nodes.
+- Removed both newest-N slices in `expand_frontier`. Over-budget wake prints every view node; under-budget expand is unchanged.
+- Tests: full 11-note listing, oldest pack kept, recall still matches when over budget, 8-2-1 wake lists three files then expands to four when short.
+- Atlas and persistent memory-bank files state that wake does not drop nodes to fit `WAKE_LINES`.
 
 ## Next Step
-- Load the Level 1 workflow and enter Build.
+- Level 1 QA via a spawned `/niko-qa` subagent.

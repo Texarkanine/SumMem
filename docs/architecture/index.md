@@ -166,7 +166,7 @@ When the view has fewer nodes than the wake budget, wake may open a children fil
 
 `nap` still takes view-node ids — ids that exist as files — not ids that exist only in that in-memory expansion.
 
-When the view meets or exceeds the budget, wake lists view nodes. It does not open children files to list, and it does not zipper.
+When the view meets or exceeds the budget, wake lists every view node. It does not drop the oldest to fit the budget, open children files to list, or zipper. The next `note` or `nap` is what folds the count back to spec.
 
 Wake never refuses to print. A dirty caption degrades; it does not block the session.
 

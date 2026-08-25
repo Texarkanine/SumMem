@@ -491,7 +491,7 @@ def test_heal_malformed_overlapping_nap_skipped(tmp_path):
 
 
 def test_heal_to_8_2_1_empty_fold_request_wake_projects(tmp_path, monkeypatch):
-    """Heal to grains 8,2,1: fold_request is empty at budget 2; wake caps at budget and expands when short."""
+    """Heal to grains 8,2,1: fold_request is empty at budget 2; wake lists all three and expands when short."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     _fold_balanced(m, repo, [f"a{i}" for i in range(8)], "eight", start=1)
@@ -505,7 +505,7 @@ def test_heal_to_8_2_1_empty_fold_request_wake_projects(tmp_path, monkeypatch):
     assert m.fold_request(repo, 2) == ""
     monkeypatch.setattr(m, "WAKE_LINES", 2)
     lines = [line for line in m.wake_text(repo).splitlines() if line]
-    assert len(lines) == 2
+    assert len(lines) == 3
     monkeypatch.setattr(m, "WAKE_LINES", 4)
     lines = [line for line in m.wake_text(repo).splitlines() if line]
     assert len(lines) == 4
