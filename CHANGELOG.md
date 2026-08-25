@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.7.0](https://github.com/Texarkanine/SumMem/compare/v0.6.0...v0.7.0) (2026-08-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* Nap captions are `.summ`, not `.sum`. To migrate after copying the new script, rename existing captions (including nested `.summem` stores). You may try running the command below from the root of your repository if you don't want to do it by hand.
+
+### Features
+
+* rename nap captions from .sum to .summ ([#47](https://github.com/Texarkanine/SumMem/issues/47)) ([9325d74](https://github.com/Texarkanine/SumMem/commit/9325d740b00e36b3a76043e6428b0cb3178d7fef))
+
+
+### Bug Fixes
+
+* **prompt:** Tweak usage instructions a bit on inclusion of memories ([b944f0b](https://github.com/Texarkanine/SumMem/commit/b944f0be54a9a136687bce3037078e65438516da))
+
 ## [0.6.0](https://github.com/Texarkanine/SumMem/compare/v0.5.0...v0.6.0) (2026-08-25)
 
 
