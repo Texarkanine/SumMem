@@ -1,13 +1,13 @@
 # Active Context
 
 ## Current Task: nap-variant-stems
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** CREATIVE - COMPLETE
 
 ## What Was Done
 
-- Intent confirmed: implement [issue #61](https://github.com/Texarkanine/SumMem/issues/61) plus a store migration script in the PR.
-- Complexity determined: Level 3. Nap stem grammar, shared constructor, dual-read, heal survivor pinning, process-level merge proofs, atlas/product copy, and a migration helper are one complete feature across several surfaces. They complete the existing ingest=union / integrate=reduce file-backend rather than a new subsystem, and they land as one breaking PR — L4 milestone split would be artificial.
+- Intent confirmed: implement [issue #61](https://github.com/Texarkanine/SumMem/issues/61) plus a store migration script in the PR. Level 3.
+- Creative (architecture): migration helper is sibling `migrate.py`, not a `summem` verb and not `surgery.py`. Documented in `memory-bank/active/creative/creative-nap-stem-migrate.md`.
 
 ## Next Step
 
-- Load the Level 3 workflow and enter the plan phase.
+- Finish the Level 3 plan (test plan, implementation steps) and proceed to preflight.

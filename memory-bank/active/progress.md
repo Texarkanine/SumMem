@@ -15,3 +15,12 @@ Give naps a five-part stem with a pair-bytes variant tag so concurrent same-bloc
 * Insights
     - Product success criteria still say “same-block naps conflict only on the caption”; this task retires that line.
     - Issue #59's manual whole-pair recipe is superseded for new stems; it remains relevant only to pre-upgrade legacy conflicts.
+
+## 2026-08-25 - CREATIVE - COMPLETE
+
+* Work completed
+    - Explored where the operator migration helper lives.
+* Decisions made
+    - Sibling `migrate.py` (surgery analogue): loads `summem`, hashes on-disk pair bytes, renames complete four-part stems. Not a CLI verb, not folded into `surgery.py`, not a shell reimplementation of the digest.
+* Insights
+    - The README command-table stability rule is what kills `summem migrate` as the shipped surface.
