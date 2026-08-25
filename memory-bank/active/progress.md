@@ -49,3 +49,24 @@ Replace root-wake catalog enumeration (`os.walk` plus per-store `git check-ignor
     - `git ls-files` failure returns empty catalog (wake never refuses)
 * Insights
     - `test_gitignore_store_omitted_from_catalog` was already green on the old walk; the reds were no-`os.walk` and the `config.toml` sentinel
+
+## 2026-08-25 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Reviewed the implementation against the Level 2 plan and project patterns
+    - Found no blocking KISS, DRY, YAGNI, completeness, regression, integrity, or documentation issues
+    - Re-ran the full tox matrix: 287 tests passed on py311, py312, py313, and py314
+* Decisions made
+    - QA PASS; no build changes required
+* Insights
+    - The one-command enumeration preserves the catalog contract while deleting both the Python walk and per-store Git subprocess
+
+## 2026-08-25 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-catalog-ls-files.md`
+    - Reconciled persistent files (all skip)
+* Decisions made
+    - Standing consent continues through archive and a non-draft PR
+* Insights
+    - `--cached` alone would drop uncommitted `start` stores; `--others` is the contract the existing tests already enforced

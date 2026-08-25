@@ -95,4 +95,12 @@ No new technology - validation not required. `git ls-files --cached --others --e
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
+
+## QA Results
+
+- PASS: implementation matches the plan and acceptance criteria.
+- One NUL-delimited `git ls-files` enumeration replaces the Python walk and per-store ignore checks.
+- Catalog output, pull omission, ignored-store handling, untracked stores, root exclusion, and the `config.toml` sentinel are preserved.
+- No KISS, DRY, YAGNI, completeness, regression, integrity, or documentation blockers found.
+- Full tox matrix passed: 287 tests on Python 3.11, 3.12, 3.13, and 3.14.
