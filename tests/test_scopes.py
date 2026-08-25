@@ -263,6 +263,18 @@ def test_monkeypatch_wake_lines_still_applies_when_config_omits_knob(tmp_path, m
     assert "beta" in out
 
 
+def _catalog_section(out: str) -> str:
+    """Return the catalog section of a root-wake document, excluding later sections."""
+    lines = out.splitlines()
+    start = lines.index("== Additional SumMem Catalogs ==")
+    end = len(lines)
+    if "== Project-root Memories ==" in lines:
+        end = lines.index("== Project-root Memories ==")
+    elif lines and lines[-1] == "You are up to speed.":
+        end = len(lines) - 1
+    return "\n".join(lines[start:end])
+
+
 def test_root_wake_catalog_is_labeled_paths_not_commands(tmp_path, monkeypatch, capsys):
     """Root wake labels extra stores as ./paths, not as wake --path commands."""
     m = load_summem()
@@ -274,10 +286,11 @@ def test_root_wake_catalog_is_labeled_paths_not_commands(tmp_path, monkeypatch, 
     assert m.main(["wake"]) == 0
     out = capsys.readouterr().out
     lines = out.splitlines()
-    assert lines[0] == "== Additional SumMem Catalogs =="
+    assert lines[0] == "== SumMem Usage =="
+    catalog = _catalog_section(out)
     assert "./pkg" in lines
-    assert "summem wake --path pkg" not in out
-    assert "wake --path" not in out
+    assert "summem wake --path pkg" not in catalog
+    assert "wake --path" not in catalog
     assert "== Project-root Memories ==" not in out
     assert lines[-1] == "You are up to speed."
     assert "pkg-note" not in out
@@ -292,8 +305,36 @@ def test_empty_root_omits_project_root_header(tmp_path, monkeypatch, capsys):
     capsys.readouterr()
     assert m.main(["wake"]) == 0
     out = capsys.readouterr().out
-    assert out == "== Additional SumMem Catalogs ==\n./pkg\nYou are up to speed.\n"
+    assert out == m.how_to_text() + "\n" + m.catalog_text(repo, repo) + "You are up to speed.\n"
     assert "== Project-root Memories ==" not in out
+
+
+def test_root_wake_starts_with_usage(tmp_path, monkeypatch, capsys):
+    """Empty root wake is how_to_text() plus the footer; no other sections."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["wake"]) == 0
+    out = capsys.readouterr().out
+    assert out == m.how_to_text() + "You are up to speed.\n"
+    assert out.startswith("== SumMem Usage ==")
+    assert "== Project-root Memories ==" not in out
+    assert "== Additional SumMem Catalogs ==" not in out
+
+
+def test_pull_wake_omits_usage(tmp_path, monkeypatch, capsys):
+    """wake --path omits the Usage section."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["start", "pkg"]) == 0
+    assert m.main(["note", "--path", "pkg", "pkg-note"]) == 0
+    capsys.readouterr()
+    assert m.main(["wake", "--path", "pkg"]) == 0
+    out = capsys.readouterr().out
+    assert "pkg-note" in out
+    assert "== SumMem Usage ==" not in out
+    assert out.endswith("You are up to speed.\n")
 
 
 def test_root_wake_catalogs_other_store(tmp_path, monkeypatch, capsys):
@@ -311,8 +352,8 @@ def test_root_wake_catalogs_other_store(tmp_path, monkeypatch, capsys):
     assert "./pkg" in out
     assert "== Additional SumMem Catalogs ==" in out
     assert "== Project-root Memories ==" in out
-    assert "summem wake --path pkg" not in out
-    assert ".summem/summem" not in out
+    catalog = _catalog_section(out)
+    assert "summem wake --path pkg" not in catalog
     assert "notes/" not in out
     assert "naps/" not in out
     assert "git" not in out
@@ -357,6 +398,7 @@ def test_pull_wake_omits_catalog_and_root_notes(tmp_path, monkeypatch, capsys):
     assert "wake --path pkg" not in out
     assert "== Additional SumMem Catalogs ==" not in out
     assert "== Project-root Memories ==" not in out
+    assert "== SumMem Usage ==" not in out
 
 
 def test_ignored_store_omitted_from_catalog(tmp_path, monkeypatch, capsys):
@@ -387,6 +429,12 @@ def test_root_only_wake_labels_nonempty_document(tmp_path, monkeypatch, capsys):
     capsys.readouterr()
     assert m.main(["wake"]) == 0
     out = capsys.readouterr().out
-    assert out == "== Project-root Memories ==\n" + m.wake_text(repo) + "You are up to speed.\n"
+    assert (
+        out
+        == m.how_to_text()
+        + "\n== Project-root Memories ==\n"
+        + m.wake_text(repo)
+        + "You are up to speed.\n"
+    )
     assert "== Additional SumMem Catalogs ==" not in out
 

@@ -1,0 +1,1 @@
+Skip a root wake when a == SumMem Usage == block is still readable; do not skip on a remembered wake or the footer alone.

@@ -1,0 +1,1 @@
+AGENT_BIN vs CLI_NAME; VISION/ROADMAP retired (README+atlas+notes+MB). tox py311-py314; nested recall; skipped-a-pack. Script is the only writer (files are the work). Note membership is clone-portability; no OptMem in the prompt. Onboarding: docs/agents-prompt.md lockstep.

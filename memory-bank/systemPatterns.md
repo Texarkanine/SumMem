@@ -2,13 +2,13 @@
 
 ## How This System Works
 
-SumMem is a script that owns a grow-only set of facts in the git tree, and a decaying view of that set. Agents never touch the store. They run `wake`, `note`, `nap`, `recall`, `zoom`, `start`, `init`, and `version` via `.summem/summem`. Bare invocation and `-h` print a handwritten catalog (`usage_text`); a command registered only with argparse will not appear there. `usage_text` uses `CLI_NAME` (`summem`). `prompt_text` and `fold_request`'s `Run:` line use `AGENT_BIN` (`.summem/summem`). That `Run:` line includes `--path REL` when walk-up from `$PWD` would not select the store that produced the ids. Successful `note` prints `Saved.` then maybe that fold request; `nap` prints only the fold request. Do not put the ACK inside `fold_request`. `init` prints the baked agent prompt (same text as `docs/agents-prompt.md`); that block at the top of committed `AGENTS.md` is how a repository opts in. The script assigns names, times, and hashes. This development repo’s record is repo-root `summem`; `.summem/summem` (and dogfood’s) is a symlink to it. `ensure_store` creates `notes/`, `naps/`, and default config when missing. It does not place the driver.
+SumMem is a script that owns a grow-only set of facts in the git tree, and a decaying view of that set. Agents never touch the store. They run `wake`, `note`, `nap`, `recall`, `zoom`, `start`, `init`, and `version` via `.summem/summem`. Bare invocation and `-h` print a handwritten catalog (`usage_text`); a command registered only with argparse will not appear there. `usage_text` uses `CLI_NAME` (`summem`). `prompt_text`, `how_to_text`, and `fold_request`'s `Run:` line use `AGENT_BIN` (`.summem/summem`). That `Run:` line includes `--path REL` when walk-up from `$PWD` would not select the store that produced the ids. Successful `note` prints `Saved.` then maybe that fold request; `nap` prints only the fold request. Do not put the ACK inside `fold_request`. `prompt_text` is the committed bootstrap; `how_to_text` is the versioned how-to on root wake. `init` prints the bootstrap; that block at the top of committed `AGENTS.md` is how a repository opts in. The script assigns names, times, and hashes. This development repo’s record is repo-root `summem`; `.summem/summem` (and dogfood’s) is a symlink to it. `ensure_store` creates `notes/`, `naps/`, and default config when missing. It does not place the driver.
 
 The view matches [OptMem](https://github.com/VictorTaelin/OptMem): short notes, a merge tree of summaries, a bounded wake. The store does not. OptMem's one append-only log and position-as-identity cannot survive squash-merge, uninterested conflict resolution, or many writers at once. SumMem keeps the view and replaces the single log with a directory of immutable files.
 
 Ingest is wait-free union: one immutable file per note. Integrate is cooperative: the script may fold a sealed block into a one-line caption plus a self-contained payload, then drop the children from the view. Wake is wait-free: it prints whatever captions exist and never blocks on a missing nap.
 
-A command resolves one store by walking from `--path` or `$PWD` toward the git root and taking the first started directory. Outside a repository, store commands fail; `init`, `version`, and help still print. Root wake pushes a labeled catalog (`== Additional SumMem Catalogs ==` and `./path` lines, not pull commands) when other stores exist, then that store's decaying document under `== Project-root Memories ==` when the document is non-empty. A pull (`wake --path`) prints only the nearest store. Child memory in context is advertised, not enforced.
+A command resolves one store by walking from `--path` or `$PWD` toward the git root and taking the first started directory. Outside a repository, store commands fail; `init`, `version`, and help still print. Root wake prints `== SumMem Usage ==` (`how_to_text`), then a labeled catalog (`== Additional SumMem Catalogs ==` and `./path` lines, not pull commands) when other stores exist, then that store's decaying document under `== Project-root Memories ==` when the document is non-empty. A pull (`wake --path`) prints only the nearest store: no Usage, no catalog, no Project-root header. Child memory in context is advertised, not enforced.
 
 This file is the briefing. The atlas is [`docs/architecture/index.md`](../docs/architecture/index.md). What this backend is not yet lives in [`docs/notes.md`](../docs/notes.md).
 
@@ -23,6 +23,7 @@ graph TD
     CLI --> Caps["Naps: one-line captions"]:::store
     CLI --> Trees["Naps: canonical payloads"]:::store
     Root["Root wake"]:::script --> Agents
+    Root --> Usage["Usage how-to"]:::script
     Root --> Catalog["Catalog of other started stores"]:::script
 ```
 
@@ -60,7 +61,7 @@ A missing or conflict-marked caption degrades to grain and unique prefix with no
 
 ## Root pushes; other stores pull
 
-Session start wakes the true root once, because of the `AGENTS.md` block, not a harness hook. Skip if a root wake is already in the conversation. That print includes the catalog: walk the tree, honor git ignore (including `.git/info/exclude`), do not keep a committed index. `wake --path` does not reprint root or the full catalog. Do not load every started store in the root wake.
+Session start wakes the true root once, because of the `AGENTS.md` block, not a harness hook. Skip if a `== SumMem Usage ==` block is still readable in the conversation. That print includes Usage, then the catalog: walk the tree, honor git ignore (including `.git/info/exclude`), do not keep a committed index. The pull recipe lives in Usage, not in the bootstrap. Catalog lines are paths. `wake --path` does not reprint Usage, root, or the full catalog. Do not load every started store in the root wake.
 
 ## Settings live in the store
 

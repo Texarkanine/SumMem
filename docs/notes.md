@@ -5,7 +5,7 @@ Things that are not true of the tree yet, and that we did not replace with a dif
 ## Not this backend
 
 - A second on-disk backend (sqlite or otherwise). The agent commands stay the same if that happens. Store roles in [Architecture](architecture/index.md) must still exist.
-- Harness hooks as the way memory loads. They may nag. Session start is still the `AGENTS.md` prompt and a root `wake`.
+- Harness hooks as the way memory loads. They may nag. Session start is still the `AGENTS.md` bootstrap and a root `wake`.
 
 ## Not this fold
 

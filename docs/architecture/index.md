@@ -16,6 +16,7 @@ graph TD
     CLI --> Naps["Naps: caption + children"]:::store
     CLI --> Cfg["Per-store settings"]:::store
     CLI --> Root["Root wake"]:::script
+    Root --> Usage["Usage how-to"]:::script
     Root --> Catalog["Catalog of other stores"]:::script
     Root --> View["Decaying view"]:::script
 ```
@@ -30,7 +31,7 @@ A **store** is the data: a directory of notes, naps, and settings under `.summem
 
 The **driver** is the script agents run. Creating a store creates the data directories and a default settings file. It does not place or overwrite the driver. This development repo keeps one script at the repository root and points each store’s script path at it.
 
-**Activation** is a block of instructions at the top of committed `AGENTS.md`. The copyable file is [`docs/agents-prompt.md`](../agents-prompt.md). The `init` command prints the same text. Presence of the driver is not activation.
+**Activation** is a block of instructions at the top of committed `AGENTS.md`. The `init` command prints that block. Presence of the driver is not activation.
 
 A command resolves one store by walking from the work path — `--path`, or the current directory — toward the git root and taking the first directory that already has a store. The git root gets a store on the first store command. Every other store is created with `start`.
 
@@ -313,7 +314,7 @@ Zoom and recall print one agent-safe line when they skip an unreadable sibling c
 
 A command resolves **one** store. The work path may be a file: the walk starts at that file’s directory. The script does not parse workspace manifests. It does not create a store because someone recorded a note from a deep folder.
 
-Root wake prints a labeled catalog of every other started store (paths only, not pull commands), then the root listing when that listing is non-empty, labeled `== Project-root Memories ==`. The catalog is a walk of the tree that honors git ignore. It is not a committed index. A wake aimed at a path prints only the nearest store.
+Root wake prints `== SumMem Usage ==`, then a labeled catalog of every other started store (paths only, not pull commands), then the root listing when that listing is non-empty, labeled `== Project-root Memories ==`. The catalog is a walk of the tree that honors git ignore. It is not a committed index. A wake aimed at a path prints only the nearest store: no Usage, no catalog, no Project-root header.
 
 A child store in context is advertised, not enforced. Do not load every started store in the root wake.
 
@@ -347,14 +348,14 @@ SumMem is also not:
 - one growing log that every note appends to
 - a lease, a primary agent, or a custom merge driver
 - git history as the zoom tree
-- harness hooks as the way memory loads — hooks may nag; the prompt and the root catalog are how memory enters context
+- harness hooks as the way memory loads — hooks may nag; the bootstrap and a root wake are how memory enters context
 - a package manifest as a scope
 
 ## Change surfaces
 
 | If you are changing | Read |
 |---|---|
-| What an agent is allowed to know or type | The README command table and the activation block. Do not leak store paths into the agent interface. CLI output stays silent on git. The activation block treats the files the script wrote as part of your work, not a separate publish procedure. |
+| What an agent is allowed to know or type | The README command table, the activation block, and root-wake Usage. Do not leak store paths into the agent interface. CLI output stays silent on git. The activation block treats the files the script wrote as part of your work, not a separate publish procedure. |
 | How notes land under concurrency | Notes. Recording a note must still commute. |
 | How summaries and originals survive squash | Naps. Fold. Zoom is a property of the current commit. |
 | Merge behavior or a new file that every note updates | Zipper. Recording a note commutes. No shared mutable index. |

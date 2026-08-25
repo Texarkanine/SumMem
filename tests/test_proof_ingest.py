@@ -48,8 +48,8 @@ def test_two_worktrees_note_merge_without_conflict(tmp_path):
     out = wake.stdout.decode("utf-8")
     assert "alpha" in out
     assert "beta" in out
-    lines = [line for line in out.splitlines() if line]
-    assert lines[0] == "== Project-root Memories =="
+    lines = out.splitlines()
+    header = lines.index("== Project-root Memories ==")
     assert lines[-1] == "You are up to speed."
     notes = [
         path
@@ -60,4 +60,4 @@ def test_two_worktrees_note_merge_without_conflict(tmp_path):
         dated_leaf(path.name.split("-")[0], path.read_text(encoding="utf-8").removesuffix("\n"))
         for path in notes
     }
-    assert set(lines[1:-1]) == expected
+    assert set(lines[header + 1 : -1]) == expected
