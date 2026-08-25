@@ -1,8 +1,8 @@
 # Progress
 
-Apply obviously wrong and fixable remediations from the 2026-08-25 SLOBAC audit of `tests/`. Leave the file-backend proof suite and other product-shaped findings.
+Apply obviously wrong and fixable remediations from the 2026-08-25 SLOBAC audit of `tests/`. Leave the file-backend proof suite and other product-shaped findings. Rework: pin `test_zoom_expanded_child_id` to this child's public wake lines so `zoom_text` cannot ignore `child.id`.
 
-**Complexity:** Level 2
+**Complexity:** Level 1
 
 ## 2026-08-25 - COMPLEXITY-ANALYSIS - COMPLETE
 
@@ -118,3 +118,12 @@ Apply obviously wrong and fixable remediations from the 2026-08-25 SLOBAC audit 
 * Decisions made
     - Pin exact public wake lines: `x5 …: eight-b-3` plus dated `b5`. Same style as `test_zoom_nap_of_naps_prints_two_children_not_leaves`.
     - Do not add substring-absent `b6`/`b7` checks; those bigrams can appear in a hex prefix.
+
+## 2026-08-25 - COMPLEXITY-ANALYSIS - COMPLETE
+
+* Work completed
+    - Rework classified Level 1: one test oracle in `tests/test_wake_expand.py`.
+* Decisions made
+    - Bug fix, single component. L1 skips plan, creative, and preflight; go to build.
+* Insights
+    - The first non-file frontier child is the `eight-b-4` nap; its zoom is `x5 …: eight-b-3` plus dated `b5`.
