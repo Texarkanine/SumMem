@@ -104,3 +104,8 @@ Apply obviously wrong and fixable remediations from the 2026-08-25 SLOBAC audit 
     - `productContext.md` / `techContext.md` no longer glob `test_proof_*`.
 * Decisions made
     - Findings 60–63 still left: same rule, different harness. No Phase B regroup.
+
+## 2026-08-25 - PR #48
+
+* Work completed
+    - Pushed `initial-slobac` and opened non-draft https://github.com/Texarkanine/SumMem/pull/48 so automated reviewers run.
