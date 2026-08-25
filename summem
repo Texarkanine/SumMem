@@ -310,23 +310,23 @@ def catalog_text(git_root, resolved_parent) -> str:
     )
     if result.returncode != 0:
         return ""
-    found: list[Path] = []
+    found: set[Path] = set()
     for raw in result.stdout.split(b"\0"):
         if not raw:
             continue
         rel = raw.decode("utf-8", "surrogateescape")
         posix = Path(rel).as_posix()
-        if posix == ".summem/config.toml":
+        if posix == ".summem" or posix.startswith(".summem/"):
             continue
-        if not posix.endswith("/.summem/config.toml"):
+        marker = "/.summem/"
+        idx = posix.find(marker)
+        if idx < 0:
             continue
-        parent = (root / Path(rel)).parent.parent
-        found.append(parent)
-    found.sort()
+        found.add(root / posix[:idx])
     if not found:
         return ""
     lines = ["== Additional SumMem Catalogs =="]
-    for parent in found:
+    for parent in sorted(found):
         rel = parent.relative_to(root).as_posix()
         lines.append(f"./{rel}")
     return "\n".join(lines) + "\n"

@@ -453,6 +453,21 @@ def test_catalog_does_not_os_walk(tmp_path, monkeypatch, capsys):
     assert "== Additional SumMem Catalogs ==" in out
 
 
+def test_file_ignored_config_still_catalogs_store(tmp_path, monkeypatch, capsys):
+    """A file-level gitignore of config.toml does not hide a store that has notes."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    (repo / ".gitignore").write_text("config.toml\n", encoding="utf-8")
+    assert m.main(["start", "pkg"]) == 0
+    assert m.main(["note", "--path", "pkg", "visible"]) == 0
+    capsys.readouterr()
+    assert m.main(["wake"]) == 0
+    out = capsys.readouterr().out
+    assert "./pkg" in out
+    assert "== Additional SumMem Catalogs ==" in out
+
+
 def test_catalog_requires_config_toml_sentinel(tmp_path, monkeypatch, capsys):
     """A child .summem directory without config.toml is not cataloged."""
     m = load_summem()

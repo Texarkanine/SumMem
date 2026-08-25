@@ -1,0 +1,1 @@
+Root catalog treats any git-visible path under /.summem/ as a started store, not only config.toml; file-level ignore of config.toml cannot hide a store that has notes.
