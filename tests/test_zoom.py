@@ -340,7 +340,7 @@ def test_zoom_shared_id_prints_first_view_row_children(tmp_path):
     m.write_nap(repo, ids[0], ids[1], "pair")
     first = m.list_view(repo)[0]
     tree = m.loads_tree(first.tree_path.read_bytes())
-    stamp, _rand, leafset, leaves = m._parse_nap_stem(first.name)
+    stamp, _rand, leafset, leaves, _variant = m._parse_nap_stem(first.name)
     later = f"{stamp}-{'f' * 16}-{leafset}-{leaves}"
     naps = repo / ".summem" / "naps"
     naps.joinpath(f"{later}.tree").write_bytes(m.dumps_tree(m.Tree(kids=list(reversed(tree.kids)))))

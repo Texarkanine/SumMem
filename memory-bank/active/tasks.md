@@ -236,4 +236,12 @@ No new technology - validation not required. `hashlib` and `SourceFileLoader` ar
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [ ] Build
+  - [x] Unit 1: pair digest, stem constructor, dual-read parse
+  - [ ] Unit 2: write_nap five-part
+  - [ ] Unit 3: rematerialize uses nap_stem
+  - [ ] Unit 4: equal-set heal survivor
+  - [ ] Unit 5: concurrent union proofs
+  - [ ] Unit 6: legacy read and rematerialize-from-legacy
+  - [ ] Unit 7: migrate.py
+  - [ ] Unit 8: atlas, patterns, product copy
 - [ ] QA
