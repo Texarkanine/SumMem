@@ -279,7 +279,7 @@ def test_unknown_prefix_is_error(tmp_path, monkeypatch, capsys):
     err = capsys.readouterr().err
     assert "unknown id" in err
     assert "Copy an id from wake" in err
-    assert list((repo / ".summem" / "naps").glob("*.sum")) == []
+    assert list((repo / ".summem" / "naps").glob("*.summ")) == []
 
 
 def test_ambiguous_prefix_is_error(tmp_path, monkeypatch, capsys):
@@ -298,7 +298,7 @@ def test_ambiguous_prefix_is_error(tmp_path, monkeypatch, capsys):
     err = capsys.readouterr().err
     assert "ambiguous" in err
     assert "Give a longer prefix" in err
-    assert list((repo / ".summem" / "naps").glob("*.sum")) == []
+    assert list((repo / ".summem" / "naps").glob("*.summ")) == []
 
 
 def test_nap_accepts_prefix_of_identical_notes(tmp_path, monkeypatch, capsys):

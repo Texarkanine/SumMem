@@ -420,7 +420,7 @@ def list_view(parent) -> list[ViewNode]:
     for path in naps.iterdir():
         if not path.is_file() or path.name.startswith("."):
             continue
-        if path.suffix not in (".sum", ".tree"):
+        if path.suffix not in (".summ", ".tree"):
             continue
         stems.setdefault(path.stem, {})[path.suffix] = path
     for stem, files in stems.items():
@@ -428,7 +428,7 @@ def list_view(parent) -> list[ViewNode]:
         if parsed is None:
             continue
         stamp, _, leafset, leaves = parsed
-        sum_path = files.get(".sum")
+        sum_path = files.get(".summ")
         tree_path = files.get(".tree")
         nodes.append(
             ViewNode(
@@ -504,7 +504,7 @@ def rematerialize_child(parent, child: NoteChild | NapChild) -> None:
     stem = _nap_stem(child)
     naps = store / "naps"
     tree_path = naps / f"{stem}.tree"
-    sum_path = naps / f"{stem}.sum"
+    sum_path = naps / f"{stem}.summ"
     if not tree_path.exists():
         _replace_bytes(tree_path, dumps_tree(child.tree))
     if not sum_path.exists():
@@ -600,7 +600,7 @@ def _adjacent_nodes(nodes: list[ViewNode], id_a: str, id_b: str) -> tuple[ViewNo
 
 
 def write_nap(parent, id_a, id_b, caption, entry_chars: int | None = None):
-    """Fold two adjacent view nodes into a nap pair. Return the .sum path."""
+    """Fold two adjacent view nodes into a nap pair. Return the .summ path."""
     require_entry(caption, entry_chars)
     nodes = list_view(parent)
     left, right = _adjacent_nodes(nodes, id_a, id_b)
@@ -615,7 +615,7 @@ def write_nap(parent, id_a, id_b, caption, entry_chars: int | None = None):
     stem = f"{_seq_prefix(left.name)}-{leafset}-{leaves}"
     naps = ensure_store(parent) / "naps"
     tree_path = naps / f"{stem}.tree"
-    sum_path = naps / f"{stem}.sum"
+    sum_path = naps / f"{stem}.summ"
     _replace_bytes(tree_path, dumps_tree(tree))
     _replace_bytes(sum_path, note_file_bytes(caption))
     _unlink_node(left)

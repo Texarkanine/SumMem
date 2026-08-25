@@ -1,4 +1,4 @@
-"""Pair-aware view: notes plus nap stems, including a missing .sum."""
+"""Pair-aware view: notes plus nap stems, including a missing .summ."""
 
 from __future__ import annotations
 
@@ -20,12 +20,12 @@ def _nap_two(m, repo):
 
 
 def test_view_includes_nap_stem_when_sum_is_missing(tmp_path):
-    """A .tree without a .sum is still one view node."""
+    """A .tree without a .summ is still one view node."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     _nap_two(m, repo)
     naps = repo / ".summem" / "naps"
-    sums = list(naps.glob("*.sum"))
+    sums = list(naps.glob("*.summ"))
     assert len(sums) == 1
     leafset = sums[0].name.split("-")[-2]
     sums[0].unlink()
@@ -35,12 +35,29 @@ def test_view_includes_nap_stem_when_sum_is_missing(tmp_path):
     assert nodes[0].caption == ""
 
 
-def test_view_includes_nap_stem_when_sum_has_conflict_markers(tmp_path):
-    """A .sum containing <<<<<<< is still one view node."""
+def test_view_ignores_leftover_sum_caption(tmp_path):
+    """A leftover .sum beside a .tree does not supply the caption."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     _nap_two(m, repo)
-    sums = list((repo / ".summem" / "naps").glob("*.sum"))
+    naps = repo / ".summem" / "naps"
+    captions = list(naps.glob("*.summ"))
+    assert len(captions) == 1
+    leftover = captions[0].with_suffix(".sum")
+    leftover.write_text("old-suffix caption\n", encoding="utf-8")
+    captions[0].unlink()
+    nodes = m.list_view(repo)
+    assert len(nodes) == 1
+    assert nodes[0].kind == "nap"
+    assert nodes[0].caption == ""
+
+
+def test_view_includes_nap_stem_when_sum_has_conflict_markers(tmp_path):
+    """A .summ containing <<<<<<< is still one view node."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    _nap_two(m, repo)
+    sums = list((repo / ".summem" / "naps").glob("*.summ"))
     leafset = sums[0].name.split("-")[-2]
     sums[0].write_text("<<<<<<< HEAD\npair\n=======\nother\n>>>>>>>\n", encoding="utf-8")
     nodes = m.list_view(repo)

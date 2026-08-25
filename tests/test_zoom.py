@@ -34,12 +34,12 @@ def test_zoom_two_note_nap_prints_both_texts(tmp_path):
 
 
 def test_zoom_conflict_sum_still_prints_leaves(tmp_path):
-    """Conflict markers in the parent .sum do not affect zoom of the leaves."""
+    """Conflict markers in the parent .summ do not affect zoom of the leaves."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     ids = _two_notes(m, repo)
     m.write_nap(repo, ids[0], ids[1], "pair")
-    sums = list((repo / ".summem" / "naps").glob("*.sum"))
+    sums = list((repo / ".summem" / "naps").glob("*.summ"))
     sums[0].write_text("<<<<<<< HEAD\npair\n=======\nother\n>>>>>>>\n", encoding="utf-8")
     nap_id = m.list_view(repo)[0].id
     out = m.zoom_text(repo, nap_id)

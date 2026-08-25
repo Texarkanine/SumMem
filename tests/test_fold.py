@@ -56,7 +56,7 @@ def test_nap_stem_inherits_left_child_seq_prefix(tmp_path):
     m.write_nap(repo, nodes[0].id, nodes[1].id, "pair")
     stem = f"{m._seq_prefix(pa.name)}-{leafset}-2"
     naps = repo / ".summem" / "naps"
-    assert (naps / f"{stem}.sum").is_file()
+    assert (naps / f"{stem}.summ").is_file()
     assert (naps / f"{stem}.tree").is_file()
 
 
@@ -256,7 +256,7 @@ def test_over_budget_note_requests_equal_grain_ones(tmp_path, monkeypatch, capsy
     notes = [p for p in (repo / ".summem" / "notes").iterdir() if not p.name.startswith(".")]
     assert len(notes) == 4
     naps = repo / ".summem" / "naps"
-    assert list(naps.glob("*.sum")) == []
+    assert list(naps.glob("*.summ")) == []
     assert list(naps.glob("*.tree")) == []
 
 
@@ -282,7 +282,7 @@ def test_config_toml_wake_lines_is_read(tmp_path, monkeypatch, capsys):
     assert "Invent nothing." in out
     notes = [p for p in (repo / ".summem" / "notes").iterdir() if not p.name.startswith(".")]
     assert len(notes) == 2
-    assert list((repo / ".summem" / "naps").glob("*.sum")) == []
+    assert list((repo / ".summem" / "naps").glob("*.summ")) == []
 
 
 def test_fold_request_mentions_remaining(tmp_path, monkeypatch):

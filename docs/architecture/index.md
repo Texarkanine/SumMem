@@ -57,8 +57,8 @@ A single note is written to a temp path and renamed into place.
 
 A **nap** is a summary of two neighbors in the listing. It is two files that share a name:
 
-- The **caption** is one line, the same length limit as a note. Wake prints it.
-- The **children file** is a dump of those two neighbors. Zoom and deep recall need it after squash.
+- The **caption** (`.summ`) is one line, the same length limit as a note. Wake prints it.
+- The **children file** (`.tree`) is a dump of those two neighbors. Zoom and deep recall need it after squash.
 
 The shared name starts with the left child’s time and random suffix so the nap sorts where that child sorted, not at “now.” The rest of the name is the leaf-set id and the grain, defined next.
 

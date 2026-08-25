@@ -36,6 +36,19 @@ Rename nap caption files from `.sum` to `.summ` in the script, tests, docs, and 
 * Insights
     - `_unlink_node` follows `sum_path`; leftover `.sum` after the suffix drop is an ignored orphan, avoided by `git mv` / the find recipe
 
+## 2026-08-25 - BUILD - COMPLETE
+
+* Work completed
+    - TDD: 15 red on `.summ` pins, then three `summem` sites green; leftover-`.sum` case in `test_view.py`
+    - `git mv` four committed captions; README + architecture Naps bullets
+    - Find recipe verified in a temp tree (kept for PR body)
+    - tox py311–py314: 284 passed
+* Decisions made
+    - No `CAPTION_SUFFIX` constant (preflight advisory: do not apply)
+    - Find uses prune + `case` so only direct `*/.summem/naps/*.sum` rename; skip if dest exists
+* Insights
+    - `Path.with_suffix(".sum")` on a `.summ` file yields `.sum` (replaces the last suffix)
+
 ## 2026-08-25 - PREFLIGHT - COMPLETE
 
 * Work completed
