@@ -93,6 +93,6 @@ No new technology - validation not required. `git ls-files --cached --others --e
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
-- [ ] Build
+- [x] Preflight
+- [x] Build
 - [ ] QA

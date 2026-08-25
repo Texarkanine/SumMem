@@ -1,13 +1,20 @@
 # Active Context
 
 ## Current Task: catalog-ls-files
-**Phase:** PREFLIGHT - COMPLETE (PASS)
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Classified Level 2
-- Planned TDD in `tests/test_scopes.py`: keep existing catalog/pull/exclude tests; add no-`os.walk`, `.gitignore`, and `config.toml` sentinel cases
-- Planned `catalog_text` as one `git ls-files -z --cached --others --exclude-standard` filtered on `.summem/config.toml`; delete `_ignored_store`
-- Atlas/README unchanged unless Scopes "walk that honors git ignore" becomes false
+- Replaced `catalog_text` walk + `_ignored_store` with one `git ls-files -z --cached --others --exclude-standard` filtered on `.summem/config.toml`
+- Added `test_catalog_does_not_os_walk`, `test_gitignore_store_omitted_from_catalog`, `test_catalog_requires_config_toml_sentinel`
+- Atlas/README unchanged: Scopes walk-that-honors-ignore is still true
+- `uvx --with tox tox`: 287 passed on py311–py314
 
 ## Next Step
-- Commit, then spawn `/niko-preflight`
+- Commit implementation, then spawn `/niko-qa`
+
+## Files modified
+- `/home/mobaxterm/.cursor/worktrees/summem-issue-49/SumMem/summem`
+- `/home/mobaxterm/.cursor/worktrees/summem-issue-49/SumMem/tests/test_scopes.py`
+
+## Deviations
+- None - built to plan

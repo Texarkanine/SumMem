@@ -37,3 +37,15 @@ Replace root-wake catalog enumeration (`os.walk` plus per-store `git check-ignor
     - No changes required to the plan.
 * Insights
     - The plan's choice to filter in Python rather than using a pathspec is safe and guarantees correctness across Git versions.
+
+## 2026-08-25 - BUILD - COMPLETE
+
+* Work completed
+    - `catalog_text` now enumerates via one `git ls-files -z --cached --others --exclude-standard`; `_ignored_store` deleted
+    - Three new catalog tests in `tests/test_scopes.py`; existing catalog/pull/exclude tests stayed
+    - Full suite: 287 passed on py311, py312, py313, py314
+* Decisions made
+    - Atlas/README left unchanged (Scopes walk sentence still true)
+    - `git ls-files` failure returns empty catalog (wake never refuses)
+* Insights
+    - `test_gitignore_store_omitted_from_catalog` was already green on the old walk; the reds were no-`os.walk` and the `config.toml` sentinel
