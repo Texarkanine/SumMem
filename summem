@@ -214,7 +214,6 @@ ENTRY_CHARS = 280
 WAKE_LINES = 32
 CLI_NAME = "summem"
 AGENT_BIN = ".summem/summem"
-PROMPT_DOC = "docs/agents-prompt.md"
 __version__ = "0.5.0"  # x-release-please-version
 
 CONFIG_TEMPLATE = """\
@@ -1017,11 +1016,11 @@ Shared memory for this repository is managed through SumMem, invoked as `{AGENT_
 
 ## At Session Start: Activating SumMem
 
-If this conversation does not contain a root-wake `== SumMem Usage ==` block you can still see and follow, run `{AGENT_BIN} wake` from the repository root. Do not skip because of a remembered wake or the footer alone.
+Run `{AGENT_BIN} wake` from the repository root. If you can see a prior project-root SumMem wake in this conversation's history, do not run it again.
 
 ## While Working: Register Memories
 
-`{AGENT_BIN} note "…"` records one short line for a fact another contributor would still need. Personal, machine-local, and user preference facts stay out. Follow further instructions that wake or `note` printed.
+`{AGENT_BIN} note "…"` records one short line for a fact another contributor would still need. Personal, machine-local, and user preference facts stay out. `note` may sometimes print further instructions; always follow them.
 
 Never invent filenames, rewrite note bytes, or delete memory files by hand. The script is the only writer. The files it writes are part of your work; do not leave them untracked.
 """
@@ -1030,8 +1029,8 @@ Never invent filenames, rewrite note bytes, or delete memory files by hand. The 
 def init_text() -> str:
     """Return the full `init` print: insert recipe plus prompt_text()."""
     return (
-        f"Insert {PROMPT_DOC} from the SumMem repository at the top of AGENTS.md "
-        "(this print is the same text). If Claude Code should see it too,"
+        "Insert the following at the top of AGENTS.md. "
+        "If Claude Code should see it too,"
         "\n"
         "put @AGENTS.md at the top of CLAUDE.md.\n"
         "\n"

@@ -14,7 +14,7 @@ def test_init_prints_recipe_and_prompt(capsys):
     assert m.main(["init"]) == 0
     out = capsys.readouterr().out
     assert "AGENTS.md" in out
-    assert m.PROMPT_DOC in out
+    assert "docs/agents-prompt.md" not in out
     assert prompt
     assert prompt in out
     assert "paste" not in out.lower()
@@ -73,7 +73,7 @@ def test_help_before_init_prints_init_help(capsys):
 
 
 def test_prompt_text_invariants():
-    """prompt_text() is the bootstrap: Usage-block skip, note, no versioned how-to."""
+    """prompt_text() is the bootstrap: always-unless root wake, note, no versioned how-to."""
     m = load_summem()
     prompt = m.prompt_text()
     lower = prompt.lower()
@@ -81,12 +81,15 @@ def test_prompt_text_invariants():
     assert "summem" in lower
     assert "wake" in lower
     assert "root" in lower
+    assert "project-root" in lower
     assert "conversation" in lower
     assert "contributor" in lower
     assert "personal" in lower
     assert "note" in lower
-    assert "== SumMem Usage ==" in prompt
-    assert "see and follow" in lower
+    assert "do not run it again" in lower
+    assert "== SumMem Usage ==" not in prompt
+    assert "see and follow" not in lower
+    assert "you are up to speed" not in lower
     assert "before any other tool call" not in lower
     assert ".summem/summem" in prompt
     assert "AGENTS.md or CLAUDE.md" not in prompt
@@ -121,13 +124,6 @@ def test_agents_md_starts_with_prompt_text():
     agents = Path(ROOT, "AGENTS.md").read_text(encoding="utf-8")
     prompt = m.prompt_text().strip()
     assert agents.startswith(prompt)
-
-
-def test_shipped_prompt_matches_prompt_text():
-    """docs/agents-prompt.md is exactly prompt_text() so installers copy a lockstep file."""
-    m = load_summem()
-    shipped = Path(ROOT, m.PROMPT_DOC).read_text(encoding="utf-8")
-    assert shipped == m.prompt_text()
 
 
 def test_how_to_text_is_the_usage_section():

@@ -31,7 +31,7 @@ A **store** is the data: a directory of notes, naps, and settings under `.summem
 
 The **driver** is the script agents run. Creating a store creates the data directories and a default settings file. It does not place or overwrite the driver. This development repo keeps one script at the repository root and points each store’s script path at it.
 
-**Activation** is a block of instructions at the top of committed `AGENTS.md`. The copyable file is [`docs/agents-prompt.md`](../agents-prompt.md). The `init` command prints the same text. Presence of the driver is not activation.
+**Activation** is a block of instructions at the top of committed `AGENTS.md`. The `init` command prints that block. Presence of the driver is not activation.
 
 A command resolves one store by walking from the work path — `--path`, or the current directory — toward the git root and taking the first directory that already has a store. The git root gets a store on the first store command. Every other store is created with `start`.
 

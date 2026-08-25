@@ -28,7 +28,7 @@ This is not a single-actor local diary ([OptMem](https://github.com/VictorTaelin
 ### Onboard a repository
 
 1. Copy [summem](./summem) into `.summem/summem` in your repository's root.
-2. Insert [docs/agents-prompt.md](docs/agents-prompt.md) from this repository at the top of committed `AGENTS.md`. If a repository already has an older, longer SumMem prefix, replace that prefix once with the current file. Later copies of the script leave `AGENTS.md` alone.
+2. Run `.summem/summem init` and insert that print at the top of committed `AGENTS.md`. If a repository already has an older, longer SumMem prefix, replace that prefix once. Later copies of the script leave `AGENTS.md` alone.
 3. Add `**/.summem/__pycache__/` to your `.gitignore`
 4. The first `wake`, `note`, `nap`, `zoom`, or `recall` creates the root store. Until someone `start`s another path, every note in the tree rolls up there.
 5. (optional): run `.summem/summem start <path>` now for any sub-packages (i.e. in a monorepo)
@@ -59,7 +59,6 @@ Agents invoke `.summem/summem`. Sometimes recording a `note` will ask for a `nap
 - [Architecture](docs/architecture/index.md) — algorithm, store layout, invariants
 - [Emergency surgery](docs/surgery.md) — zipper-excise one raw note at the branch tip (not a shipped command)
 - [Notes](docs/notes.md) — what this backend is not yet
-- [docs/agents-prompt.md](docs/agents-prompt.md) — the insertable bootstrap (also printed by `init`)
 - [AGENTS.md](AGENTS.md) — this repository's activation plus extra agent context
 
 ## Developing

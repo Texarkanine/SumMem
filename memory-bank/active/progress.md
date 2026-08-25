@@ -97,3 +97,14 @@ Move the versioned agent how-to from the committed `AGENTS.md` prefix onto the r
 * Insights
     - Leftover pins are the recurring failure mode: a retarget step that names only some tokens leaves the rest in place.
     - Catalog-shape tests must slice the catalog section once Usage contains `{AGENT_BIN}` and `wake --path`.
+
+## 2026-08-25 - POST-REFLECT - COMPLETE
+
+* Work completed
+    - Bootstrap skip is always-unless a prior project-root wake (no output-flag coupling).
+    - Deleted `docs/agents-prompt.md` and `PROMPT_DOC`. `init` prints an insert recipe plus `prompt_text()`.
+    - Opened [PR #44](https://github.com/Texarkanine/SumMem/pull/44).
+* Decisions made
+    - One shipped bootstrap: the function `init` prints. This repo’s `AGENTS.md` prefix remains dogfood lockstep.
+* Insights
+    - “A prior SumMem wake” would count a pull. The skip names project-root.

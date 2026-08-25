@@ -4,8 +4,8 @@
 **Phase:** REFLECT - COMPLETE
 
 ## What Was Done
-- Wrote `memory-bank/active/reflection/reflection-wake-usage-prompt.md`.
-- Reconciled persistent files: `productContext.md` session-start use case now includes the how-to; `systemPatterns.md` and `techContext.md` already matched.
+- Built Usage-on-root-wake; QA PASS; reflected.
+- After reflect: bootstrap is always-unless project-root wake (no Usage/footer flags). Dropped `docs/agents-prompt.md`; `init` prints `prompt_text()` only. `AGENTS.md` prefix still matches. PR #44 open. `tox -e py311` 283 passed.
 
 ## Next Step
-- `/niko-archive` to create the archive document and finalize
+- `/niko-archive`, then push `feat/wake-usage-prompt`
