@@ -1004,7 +1004,7 @@ If `note` asks for a nap, the note is already stored; do not retry the same note
 
 `{AGENT_BIN} recall <regex>` searches remembered text word for word. `{AGENT_BIN} zoom <id>` opens a pack: a line with an `x<N> <hash>:` prefix is a nap that can be zoomed in on. A leaf is `x1 YYYY-MM-DD:` and is not a zoom target.
 
-Listed `./path` lines name other stores; they are not commands. When you work under a cataloged path, `{AGENT_BIN} wake --path <path>` if that store's wake is not already in this conversation. Ignore `--path` if the root wake had no catalog.
+Listed catalog lines are paths that name other stores; they are not commands. When you work under a cataloged path, run `{AGENT_BIN} wake --path <path>` if that store's wake is not already in this conversation. Ignore `--path` if the root wake had no catalog.
 """
 
 
