@@ -27,3 +27,13 @@ Replace root-wake catalog enumeration (`os.walk` plus per-store `git check-ignor
     - Leave atlas/README unless the Scopes walk sentence becomes false
 * Insights
     - Existing start-then-wake tests never `git add` the child store; `--cached` alone would silently fail them
+
+## 2026-08-25 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Preflight evaluation completed. `.preflight-status` is PASS.
+    - Verified TDD plan encoding, convention compliance, dependency impact, and completeness.
+* Decisions made
+    - No changes required to the plan.
+* Insights
+    - The plan's choice to filter in Python rather than using a pathspec is safe and guarantees correctness across Git versions.
