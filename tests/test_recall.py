@@ -171,6 +171,104 @@ def test_recall_does_not_match_grain_day_or_prefix(tmp_path):
     assert "folded pair" not in m.recall_text(repo, ch)
 
 
+def test_recall_keeps_duplicate_note_dates(tmp_path):
+    """Recall prints both dated lines when two nested notes share text but not a day."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "same-text", datetime(2026, 1, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "same-text", datetime(2026, 1, 2, tzinfo=UTC), Random(2))
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    out = m.recall_text(repo, "same-text")
+    assert dated_leaf("20260101T000000Z", "same-text") in out.splitlines()
+    assert dated_leaf("20260102T000000Z", "same-text") in out.splitlines()
+
+
+def test_recall_nested_caption_before_matching_leaves(tmp_path):
+    """A nested nap caption hit is printed before matching leaves under that nap."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    for i, text in enumerate(["theme-a1", "theme-a2", "other-b1", "other-b2"], start=1):
+        m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "theme-inner")
+    m.write_nap(repo, ids[2], ids[3], "other")
+    nap_ids = [node.id for node in m.list_view(repo) if node.kind == "nap"]
+    m.write_nap(repo, nap_ids[0], nap_ids[1], "both")
+    lines = m.recall_text(repo, "theme").splitlines()
+    cap = next(i for i, line in enumerate(lines) if "theme-inner" in line)
+    leaf = next(i for i, line in enumerate(lines) if "theme-a1" in line)
+    assert cap < leaf
+
+
+def test_recall_parses_each_view_tree_once(tmp_path, monkeypatch):
+    """recall_text parses each view children file once while searching nested leaves."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    ab = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ab[0], ab[1], "ab")
+    m.write_note(repo, "unique-good-leaf", datetime(2026, 1, 1, 0, 0, 3, tzinfo=UTC), Random(3))
+    m.write_note(repo, "other-good", datetime(2026, 1, 1, 0, 0, 4, tzinfo=UTC), Random(4))
+    notes = [node for node in m.list_view(repo) if node.kind == "note"]
+    m.write_nap(repo, notes[0].id, notes[1].id, "cd")
+    bodies = [path.read_bytes() for path in (repo / ".summem" / "naps").glob("*.tree")]
+    assert len(bodies) == 2
+    real = m.loads_tree
+    seen: list[bytes] = []
+
+    def counted(data: bytes):
+        seen.append(data)
+        return real(data)
+
+    monkeypatch.setattr(m, "loads_tree", counted)
+    out = m.recall_text(repo, "unique-good-leaf")
+    assert "unique-good-leaf" in out
+    for body in bodies:
+        assert seen.count(body) == 1
+
+
+def test_recall_does_not_call_short_id_per_hit(tmp_path, monkeypatch):
+    """recall_text formats pack hits from a prefix map and does not call short_id."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    for i, text in enumerate(["a1", "a2", "b1", "b2"], start=1):
+        m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "pack-a")
+    m.write_nap(repo, ids[2], ids[3], "pack-b")
+    nap_ids = [node.id for node in m.list_view(repo) if node.kind == "nap"]
+    m.write_nap(repo, nap_ids[0], nap_ids[1], "both")
+
+    def boom(*_args, **_kwargs):
+        raise AssertionError("short_id")
+
+    monkeypatch.setattr(m, "short_id", boom)
+    out = m.recall_text(repo, "pack-a")
+    assert "pack-a" in out
+    assert out.split()[0].startswith("x")
+
+
+def test_recall_unprojectable_note_name_skips(tmp_path, capsys):
+    """Recall does not traceback when a note child's name is not a string."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    next((repo / ".summem" / "naps").glob("*.tree")).write_bytes(
+        b'{"c":[{"type":"note","name":1,"text":"x"}]}\n'
+    )
+    capsys.readouterr()
+    out = m.recall_text(repo, "x")
+    assert isinstance(out, str)
+    err = capsys.readouterr().err
+    assert err == "skipped a pack\n"
+    assert "Traceback" not in err
+
+
 def test_recall_invalid_pattern_is_cli_error(tmp_path, monkeypatch, capsys):
     """An invalid regex is a CLI error and does not mention store paths."""
     m = load_summem()

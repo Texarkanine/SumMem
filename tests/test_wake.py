@@ -311,3 +311,53 @@ def test_resolve_id_accepts_prefix_when_id_repeats():
     assert m.resolve_id("a3f2c1b8", [cid, cid, other]) == cid
     assert m.resolve_id(cid, [cid, cid]) == cid
 
+
+def test_unique_prefixes_matches_short_id():
+    """unique_prefixes maps each distinct id to the prefix short_id already returns."""
+    m = load_summem()
+    cid = "a3f2c1b8" + "ab" * 28
+    other = "b3f2c1b8" + "cd" * 28
+    ids = [cid, other]
+    table = m.unique_prefixes(ids)
+    assert table == {item: m.short_id(item, ids) for item in ids}
+
+
+def test_unique_prefixes_repeated_id_is_one_prefix():
+    """A repeated content id is one key in unique_prefixes, at the floor length."""
+    m = load_summem()
+    cid = "a3f2c1b8" + "ab" * 28
+    other = "b3f2c1b8" + "cd" * 28
+    ids = [cid, cid, other]
+    table = m.unique_prefixes(ids)
+    assert set(table) == {cid, other}
+    assert table[cid] == "a3f2c1b8"
+    assert table[cid] == m.short_id(cid, ids)
+
+
+def test_unique_prefixes_lengthens_until_unique():
+    """unique_prefixes grows past 8 hex when two ids share the floor prefix."""
+    m = load_summem()
+    a = "a3f2c1b8" + "0" * 56
+    b = "a3f2c1b8" + "1" * 56
+    table = m.unique_prefixes([a, b])
+    assert table[a] == "a3f2c1b80"
+    assert table[b] == "a3f2c1b81"
+
+
+def test_format_wake_line_uses_prefix_map_without_short_id(monkeypatch):
+    """format_wake_line uses an id-to-prefix dict and does not call short_id."""
+    m = load_summem()
+
+    def boom(*_args, **_kwargs):
+        raise AssertionError("short_id")
+
+    monkeypatch.setattr(m, "short_id", boom)
+    node = m.ProjectedNode(
+        id="ab" * 32,
+        kind="nap",
+        caption="pack",
+        leaves=2,
+        stamp="20260101T000000Z",
+    )
+    assert m.format_wake_line(node, {node.id: "deadbeef"}) == "x2 deadbeef: pack"
+

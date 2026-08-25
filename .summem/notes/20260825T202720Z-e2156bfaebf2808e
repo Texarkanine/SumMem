@@ -1,0 +1,1 @@
+PR #55 review: zoom pack map keyed by node.name so a shared content id prints the first list_view row; _index_tree inside loads_tree try so unprojectable children skip like other unreadable packs.
