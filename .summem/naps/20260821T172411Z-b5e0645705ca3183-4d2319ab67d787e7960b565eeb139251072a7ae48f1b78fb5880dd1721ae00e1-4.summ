@@ -1,0 +1,1 @@
+note-ack-surgery L4 capped (#29+#30). Program is AGPL; 0BSD prompt and §7 invocation live only in the summem header (authoritative); LICENSE stays verbatim AGPL; surgery.py is stock AGPL and echoes invocation only. agpl-carve-outs archived (PR #32).
