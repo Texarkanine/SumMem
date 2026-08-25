@@ -1,7 +1,0 @@
-PASS
-
-Advisories (none blocking):
-
-- how_to_text() still labels zoomable packs as `x<N> <hash>:`. Product listings print unique prefixes (`xN <short_id>:`). Same wording as the old fat prompt; dated-leaf vs pack is taught.
-- test_how_to_text_is_the_usage_section does not pin the plan's "ignore `--path` without catalog" token. The sentence is in the product.
-- test_root_wake_catalogs_other_store still forbids the substring `git` on whole root-wake stdout, including Usage. Plan kept that pin. Future how-to wording that contains `git` (for example `digit`) would fail for the wrong reason.
