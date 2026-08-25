@@ -109,3 +109,12 @@ Apply obviously wrong and fixable remediations from the 2026-08-25 SLOBAC audit 
 
 * Work completed
     - Pushed `initial-slobac` and opened non-draft https://github.com/Texarkanine/SumMem/pull/48 so automated reviewers run.
+
+## 2026-08-25 - REWORK INITIATED - PR #48 zoom oracle
+
+* Work completed
+    - Operator chose rework, not archive.
+    - Feedback: [discussion_r3856003101](https://github.com/Texarkanine/SumMem/pull/48#discussion_r3856003101) on `tests/test_wake_expand.py`. The nap-branch `any(b{i} or eight-b-{i})` oracle stays green if `zoom_text` ignores `child.id` (fake `x2 00b0aaaa: eight-a-0`, or this fixture's `wake_text`).
+* Decisions made
+    - Pin exact public wake lines: `x5 …: eight-b-3` plus dated `b5`. Same style as `test_zoom_nap_of_naps_prints_two_children_not_leaves`.
+    - Do not add substring-absent `b6`/`b7` checks; those bigrams can appear in a hex prefix.

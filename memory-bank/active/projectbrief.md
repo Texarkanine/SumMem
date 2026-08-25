@@ -39,3 +39,7 @@ An assessor finding names a product pattern (ValueError ratchets, subprocess tes
 ## Rework
 
 Operator: leftover VISION numbering is the deliverable-fossils smell, not a reason to leave the labels. Phase A only — strip `First proof N`, rename off `proof_`, update the memory-bank sentences that globbed `test_proof_*`. Do not scatter the modules into unit files.
+
+## Rework
+
+Operator: rework, not archive. PR #48 [cursor review](https://github.com/Texarkanine/SumMem/pull/48#discussion_r3856003101): `test_zoom_expanded_child_id` still goes green if `zoom_text` ignores `child.id`. Pin the public wake lines for this child (`x5 …: eight-b-3` and the dated `b5` leaf), the way `test_zoom_nap_of_naps_prints_two_children_not_leaves` already does. Do not rely on substring-absent `b6`/`b7` (hex prefixes can contain those bigrams).
