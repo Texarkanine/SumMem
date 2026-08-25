@@ -23,6 +23,108 @@ If *you* set up memory for *your* agent on *your* machine via an MCP, server (lo
 - **Hierarchical stores** — Got a monorepo or other situation where memories should be scoped to a subdirectory? No problem; just `start <dir>` and you've got a second store.
 - **Universal** — drop the script in, update your `AGENTS.md`, and jsut about every agent, everywhere, will start recalling *and* contributing memories.
 
+## Example
+
+In this repo, there's a store in the `dogfood` directory. We've been remembering letters of the English alphabet, and we've gotten as far as `h`:
+
+```
+$ .summem/summem wake --path dogfood
+x4 01b18901: a, b, c, d
+x2 abd13ab8: e & f
+x1 2026-08-19: g
+x1 2026-08-19: h
+You are up to speed.
+```
+
+Let's remember `i`:
+
+```
+$ .summem/summem note --path dogfood i
+Saved.
+
+Compress these two into one line of at most 280 characters.
+Keep what has lasting effect, drop what does not. Invent nothing.
+
+  x1 2026-08-19: g
+  x1 2026-08-19: h
+
+Run: .summem/summem nap --path dogfood 3fc87382 fa6da6a9 "<your line>"
+```
+
+OK, let's nap:
+
+```
+$ .summem/summem nap --path dogfood 3fc87382 fa6da6a9 "g & h"
+```
+
+Now what does memory look like?
+
+```
+$ .summem/summem wake --path dogfood
+x4 01b18901: a, b, c, d
+x2 abd13ab8: e & f
+x2 cfbf987a: g & h
+x1 2026-08-25: i
+You are up to speed.
+```
+
+We were asked to nap because `dogfood` is capped at 4 memories total. If we'd just added `i`, that would have been 5 lines - so the oldest memories of the smallest eligible size got compressed into one.
+In this case, that was the single `g` and `h` memories.
+
+What if we need specifics that the `g & h` summary doesn't provide? That's OK; we can zoom into that memory:
+
+```
+$ .summem/summem zoom --path dogfood cfbf987a
+x1 2026-08-19: g
+x1 2026-08-19: h
+```
+
+Eidedic!
+
+Finally, you may wonder what this looks like on disk. We haven't committed yet:
+
+```
+$ git st
+...
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+        new file:   dogfood/.summem/naps/20260819T213123Z-5e64febd8268823c-cfbf987aa25d8492e257e0484faa9be9903b3d3e9f74fcb83ed2ca443cada000-2.sum
+        new file:   dogfood/.summem/naps/20260819T213123Z-5e64febd8268823c-cfbf987aa25d8492e257e0484faa9be9903b3d3e9f74fcb83ed2ca443cada000-2.tree
+        deleted:    dogfood/.summem/notes/20260819T213123Z-5e64febd8268823c
+        deleted:    dogfood/.summem/notes/20260819T213139Z-e82628a6be85430a
+        new file:   dogfood/.summem/notes/20260825T141300Z-46540ead99c4e20b
+
+```
+
+You can see two old notes were `deleted` - the old individual `g` and `h`. A new note is added - that's our `i` memory.
+Then, there are two `nap` files:
+
+- `.sum` contains our summary, `g & h`.
+- `.tree` contains the original notes - in json form - that were compressed into that summary.
+
+Because `g & h` is only an `x2` memory, it only has two notes in its `.tree`:
+
+```json
+{
+  "c": [
+    {
+      "name": "20260819T213123Z-5e64febd8268823c",
+      "text": "g",
+      "type": "note"
+    },
+    {
+      "name": "20260819T213139Z-e82628a6be85430a",
+      "text": "h",
+      "type": "note"
+    }
+  ]
+}
+```
+
+But that original `a, b, c, d` memory? Yeah, it's got all four in there.
+
+And [that's how SumMem works](https://classic.play2048.co/)!
+
 ## Quick Start
 
 ### Prerequisites
