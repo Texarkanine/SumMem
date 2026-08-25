@@ -1,13 +1,13 @@
 # Active Context
 
 ## Current Task: nap-variant-stems
-**Phase:** CREATIVE - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
 
-- Intent confirmed: implement [issue #61](https://github.com/Texarkanine/SumMem/issues/61) plus a store migration script in the PR. Level 3.
-- Creative (architecture): migration helper is sibling `migrate.py`, not a `summem` verb and not `surgery.py`. Documented in `memory-bank/active/creative/creative-nap-stem-migrate.md`.
+- Level 3 plan written: shared `variant_tag`/`nap_stem`, `write_nap`+`rematerialize` use it, dual-read parse, pin equal-set heal, invert caption-conflict proofs, sibling `migrate.py`, atlas/product copy.
+- Creative: `migrate.py` is a surgery analogue, not a `summem` verb (`memory-bank/active/creative/creative-nap-stem-migrate.md`).
 
 ## Next Step
 
-- Finish the Level 3 plan (test plan, implementation steps) and proceed to preflight.
+- Preflight subagent validates the plan. On PASS / PASS WITH ADVISORY, stop and wait for `/niko-build`.
