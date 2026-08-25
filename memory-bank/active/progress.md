@@ -29,3 +29,12 @@ Make `recall` and `zoom` unique-prefix in linear time and parse each view `.tree
     - No process-global parse cache; no 5k-leaf pytest fixture
 * Insights
     - `test_ambiguous_prefix_is_error` must move off a `named_ids` patch if zoom no longer calls it
+
+## 2026-08-25 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Validated implementation plan via `/niko-preflight` skill
+* Decisions made
+    - The first line of `.preflight-status` is PASS
+* Insights
+    - The implementation plan is structurally sound and strictly follows TDD requirements.
