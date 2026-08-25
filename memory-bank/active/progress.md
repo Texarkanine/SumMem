@@ -15,3 +15,16 @@ Apply obviously wrong and fixable remediations from the 2026-08-25 SLOBAC audit 
     - The 60–63 "redundancies" are subprocess proofs sitting next to in-process units of the same rule. That is layering, not dead weight.
 * Insights
     - Several other findings pair `vacuous-assertion` (no `match=`) with `loose-text-oracle` (has `match=`). Those cancel: the product ratchet is `ValueError` plus a stable message.
+
+## 2026-08-25 - PLAN - COMPLETE
+
+* Work completed
+    - Level 2 plan written: 20 accepted findings, 43 rejected with reasons.
+    - No new product behavior; tests are the change.
+* Decisions made
+    - Do not golden `prompt_text` / `how_to_text`.
+    - Do not add typed exceptions.
+    - Do not remove heal/wake call-count spies (they are the wait-free contract).
+    - Derive nap `{stamp}-{rand}` from the public filename, not `_seq_prefix`.
+* Insights
+    - Leftover `memory-bank/active/creative/` files are from archived tasks and are not this design.
