@@ -1,1 +1,0 @@
-pytest-cov --cov=summem measures the no-suffix shebang; lcov SF path is summem.
