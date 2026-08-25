@@ -60,3 +60,11 @@ Give naps a five-part stem with a pair-bytes variant tag so concurrent same-bloc
 * Insights
     - The first plan’s “invert in unit 5” left the suite red across three units of progress commits. Scheduling the inversion with the behavior change is the TDD constraint, not just completeness.
 
+## 2026-08-25 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Validated the re-planned Level 3 plan against the codebase; wrote `memory-bank/active/.preflight-status` with first line `PASS WITH ADVISORY`.
+* Decisions made
+    - Blocking TDD Plan Encoding check passes: all seven executable units order tests before production code.
+* Insights
+    - The plan thoroughly covers the issues found in the previous preflight and includes concrete steps for tests. Suggested a dry-run flag for the migration script to improve operator trust.
