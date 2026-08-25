@@ -105,7 +105,7 @@ graph TD
 
 ## Implementation Plan
 
-### 1. how_to_text — executable
+### 1. how_to_text — executable ✅
 
 - Files: `summem`, `tests/test_init.py`
 - Creative ref: `memory-bank/active/creative/creative-agent-document-split.md`
@@ -115,7 +115,7 @@ graph TD
 3. Write tests and run red: section header; `{AGENT_BIN}` / note / nap-already-stored / do not retry / `clone` / `another machine` / `x1 YYYY-MM-DD` / zoom target / recall / `wake --path` / ignore `--path` without catalog; forbid `git` (not only `git add`), `notes/`, `naps/`, `Run:`, `must still be true after a fresh clone`; `how_to_text() != usage_text()` and `.summem/summem` in how-to while `usage_text()` keeps `summem` and omits `.summem/summem`.
 4. Write code and run green: implement `how_to_text()` as a labeled document (prose plus taught commands, not a runbook). Include the header and a trailing newline.
 
-### 2. Bootstrap prompt_text — executable
+### 2. Bootstrap prompt_text — executable ✅
 
 - Files: `summem` (`prompt_text`), `docs/agents-prompt.md`, `AGENTS.md`, `tests/test_init.py`
 - Creative ref: same
@@ -125,7 +125,7 @@ graph TD
 3. Write tests and run red: bootstrap names Usage as the skip key; omits `clone`, `another machine`, `x1 YYYY-MM-DD`, and “prior **root** SumMem wake”; still has `note`, writer-only, `{AGENT_BIN}`, no `before any other tool call`. Lockstep tests go red when the committed files still have the fat prompt.
 4. Write code and run green: rewrite `prompt_text()` to the creative bootstrap. Copy those bytes to `docs/agents-prompt.md`. Replace this repo’s `AGENTS.md` prefix; leave the Niko suffix. `init_text()` stays a wrapper.
 
-### 3. Root wake document — executable
+### 3. Root wake document — executable ✅
 
 - Files: `summem` (`main` wake branch), `tests/test_scopes.py`, `tests/test_proof_ingest.py`, `tests/test_proof_scopes.py`
 - Creative ref: same (document order; pull omit; catalog-section pins)
@@ -135,7 +135,7 @@ graph TD
 3. Write tests and run red: the exact-string and `lines[0] == catalog` assertions fail on current wake.
 4. Write code and run green: if `parent` is root, prepend `how_to_text()`; then catalog; then Project-root header + `wake_text` when the view is non-empty; blank line between non-empty sections (same as today’s catalog-to-memories gap); footer last. Pulls skip `how_to_text()`. Do not pass Usage through `expand_frontier` / `WAKE_LINES`.
 
-### 4. Briefing — prose/policy
+### 4. Briefing — prose/policy ✅
 
 - Files: `README.md`, `memory-bank/systemPatterns.md`, `memory-bank/techContext.md`, `docs/architecture/index.md`, `docs/notes.md`
 - No tests: prose/policy artifact
@@ -174,5 +174,5 @@ No new technology - validation not required
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
 - [x] Preflight
-- [ ] Build
+- [x] Build
 - [ ] QA

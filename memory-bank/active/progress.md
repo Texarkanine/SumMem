@@ -65,3 +65,13 @@ Move the versioned agent how-to from the committed `AGENTS.md` prefix onto the r
 * Insights
     - Advisories are implementer cautions (drop ingest `lines[0]`, keep how_to free of `git` / `notes/` / `naps/` / other section headers, teach `wake --path <path>` not `pkg`), not plan defects.
     - Radical advisory this run: named-section wake assembler plus section-keyed tests, so exact-stdout / `lines[0]` pins cannot recur. Not applied.
+
+## 2026-08-24 - BUILD - COMPLETE
+
+* Work completed
+    - Implemented `how_to_text()`, shrank `prompt_text()` to the bootstrap, composed Usage onto root wake, retargeted prompt/scope/proof tests, updated briefing docs.
+    - Full `tox`: 284 passed on py311–py314.
+* Decisions made
+    - Kept inlined prepends in the existing wake branch. Applied preflight cautions (`<path>` not `pkg`; no other section headers in how-to; ingest slices from the memories header).
+* Insights
+    - Catalog-section helpers keep Usage's `{AGENT_BIN}` and `wake --path` from fighting leftover whole-stdout forbids.

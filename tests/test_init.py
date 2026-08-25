@@ -73,23 +73,29 @@ def test_help_before_init_prints_init_help(capsys):
 
 
 def test_prompt_text_invariants():
-    """prompt_text() names .summem/summem and wake rules; omits forbidden strings."""
+    """prompt_text() is the bootstrap: Usage-block skip, note, no versioned how-to."""
     m = load_summem()
     prompt = m.prompt_text()
     lower = prompt.lower()
+    assert prompt.startswith("# Project Memory")
     assert "summem" in lower
     assert "wake" in lower
     assert "root" in lower
     assert "conversation" in lower
     assert "contributor" in lower
     assert "personal" in lower
+    assert "note" in lower
+    assert "== SumMem Usage ==" in prompt
+    assert "see and follow" in lower
     assert "before any other tool call" not in lower
     assert ".summem/summem" in prompt
     assert "AGENTS.md or CLAUDE.md" not in prompt
     assert "./summem/summem" not in prompt
     assert "must still be true after a fresh clone" not in prompt
-    assert "clone" in lower
-    assert "another machine" in lower
+    assert "clone" not in lower
+    assert "another machine" not in lower
+    assert "x1 YYYY-MM-DD" not in prompt
+    assert "prior **root** SumMem wake" not in prompt
 
 
 def test_prompt_text_notes_are_part_of_the_work():
@@ -122,3 +128,43 @@ def test_shipped_prompt_matches_prompt_text():
     m = load_summem()
     shipped = Path(ROOT, m.PROMPT_DOC).read_text(encoding="utf-8")
     assert shipped == m.prompt_text()
+
+
+def test_how_to_text_is_the_usage_section():
+    """how_to_text() is the root-wake Usage section: header, taught verbs, no runbook."""
+    m = load_summem()
+    text = m.how_to_text()
+    lower = text.lower()
+    assert text.startswith("== SumMem Usage ==")
+    assert text.endswith("\n")
+    assert m.AGENT_BIN in text
+    assert "note" in lower
+    assert "already stored" in lower
+    assert "do not retry" in lower
+    assert "clone" in lower
+    assert "another machine" in lower
+    assert "x1 YYYY-MM-DD" in text
+    assert "zoom" in lower
+    assert "zoom target" in lower
+    assert "recall" in lower
+    assert "wake --path" in text
+    assert "catalog" in lower
+    assert "git" not in lower
+    assert "notes/" not in text
+    assert "naps/" not in text
+    assert "Run:" not in text
+    assert "must still be true after a fresh clone" not in text
+    assert "== Project-root Memories ==" not in text
+    assert "== Additional SumMem Catalogs ==" not in text
+    assert "wake --path pkg" not in text
+
+
+def test_how_to_text_is_not_operator_help():
+    """how_to_text() is not usage_text(); agent bin vs operator catalog name."""
+    m = load_summem()
+    how_to = m.how_to_text()
+    usage = m.usage_text()
+    assert how_to != usage
+    assert ".summem/summem" in how_to
+    assert "summem" in usage
+    assert ".summem/summem" not in usage
