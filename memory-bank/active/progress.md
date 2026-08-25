@@ -36,3 +36,16 @@ Heal overlap checks walk raw tree JSON instead of building unused `Tree` datacla
     - No changes required to the implementation plan.
 * Insights
     - Advisory: Suggested encapsulating view state into a `StoreContext` object to simplify threading through the write path. Declined for build: extra type for two optional kwargs.
+
+## 2026-08-25 - BUILD - COMPLETE
+
+* Work completed
+    - `_digests_of_dict` walks raw tree JSON; `leaf_digests` no longer calls `loads_tree`.
+    - `heal_view` returns the final view and re-lists only after a mutation.
+    - `write_nap` / `fold_request` take optional `nodes` and `entry_chars`; `note_locked` / `nap_locked` thread them. Fold after `nap` still lists once.
+    - tox py311–py314: 290 passed.
+* Decisions made
+    - Declined StoreContext. Optional kwargs keep `surgery.py` and existing callers unchanged.
+    - `fold_request` still defaults `wake_lines` to the script constant when omitted; only `ENTRY_CHARS` comes from knobs unless passed in.
+* Insights
+    - Parse-equivalence needs the same keys as `_tree_from_dict` so a nameless note still yields `None` and heal does not rematerialize a pack `_as_child` cannot load.
