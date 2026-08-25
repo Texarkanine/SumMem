@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import fcntl
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
@@ -509,13 +510,13 @@ def test_cli_wake_on_overlapping_head_writes_nothing(tmp_path, monkeypatch):
     _plant_abd_abe(m, repo)
     before = _payload_names(repo)
     flocks = {"n": 0}
-    real = m.fcntl.flock
+    real = fcntl.flock
 
     def wrapped(fd, op):
         flocks["n"] += 1
         return real(fd, op)
 
-    monkeypatch.setattr(m.fcntl, "flock", wrapped)
+    monkeypatch.setattr(fcntl, "flock", wrapped)
     assert m.main(["wake"]) == 0
     assert flocks["n"] == 0
     assert _payload_names(repo) == before
