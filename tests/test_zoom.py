@@ -272,6 +272,21 @@ def test_zoom_unreadable_tree_is_unreadable_pack(tmp_path, capsys):
     assert capsys.readouterr().err == ""
 
 
+def test_zoom_keeps_duplicate_note_dates(tmp_path):
+    """Zoom of a nap prints both dated lines when two children share text but not a day."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "same-text", datetime(2026, 1, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "same-text", datetime(2026, 1, 2, tzinfo=UTC), Random(2))
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    out = m.zoom_text(repo, m.list_view(repo)[0].id)
+    assert out.splitlines() == [
+        dated_leaf("20260101T000000Z", "same-text"),
+        dated_leaf("20260102T000000Z", "same-text"),
+    ]
+
+
 def test_zoom_parses_each_view_tree_once(tmp_path, monkeypatch):
     """zoom_text of a nested id parses each view children file once."""
     m = load_summem()

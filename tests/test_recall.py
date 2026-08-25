@@ -171,6 +171,36 @@ def test_recall_does_not_match_grain_day_or_prefix(tmp_path):
     assert "folded pair" not in m.recall_text(repo, ch)
 
 
+def test_recall_keeps_duplicate_note_dates(tmp_path):
+    """Recall prints both dated lines when two nested notes share text but not a day."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "same-text", datetime(2026, 1, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "same-text", datetime(2026, 1, 2, tzinfo=UTC), Random(2))
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    out = m.recall_text(repo, "same-text")
+    assert dated_leaf("20260101T000000Z", "same-text") in out.splitlines()
+    assert dated_leaf("20260102T000000Z", "same-text") in out.splitlines()
+
+
+def test_recall_nested_caption_before_matching_leaves(tmp_path):
+    """A nested nap caption hit is printed before matching leaves under that nap."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    for i, text in enumerate(["theme-a1", "theme-a2", "other-b1", "other-b2"], start=1):
+        m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "theme-inner")
+    m.write_nap(repo, ids[2], ids[3], "other")
+    nap_ids = [node.id for node in m.list_view(repo) if node.kind == "nap"]
+    m.write_nap(repo, nap_ids[0], nap_ids[1], "both")
+    lines = m.recall_text(repo, "theme").splitlines()
+    cap = next(i for i, line in enumerate(lines) if "theme-inner" in line)
+    leaf = next(i for i, line in enumerate(lines) if "theme-a1" in line)
+    assert cap < leaf
+
+
 def test_recall_parses_each_view_tree_once(tmp_path, monkeypatch):
     """recall_text parses each view children file once while searching nested leaves."""
     m = load_summem()

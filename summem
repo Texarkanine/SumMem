@@ -623,16 +623,11 @@ def write_nap(parent, id_a, id_b, caption, entry_chars: int | None = None):
     return sum_path
 
 
-def _zoom_kids(tree: Tree, ids, rows: dict[str, ProjectedNode] | None = None) -> str:
+def _zoom_kids(tree: Tree, ids, child_rows: list[ProjectedNode | None] | None = None) -> str:
     """Return one-level listing of *tree* using the wake line grammar."""
     lines = []
-    for child in tree.kids:
-        if rows is None:
-            row = _projected_child(child)
-        elif isinstance(child, NoteChild):
-            row = rows.get(leafset_id([note_digest(note_file_bytes(child.text))]))
-        else:
-            row = rows.get(child.id)
+    rows = child_rows if child_rows is not None else [_projected_child(child) for child in tree.kids]
+    for row in rows:
         if row is None:
             continue
         lines.append(format_wake_line(row, ids))
@@ -662,30 +657,53 @@ def zoom_text(parent, token: str) -> str:
             raise ValueError("unknown id")
         if pack["status"] == "unreadable":
             raise ValueError("unreadable pack")
-        return _zoom_kids(pack["tree"], prefixes, pack["rows"])
+        return _zoom_kids(pack["tree"], prefixes, pack["root_kids"])
     for pack in packs:
         if pack["status"] == "unreadable":
             _warn_skipped_pack()
             continue
         if pack["status"] != "ok":
             continue
-        row = pack["rows"].get(cid)
+        row = pack["first"].get(cid)
         if row is not None and row.kind == "note":
             return format_wake_line(row, prefixes) + "\n"
         subtree = pack["trees"].get(cid)
         if subtree is None:
             continue
-        return _zoom_kids(subtree, prefixes, pack["rows"])
+        return _zoom_kids(subtree, prefixes, pack["kids"].get(cid))
     raise ValueError("unknown id. Copy an id from wake.")
 
 
-def _index_tree(tree: Tree) -> tuple[list[str], dict[str, ProjectedNode], dict[str, Tree]]:
-    """Return nested ids, projected rows, and nap subtrees from one walk of *tree*."""
-    ids: list[str] = []
-    rows: dict[str, ProjectedNode] = {}
-    trees: dict[str, Tree] = {}
+def _empty_pack(node, status: str) -> dict:
+    return {
+        "node": node,
+        "status": status,
+        "tree": None,
+        "ids": [],
+        "hits": [],
+        "first": {},
+        "trees": {},
+        "kids": {},
+        "root_kids": [],
+    }
 
-    def walk(node: Tree) -> tuple[int, str | None]:
+
+def _index_tree(tree: Tree) -> dict:
+    """Return nested ids, preorder hits, first row per id, and per-nap children from one walk."""
+    ids: list[str] = []
+    first: dict[str, ProjectedNode] = {}
+    trees: dict[str, Tree] = {}
+    kids: dict[str, list[ProjectedNode | None]] = {}
+
+    def remember(row: ProjectedNode) -> None:
+        if row.id not in first:
+            first[row.id] = row
+
+    def walk(
+        node: Tree,
+    ) -> tuple[list[ProjectedNode], list[ProjectedNode | None], int, str | None]:
+        hits: list[ProjectedNode] = []
+        child_rows: list[ProjectedNode | None] = []
         leaves = 0
         stamps: list[str] = []
         for child in node.kids:
@@ -693,21 +711,27 @@ def _index_tree(tree: Tree) -> tuple[list[str], dict[str, ProjectedNode], dict[s
                 cid = leafset_id([note_digest(note_file_bytes(child.text))])
                 stamp = child.name.split("-")[0]
                 ids.append(cid)
-                rows[cid] = ProjectedNode(
+                row = ProjectedNode(
                     id=cid,
                     kind="note",
                     caption=child.text,
                     leaves=1,
                     stamp=stamp,
                 )
+                remember(row)
+                hits.append(row)
+                child_rows.append(row)
                 leaves += 1
                 stamps.append(stamp)
                 continue
             ids.append(child.id)
-            trees[child.id] = child.tree
-            child_leaves, child_stamp = walk(child.tree)
+            child_hits, sub_kids, child_leaves, child_stamp = walk(child.tree)
+            if child.id not in trees:
+                trees[child.id] = child.tree
+                kids[child.id] = sub_kids
+            nap_row = None
             if child_leaves and child_stamp is not None:
-                rows[child.id] = ProjectedNode(
+                nap_row = ProjectedNode(
                     id=child.id,
                     kind="nap",
                     caption=child.sum,
@@ -715,15 +739,25 @@ def _index_tree(tree: Tree) -> tuple[list[str], dict[str, ProjectedNode], dict[s
                     stamp=child_stamp,
                     tree=child.tree,
                 )
+                remember(nap_row)
+                hits.append(nap_row)
                 leaves += child_leaves
                 stamps.append(child_stamp)
+            hits.extend(child_hits)
+            child_rows.append(nap_row)
         if not stamps:
-            return 0, None
-        return leaves, min(stamps)
+            return hits, child_rows, 0, None
+        return hits, child_rows, leaves, min(stamps)
 
-    walk(tree)
-    return ids, rows, trees
-
+    root_hits, root_kids, _, _ = walk(tree)
+    return {
+        "ids": ids,
+        "hits": root_hits,
+        "first": first,
+        "trees": trees,
+        "kids": kids,
+        "root_kids": root_kids,
+    }
 
 def _view_packs(parent) -> tuple[list[str], list[dict]]:
     """Return named ids and one record per view nap, parsing each children file at most once."""
@@ -741,29 +775,17 @@ def _view_packs(parent) -> tuple[list[str], list[dict]]:
         if node.kind != "nap":
             continue
         if node.tree_path is None or not node.tree_path.is_file():
-            packs.append(
-                {"node": node, "status": "missing", "tree": None, "rows": {}, "trees": {}}
-            )
+            packs.append(_empty_pack(node, "missing"))
             continue
         try:
             tree = loads_tree(node.tree_path.read_bytes())
         except _TREE_PARSE_ERRORS:
-            packs.append(
-                {
-                    "node": node,
-                    "status": "unreadable",
-                    "tree": None,
-                    "rows": {},
-                    "trees": {},
-                }
-            )
+            packs.append(_empty_pack(node, "unreadable"))
             continue
-        nested, rows, trees = _index_tree(tree)
-        for cid in nested:
+        index = _index_tree(tree)
+        for cid in index["ids"]:
             add(cid)
-        packs.append(
-            {"node": node, "status": "ok", "tree": tree, "rows": rows, "trees": trees}
-        )
+        packs.append({"node": node, "status": "ok", "tree": tree, **index})
     return ids, packs
 
 
@@ -1012,7 +1034,7 @@ def recall_text(parent, pattern: str) -> str:
             continue
         if pack["status"] != "ok":
             continue
-        for row in pack["rows"].values():
+        for row in pack["hits"]:
             if not rx.search(row.caption):
                 continue
             line = format_wake_line(row, prefixes)
