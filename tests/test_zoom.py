@@ -129,7 +129,7 @@ def test_ambiguous_prefix_is_error(tmp_path, monkeypatch):
     _two_notes(m, repo)
     a = "a3f2c1b8" + "0" * 56
     b = "a3f2c1b8" + "1" * 56
-    monkeypatch.setattr(m, "named_ids", lambda _parent: [a, b])
+    monkeypatch.setattr(m, "_view_packs", lambda _parent: ([a, b], []))
     with pytest.raises(ValueError, match="ambiguous") as caught:
         m.zoom_text(repo, "a3f2c1b8")
     assert "Give a longer prefix" in str(caught.value)
@@ -161,6 +161,39 @@ def test_zoom_skips_unreadable_sibling_warns(tmp_path, capsys):
     assert "naps/" not in err
     assert "git" not in err
     assert "Traceback" not in err
+
+
+def test_named_ids_parses_each_view_tree_once(tmp_path, monkeypatch):
+    """named_ids and _view_packs parse each view children file once and agree on ids."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "A", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "B", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    ab = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ab[0], ab[1], "ab")
+    m.write_note(repo, "C", datetime(2026, 1, 1, 0, 0, 3, tzinfo=UTC), Random(3))
+    m.write_note(repo, "D", datetime(2026, 1, 1, 0, 0, 4, tzinfo=UTC), Random(4))
+    notes = [node for node in m.list_view(repo) if node.kind == "note"]
+    m.write_nap(repo, notes[0].id, notes[1].id, "cd")
+    bodies = [path.read_bytes() for path in (repo / ".summem" / "naps").glob("*.tree")]
+    assert len(bodies) == 2
+    real = m.loads_tree
+    seen: list[bytes] = []
+
+    def counted(data: bytes):
+        seen.append(data)
+        return real(data)
+
+    monkeypatch.setattr(m, "loads_tree", counted)
+    ids, packs = m._view_packs(repo)
+    assert {pack["status"] for pack in packs} == {"ok"}
+    for body in bodies:
+        assert seen.count(body) == 1
+    seen.clear()
+    named = m.named_ids(repo)
+    assert named == ids
+    for body in bodies:
+        assert seen.count(body) == 1
 
 
 def test_named_ids_skips_non_mapping_tree_child(tmp_path):
@@ -237,6 +270,37 @@ def test_zoom_unreadable_tree_is_unreadable_pack(tmp_path, capsys):
     assert "naps/" not in err
     assert "git" not in err
     assert capsys.readouterr().err == ""
+
+
+def test_zoom_parses_each_view_tree_once(tmp_path, monkeypatch):
+    """zoom_text of a nested id parses each view children file once."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "A", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "B", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    ab = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ab[0], ab[1], "ab")
+    m.write_note(repo, "C", datetime(2026, 1, 1, 0, 0, 3, tzinfo=UTC), Random(3))
+    m.write_note(repo, "D", datetime(2026, 1, 1, 0, 0, 4, tzinfo=UTC), Random(4))
+    notes = [node for node in m.list_view(repo) if node.kind == "note"]
+    m.write_nap(repo, notes[0].id, notes[1].id, "cd")
+    naps = [node for node in m.list_view(repo) if node.kind == "nap"]
+    tree = m.loads_tree(naps[1].tree_path.read_bytes())
+    child_id = m.leafset_id([m.note_digest(m.note_file_bytes(tree.kids[0].text))])
+    bodies = [path.read_bytes() for path in (repo / ".summem" / "naps").glob("*.tree")]
+    assert len(bodies) == 2
+    real = m.loads_tree
+    seen: list[bytes] = []
+
+    def counted(data: bytes):
+        seen.append(data)
+        return real(data)
+
+    monkeypatch.setattr(m, "loads_tree", counted)
+    out = m.zoom_text(repo, child_id)
+    assert tree.kids[0].text in out
+    for body in bodies:
+        assert seen.count(body) == 1
 
 
 def test_zoom_nested_note_id_prints_dated_leaf(tmp_path):

@@ -306,7 +306,7 @@ Zoom walks a children file in the current commit. Every sentence zoom still owes
 
 Everyday recall is the view, with captions standing in for napped children. Recall that must see original sentences or nested nap captions reads children files as well.
 
-Listings share `format_wake_line`: dated leaves and unique-prefix packs. Recall searches note text and nap captions, not grain, prefix, or day. Pack prefixes are unique among `named_ids` (view plus nested tree ids). 64-hex stays on disk; agent stdout uses `short_id` unless uniqueness requires the full id.
+Listings share `format_wake_line`: dated leaves and unique-prefix packs. Recall searches note text and nap captions, not grain, prefix, or day. Pack prefixes are unique among `named_ids` (view plus nested tree ids). Recall and zoom build that uniqueness once per command — sort the distinct ids and take the longest common prefix with each neighbor — so each printed line is a lookup. They parse each view children file at most once; `named_ids` is that walk's id list. Wake and fold may still call `short_id` per line. 64-hex stays on disk.
 
 Zoom and recall print one agent-safe line when they skip an unreadable sibling children file, and do not fail if another pack answered. Wake stays silent.
 
@@ -358,6 +358,7 @@ SumMem is also not:
 | What an agent is allowed to know or type | The README command table, the activation block, and root-wake Usage. Do not leak store paths into the agent interface. CLI output stays silent on git. The activation block treats the files the script wrote as part of your work, not a separate publish procedure. |
 | How notes land under concurrency | Notes. Recording a note must still commute. |
 | How summaries and originals survive squash | Naps. Fold. Zoom is a property of the current commit. |
+| How recall or zoom unique-prefix or walk children files | Zoom and recall. Parse each view `.tree` at most once. Prefix uniqueness is among distinct ids. |
 | Merge behavior or a new file that every note updates | Zipper. Recording a note commutes. No shared mutable index. |
 | Wake budget, decay shape, or “cannot wake” | The view. Grain. Fold. Expand. Wake never blocks. |
 | Package vs repo vs machine-global | Scopes. Store, driver, and activation. |
