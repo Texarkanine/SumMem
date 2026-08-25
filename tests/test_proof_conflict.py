@@ -23,7 +23,7 @@ def _run(args, cwd, check=True):
 
 
 def test_same_pair_two_captions_conflict_only_on_sum(tmp_path, monkeypatch):
-    """Two nappers of the same pair conflict on .sum only; both resolutions wake and zoom."""
+    """Two nappers of the same pair conflict on .summ only; both resolutions wake and zoom."""
     m = load_summem()
     monkeypatch.setattr(m, "WAKE_LINES", 1)
     main = init_repo(tmp_path / "main")
@@ -54,7 +54,7 @@ def test_same_pair_two_captions_conflict_only_on_sum(tmp_path, monkeypatch):
     unmerged = _run(["git", "diff", "--name-only", "--diff-filter=U"], wt_a)
     names = [line for line in unmerged.stdout.decode("utf-8").splitlines() if line]
     assert names
-    assert all(name.endswith(".sum") for name in names)
+    assert all(name.endswith(".summ") for name in names)
     assert not any(name.endswith(".tree") for name in names)
     sumfile = names[0]
 
@@ -73,14 +73,14 @@ def test_same_pair_two_captions_conflict_only_on_sum(tmp_path, monkeypatch):
 
 
 def test_planted_conflict_markers_wake_skips_caption_zoom_prints_leaves(tmp_path, monkeypatch):
-    """Planted <<<<<<< in a .sum: wake omits the caption; zoom still prints the leaves."""
+    """Planted <<<<<<< in a .summ: wake omits the caption; zoom still prints the leaves."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
     ids = [node.id for node in m.list_view(repo)]
     m.write_nap(repo, ids[0], ids[1], "secret caption")
-    sums = list((repo / ".summem" / "naps").glob("*.sum"))
+    sums = list((repo / ".summem" / "naps").glob("*.summ"))
     sums[0].write_text("<<<<<<< HEAD\nsecret caption\n=======\nother\n>>>>>>>\n", encoding="utf-8")
     monkeypatch.setattr(m, "WAKE_LINES", 1)
     wake = m.wake_text(repo)

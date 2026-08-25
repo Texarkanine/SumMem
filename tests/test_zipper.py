@@ -93,7 +93,7 @@ def _sum_sentences(m, repo) -> set[str]:
     if not naps.is_dir():
         return found
     for path in naps.iterdir():
-        if path.suffix == ".sum" and path.is_file() and not path.name.startswith("."):
+        if path.suffix == ".summ" and path.is_file() and not path.name.startswith("."):
             text = path.read_text(encoding="utf-8")
             if text.endswith("\n"):
                 text = text[:-1]
@@ -197,7 +197,7 @@ def test_rematerialize_nap_stem_uses_leftmost_seq_child_id_and_leaves(tmp_path):
     stem = f"{leftmost}-{child.id}-{leaves}"
     naps = repo / ".summem" / "naps"
     assert (naps / f"{stem}.tree").read_bytes() == m.dumps_tree(inner)
-    assert (naps / f"{stem}.sum").read_bytes() == m.note_file_bytes("pair")
+    assert (naps / f"{stem}.summ").read_bytes() == m.note_file_bytes("pair")
     assert m._nap_stem(child) == stem
 
 
@@ -304,7 +304,7 @@ def test_heal_abd_vs_abe_unique_cover(tmp_path):
         assert reaches(m, repo, sentence)
     assert len(_note_names(repo)) < 4
     after_sums = set()
-    for path in (repo / ".summem" / "naps").glob("*.sum"):
+    for path in (repo / ".summem" / "naps").glob("*.summ"):
         if not path.is_file():
             continue
         text = path.read_text(encoding="utf-8")
@@ -526,7 +526,7 @@ def test_cli_wake_on_overlapping_head_writes_nothing(tmp_path, monkeypatch):
 
 
 def test_cli_nap_overlapping_ids_exits_1_without_concat(tmp_path, monkeypatch):
-    """nap of two overlapping ids exits 1, does not concat, writes no new .sum sentence."""
+    """nap of two overlapping ids exits 1, does not concat, writes no new .summ sentence."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
@@ -534,7 +534,7 @@ def test_cli_nap_overlapping_ids_exits_1_without_concat(tmp_path, monkeypatch):
     ids = [n.id for n in m.list_view(repo)]
     assert m.main(["nap", ids[0], ids[1], "concat-caption"]) == 1
     sum_texts = []
-    for path in (repo / ".summem" / "naps").glob("*.sum"):
+    for path in (repo / ".summem" / "naps").glob("*.summ"):
         text = path.read_text(encoding="utf-8")
         if text.endswith("\n"):
             text = text[:-1]

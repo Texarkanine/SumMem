@@ -88,7 +88,7 @@ $ git st
 ...
 Changes to be committed:
   (use "git restore --staged <file>..." to unstage)
-        new file:   dogfood/.summem/naps/20260819T213123Z-5e64febd8268823c-cfbf987aa25d8492e257e0484faa9be9903b3d3e9f74fcb83ed2ca443cada000-2.sum
+        new file:   dogfood/.summem/naps/20260819T213123Z-5e64febd8268823c-cfbf987aa25d8492e257e0484faa9be9903b3d3e9f74fcb83ed2ca443cada000-2.summ
         new file:   dogfood/.summem/naps/20260819T213123Z-5e64febd8268823c-cfbf987aa25d8492e257e0484faa9be9903b3d3e9f74fcb83ed2ca443cada000-2.tree
         deleted:    dogfood/.summem/notes/20260819T213123Z-5e64febd8268823c
         deleted:    dogfood/.summem/notes/20260819T213139Z-e82628a6be85430a
@@ -99,7 +99,7 @@ Changes to be committed:
 You can see two old notes were `deleted` - the old individual `g` and `h`. A new note is added - that's our `i` memory.
 Then, there are two `nap` files:
 
-- `.sum` contains our summary, `g & h`.
+- `.summ` contains our summary, `g & h`.
 - `.tree` contains the original notes - in json form - that were compressed into that summary.
 
 Because `g & h` is only an `x2` memory, it only has two notes in its `.tree`:

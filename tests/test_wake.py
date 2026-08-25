@@ -163,14 +163,14 @@ def test_wake_mixed_view_sorts_by_filename(tmp_path, monkeypatch):
 
 
 def test_wake_missing_sum_prints_id_and_grain_without_caption(tmp_path, monkeypatch):
-    """Missing .sum: wake prints id and grain, not a caption, and does not refuse."""
+    """Missing .summ: wake prints id and grain, not a caption, and does not refuse."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
     ids = [node.id for node in m.list_view(repo)]
     m.write_nap(repo, ids[0], ids[1], "pair")
-    sums = list((repo / ".summem" / "naps").glob("*.sum"))
+    sums = list((repo / ".summem" / "naps").glob("*.summ"))
     leafset = sums[0].name.split("-")[-2]
     sums[0].unlink()
     monkeypatch.setattr(m, "WAKE_LINES", 1)
@@ -181,14 +181,14 @@ def test_wake_missing_sum_prints_id_and_grain_without_caption(tmp_path, monkeypa
 
 
 def test_wake_conflict_sum_omits_caption(tmp_path, monkeypatch):
-    """A .sum containing <<<<<<< omits the caption and still prints id and grain."""
+    """A .summ containing <<<<<<< omits the caption and still prints id and grain."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
     ids = [node.id for node in m.list_view(repo)]
     m.write_nap(repo, ids[0], ids[1], "pair")
-    sums = list((repo / ".summem" / "naps").glob("*.sum"))
+    sums = list((repo / ".summem" / "naps").glob("*.summ"))
     leafset = sums[0].name.split("-")[-2]
     sums[0].write_text("<<<<<<< HEAD\npair\n=======\nother\n>>>>>>>\n", encoding="utf-8")
     monkeypatch.setattr(m, "WAKE_LINES", 1)

@@ -53,7 +53,7 @@ def test_nap_two_adjacent_notes_writes_pair_and_unlinks(tmp_path, monkeypatch):
     sum_path = m.write_nap(repo, id_a, id_b, "pair")
     naps = repo / ".summem" / "naps"
     tree_path = naps / f"{stem}.tree"
-    assert sum_path == naps / f"{stem}.sum"
+    assert sum_path == naps / f"{stem}.summ"
     assert tree_path.read_bytes() == m.dumps_tree(expected)
     assert sum_path.read_bytes() == b"pair\n"
     assert not pa.exists()
@@ -83,14 +83,14 @@ def test_same_children_same_tree_bytes_and_paths(tmp_path):
     assert (repo_a / ".summem" / "naps" / tree_name).read_bytes() == (
         repo_b / ".summem" / "naps" / tree_name
     ).read_bytes()
-    sum_name = tree_name.removesuffix(".tree") + ".sum"
+    sum_name = tree_name.removesuffix(".tree") + ".summ"
     assert (repo_a / ".summem" / "naps" / sum_name).read_bytes() != (
         repo_b / ".summem" / "naps" / sum_name
     ).read_bytes()
 
 
 def test_first_unlink_sees_both_parent_files(tmp_path, monkeypatch):
-    """At the first child unlink, both parent .sum and .tree already exist."""
+    """At the first child unlink, both parent .summ and .tree already exist."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     _two_notes(m, repo)
@@ -101,7 +101,7 @@ def test_first_unlink_sees_both_parent_files(tmp_path, monkeypatch):
     def wrapped(self, *args, **kwargs):
         if not seen:
             naps = repo / ".summem" / "naps"
-            seen["sum"] = list(naps.glob("*.sum"))
+            seen["sum"] = list(naps.glob("*.summ"))
             seen["tree"] = list(naps.glob("*.tree"))
         return real(self, *args, **kwargs)
 
@@ -130,7 +130,7 @@ def test_tree_replace_failure_leaves_children(tmp_path, monkeypatch):
         m.write_nap(repo, ids[0], ids[1], "pair")
     assert pa.exists() and pb.exists()
     naps = repo / ".summem" / "naps"
-    assert list(naps.glob("*.sum")) == []
+    assert list(naps.glob("*.summ")) == []
     assert list(naps.glob("*.tree")) == []
     assert _payload_names(repo) == before
 
@@ -277,7 +277,7 @@ def test_nap_of_two_naps_nests_napchild_and_unions_digests(tmp_path):
 
 
 def test_napchild_sum_empty_when_child_sum_missing(tmp_path):
-    """Napping a child whose .sum is missing stores an empty NapChild.sum."""
+    """Napping a child whose .summ is missing stores an empty NapChild.sum."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "a1", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
@@ -287,7 +287,7 @@ def test_napchild_sum_empty_when_child_sum_missing(tmp_path):
     ids = _ids(m, repo)
     m.write_nap(repo, ids[0], ids[1], "pack-a")
     m.write_nap(repo, ids[2], ids[3], "pack-b")
-    sums = sorted((repo / ".summem" / "naps").glob("*.sum"))
+    sums = sorted((repo / ".summem" / "naps").glob("*.summ"))
     sums[0].unlink()
     nap_ids = _ids(m, repo)
     m.write_nap(repo, nap_ids[0], nap_ids[1], "both")
@@ -298,7 +298,7 @@ def test_napchild_sum_empty_when_child_sum_missing(tmp_path):
 
 
 def test_napchild_sum_empty_when_child_sum_conflict(tmp_path):
-    """Napping a child whose .sum is conflict-marked stores an empty NapChild.sum."""
+    """Napping a child whose .summ is conflict-marked stores an empty NapChild.sum."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "a1", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
@@ -308,7 +308,7 @@ def test_napchild_sum_empty_when_child_sum_conflict(tmp_path):
     ids = _ids(m, repo)
     m.write_nap(repo, ids[0], ids[1], "pack-a")
     m.write_nap(repo, ids[2], ids[3], "pack-b")
-    sums = sorted((repo / ".summem" / "naps").glob("*.sum"))
+    sums = sorted((repo / ".summem" / "naps").glob("*.summ"))
     sums[0].write_text("<" * 7 + " HEAD\npack-a\n=======\nother\n>>>>>>>\n", encoding="utf-8")
     nap_ids = _ids(m, repo)
     m.write_nap(repo, nap_ids[0], nap_ids[1], "both")
