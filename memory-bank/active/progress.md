@@ -28,3 +28,26 @@ Apply obviously wrong and fixable remediations from the 2026-08-25 SLOBAC audit 
     - Derive nap `{stamp}-{rand}` from the public filename, not `_seq_prefix`.
 * Insights
     - Leftover `memory-bank/active/creative/` files are from archived tasks and are not this design.
+
+## 2026-08-25 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - `.preflight-status` first line: `FAIL (fixable)`.
+    - Verified baseline before judging: `tox -e py311` → 284 passed.
+    - Checked every named test exists, every `match=` string against `require_entry` / `require_utc`, both exit-code claims against `main`'s argparse handling, and the `_two_eights` / `_two_notes` fixtures behind the new oracles.
+    - Confirmed all 20 accepted findings map to a concrete substep, and the `summem` fixture is unused (no signature, no `getfixturevalue`).
+* Decisions made
+    - TDD Plan Encoding passes; no in-phase plan edits made.
+    - Fail on unit 2: deleting `test_version_info_is_checked_before_import_tomllib` leaves the 3.11-floor ordering unenforced in CI, because the replacement subprocess test skips where no CPython 3.10 exists and `ci.yaml` provisions only 3.11 with no `uv`.
+* Insights
+    - `_seq_prefix` is the first two hyphen fields, and a note filename has exactly two — so `pa.name` is the exact public expected value and no test-local helper is needed.
+    - `ProjectedNode` is public, so exact wake-line equality is reachable without `_projected_child`; the plan's substring oracles are weaker than achievable.
+
+## 2026-08-25 - PLAN - COMPLETE
+
+* Work completed
+    - Re-planned after FAIL (fixable): 19 accepted findings, finding 14 rejected.
+* Decisions made
+    - Keep `test_version_info_is_checked_before_import_tomllib`. CI has no 3.10, so the source-order pin is the floor guard that actually runs there.
+    - Coverage oracle is one before/after byte snapshot (`None` if absent).
+    - Note seq prefix is the public filename; exact wake lines from `short_id` + caption.
