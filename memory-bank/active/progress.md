@@ -49,3 +49,27 @@ Make `recall` and `zoom` unique-prefix in linear time and parse each view `.tree
     - Wake expand still uses `_projected_child`; recall/zoom use indexed rows
 * Insights
     - Eight new tests (292 total, was 284). Proof walkers still enqueue from `Tree.kids`.
+
+## 2026-08-25 - QA - COMPLETE (FAIL)
+
+* Work completed
+    - Reviewed the implementation against issue #50, the Level 2 plan, and established duplicate-id behavior
+    - Ran `uvx --with tox tox`: 292 tests passed on each of Python 3.11, 3.12, 3.13, and 3.14
+    - Probed duplicate-note indexing and nested row order directly
+* Findings
+    - The id-keyed projected-row dictionary collapses valid repeated note or nap occurrences; zoom can print the wrong date for a duplicate note and recall can omit distinct rows
+    - Nap rows are inserted after descendants, changing nested recall from preorder to postorder
+* Decision
+    - FAIL; Plan must rerun because the planned id-to-row dictionary cannot preserve row multiplicity and order
+
+## 2026-08-25 - BUILD - REWORK AFTER QA FAIL
+
+* Work completed
+    - `_index_tree` now returns preorder `hits`, first-id lookup, and per-nap child rows
+    - Added three tests for duplicate dated notes and nested caption-before-leaf order
+    - `uvx --with tox tox` 295 passed on py311–py314
+* Decisions made
+    - Treated QA "plan must rerun" as a fixable build gap: same walk, row-preserving structure
+    - First matching id still wins for zoom find, matching old `_find_in_tree`
+* Insights
+    - Prefix uniqueness is among distinct ids; printed rows are not. An id-keyed row map cannot be the only index.

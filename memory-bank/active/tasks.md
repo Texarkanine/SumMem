@@ -126,7 +126,8 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA - FAIL then rework
+- [ ] QA retry
 
 ### Build progress
 
@@ -135,3 +136,10 @@ No new technology - validation not required
 - [x] 3. Recall one pass
 - [x] 4. Zoom one pass
 - [x] 5. Atlas zoom and recall
+
+### QA results
+
+- [x] Shared index keeps an ordered `hits` list plus first-id lookup; `_zoom_kids` takes child rows in tree order
+- [x] `test_zoom_keeps_duplicate_note_dates` and `test_recall_keeps_duplicate_note_dates`
+- [x] `test_recall_nested_caption_before_matching_leaves`
+- Full tox after rework: 295 passed on py311–py314
