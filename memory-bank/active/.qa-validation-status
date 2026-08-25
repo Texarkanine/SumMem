@@ -1,6 +1,0 @@
-PASS
-QA semantic review passed. 
-- KISS: `expand_frontier` is simpler with the removal of slicing.
-- Completeness: Non-positive budgets are now correctly handled and tested. 
-- Regression: Tests prevent future cutting of oldest nodes.
-- Documentation: Docs accurately reflect the `wake` print behavior regardless of budget configuration.

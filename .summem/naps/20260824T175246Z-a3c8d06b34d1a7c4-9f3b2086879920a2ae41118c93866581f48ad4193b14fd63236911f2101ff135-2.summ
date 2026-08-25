@@ -1,1 +1,0 @@
-3.11 floor is import-time before tomllib (#42/#38). Root wake prints how_to_text under Usage; AGENTS.md is bootstrap only (wake-if-needed, note, writer-only).
