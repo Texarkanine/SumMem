@@ -12,7 +12,7 @@ Applied 19 obviously wrong SLOBAC remediations in existing tests. Proofs stayed.
 
 ## Requirements vs Outcome
 
-Delivered the ratchet: stronger oracles and less private-helper coupling where the hole was real. Did not golden prompts, add typed exceptions, or regroup `test_proof_*.py`. Finding 14 stayed after preflight showed the subprocess 3.10 proof skips in CI.
+Delivered the ratchet: stronger oracles and less private-helper coupling where the hole was real. Did not golden prompts, add typed exceptions, or Phase B regroup. Finding 14 stayed after preflight showed the subprocess 3.10 proof skips in CI. Rework: Phase A on finding 59 — stripped `First proof N`, renamed off `test_proof_*`.
 
 ## Plan Accuracy
 

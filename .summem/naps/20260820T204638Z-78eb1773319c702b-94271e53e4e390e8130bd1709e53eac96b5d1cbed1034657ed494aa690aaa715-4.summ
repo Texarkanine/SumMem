@@ -1,0 +1,1 @@
+Coverage: pytest-cov measures the no-suffix driver; tox -e coverage uploads lcov (PR #23).

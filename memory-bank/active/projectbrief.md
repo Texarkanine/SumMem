@@ -2,7 +2,7 @@
 
 ## User Story
 
-As a maintainer of SumMem's test suite, I want the obviously wrong and fixable smells in the 2026-08-25 SLOBAC audit applied so the suite is a tighter ratchet — not a perfect suite, and not a rewrite of the file-backend proofs.
+As a maintainer of SumMem's test suite, I want the obviously wrong and fixable smells in the 2026-08-25 SLOBAC audit applied so the suite is a tighter ratchet — not a perfect suite, and not a Phase B regroup of the process-level tests.
 
 ## Use-Case(s)
 
@@ -12,15 +12,15 @@ An assessor finding names a real hole (a test that can go green on a broken impl
 
 ### Use-Case 2
 
-An assessor finding names a product pattern (ValueError ratchets, subprocess proofs next to in-process units, `test_proof_*.py` as the acceptance surface). The finding is left alone.
+An assessor finding names a product pattern (ValueError ratchets, subprocess tests next to in-process units). The finding is left alone.
 
 ## Requirements
 
 1. Work from [`.slobac/2026-08-25T12-27-19/audit.md`](../../.slobac/2026-08-25T12-27-19/audit.md) as a ratchet, not as a mandatory punch list.
 2. Apply remediations the build judge finds obviously wrong and fixable.
-3. Leave findings 59–63: the proof files are the file-backend acceptance surface named in `productContext.md` / `techContext.md`. "First proof N" in module docstrings is leftover VISION numbering; that is cosmetic, not a reason to regroup or delete.
+3. Finding 59 Phase A: strip `First proof N` and rename `test_proof_*.py` to capability names. Do not Phase B regroup or delete the process-level tests (findings 60–63 stay).
 4. Do not invent a typed-exception hierarchy to satisfy loose-text-oracle on ratchet `ValueError` messages.
-5. Do not replace existing process-boundary proofs with in-process units, or the reverse.
+5. Do not replace existing process-boundary tests with in-process units, or the reverse.
 
 ## Constraints
 
@@ -33,5 +33,9 @@ An assessor finding names a product pattern (ValueError ratchets, subprocess pro
 
 1. Each accepted finding has a stronger oracle or less coupling, and the named test still fails if the behavior it claims is broken.
 2. Rejected findings are listed with a one-line reason in the plan / progress, not silently skipped.
-3. `tests/test_proof_*.py` remain in place with the same process-level claims.
+3. Process-level tests keep the same claims; module lines and filenames name the capability, not a VISION checklist number.
 4. `tox` (or `tox -e py311` if that is the local interpreter set) stays green.
+
+## Rework
+
+Operator: leftover VISION numbering is the deliverable-fossils smell, not a reason to leave the labels. Phase A only — strip `First proof N`, rename off `proof_`, update the memory-bank sentences that globbed `test_proof_*`. Do not scatter the modules into unit files.

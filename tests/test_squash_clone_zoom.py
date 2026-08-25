@@ -1,4 +1,4 @@
-"""First proof 4: three packs, squash onto main, clone still zooms."""
+"""Three packs, squash onto main, clone still zooms."""
 
 from __future__ import annotations
 

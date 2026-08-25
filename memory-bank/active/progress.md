@@ -95,3 +95,12 @@ Apply obviously wrong and fixable remediations from the 2026-08-25 SLOBAC audit 
     - Standalone task: next operator step is `/niko-archive`.
 * Insights
     - Note filename is already the seq prefix. The 3.10 subprocess proof is not CI coverage.
+
+## 2026-08-25 - REWORK - Phase A fossils
+
+* Work completed
+    - Operator corrected finding 59: leftover VISION numbering is the smell. Phase A applied.
+    - Renamed `test_proof_*.py` to capability files; stripped `First proof N` from module lines.
+    - `productContext.md` / `techContext.md` no longer glob `test_proof_*`.
+* Decisions made
+    - Findings 60–63 still left: same rule, different harness. No Phase B regroup.

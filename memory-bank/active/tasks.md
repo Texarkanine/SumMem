@@ -55,7 +55,7 @@ Rejected findings:
 | 31, 48 | Already have structural asserts; truthiness is a narrowing precondition. |
 | 33–40, 51–57 | CLI tokens are the contract; several already parse catalog sections. Whole-output goldens are change-detectors. |
 | 49 | Public wake already pins dated leaves via `dated_leaf`. The helper unit is not a hole. |
-| 59–63 | File-backend acceptance surface. "First proof N" is leftover VISION numbering. Overlaps are subprocess proofs next to in-process units. |
+| 59 Phase B, 60–63 | Process-level tests stay. Phase A (rename + strip numbers) is in; do not scatter into unit files. Overlaps are subprocess next to in-process units. |
 
 ### 2. Dead scaffold — executable
 

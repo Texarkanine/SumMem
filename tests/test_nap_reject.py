@@ -1,4 +1,4 @@
-"""First proof 5: nap rejects ranges and missing ids without writing."""
+"""nap rejects ranges and missing ids without writing."""
 
 from __future__ import annotations
 

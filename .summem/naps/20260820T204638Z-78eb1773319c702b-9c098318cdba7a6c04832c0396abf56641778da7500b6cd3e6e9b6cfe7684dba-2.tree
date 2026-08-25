@@ -1,1 +1,0 @@
-{"c":[{"name":"20260820T204638Z-78eb1773319c702b","text":"pytest-cov --cov=summem measures the no-suffix shebang; lcov SF path is summem.","type":"note"},{"name":"20260820T205716Z-2ff58bd8d1240b01","text":"tox -e coverage writes coverage/lcov.info via pytest-cov --cov=summem; default tox stays coverage-free.","type":"note"}]}

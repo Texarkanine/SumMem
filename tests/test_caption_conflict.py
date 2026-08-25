@@ -1,4 +1,4 @@
-"""First proofs 2 and 3: caption conflict and planted conflict markers."""
+"""Caption conflict and planted conflict markers."""
 
 from __future__ import annotations
 
