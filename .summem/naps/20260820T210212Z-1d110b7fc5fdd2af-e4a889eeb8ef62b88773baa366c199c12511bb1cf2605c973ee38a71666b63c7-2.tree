@@ -1,0 +1,1 @@
+{"c":[{"name":"20260820T210212Z-1d110b7fc5fdd2af","text":"Draft PR #23: tox -e coverage uploads lcov to Codecov; README badge.","type":"note"},{"name":"20260820T213032Z-d2f8289f08d361a6","text":"codecov-upload archived: tox -e coverage uploads lcov; README badge; draft PR #23.","type":"note"}]}

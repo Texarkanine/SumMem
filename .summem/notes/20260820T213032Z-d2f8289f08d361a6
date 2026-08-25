@@ -1,1 +1,0 @@
-codecov-upload archived: tox -e coverage uploads lcov; README badge; draft PR #23.

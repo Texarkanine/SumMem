@@ -7,8 +7,6 @@ import sys
 from importlib.machinery import SourceFileLoader
 from pathlib import Path
 
-import pytest
-
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "summem"
 
@@ -31,8 +29,3 @@ def load_summem():
     sys.modules["summem"] = mod
     spec.loader.exec_module(mod)
     return mod
-
-
-@pytest.fixture
-def summem():
-    return load_summem()

@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from random import Random
 
-from conftest import load_summem
+from conftest import dated_leaf, load_summem
 from gitutil import init_repo, reaches
 
 UTC = timezone.utc
@@ -54,8 +54,13 @@ def test_reaches_nested_sentence_when_zoom_prints_wake_lines(tmp_path, monkeypat
         tree = _tree_for(m, parent, cid)
         if tree is None:
             raise ValueError("unknown id")
-        rows = [m._projected_child(child) for child in tree.kids]
-        return "\n".join(m.format_wake_line(row, named) for row in rows if row) + "\n"
+        lines = []
+        for child in tree.kids:
+            if isinstance(child, m.NoteChild):
+                lines.append(dated_leaf(child.name.split("-")[0], child.text))
+            else:
+                lines.append(f"x2 {m.short_id(child.id, named)}: {child.sum}")
+        return "\n".join(lines) + "\n"
 
     monkeypatch.setattr(m, "zoom_text", fake_zoom)
     assert reaches(m, repo, "a1")

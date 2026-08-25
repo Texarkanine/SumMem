@@ -1,0 +1,13 @@
+PASS WITH ADVISORY
+
+Preflight of `slobac-audit-ratchet`, 2026-08-25. Baseline verified green with the documented fallback command: `uvx --with tox tox -e py311` → 284 passed.
+
+TDD Plan Encoding: PASS. This task changes test-suite oracles and dead test scaffold, not product behavior. Units 3–5 explicitly place the existing-test changes before their no-product-code substeps; unit 2 removes an unused fixture and schedules verification without production code; unit 6 is full-suite verification. Unit 1 is prose/policy and owes no tests. No change-detector is scheduled, and no in-phase plan edit was needed.
+
+Prerequisites and completeness: PASS. Planning, test planning, technology validation, and the pre-mortem are complete. Level 2 requires no creative artifact. All 19 accepted findings (1, 2, 3, 5, 6, 7, 10, 13, 18, 19, 20, 21, 22, 32, 41, 42, 45, 46, 47) map to concrete edits in units 2–5. The rejected table accounts for all other findings, including finding 14, whose source-order test remains because CI provisions only Python 3.11 and the Python 3.10 subprocess proof can skip.
+
+Convention, dependency, and conflict checks: PASS. Every named test exists at the planned path. The plan preserves `load_summem()`, `init_repo`, pytest/tox, the no-suffix driver, and every `tests/test_proof_*.py` acceptance proof. It adds no module, runner, dependency, or public contract. Public note filenames supply the exact `{stamp}-{rand}` prefix; public tree children plus `short_id` supply exact pack lines without `_seq_prefix` or `_projected_child`. The branchless lcov snapshot covers both absent and pre-existing reports. Planned error matches and argparse exit code `2` agree with `require_entry`, `require_utc`, and `main`.
+
+Advisory — deleting the unused `summem` fixture makes `import pytest` in `tests/conftest.py` unused. Remove that import with the fixture during build; this is induced cleanup, not a plan blocker.
+
+Radical innovation advisory — add a test-owned `pack_line(prefix, leaves, caption)` beside `dated_leaf()` in `tests/conftest.py`, then use it for recall, zoom, and fake-zoom expectations. This gives the shared wake grammar an independent oracle and prevents future tests from rebuilding expected output through product formatters. It is broader than this ratchet requires, so do not add it unless the operator chooses that extra scope.

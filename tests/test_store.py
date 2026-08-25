@@ -24,7 +24,7 @@ def test_note_rejects_empty(tmp_path):
     """Empty note text is rejected."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="note is empty"):
         _write(m, repo, text="")
 
 
@@ -32,7 +32,7 @@ def test_note_rejects_over_280_bytes(tmp_path):
     """A note longer than 280 UTF-8 bytes is rejected."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Too long"):
         _write(m, repo, text="x" * (m.ENTRY_CHARS + 1))
 
 
@@ -90,7 +90,7 @@ def test_note_280_is_utf8_bytes_not_chars(tmp_path):
     """The 280 limit is UTF-8 bytes, not characters."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Too long"):
         _write(m, repo, text="你" * 94)
     text = ("你" * 93) + "a"
     assert len(text.encode("utf-8")) == 280
@@ -102,10 +102,10 @@ def test_note_rejects_non_utc_now(tmp_path):
     """A naive or non-UTC now is rejected."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="clock must be UTC"):
         m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 0), Random(0))
     local = datetime(2026, 1, 1, 0, 0, 0, tzinfo=timezone(timedelta(hours=-5)))
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="clock must be UTC"):
         m.write_note(repo, "hello", local, Random(0))
 
 

@@ -238,7 +238,9 @@ def test_zoom_expanded_child_id(tmp_path, monkeypatch):
     monkeypatch.setattr(m, "WAKE_LINES", 4)
     file_ids = {node.id for node in m.list_view(repo)}
     frontier = m.expand_frontier(m.list_view(repo), 4)
-    child_ids = [row.id for row in frontier if row.id not in file_ids]
-    assert child_ids
-    out = m.zoom_text(repo, child_ids[0])
-    assert out
+    child = next(row for row in frontier if row.id not in file_ids)
+    out = m.zoom_text(repo, child.id)
+    if child.kind == "note":
+        assert child.caption in out
+    else:
+        assert any(f"b{i}" in out or f"eight-b-{i}" in out for i in range(8))

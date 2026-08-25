@@ -102,9 +102,11 @@ def test_zoom_nap_of_naps_prints_two_children_not_leaves(tmp_path):
     assert len(lines) == 2
     ids = m.named_ids(repo)
     tree = m.loads_tree(parent.tree_path.read_bytes())
-    want = [m.format_wake_line(m._projected_child(child), ids) for child in tree.kids]
+    want = [f"x2 {m.short_id(child.id, ids)}: {child.sum}" for child in tree.kids]
     assert lines == want
     assert all(len(m.short_id(child.id, ids)) == 8 for child in tree.kids)
+    for text in ("a1", "a2", "b1", "b2"):
+        assert text not in out
 
 
 def test_zoom_accepts_unique_prefix(tmp_path):

@@ -51,3 +51,27 @@ Apply obviously wrong and fixable remediations from the 2026-08-25 SLOBAC audit 
     - Keep `test_version_info_is_checked_before_import_tomllib`. CI has no 3.10, so the source-order pin is the floor guard that actually runs there.
     - Coverage oracle is one before/after byte snapshot (`None` if absent).
     - Note seq prefix is the public filename; exact wake lines from `short_id` + caption.
+
+## 2026-08-25 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - `.preflight-status` first line: `PASS WITH ADVISORY`.
+    - Revalidated all 19 accepted findings, rejected-finding coverage, TDD ordering, file locations, public-oracle construction, and downstream test impact.
+    - Verified the baseline with `uvx --with tox tox -e py311`: 284 passed.
+* Decisions made
+    - The revised plan resolves the prior blocker by retaining the CI-effective Python 3.11 import-order guard.
+    - Proceed to build without replanning.
+* Insights
+    - Removing the unused fixture also leaves an unused `pytest` import in `tests/conftest.py`; remove both together during build.
+    - A test-owned pack-line helper could independently encode shared wake grammar, but it remains optional extra scope.
+
+## 2026-08-25 - BUILD - COMPLETE
+
+* Work completed
+    - 19 accepted findings applied in existing tests. Unused `summem` fixture and `pytest` import removed.
+    - `tox` py311–py314: 284 passed.
+* Decisions made
+    - Expand-child zoom oracle is `bN` / `eight-b-N` because expand walks the right 8-pack.
+    - No product file changed.
+* Insights
+    - Finding 14 stays: CI still has no CPython 3.10, so the source-order pin is the floor guard that runs there.

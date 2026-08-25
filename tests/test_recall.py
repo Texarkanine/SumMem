@@ -127,7 +127,8 @@ def test_recall_matches_nested_nap_caption(tmp_path):
     parent = m.list_view(repo)[0]
     tree = m.loads_tree(parent.tree_path.read_bytes())
     child = next(c for c in tree.kids if c.sum == "pack-a")
-    want = m.format_wake_line(m._projected_child(child), m.named_ids(repo))
+    ids = m.named_ids(repo)
+    want = f"x2 {m.short_id(child.id, ids)}: pack-a"
     assert out.splitlines() == [want]
     prefix = want.split()[1].rstrip(":")
     zoomed = m.zoom_text(repo, prefix)

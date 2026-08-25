@@ -192,13 +192,10 @@ def test_rematerialize_nap_stem_uses_leftmost_seq_child_id_and_leaves(tmp_path):
     child = m.NapChild(id=node.id, sum=node.caption, tree=inner)
     m._unlink_node(node)
     m.rematerialize_child(repo, child)
-    leftmost = m._seq_prefix(paths[0].name)
-    leaves = len(m._digests_of_tree(inner))
-    stem = f"{leftmost}-{child.id}-{leaves}"
+    stem = f"{paths[0].name}-{child.id}-2"
     naps = repo / ".summem" / "naps"
     assert (naps / f"{stem}.tree").read_bytes() == m.dumps_tree(inner)
     assert (naps / f"{stem}.summ").read_bytes() == m.note_file_bytes("pair")
-    assert m._nap_stem(child) == stem
 
 
 def test_rematerialize_does_not_clobber_existing_dest(tmp_path):
@@ -223,7 +220,6 @@ def test_rematerialize_does_not_clobber_existing_dest(tmp_path):
     m.rematerialize_child(repo2, child)
     assert node.tree_path.read_bytes() == tree_bytes
     assert node.sum_path.read_bytes() == sum_bytes
-    assert m._nap_stem(child) == node.name
 
 
 def test_heal_ab_vs_abcd_keeps_coarse_pack(tmp_path):
@@ -453,7 +449,7 @@ def test_same_second_notes_keep_left_child_stem(tmp_path):
     for text in ("a", "b", "c", "d"):
         m.write_note(repo, text, now, rng)
     nodes = m.list_view(repo)
-    left_seq = m._seq_prefix(nodes[0].name)
+    left_seq = nodes[0].name
     m.write_nap(repo, nodes[0].id, nodes[1].id, "ab")
     m.write_nap(repo, nodes[2].id, nodes[3].id, "cd")
     naps = [n for n in m.list_view(repo) if n.kind == "nap"]
