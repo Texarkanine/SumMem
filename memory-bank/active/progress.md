@@ -49,3 +49,16 @@ Heal overlap checks walk raw tree JSON instead of building unused `Tree` datacla
     - `fold_request` still defaults `wake_lines` to the script constant when omitted; only `ENTRY_CHARS` comes from knobs unless passed in.
 * Insights
     - Parse-equivalence needs the same keys as `_tree_from_dict` so a nameless note still yields `None` and heal does not rematerialize a pack `_as_child` cannot load.
+
+## 2026-08-25 - QA - COMPLETE
+
+* Work completed
+    - Reviewed the implementation against the Level 2 plan for KISS, DRY, YAGNI, completeness, regressions, integrity, and documentation.
+    - Confirmed the raw-JSON walker preserves the Tree parser's required key access and parse-error behavior without materializing `Tree`.
+    - Confirmed the `note` and `nap` write paths reuse the healed view and loaded knobs, with the required post-write re-list for `nap`.
+    - Ran `uvx --with tox tox`: py311, py312, py313, and py314 each passed all 290 tests.
+* Decisions made
+    - QA result: PASS.
+    - The nap CLI test's lack of direct call-count assertions is a non-blocking advisory because the simple implementation satisfies the planned count by inspection.
+* Insights
+    - The duplicated raw-dict traversal is intentional and smaller than introducing a shared abstraction that would compromise either digest-only performance or materialization clarity.

@@ -81,4 +81,12 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
+
+## QA Results
+
+- PASS: The implementation matches the approved raw-JSON digest walk and write-path threading plan without scope creep or semantic blockers.
+- The raw walker preserves Tree parser key access and error handling while avoiding `Tree` construction during overlap checks.
+- `note` and `nap` reuse the healed view and loaded knobs; `nap` correctly re-lists only after the view-changing write.
+- Non-blocking advisory: the nap CLI test observes `nodes` reaching `write_nap` but does not directly count the one post-write `list_view` call or the one `knobs` call. The implementation satisfies both by inspection.
+- Verification: `uvx --with tox tox` passed on py311, py312, py313, and py314 with 290 tests per environment.
