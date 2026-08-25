@@ -1,0 +1,1 @@
+Issue #51: heal digest walk is raw JSON only; rematerialize and write_nap still build Tree when writing a pack.
