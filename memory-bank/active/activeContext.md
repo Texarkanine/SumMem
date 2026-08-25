@@ -1,13 +1,12 @@
 # Active Context
 
 ## Current Task: drop-dataclasses
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Fresh checkout on `feat/drop-dataclasses` at `ddc239e` (main). No `memory-bank/active/` in-flight state.
-- Issue #52 treated as already-approved intent.
-- Measured `-X importtime` on `summem version` under uv Python 3.11: argparse ~33 ms, dataclasses ~18 ms (inspect ~16 ms), tomllib ~6 ms, subprocess ~4.5 ms, random ~1 ms, fcntl ~0.08 ms. Wall `version` ~100–135 ms. The import-time floor is real; implement.
-- Classified Level 2: single-file enhancement (class defs + lazy imports + `main` dispatch), design already specified, no architecture change.
+- Level 2 plan written: isolation tests first, then slots + `_replace`, then lazy imports, then optional argparse leftover, then techContext.
+- Lane locked: class definitions, module imports, `main` dispatch only.
+- Isolation tests run in a fresh interpreter so pytest's own imports cannot mask the contract.
 
 ## Next Step
-- Load the Level 2 workflow and execute Plan.
+- Preflight validation, then Build.

@@ -18,3 +18,14 @@ Cut the per-invocation import floor: drop dataclasses, lazy-import command-only 
     - Issue text says six dataclasses; this `main` has five (`NoteChild`, `Tree`, `NapChild`, `ViewNode`, `ProjectedNode`)
     - `fcntl` itself is cheap; it is still in the acceptance "do not import" list
     - `test_zipper.py` patches `m.fcntl.flock`; `test_cli.py` uses `dataclasses.replace` on `ViewNode`
+
+## 2026-08-25 - PLAN - COMPLETE
+
+* Work completed
+    - Wrote TDD plan: fresh-interpreter isolation, slots + `_replace`, lazy imports, optional argparse leftover, techContext
+* Decisions made
+    - No new test file; extend `tests/test_cli.py` and retarget two existing patches
+    - Unit 4 runs only if argparse is still the leftover after units 2–3; early-out exact argv, keep ArgumentParser for `-h` on real commands
+    - Runtime `sys.modules` probe, not a source-scan change-detector, is the dataclasses/import contract
+* Insights
+    - Bare `-h` already returns `usage_text()` before the parser; moving `import argparse` below that early-out is enough if unit 4 runs
