@@ -343,41 +343,37 @@ def knobs(parent):
         return defaults
 
 
-def _ignored_store(git_root: Path, store_dir: Path) -> bool:
-    import subprocess
-
-    rel = store_dir.relative_to(git_root).as_posix()
-    result = subprocess.run(
-        ["git", "check-ignore", "-q", "--", rel],
-        cwd=git_root,
-        capture_output=True,
-    )
-    return result.returncode == 0
-
-
 def catalog_text(git_root, resolved_parent) -> str:
     """Return root-wake catalog of other started stores, or empty."""
+    import subprocess
+
     root = Path(git_root).resolve()
     if Path(resolved_parent).resolve() != root:
         return ""
-    found: list[Path] = []
-    for dirpath, dirnames, _filenames in os.walk(root, followlinks=False):
-        dirnames[:] = [name for name in dirnames if name != ".git"]
-        if ".summem" not in dirnames:
+    result = subprocess.run(
+        ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
+        cwd=root,
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        return ""
+    found: set[Path] = set()
+    for raw in result.stdout.split(b"\0"):
+        if not raw:
             continue
-        parent = Path(dirpath)
-        dirnames.remove(".summem")
-        if parent.resolve() == root:
+        rel = raw.decode("utf-8", "surrogateescape")
+        posix = Path(rel).as_posix()
+        if posix == ".summem" or posix.startswith(".summem/"):
             continue
-        store_dir = parent / ".summem"
-        if _ignored_store(root, store_dir):
+        marker = "/.summem/"
+        idx = posix.find(marker)
+        if idx < 0:
             continue
-        found.append(parent)
-    found.sort()
+        found.add(root / posix[:idx])
     if not found:
         return ""
     lines = ["== Additional SumMem Catalogs =="]
-    for parent in found:
+    for parent in sorted(found):
         rel = parent.relative_to(root).as_posix()
         lines.append(f"./{rel}")
     return "\n".join(lines) + "\n"

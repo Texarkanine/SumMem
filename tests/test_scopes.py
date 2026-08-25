@@ -420,6 +420,68 @@ def test_ignored_store_omitted_from_catalog(tmp_path, monkeypatch, capsys):
     assert "wake --path secret" not in out
 
 
+def test_gitignore_store_omitted_from_catalog(tmp_path, monkeypatch, capsys):
+    """A store ignored by .gitignore is omitted from the catalog."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    (repo / ".gitignore").write_text("hidden/.summem\n", encoding="utf-8")
+    assert m.main(["start", "hidden"]) == 0
+    assert m.main(["start", "pkg"]) == 0
+    capsys.readouterr()
+    assert m.main(["wake"]) == 0
+    out = capsys.readouterr().out
+    assert "./pkg" in out
+    assert "./hidden" not in out
+
+
+def test_catalog_does_not_os_walk(tmp_path, monkeypatch, capsys):
+    """Root catalog lists other stores without calling os.walk."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["start", "pkg"]) == 0
+    capsys.readouterr()
+
+    def boom(*_a, **_k):
+        raise AssertionError("os.walk")
+
+    monkeypatch.setattr(m.os, "walk", boom)
+    assert m.main(["wake"]) == 0
+    out = capsys.readouterr().out
+    assert "./pkg" in out
+    assert "== Additional SumMem Catalogs ==" in out
+
+
+def test_file_ignored_config_still_catalogs_store(tmp_path, monkeypatch, capsys):
+    """A file-level gitignore of config.toml does not hide a store that has notes."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    (repo / ".gitignore").write_text("config.toml\n", encoding="utf-8")
+    assert m.main(["start", "pkg"]) == 0
+    assert m.main(["note", "--path", "pkg", "visible"]) == 0
+    capsys.readouterr()
+    assert m.main(["wake"]) == 0
+    out = capsys.readouterr().out
+    assert "./pkg" in out
+    assert "== Additional SumMem Catalogs ==" in out
+
+
+def test_catalog_requires_config_toml_sentinel(tmp_path, monkeypatch, capsys):
+    """A child .summem directory without config.toml is not cataloged."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    (repo / "bare" / ".summem").mkdir(parents=True)
+    assert m.main(["start", "pkg"]) == 0
+    capsys.readouterr()
+    assert m.main(["wake"]) == 0
+    out = capsys.readouterr().out
+    assert "./pkg" in out
+    assert "./bare" not in out
+
+
 def test_root_only_wake_labels_nonempty_document(tmp_path, monkeypatch, capsys):
     """A repo with only the git-root store labels a non-empty document."""
     m = load_summem()
