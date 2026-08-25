@@ -62,3 +62,13 @@ Heal overlap checks walk raw tree JSON instead of building unused `Tree` datacla
     - The nap CLI test's lack of direct call-count assertions is a non-blocking advisory because the simple implementation satisfies the planned count by inspection.
 * Insights
     - The duplicated raw-dict traversal is intentional and smaller than introducing a shared abstraction that would compromise either digest-only performance or materialization clarity.
+
+## 2026-08-25 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-heal-raw-json.md`.
+    - Persistent-file probe: productContext, systemPatterns, and techContext skipped.
+* Decisions made
+    - The write-path optional kwargs are the elegant form. StoreContext stays out.
+* Insights
+    - A digest walker looser than `loads_tree` will hand rematerialize a pack `_as_child` cannot load. Same keys, or None.
