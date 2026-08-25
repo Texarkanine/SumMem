@@ -1,6 +1,0 @@
-PASS
-- The id-keyed row dict was replaced with an ordered `hits` list and a `first` lookup dict, correctly preserving duplicate notes and their distinct dates.
-- Nap rows are now appended to `hits` before their children's hits are extended, restoring preorder traversal so nested recall prints captions before leaves.
-- `_zoom_kids` now takes pre-projected child rows from the index, maintaining tree order and duplicate preservation during zoom.
-- The new tests `test_recall_keeps_duplicate_note_dates`, `test_zoom_keeps_duplicate_note_dates`, and `test_recall_nested_caption_before_matching_leaves` verify the fixes.
-- The implementation is acceptable as-is.
