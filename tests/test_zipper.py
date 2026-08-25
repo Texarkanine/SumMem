@@ -158,6 +158,106 @@ def test_leaf_digests_none_when_tree_missing_or_malformed(tmp_path):
     assert m.leaf_digests(ez) is None
 
 
+def test_leaf_digests_nap_does_not_build_tree(tmp_path, monkeypatch):
+    """A nap's leaf-set is hashed from raw tree JSON, not a Tree graph."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    texts = ["alpha", "beta"]
+    _write_notes(m, repo, texts)
+    expected = {m.note_digest(m.note_file_bytes(text)) for text in texts}
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    node = m.list_view(repo)[0]
+
+    def boom(*_args, **_kwargs):
+        raise AssertionError("digest-only work must not build Tree")
+
+    monkeypatch.setattr(m, "loads_tree", boom)
+    monkeypatch.setattr(m, "_tree_from_dict", boom)
+    assert m.leaf_digests(node) == expected
+
+
+def test_write_nap_reuses_nodes(tmp_path, monkeypatch):
+    """write_nap(nodes=...) does not call list_view."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    _write_notes(m, repo, ["alpha", "beta"])
+    nodes = m.list_view(repo)
+    ids = [n.id for n in nodes]
+    real = m.list_view
+
+    def boom(_parent):
+        raise AssertionError("write_nap must reuse nodes")
+
+    monkeypatch.setattr(m, "list_view", boom)
+    m.write_nap(repo, ids[0], ids[1], "pair", nodes=nodes)
+    monkeypatch.setattr(m, "list_view", real)
+    assert all(n.kind == "nap" for n in m.list_view(repo))
+
+
+def test_cli_note_lists_once_when_disjoint(tmp_path, monkeypatch):
+    """A no-overlap note under budget lists the view once."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    _write_notes(m, repo, ["alpha", "beta"])
+    lists = {"n": 0}
+    knobs_n = {"n": 0}
+    real_list = m.list_view
+    real_knobs = m.knobs
+
+    def wrap_list(parent):
+        lists["n"] += 1
+        return real_list(parent)
+
+    def wrap_knobs(parent):
+        knobs_n["n"] += 1
+        return real_knobs(parent)
+
+    monkeypatch.setattr(m, "list_view", wrap_list)
+    monkeypatch.setattr(m, "knobs", wrap_knobs)
+    assert m.main(["note", "gamma"]) == 0
+    assert lists["n"] == 1
+    assert knobs_n["n"] == 1
+
+
+def test_cli_nap_passes_heal_nodes_to_write_nap(tmp_path, monkeypatch):
+    """nap hands heal's view to write_nap instead of listing again."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    _write_notes(m, repo, ["alpha", "beta"])
+    ids = [n.id for n in m.list_view(repo)]
+    seen = {}
+    real = m.write_nap
+
+    def wrapped(parent, id_a, id_b, caption, entry_chars=None, nodes=None):
+        seen["nodes"] = nodes
+        return real(parent, id_a, id_b, caption, entry_chars, nodes)
+
+    monkeypatch.setattr(m, "write_nap", wrapped)
+    assert m.main(["nap", ids[0], ids[1], "pair"]) == 0
+    assert seen.get("nodes") is not None
+    assert {n.id for n in seen["nodes"]} == set(ids)
+
+
+def test_heal_view_returns_final_view(tmp_path):
+    """heal_view returns the same nodes a subsequent list_view would."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    _write_notes(m, repo, ["A", "B"], start=1)
+    ids = [n.id for n in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "ab")
+    _write_notes(m, repo, ["C", "D"], start=10)
+    ids = [n.id for n in m.list_view(repo) if n.kind == "note"]
+    m.write_nap(repo, ids[0], ids[1], "cd")
+    returned = m.heal_view(repo)
+    fresh = m.list_view(repo)
+    assert [(n.id, n.kind, n.leaves) for n in returned] == [
+        (n.id, n.kind, n.leaves) for n in fresh
+    ]
+
+
 def test_two_identical_notes_stay(tmp_path):
     """Two notes with the same text are not unlinked by leaf-set helpers."""
     m = load_summem()

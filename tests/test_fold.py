@@ -285,6 +285,25 @@ def test_config_toml_wake_lines_is_read(tmp_path, monkeypatch, capsys):
     assert list((repo / ".summem" / "naps").glob("*.summ")) == []
 
 
+def test_fold_request_reuses_nodes_and_entry_chars(tmp_path, monkeypatch):
+    """fold_request(nodes=..., entry_chars=...) does not list or parse knobs."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    for i, text in enumerate(("a", "b", "c"), start=1):
+        m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
+    nodes = m.list_view(repo)
+    expected = m.fold_request(repo, 1)
+
+    def boom(*_args, **_kwargs):
+        raise AssertionError("fold_request must reuse nodes and entry_chars")
+
+    monkeypatch.setattr(m, "list_view", boom)
+    monkeypatch.setattr(m, "knobs", boom)
+    out = m.fold_request(repo, 1, nodes=nodes, entry_chars=280)
+    assert out == expected
+
+
 def test_fold_request_mentions_remaining(tmp_path, monkeypatch):
     """Five notes at budget 3: fold_request says compressions remain after this one."""
     m = load_summem()
