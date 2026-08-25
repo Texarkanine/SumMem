@@ -60,20 +60,14 @@
 
 from __future__ import annotations
 
-import argparse
-import fcntl
 import hashlib
 import json
 import os
-import random
 import re
-import subprocess
 import sys
 if sys.version_info < (3, 11):
     sys.stderr.write("SumMem needs Python 3.11 or newer\n")
     raise SystemExit(1)
-import tomllib
-from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -108,57 +102,106 @@ def leafset_id(digests: list[str]) -> str:
     return hashlib.sha256(join.encode("ascii")).hexdigest()
 
 
-@dataclass(frozen=True)
+def _replace(obj, **changes):
+    """Return a copy of *obj* with *changes* applied to named fields."""
+    fields = {name: getattr(obj, name) for name in obj.__slots__}
+    fields.update(changes)
+    return type(obj)(**fields)
+
+
+def _eq_by_slots(self, other):
+    if type(other) is not type(self):
+        return NotImplemented
+    return all(getattr(self, name) == getattr(other, name) for name in self.__slots__)
+
+
 class NoteChild:
     """A raw note child in a canonical tree."""
 
-    name: str
-    text: str
+    __slots__ = ("name", "text")
+    __eq__ = _eq_by_slots
+
+    def __init__(self, name: str, text: str) -> None:
+        self.name = name
+        self.text = text
 
 
-@dataclass(frozen=True)
 class Tree:
     """Canonical tree: list of note and nap children."""
 
-    kids: list[NoteChild | NapChild]
+    __slots__ = ("kids",)
+    __eq__ = _eq_by_slots
+
+    def __init__(self, kids: list[NoteChild | NapChild]) -> None:
+        self.kids = kids
 
 
-@dataclass(frozen=True)
 class NapChild:
     """A nap child. *id* is the leaf-set id of the original notes."""
 
-    id: str
-    sum: str
-    tree: Tree
+    __slots__ = ("id", "sum", "tree")
+    __eq__ = _eq_by_slots
+
+    def __init__(self, id: str, sum: str, tree: Tree) -> None:
+        self.id = id
+        self.sum = sum
+        self.tree = tree
 
 
-@dataclass(frozen=True)
 class ViewNode:
     """One wait-free view entry: a loose note or a nap stem."""
 
-    id: str
-    name: str
-    kind: str
-    caption: str
-    leaves: int
-    stamp: str
-    path: Path
-    sum_path: Path | None = None
-    tree_path: Path | None = None
+    __slots__ = ("id", "name", "kind", "caption", "leaves", "stamp", "path", "sum_path", "tree_path")
+    __eq__ = _eq_by_slots
+
+    def __init__(
+        self,
+        id: str,
+        name: str,
+        kind: str,
+        caption: str,
+        leaves: int,
+        stamp: str,
+        path: Path,
+        sum_path: Path | None = None,
+        tree_path: Path | None = None,
+    ) -> None:
+        self.id = id
+        self.name = name
+        self.kind = kind
+        self.caption = caption
+        self.leaves = leaves
+        self.stamp = stamp
+        self.path = path
+        self.sum_path = sum_path
+        self.tree_path = tree_path
 
 
-@dataclass(frozen=True)
 class ProjectedNode:
     """One printed wake row: a view file or an in-memory expanded child."""
 
-    id: str
-    kind: str
-    caption: str
-    leaves: int
-    stamp: str
-    tree: Tree | None = None
-    tree_path: Path | None = None
-    tree_attempted: bool = False
+    __slots__ = ("id", "kind", "caption", "leaves", "stamp", "tree", "tree_path", "tree_attempted")
+    __eq__ = _eq_by_slots
+
+    def __init__(
+        self,
+        id: str,
+        kind: str,
+        caption: str,
+        leaves: int,
+        stamp: str,
+        tree: Tree | None = None,
+        tree_path: Path | None = None,
+        tree_attempted: bool = False,
+    ) -> None:
+        self.id = id
+        self.kind = kind
+        self.caption = caption
+        self.leaves = leaves
+        self.stamp = stamp
+        self.tree = tree
+        self.tree_path = tree_path
+        self.tree_attempted = tree_attempted
 
 
 def _tree_dict(tree: Tree) -> dict:
@@ -284,6 +327,8 @@ def ensure_store(parent):
 
 def knobs(parent):
     """Return WAKE_LINES and ENTRY_CHARS for the store under *parent*."""
+    import tomllib
+
     defaults = {"WAKE_LINES": WAKE_LINES, "ENTRY_CHARS": ENTRY_CHARS}
     config = Path(parent) / ".summem" / "config.toml"
     try:
@@ -299,6 +344,8 @@ def knobs(parent):
 
 
 def _ignored_store(git_root: Path, store_dir: Path) -> bool:
+    import subprocess
+
     rel = store_dir.relative_to(git_root).as_posix()
     result = subprocess.run(
         ["git", "check-ignore", "-q", "--", rel],
@@ -462,6 +509,22 @@ def _digests_of_tree(tree: Tree) -> list[str]:
     return out
 
 
+def _digests_of_dict(obj: dict) -> list[str]:
+    """Return leaf digests by walking a raw tree-JSON dict. Do not build Tree."""
+    out: list[str] = []
+    for child in obj["c"]:
+        kind = child.get("type")
+        if kind == "note":
+            _name, text = child["name"], child["text"]
+            out.append(note_digest(note_file_bytes(text)))
+        elif kind == "nap":
+            _cid, _caption = child["id"], child["sum"]
+            out.extend(_digests_of_dict(child["tree"]))
+        else:
+            raise ValueError("unknown tree child type")
+    return out
+
+
 def _note_children(tree: Tree):
     for child in tree.kids:
         if isinstance(child, NoteChild):
@@ -480,7 +543,7 @@ def leaf_digests(node: ViewNode) -> set[str] | None:
     if node.tree_path is None or not node.tree_path.is_file():
         return None
     try:
-        return set(_digests_of_tree(loads_tree(node.tree_path.read_bytes())))
+        return set(_digests_of_dict(json.loads(node.tree_path.read_bytes().decode("utf-8"))))
     except _TREE_PARSE_ERRORS:
         return None
 
@@ -531,27 +594,34 @@ def _first_overlap(
     return None
 
 
-def heal_view(parent) -> None:
-    """Zipper overlapping view packs until a pass cannot mutate."""
+def heal_view(parent, nodes=None) -> list[ViewNode]:
+    """Zipper overlapping view packs until a pass cannot mutate. Return the final view."""
     while True:
-        found = _first_overlap(list_view(parent))
+        if nodes is None:
+            nodes = list_view(parent)
+        found = _first_overlap(nodes)
         if found is None:
-            return
+            return nodes
         smaller, other, small_set, other_set = found
         if small_set <= other_set:
             _unlink_node(smaller)
+            nodes = None
             continue
         if other_set <= small_set:
             _unlink_node(other)
+            nodes = None
             continue
         child, _digests = _as_child(smaller)
         for kid in child.tree.kids:
             rematerialize_child(parent, kid)
         _unlink_node(smaller)
+        nodes = None
 
 
 def with_store_lock(parent, fn):
     """Run *fn* while holding an exclusive flock on the store's naps/ directory."""
+    import fcntl
+
     store = ensure_store(parent)
     fd = os.open(store / "naps", os.O_RDONLY)
     try:
@@ -599,10 +669,11 @@ def _adjacent_nodes(nodes: list[ViewNode], id_a: str, id_b: str) -> tuple[ViewNo
     raise ValueError("not adjacent. Nap two ids that sit next to each other in wake.")
 
 
-def write_nap(parent, id_a, id_b, caption, entry_chars: int | None = None):
+def write_nap(parent, id_a, id_b, caption, entry_chars: int | None = None, nodes=None):
     """Fold two adjacent view nodes into a nap pair. Return the .summ path."""
     require_entry(caption, entry_chars)
-    nodes = list_view(parent)
+    if nodes is None:
+        nodes = list_view(parent)
     left, right = _adjacent_nodes(nodes, id_a, id_b)
     child_l, digs_l = _as_child(left)
     child_r, digs_r = _as_child(right)
@@ -835,14 +906,14 @@ def _prepare_nap(row: ProjectedNode) -> ProjectedNode:
     if row.kind != "nap" or row.tree_attempted:
         return row
     if row.tree is not None:
-        return replace(row, tree_attempted=True)
+        return _replace(row, tree_attempted=True)
     if row.tree_path is None or not row.tree_path.is_file():
-        return replace(row, tree_attempted=True)
+        return _replace(row, tree_attempted=True)
     try:
         tree = loads_tree(row.tree_path.read_bytes())
     except _TREE_PARSE_ERRORS:
-        return replace(row, tree_attempted=True)
-    return replace(row, tree=tree, tree_attempted=True)
+        return _replace(row, tree_attempted=True)
+    return _replace(row, tree=tree, tree_attempted=True)
 
 
 def _split_kids(row: ProjectedNode) -> list[ProjectedNode] | None:
@@ -979,11 +1050,14 @@ def _fold_path_flag(parent) -> str:
     return f" --path {Path(rel).as_posix()}"
 
 
-def fold_request(parent, wake_lines: int | None = None) -> str:
+def fold_request(parent, wake_lines: int | None = None, nodes=None, entry_chars: int | None = None) -> str:
     """Return an OptMem-style nap prompt for the oldest equal-grain pair when over *wake_lines*."""
     if wake_lines is None:
         wake_lines = WAKE_LINES
-    nodes = list_view(parent)
+    if entry_chars is None:
+        entry_chars = knobs(parent)["ENTRY_CHARS"]
+    if nodes is None:
+        nodes = list_view(parent)
     if len(nodes) <= wake_lines:
         return ""
     left = right = None
@@ -1000,7 +1074,7 @@ def fold_request(parent, wake_lines: int | None = None) -> str:
         extra = "1 compression remains after this one.\n"
     elif remain > 1:
         extra = f"{remain} compressions remain after this one.\n"
-    limit = knobs(parent)["ENTRY_CHARS"]
+    limit = entry_chars
     return (
         f"Compress these two into one line of at most {limit} characters.\n"
         "Keep what has lasting effect, drop what does not. Invent nothing.\n"
@@ -1156,6 +1230,14 @@ def main(argv: list[str] | None = None) -> int:
             sys.stdout.write(usage_text())
             return 0
         args_list = [args_list[1], "--help", *args_list[2:]]
+    if args_list == ["version"]:
+        sys.stdout.write(f"{__version__}\n")
+        return 0
+    if args_list == ["init"]:
+        sys.stdout.write(init_text())
+        return 0
+    import argparse
+
     parser = argparse.ArgumentParser(prog="summem")
     sub = parser.add_subparsers(dest="cmd", required=True)
     wake = sub.add_parser("wake")
@@ -1237,12 +1319,12 @@ def main(argv: list[str] | None = None) -> int:
             return 1
 
         def nap_locked():
-            heal_view(parent)
-            view_ids = [node.id for node in list_view(parent)]
+            view = heal_view(parent)
+            view_ids = [node.id for node in view]
             id_a = resolve_id(args.id_a, view_ids)
             id_b = resolve_id(args.id_b, view_ids)
-            write_nap(parent, id_a, id_b, args.caption, k["ENTRY_CHARS"])
-            return fold_request(parent, k["WAKE_LINES"])
+            write_nap(parent, id_a, id_b, args.caption, k["ENTRY_CHARS"], nodes=view)
+            return fold_request(parent, k["WAKE_LINES"], entry_chars=k["ENTRY_CHARS"])
 
         try:
             out = with_store_lock(parent, nap_locked)
@@ -1276,13 +1358,17 @@ def main(argv: list[str] | None = None) -> int:
     except ValueError as exc:
         sys.stderr.write(f"{exc}\n")
         return 1
+    import random
+
     now = datetime.now(timezone.utc)
     rng = random.SystemRandom()
 
     def note_locked():
         write_note(parent, args.text, now, rng, k["ENTRY_CHARS"])
-        heal_view(parent)
-        return fold_request(parent, k["WAKE_LINES"])
+        view = heal_view(parent)
+        return fold_request(
+            parent, k["WAKE_LINES"], nodes=view, entry_chars=k["ENTRY_CHARS"]
+        )
 
     try:
         out = with_store_lock(parent, note_locked)
