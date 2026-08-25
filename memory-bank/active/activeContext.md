@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: recall-zoom-prefix
-**Phase:** BUILD - COMPLETE (rework after QA FAIL)
+**Phase:** REFLECT - COMPLETE
 
 ## What Was Done
 - `unique_prefixes` builds one table via sort plus neighbor LCP. `short_id` is a lookup. `format_wake_line` accepts a prefix `dict` for O(1) lines.
@@ -27,4 +27,4 @@
 - The planned id-to-row `dict` could not keep two same-text notes. Rework added an ordered hits list; that is the same walk, not a new design.
 
 ## Next Step
-- QA retry of the rework.
+- Archive and open a non-draft PR that Fixes #50.

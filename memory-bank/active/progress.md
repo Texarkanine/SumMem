@@ -73,3 +73,27 @@ Make `recall` and `zoom` unique-prefix in linear time and parse each view `.tree
     - First matching id still wins for zoom find, matching old `_find_in_tree`
 * Insights
     - Prefix uniqueness is among distinct ids; printed rows are not. An id-keyed row map cannot be the only index.
+
+## 2026-08-25 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Reviewed the reworked implementation against the previous QA FAIL findings
+    - Verified `_index_tree` returns preorder `hits` and per-nap child rows
+    - Verified `_zoom_kids` formats child rows in tree order
+    - Verified new tests for duplicate note dates and nested caption-before-leaf order
+* Findings
+    - The id-keyed row dict was successfully replaced with an ordered `hits` list and a `first` lookup dict, preserving duplicate notes.
+    - Nap rows are appended before descendants, restoring preorder traversal.
+    - The implementation is acceptable as-is.
+* Decision
+    - PASS
+
+## 2026-08-25 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-recall-zoom-prefix.md`
+    - Reconciled persistent files
+* Decisions made
+    - Persistent briefing files needed no update; the atlas already carries parse-once and the prefix table
+* Insights
+    - Prefix uniqueness is among distinct ids; printed rows are not

@@ -127,7 +127,7 @@ No new technology - validation not required
 - [x] Preflight
 - [x] Build
 - [x] QA - FAIL then rework
-- [ ] QA retry
+- [x] QA retry
 
 ### Build progress
 
