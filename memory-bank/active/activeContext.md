@@ -1,12 +1,12 @@
 # Active Context
 
 ## Current Task: wake-never-cut
-**Phase:** BUILD - COMPLETE
+**Phase:** BUILD - COMPLETE (QA rework)
 
 ## What Was Done
-- Removed both newest-N slices in `expand_frontier`. Over-budget wake prints every view node; under-budget expand is unchanged.
-- Tests: full 11-note listing, oldest pack kept, recall still matches when over budget, 8-2-1 wake lists three files then expands to four when short.
-- Atlas and persistent memory-bank files state that wake does not drop nodes to fit `WAKE_LINES`.
+- First QA FAIL: stale wake-budget definition at atlas settings paragraph; untracked leftover store files.
+- Rewrote the settings-paragraph definition (fold trigger + expand-when-short; over-budget still prints every node).
+- Did not commit the leftover `55a93401` pair: those sentences already live in the committed 32-pack. Parked leftovers in `stash@{0}`.
 
 ## Next Step
-- Level 1 QA via a spawned `/niko-qa` subagent.
+- Re-run Level 1 QA via a spawned `/niko-qa` subagent.

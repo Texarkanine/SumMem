@@ -28,3 +28,31 @@ Stop wake from dropping oldest view nodes when the listing is over `WAKE_LINES`.
 * Insights
     - A second `frontier[-budget:]` after expand would have kept cutting even after the first slice was gone
     - The 8-2-1 zipper case already documented “lists three files at budget 2”; the test had drifted to a cap
+
+## 2026-08-25 - QA - COMPLETE (FAIL)
+
+* Work completed
+    - Reviewed the `expand_frontier` change, the four retargeted test oracles, and the atlas / patterns / product edits against the brief
+    - Full suite on `.tox/py311`: 313 passed
+    - Live check: `./summem wake` prints 34 view lines at `WAKE_LINES=32`, oldest `x32` pack included
+    - Swept `README.md`, `how_to_text`, `prompt_text`, `usage_text`, and `docs/` for other statements of the removed cap
+* Decisions made
+    - FAIL on two findings: the stale wake-budget definition at `docs/architecture/index.md:75`, and three untracked script-written store files
+    - The code change itself passes: both slices gone, nothing added, and the post-expand slice was unreachable dead code rather than live behavior
+    - `budget <= 0` returning `[]` stays an advisory - pre-existing, degenerate config, out of this task's scope
+* Insights
+    - The build fixed the atlas's behavior paragraph (line 169) but not the setting's definition (line 75), so the atlas contradicted itself on the very setting under change
+    - The untracked `x2 55a93401` pair is not just hygiene: its child notes were deleted on `main` and the pack never landed there, so at HEAD those two sentences live in no file at all. Committing the pair on this branch repairs a pre-existing loss
+
+## 2026-08-25 - BUILD - COMPLETE (QA rework)
+
+* Work completed
+    - Rewrote the wake-budget definition at `docs/architecture/index.md` (settings paragraph): fold trigger + expand-when-short, not a print cap
+    - Checked the QA integrity finding against HEAD: both AGPL sentences already live in the committed 32-pack (nested `55a93401` node). The untracked pair is a leftover subset nap from local `main`, not a missing payload
+    - The untracked Parallel-naps note is an earlier wording of the `#59` sentence already on HEAD (`65041798`)
+    - Parked the three leftover store files in `stash@{0}` so this branch does not add an overlapping pack
+* Decisions made
+    - Do not commit the leftover `55a93401` pair on this branch: it would overlap the 32-pack and is the zipper's job to drop
+    - Do not commit the Parallel-naps note here: redundant with HEAD, not this task's output
+* Insights
+    - QA saw the live wake print `x2 55a93401` because those untracked files were in the worktree, not because HEAD lacked the sentences

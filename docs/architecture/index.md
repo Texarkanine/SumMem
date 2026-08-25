@@ -72,7 +72,7 @@ Each of those is one **view node**. A complete nap is two physical files and sti
 
 A missing or conflict-marked caption still counts as a view node: grain and id prefix print, the caption does not. A missing or unreadable children file means that node will not split.
 
-Each store has a committed **settings** file. Two settings matter here: the length limit, and the **wake budget** — how many lines a wake may print, and how many view nodes may exist before the script asks for a fold. Missing values use the script’s defaults. Settings are not environment variables and are not rewritten unless someone runs `start`.
+Each store has a committed **settings** file. Two settings matter here: the length limit, and the **wake budget** — how many view nodes may exist before the script asks for a fold, and how short a listing must be before wake expands a nap in memory. Wake still prints every view node when the count is over budget. Missing values use the script’s defaults. Settings are not environment variables and are not rewritten unless someone runs `start`.
 
 ## Grain
 
