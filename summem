@@ -60,20 +60,14 @@
 
 from __future__ import annotations
 
-import argparse
-import fcntl
 import hashlib
 import json
 import os
-import random
 import re
-import subprocess
 import sys
 if sys.version_info < (3, 11):
     sys.stderr.write("SumMem needs Python 3.11 or newer\n")
     raise SystemExit(1)
-import tomllib
-from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -108,57 +102,106 @@ def leafset_id(digests: list[str]) -> str:
     return hashlib.sha256(join.encode("ascii")).hexdigest()
 
 
-@dataclass(frozen=True)
+def _replace(obj, **changes):
+    """Return a copy of *obj* with *changes* applied to named fields."""
+    fields = {name: getattr(obj, name) for name in obj.__slots__}
+    fields.update(changes)
+    return type(obj)(**fields)
+
+
+def _eq_by_slots(self, other):
+    if type(other) is not type(self):
+        return NotImplemented
+    return all(getattr(self, name) == getattr(other, name) for name in self.__slots__)
+
+
 class NoteChild:
     """A raw note child in a canonical tree."""
 
-    name: str
-    text: str
+    __slots__ = ("name", "text")
+    __eq__ = _eq_by_slots
+
+    def __init__(self, name: str, text: str) -> None:
+        self.name = name
+        self.text = text
 
 
-@dataclass(frozen=True)
 class Tree:
     """Canonical tree: list of note and nap children."""
 
-    kids: list[NoteChild | NapChild]
+    __slots__ = ("kids",)
+    __eq__ = _eq_by_slots
+
+    def __init__(self, kids: list[NoteChild | NapChild]) -> None:
+        self.kids = kids
 
 
-@dataclass(frozen=True)
 class NapChild:
     """A nap child. *id* is the leaf-set id of the original notes."""
 
-    id: str
-    sum: str
-    tree: Tree
+    __slots__ = ("id", "sum", "tree")
+    __eq__ = _eq_by_slots
+
+    def __init__(self, id: str, sum: str, tree: Tree) -> None:
+        self.id = id
+        self.sum = sum
+        self.tree = tree
 
 
-@dataclass(frozen=True)
 class ViewNode:
     """One wait-free view entry: a loose note or a nap stem."""
 
-    id: str
-    name: str
-    kind: str
-    caption: str
-    leaves: int
-    stamp: str
-    path: Path
-    sum_path: Path | None = None
-    tree_path: Path | None = None
+    __slots__ = ("id", "name", "kind", "caption", "leaves", "stamp", "path", "sum_path", "tree_path")
+    __eq__ = _eq_by_slots
+
+    def __init__(
+        self,
+        id: str,
+        name: str,
+        kind: str,
+        caption: str,
+        leaves: int,
+        stamp: str,
+        path: Path,
+        sum_path: Path | None = None,
+        tree_path: Path | None = None,
+    ) -> None:
+        self.id = id
+        self.name = name
+        self.kind = kind
+        self.caption = caption
+        self.leaves = leaves
+        self.stamp = stamp
+        self.path = path
+        self.sum_path = sum_path
+        self.tree_path = tree_path
 
 
-@dataclass(frozen=True)
 class ProjectedNode:
     """One printed wake row: a view file or an in-memory expanded child."""
 
-    id: str
-    kind: str
-    caption: str
-    leaves: int
-    stamp: str
-    tree: Tree | None = None
-    tree_path: Path | None = None
-    tree_attempted: bool = False
+    __slots__ = ("id", "kind", "caption", "leaves", "stamp", "tree", "tree_path", "tree_attempted")
+    __eq__ = _eq_by_slots
+
+    def __init__(
+        self,
+        id: str,
+        kind: str,
+        caption: str,
+        leaves: int,
+        stamp: str,
+        tree: Tree | None = None,
+        tree_path: Path | None = None,
+        tree_attempted: bool = False,
+    ) -> None:
+        self.id = id
+        self.kind = kind
+        self.caption = caption
+        self.leaves = leaves
+        self.stamp = stamp
+        self.tree = tree
+        self.tree_path = tree_path
+        self.tree_attempted = tree_attempted
 
 
 def _tree_dict(tree: Tree) -> dict:
@@ -284,6 +327,8 @@ def ensure_store(parent):
 
 def knobs(parent):
     """Return WAKE_LINES and ENTRY_CHARS for the store under *parent*."""
+    import tomllib
+
     defaults = {"WAKE_LINES": WAKE_LINES, "ENTRY_CHARS": ENTRY_CHARS}
     config = Path(parent) / ".summem" / "config.toml"
     try:
@@ -299,6 +344,8 @@ def knobs(parent):
 
 
 def _ignored_store(git_root: Path, store_dir: Path) -> bool:
+    import subprocess
+
     rel = store_dir.relative_to(git_root).as_posix()
     result = subprocess.run(
         ["git", "check-ignore", "-q", "--", rel],
@@ -552,6 +599,8 @@ def heal_view(parent) -> None:
 
 def with_store_lock(parent, fn):
     """Run *fn* while holding an exclusive flock on the store's naps/ directory."""
+    import fcntl
+
     store = ensure_store(parent)
     fd = os.open(store / "naps", os.O_RDONLY)
     try:
@@ -761,14 +810,14 @@ def _prepare_nap(row: ProjectedNode) -> ProjectedNode:
     if row.kind != "nap" or row.tree_attempted:
         return row
     if row.tree is not None:
-        return replace(row, tree_attempted=True)
+        return _replace(row, tree_attempted=True)
     if row.tree_path is None or not row.tree_path.is_file():
-        return replace(row, tree_attempted=True)
+        return _replace(row, tree_attempted=True)
     try:
         tree = loads_tree(row.tree_path.read_bytes())
     except _TREE_PARSE_ERRORS:
-        return replace(row, tree_attempted=True)
-    return replace(row, tree=tree, tree_attempted=True)
+        return _replace(row, tree_attempted=True)
+    return _replace(row, tree=tree, tree_attempted=True)
 
 
 def _split_kids(row: ProjectedNode) -> list[ProjectedNode] | None:
@@ -1082,6 +1131,14 @@ def main(argv: list[str] | None = None) -> int:
             sys.stdout.write(usage_text())
             return 0
         args_list = [args_list[1], "--help", *args_list[2:]]
+    if args_list == ["version"]:
+        sys.stdout.write(f"{__version__}\n")
+        return 0
+    if args_list == ["init"]:
+        sys.stdout.write(init_text())
+        return 0
+    import argparse
+
     parser = argparse.ArgumentParser(prog="summem")
     sub = parser.add_subparsers(dest="cmd", required=True)
     wake = sub.add_parser("wake")
@@ -1202,6 +1259,8 @@ def main(argv: list[str] | None = None) -> int:
     except ValueError as exc:
         sys.stderr.write(f"{exc}\n")
         return 1
+    import random
+
     now = datetime.now(timezone.utc)
     rng = random.SystemRandom()
 
