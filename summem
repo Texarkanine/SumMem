@@ -462,6 +462,22 @@ def _digests_of_tree(tree: Tree) -> list[str]:
     return out
 
 
+def _digests_of_dict(obj: dict) -> list[str]:
+    """Return leaf digests by walking a raw tree-JSON dict. Do not build Tree."""
+    out: list[str] = []
+    for child in obj["c"]:
+        kind = child.get("type")
+        if kind == "note":
+            _name, text = child["name"], child["text"]
+            out.append(note_digest(note_file_bytes(text)))
+        elif kind == "nap":
+            _cid, _caption = child["id"], child["sum"]
+            out.extend(_digests_of_dict(child["tree"]))
+        else:
+            raise ValueError("unknown tree child type")
+    return out
+
+
 def _note_children(tree: Tree):
     for child in tree.kids:
         if isinstance(child, NoteChild):
@@ -480,7 +496,7 @@ def leaf_digests(node: ViewNode) -> set[str] | None:
     if node.tree_path is None or not node.tree_path.is_file():
         return None
     try:
-        return set(_digests_of_tree(loads_tree(node.tree_path.read_bytes())))
+        return set(_digests_of_dict(json.loads(node.tree_path.read_bytes().decode("utf-8"))))
     except _TREE_PARSE_ERRORS:
         return None
 
@@ -531,23 +547,28 @@ def _first_overlap(
     return None
 
 
-def heal_view(parent) -> None:
-    """Zipper overlapping view packs until a pass cannot mutate."""
+def heal_view(parent, nodes=None) -> list[ViewNode]:
+    """Zipper overlapping view packs until a pass cannot mutate. Return the final view."""
     while True:
-        found = _first_overlap(list_view(parent))
+        if nodes is None:
+            nodes = list_view(parent)
+        found = _first_overlap(nodes)
         if found is None:
-            return
+            return nodes
         smaller, other, small_set, other_set = found
         if small_set <= other_set:
             _unlink_node(smaller)
+            nodes = None
             continue
         if other_set <= small_set:
             _unlink_node(other)
+            nodes = None
             continue
         child, _digests = _as_child(smaller)
         for kid in child.tree.kids:
             rematerialize_child(parent, kid)
         _unlink_node(smaller)
+        nodes = None
 
 
 def with_store_lock(parent, fn):
@@ -599,10 +620,11 @@ def _adjacent_nodes(nodes: list[ViewNode], id_a: str, id_b: str) -> tuple[ViewNo
     raise ValueError("not adjacent. Nap two ids that sit next to each other in wake.")
 
 
-def write_nap(parent, id_a, id_b, caption, entry_chars: int | None = None):
+def write_nap(parent, id_a, id_b, caption, entry_chars: int | None = None, nodes=None):
     """Fold two adjacent view nodes into a nap pair. Return the .summ path."""
     require_entry(caption, entry_chars)
-    nodes = list_view(parent)
+    if nodes is None:
+        nodes = list_view(parent)
     left, right = _adjacent_nodes(nodes, id_a, id_b)
     child_l, digs_l = _as_child(left)
     child_r, digs_r = _as_child(right)
@@ -889,11 +911,14 @@ def _fold_path_flag(parent) -> str:
     return f" --path {Path(rel).as_posix()}"
 
 
-def fold_request(parent, wake_lines: int | None = None) -> str:
+def fold_request(parent, wake_lines: int | None = None, nodes=None, entry_chars: int | None = None) -> str:
     """Return an OptMem-style nap prompt for the oldest equal-grain pair when over *wake_lines*."""
     if wake_lines is None:
         wake_lines = WAKE_LINES
-    nodes = list_view(parent)
+    if entry_chars is None:
+        entry_chars = knobs(parent)["ENTRY_CHARS"]
+    if nodes is None:
+        nodes = list_view(parent)
     if len(nodes) <= wake_lines:
         return ""
     left = right = None
@@ -910,7 +935,7 @@ def fold_request(parent, wake_lines: int | None = None) -> str:
         extra = "1 compression remains after this one.\n"
     elif remain > 1:
         extra = f"{remain} compressions remain after this one.\n"
-    limit = knobs(parent)["ENTRY_CHARS"]
+    limit = entry_chars
     return (
         f"Compress these two into one line of at most {limit} characters.\n"
         "Keep what has lasting effect, drop what does not. Invent nothing.\n"
@@ -1163,12 +1188,12 @@ def main(argv: list[str] | None = None) -> int:
             return 1
 
         def nap_locked():
-            heal_view(parent)
-            view_ids = [node.id for node in list_view(parent)]
+            view = heal_view(parent)
+            view_ids = [node.id for node in view]
             id_a = resolve_id(args.id_a, view_ids)
             id_b = resolve_id(args.id_b, view_ids)
-            write_nap(parent, id_a, id_b, args.caption, k["ENTRY_CHARS"])
-            return fold_request(parent, k["WAKE_LINES"])
+            write_nap(parent, id_a, id_b, args.caption, k["ENTRY_CHARS"], nodes=view)
+            return fold_request(parent, k["WAKE_LINES"], entry_chars=k["ENTRY_CHARS"])
 
         try:
             out = with_store_lock(parent, nap_locked)
@@ -1207,8 +1232,10 @@ def main(argv: list[str] | None = None) -> int:
 
     def note_locked():
         write_note(parent, args.text, now, rng, k["ENTRY_CHARS"])
-        heal_view(parent)
-        return fold_request(parent, k["WAKE_LINES"])
+        view = heal_view(parent)
+        return fold_request(
+            parent, k["WAKE_LINES"], nodes=view, entry_chars=k["ENTRY_CHARS"]
+        )
 
     try:
         out = with_store_lock(parent, note_locked)
