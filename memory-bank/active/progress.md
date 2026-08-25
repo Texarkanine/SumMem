@@ -56,3 +56,26 @@ Stop wake from dropping oldest view nodes when the listing is over `WAKE_LINES`.
     - Do not commit the Parallel-naps note here: redundant with HEAD, not this task's output
 * Insights
     - QA saw the live wake print `x2 55a93401` because those untracked files were in the worktree, not because HEAD lacked the sentences
+
+## 2026-08-25 - BUILD - COMPLETE (QA rework 2)
+
+* Work completed
+    - Added `test_wake_zero_budget_prints_every_view_node` (red: empty listing)
+    - Removed `expand_frontier`'s `budget <= 0 → []` early return so a zero/negative budget still lists every view node and does not expand
+* Decisions made
+    - Keep accepting non-positive `WAKE_LINES` rather than reject it: over-budget means print all, never cut
+* Insights
+    - The first QA called this advisory; the second correctly treated an empty document as a cut
+
+## 2026-08-25 - QA - COMPLETE (FAIL, re-review)
+
+* Work completed
+    - Re-reviewed the implementation, tests, documentation, clean worktree, and parked store leftovers against the brief
+    - Ran the full suite: 313 tests passed on each of py311, py312, py313, and py314
+    - Probed the accepted `WAKE_LINES = 0` configuration; a non-empty wake returned an empty document
+* Decisions made
+    - PASS the two first-QA rework items: the settings definition is consistent, and the unrelated store files are outside the worktree
+    - FAIL on the non-positive budget path: Build must rerun before acceptance
+* Insights
+    - `knobs` accepts zero and negative integer budgets, while `expand_frontier` returns `[]` for `budget <= 0`
+    - That pre-existing branch now directly contradicts the task's unconditional full-view requirement and the new “return every view node” contract

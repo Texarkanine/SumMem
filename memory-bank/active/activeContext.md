@@ -1,12 +1,12 @@
 # Active Context
 
 ## Current Task: wake-never-cut
-**Phase:** BUILD - COMPLETE (QA rework)
+**Phase:** BUILD - COMPLETE (QA rework 2)
 
 ## What Was Done
-- First QA FAIL: stale wake-budget definition at atlas settings paragraph; untracked leftover store files.
-- Rewrote the settings-paragraph definition (fold trigger + expand-when-short; over-budget still prints every node).
-- Did not commit the leftover `55a93401` pair: those sentences already live in the committed 32-pack. Parked leftovers in `stash@{0}`.
+- Second QA FAIL: `WAKE_LINES = 0` made `expand_frontier` return `[]`.
+- Removed that early return. Zero/negative budget lists every view node and does not expand.
+- Regression: `test_wake_zero_budget_prints_every_view_node`.
 
 ## Next Step
 - Re-run Level 1 QA via a spawned `/niko-qa` subagent.

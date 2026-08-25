@@ -27,7 +27,7 @@
 - `memory-bank/systemPatterns.md`
 - `memory-bank/productContext.md`
 
-## QA Result: FAIL
+## First QA Result: FAIL
 
 Suite green (313 on py311). Live `./summem wake` prints 34 lines at
 `WAKE_LINES=32` including the oldest `x32` pack, so the fix itself is verified.
@@ -40,3 +40,11 @@ Advisories, no action required: `expand_frontier` still returns `[]` for
 `budget <= 0`, which the new docstring does not cover (pre-existing, degenerate
 config); `test_wake_over_budget_keeps_oldest_pack` rebuilds the same id list
 from three `list_view` calls.
+
+## Re-QA Result: FAIL
+
+The first QA findings are resolved, and the full suite passes with 313 tests on each of py311–py314. One integrity issue still blocks acceptance.
+
+- [x] **Non-positive wake budget.** Removed `expand_frontier`'s `budget <= 0 → []` cut. `WAKE_LINES = 0` (and negatives) list every view node and do not expand. `test_wake_zero_budget_prints_every_view_node` pins a committed `WAKE_LINES = 0` store.
+
+Verified as acceptable: positive-budget overflow keeps all view nodes oldest-first; at-budget and under-budget behavior is unchanged; wake emits no fold request; the documentation rework is consistent; unrelated store leftovers remain outside the worktree in `stash@{0}`.
