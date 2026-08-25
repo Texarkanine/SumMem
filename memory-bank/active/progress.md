@@ -49,6 +49,25 @@ Rename nap caption files from `.sum` to `.summ` in the script, tests, docs, and 
 * Insights
     - `Path.with_suffix(".sum")` on a `.summ` file yields `.sum` (replaces the last suffix)
 
+## 2026-08-25 - QA - COMPLETE
+
+* Work completed
+    - QA PASS (advisories only: hardcoded `.summ` tokens, leftover `.sum` orphans, find recipe still owed to the PR body)
+* Decisions made
+    - Accept as-is; no `CAPTION_SUFFIX` this change
+* Insights
+    - Extra root note + x2 nap in the build commit is store use, not a missed rename
+
+## 2026-08-25 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `reflection/reflection-summ-caption-suffix.md`
+    - techContext: nap captions are `.summ`
+* Decisions made
+    - productContext and systemPatterns skip — suffix is not business context; atlas already names the pair
+* Insights
+    - Prove a destructive `find … -exec` in a temp tree; do not treat the recipe as product TDD
+
 ## 2026-08-25 - PREFLIGHT - COMPLETE
 
 * Work completed
@@ -59,3 +78,14 @@ Rename nap caption files from `.sum` to `.summ` in the script, tests, docs, and 
 * Insights
     - Three hardcoded suffix sites plus eight test files are the complete pin set; `_unlink_node` follows `sum_path`
     - A single `CAPTION_SUFFIX` / `_caption_path` helper is the accretive change the plan does not make
+
+## 2026-08-25 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Semantic review of `summ-caption-suffix` against the Level 2 plan
+    - Wrote `memory-bank/active/.qa-validation-status` with first line `PASS`
+* Decisions made
+    - Accept as-is; advisories are not build defects
+* Insights
+    - The four committed `.sum` captions were all renamed; the extra `.summ` + `.tree` pair is a new script-written nap, not a fifth leftover caption
+    - `Path.with_suffix(".sum")` on a `.summ` path is the leftover-plant in `test_view_ignores_leftover_sum_caption`

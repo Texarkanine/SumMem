@@ -95,4 +95,14 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
+
+## QA Results
+
+✅ PASS (advisories, not blocking)
+
+- **KISS / YAGNI:** Three literal `.summ` sites, no `CAPTION_SUFFIX` helper (preflight advisory honored).
+- **Completeness:** Script, tests, four `git mv` captions, README, and architecture pair bullets match the plan. `NapChild.sum` untouched. No dual-read of `.sum`.
+- **Regression:** `_unlink_node` still follows `sum_path`; `surgery.py` does not hardcode the suffix.
+- **Documentation:** Planned docs updated; archives not rewritten; find recipe not shipped in-repo.
+- **Advisory:** find command is PR-body only and is not copied into memory-bank; leftover `{stem}.sum` is an ignored orphan on unlink.
