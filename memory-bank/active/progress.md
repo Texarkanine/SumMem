@@ -54,3 +54,27 @@ Cut the per-invocation import floor: drop dataclasses, lazy-import command-only 
 * Insights
     - 3.14 pathlib imports fcntl; absence from `sys.modules` is not portable
     - Wall `version` dropped from ~110–135 ms to ~60–80 ms on this machine (pyenv shim still extra)
+
+## 2026-08-25 - QA - COMPLETE
+
+* Work completed
+    - Reviewed the complete branch diff against the Level 2 plan and project brief
+    - Checked KISS, DRY, YAGNI, completeness, regression, integrity, and documentation
+    - Ran the full tox matrix and the Python 3.10 floor check
+* Decisions made
+    - QA passed; no implementation changes are required
+* Insights
+    - tox passed 287 tests on each of Python 3.11, 3.12, 3.13, and 3.14
+    - The fresh-interpreter probe omits `random`, but the implementation localizes it to `note` and the acceptance criteria name only tomllib/fcntl/subprocess/dataclasses
+
+## 2026-08-25 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-drop-dataclasses.md`
+    - Reconciled persistent files
+* Decisions made
+    - productContext skip — no audience/use-case change; standing-contract probe clean
+    - systemPatterns skip — argparse still builds command `-h`; usage_text still handwritten; slots are a tech convention already in techContext
+    - techContext skip — lazy-import and slots sentences landed in BUILD
+* Insights
+    - 3.14 pathlib/fcntl is the standing test oracle, already noted in SumMem
