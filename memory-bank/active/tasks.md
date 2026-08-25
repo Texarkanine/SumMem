@@ -48,3 +48,9 @@ The first QA findings are resolved, and the full suite passes with 313 tests on 
 - [x] **Non-positive wake budget.** Removed `expand_frontier`'s `budget <= 0 → []` cut. `WAKE_LINES = 0` (and negatives) list every view node and do not expand. `test_wake_zero_budget_prints_every_view_node` pins a committed `WAKE_LINES = 0` store.
 
 Verified as acceptable: positive-budget overflow keeps all view nodes oldest-first; at-budget and under-budget behavior is unchanged; wake emits no fold request; the documentation rework is consistent; unrelated store leftovers remain outside the worktree in `stash@{0}`.
+
+## Final QA Result: PASS
+
+The non-positive wake budget issue is resolved. `WAKE_LINES <= 0` lists all view nodes without dropping any, as validated by `test_wake_zero_budget_prints_every_view_node`.
+
+Verified as acceptable: positive-budget overflow keeps all view nodes oldest-first; at-budget and under-budget behavior is unchanged; zero/negative budgets do not drop notes; wake emits no fold request; documentation is consistent; unrelated store leftovers remain outside the worktree.

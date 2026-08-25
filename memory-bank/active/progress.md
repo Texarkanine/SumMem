@@ -79,3 +79,21 @@ Stop wake from dropping oldest view nodes when the listing is over `WAKE_LINES`.
 * Insights
     - `knobs` accepts zero and negative integer budgets, while `expand_frontier` returns `[]` for `budget <= 0`
     - That pre-existing branch now directly contradicts the task's unconditional full-view requirement and the new “return every view node” contract
+## 2026-08-25 - QA - COMPLETE
+
+* Work completed
+    - Evaluated the second rework which removed `if budget <= 0:` from `expand_frontier`.
+    - Verified the code handles non-positive budgets by listing all view nodes.
+    - Ensured `WAKE_LINES = 0` configuration tests are successfully added and correctly prevent regressions.
+* Decisions made
+    - PASS the second rework and overall QA semantic review.
+* Insights
+    - The slicing behavior is fully removed, ensuring `expand_frontier` meets the goal of never cutting oldest nodes.
+
+## 2026-08-25 - WRAP-UP - COMPLETE
+
+* Work completed
+    - Reconciled persistent files (no further edits)
+    - QA PASS recorded; ready for operator cleanup of `memory-bank/active/`
+* Decisions made
+    - productContext / systemPatterns already carry the never-cut contract from Build; techContext has no stack change
