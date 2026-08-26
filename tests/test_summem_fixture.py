@@ -2,23 +2,34 @@
 
 from __future__ import annotations
 
+import sys
+import types
 from pathlib import Path
 
-import conftest
-from conftest import SCRIPT
+from conftest import SCRIPT, load_summem
 
 
-def test_summem_fixture_is_session_scoped():
-    """The summem fixture is session-scoped."""
-    marker = getattr(conftest.summem, "_fixture_function_marker", None)
-    assert marker is not None
-    assert marker.scope == "session"
+def test_load_summem_returns_cached_module():
+    """load_summem returns the same module object on every call."""
+    assert load_summem() is load_summem()
 
 
-def test_summem_is_repo_root_driver(summem):
-    """The summem fixture is the SourceFileLoader module for repo-root summem."""
+def test_summem_fixture_is_the_cached_module(summem):
+    """The summem fixture is the cached SourceFileLoader module for repo-root summem."""
+    assert summem is load_summem()
     assert summem.__file__ == str(SCRIPT)
     assert hasattr(summem, "main")
+
+
+def test_load_summem_ignores_later_sys_modules_replace(summem):
+    """migrate.py and surgery.py overwrite sys.modules['summem']; the test cache must not follow."""
+    impostor = types.ModuleType("summem")
+    impostor.__file__ = str(SCRIPT)
+    sys.modules["summem"] = impostor
+    try:
+        assert load_summem() is summem
+    finally:
+        sys.modules["summem"] = summem
 
 
 def test_monkeypatch_on_summem_restores_after_undo(summem, monkeypatch):

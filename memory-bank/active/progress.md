@@ -64,3 +64,16 @@ Speed up local tox: parallel py311–py314 environments, an agent iteration rule
     - pytest's default basetemp is already parallel-safe and already outside the worktree under tox (`TMPDIR` unset in the env, `gettempdir()` is `/tmp`), so the tox FAQ's advice bought nothing here
     - The `load_summem` cache makes fixture scope unobservable, which turns the scope assertion into a change-detector and leaves the cache itself untested
 
+## 2026-08-25 - BUILD - COMPLETE (rework)
+
+* Work completed
+    - Dropped `--basetemp` from `[testenv]` and `[testenv:coverage]`; lock test asserts the flag is absent
+    - Replaced pytest private fixture-marker assertion with `load_summem() is load_summem()` plus fixture identity
+    - Cached the session module on `conftest._SUMMEM` so migrate.py/surgery.py overwriting `sys.modules["summem"]` cannot swap the fixture
+    - `tox run-parallel`: 355 passed on py311–py314 (~52s)
+* Decisions made
+    - Explicit `--basetemp` is a regression; pytest's default already isolates concurrent runs outside the worktree
+    - Test-owned cache, not `sys.modules`, is the load-once contract
+* Insights
+    - `test_migrate.py` runs before `test_summem_fixture.py` and `mig.main()` replaces `sys.modules["summem"]`; identity against that dict is order-dependent unless the cache lives elsewhere
+

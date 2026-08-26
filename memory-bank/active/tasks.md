@@ -15,7 +15,8 @@ Spec: [issue #63](https://github.com/Texarkanine/SumMem/issues/63).
 - Session fixture: requesting `summem` → the object is the SourceFileLoader module for repo-root `summem`, and the fixture scope is `session`.
 - Monkeypatch restore: `monkeypatch.setattr(summem, "WAKE_LINES", 1)` then `monkeypatch.undo()` → `summem.WAKE_LINES` is the original default (32).
 - Call-site contract: every `tests/test_*.py` except `test_summem_fixture.py` → source text does not contain `load_summem` (`conftest.py` still defines the loader; the contract test may mention the name).
-- Parallel-safe pytest: `tox.ini` `[testenv]` commands → `pytest --basetemp="{env:TMPDIR:/tmp}/summem-{env_name}" {posargs}` (coverage env pytest line includes the same `--basetemp`; not `{env_tmp_dir}`, which is inside the git worktree).
+- Parallel-safe pytest: `tox.ini` `[testenv]` commands do not pass `--basetemp` (pytest's default is already outside the worktree and isolates concurrent runs; a fixed path is a cross-checkout clobber). Coverage env pytest line likewise omits `--basetemp`.
+- Load-once: `load_summem() is load_summem()`, and the `summem` fixture is that object even after `sys.modules["summem"]` is replaced (migrate.py / surgery.py do that).
 - Unchanged tox contract: env_list stays py311–py314; `package = skip`; coverage stays out of env_list; default commands still have no `--cov`.
 - Existing suite: any test that used `load_summem()` → same assertions via the `summem` fixture; process-level git/worktree proofs unchanged.
 
@@ -133,5 +134,5 @@ FAIL. Full findings in `memory-bank/active/.qa-validation-status`. Build must re
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
 - [x] Preflight
-- [x] Build
-- [x] QA (FAIL - Build must rerun)
+- [x] Build (rework for QA FAIL)
+- [ ] QA (rerun)

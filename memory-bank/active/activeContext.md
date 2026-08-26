@@ -1,14 +1,14 @@
 # Active Context
 
 ## Current Task: tox-speedup
-**Phase:** QA - COMPLETE (FAIL)
+**Phase:** BUILD - COMPLETE (rework)
 
 ## What Was Done
-- Session-scoped `summem` fixture in `tests/conftest.py`; `load_summem` caches on `sys.modules["summem"]`.
+- Session-scoped `summem` fixture in `tests/conftest.py`; `load_summem` caches on `conftest._SUMMEM` (not `sys.modules["summem"]`).
 - Replaced ~200 `load_summem()` call sites in 21 test modules; contract test forbids the name in other `test_*.py`.
-- `tox.ini` pytest `--basetemp="{env:TMPDIR:/tmp}/summem-{env_name}"` (not `{env_tmp_dir}`: that path is inside the clone and made outside-repo tests wake the real store).
+- Dropped pytest `--basetemp` from `tox.ini` (QA: an explicit path is a cross-checkout clobber; pytest's default already isolates and already lives outside the worktree under tox).
 - README Developing, `memory-bank/techContext.md` Testing Process, `.cursor/rules/SumMem-testing.mdc`.
-- `tox run-parallel`: 354 passed on py311–py314 in ~49s.
+- `tox run-parallel`: 355 passed on py311–py314 in ~52s.
 
 ## Files created or modified
 - `/home/mobaxterm/git/SumMem/tests/conftest.py`
@@ -22,11 +22,13 @@
 
 ## Key implementation decisions
 - Full matrix command is `tox run-parallel` (`-p auto`); sequential `tox` is not the documented full suite.
-- Pytest temps live under system `TMPDIR` per env so `chdir(tmp_path)` is outside the git worktree.
+- Do not pass `--basetemp`. Pytest's default basetemp is outside the clone (`TMPDIR` unset in the tox env → `gettempdir()` is `/tmp`) and numbers concurrent runs (`pytest-0`…).
+- Test cache is `conftest._SUMMEM`. migrate.py and surgery.py overwrite `sys.modules["summem"]` on each CLI run; a dict-keyed cache would diverge from the session fixture after `test_migrate.py`.
 
 ## Deviations from Plan
-- Plan first locked `--basetemp="{env_tmp_dir}"` (tox FAQ). Build found that breaks `test_wake_without_repository_errors` and `test_start_without_repository_errors`. Switched to `{env:TMPDIR:/tmp}/summem-{env_name}`.
-- Pytest 9 fixture objects expose `_fixture_function_marker`, not `_pytestfixturefunction`.
+- Plan first locked `--basetemp="{env_tmp_dir}"` (tox FAQ). Build found that breaks outside-repo tests (`chdir(tmp_path)` still finds the real git root). First build switched to `{env:TMPDIR:/tmp}/summem-{env_name}`. QA found that explicit path is a cross-checkout clobber and unnecessary; rework dropped the flag.
+- Pytest 9 fixture objects expose `_fixture_function_marker`, not `_pytestfixturefunction`. QA rejected asserting either private marker; tests assert cache identity instead.
+- Plan said cache via `sys.modules["summem"]` when `__file__` is `SCRIPT`. That fails after migrate/surgery replace the dict entry. Rework caches on `_SUMMEM`.
 
 ## Next Step
-- QA FAILED. Build reruns for two blocking findings (see `.qa-validation-status`): remove `tox.ini` `--basetemp` and its lock test; replace the fixture-scope marker assertion with a behavioral test of the load-once cache.
+- QA rerun (delete `.qa-validation-status`, spawn `/niko-qa`).

@@ -62,16 +62,11 @@ def test_default_tox_commands_have_no_cov():
     assert "coverage" not in env_list
 
 
-def test_tox_pytest_basetemp_is_per_env_system_tmp():
-    """pytest --basetemp is per-env under TMPDIR, not {env_tmp_dir} (that path is inside the git worktree)."""
-    basetemp = '--basetemp="{env:TMPDIR:/tmp}/summem-{env_name}"'
+def test_tox_pytest_does_not_set_basetemp():
+    """pytest keeps its default basetemp; an explicit path is a cross-checkout clobber."""
     testenv = _ini(ROOT / "tox.ini")["testenv"]["commands"]
-    assert testenv.split()[0] == "pytest"
-    assert "{posargs}" in testenv
-    assert basetemp in testenv
-    assert "{env_tmp_dir}" not in testenv
+    assert "--basetemp" not in testenv
     coverage = _ini(ROOT / "tox.ini")["testenv:coverage"]["commands"]
-    assert basetemp in coverage
-    assert "--cov=summem" in coverage
+    assert "--basetemp" not in coverage
 
 

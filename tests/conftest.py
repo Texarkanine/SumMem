@@ -11,6 +11,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "summem"
+_SUMMEM = None
 
 
 def dated_leaf(stamp: str, text: str) -> str:
@@ -22,10 +23,14 @@ def dated_leaf(stamp: str, text: str) -> str:
 
 
 def load_summem():
-    """Load repo-root `summem` via SourceFileLoader (no .py suffix). Cached for the process."""
-    existing = sys.modules.get("summem")
-    if existing is not None and getattr(existing, "__file__", None) == str(SCRIPT):
-        return existing
+    """Load repo-root `summem` via SourceFileLoader (no .py suffix). Cached for the process.
+
+    The cache is this module's `_SUMMEM`, not `sys.modules["summem"]`. migrate.py and
+    surgery.py overwrite that dict entry on each CLI run.
+    """
+    global _SUMMEM
+    if _SUMMEM is not None:
+        return _SUMMEM
     loader = SourceFileLoader("summem", str(SCRIPT))
     spec = importlib.util.spec_from_loader("summem", loader)
     if spec is None or spec.loader is None:
@@ -33,6 +38,7 @@ def load_summem():
     mod = importlib.util.module_from_spec(spec)
     sys.modules["summem"] = mod
     spec.loader.exec_module(mod)
+    _SUMMEM = mod
     return mod
 
 
