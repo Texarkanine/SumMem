@@ -118,3 +118,13 @@ Investigate whether pytest-xdist is safe inside each tox env, then apply it (wit
     - Measure the documented end-of-work command during Plan, not only the iteration env
     - Two parallelism dials multiply; cap workers so concurrent tox envs stay near one core budget
 
+## 2026-08-25 - FOLLOW-UP - coverage artifacts untracked
+
+* Work completed
+    - `git rm --cached` `.coverage` and `coverage/lcov.info` (still gitignored; CI generates lcov on the coverage job)
+* Decisions made
+    - They should never have been in the tree; 2759a5f added them despite `.gitignore`
+    - No test that git does not contain those files: `.gitignore` is the gate; a `git ls-files` assertion is a change-detector
+* Insights
+    - Tracked generate-on-demand coverage means every `tox -e coverage` dirties the worktree
+

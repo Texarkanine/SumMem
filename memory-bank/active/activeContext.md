@@ -9,3 +9,4 @@
 
 ## Next Step
 - Run `/niko-archive` to create the archive document and finalize.
+- `.coverage` and `coverage/lcov.info` untracked (`git rm --cached`); `.gitignore` already listed them.
