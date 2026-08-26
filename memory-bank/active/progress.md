@@ -85,4 +85,16 @@ Shorten stored nap leaf-set ids to 16 hex; grow `migrate.py` so one pass rewrite
 * Insights
     - Live inspection of this clone's root store confirms nested 64-hex `NapChild.id` at depth up to 4 (grain-32), independently validating activeContext's correction of the prior preflight's "no nested id" claim.
 
+## 2026-08-26 - BUILD - COMPLETE
+
+* Work completed
+    - Truncated `leafset_id` to 16 hex; `_parse_nap_stem` accepts only five-part-16.
+    - Rewrote `migrate.py` for 4-part-64 and 5-part-64: recursive `_shorten_tree`, `_write_pair` then unlink.
+    - Updated atlas, `systemPatterns.md`, and README walkthrough.
+    - Migrated this clone's root and dogfood stores. `tox run-parallel` py311–py314 green (366 tests).
+* Decisions made
+    - Atlas Identity hash step 3 states the stored id is the first 16 hex of the join hash, not only the wake-prefix sentence.
+* Insights
+    - Grain-2 note-only pairs keep the same variant tag after migrate; grain-4+ recomputes it because nested ids change the tree bytes.
+
 

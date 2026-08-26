@@ -1,0 +1,1 @@
+16-hex-leafset built: leafset_id is SHA-256[:16]; migrate.py rewrites 4-part-64 and 5-part-64 (nested ids, new variant); root and dogfood stores migrated.

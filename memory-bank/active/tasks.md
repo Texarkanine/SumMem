@@ -171,9 +171,9 @@ No new technology - validation not required.
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
 - [x] Preflight
-- [ ] Build
+- [x] Build
   - [x] Unit 1: stored leaf-set width (`leafset_id` `[:16]`, `_parse_nap_stem` requires 16)
-  - [ ] Unit 2: migrate.py dual-source rewrite
-  - [ ] Unit 3: atlas, systemPatterns, README
-  - [ ] Unit 4: clone stores + `tox run-parallel`
+  - [x] Unit 2: migrate.py dual-source rewrite
+  - [x] Unit 3: atlas, systemPatterns, README
+  - [x] Unit 4: clone stores + `tox run-parallel`
 - [ ] QA

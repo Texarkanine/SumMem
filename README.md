@@ -88,8 +88,8 @@ $ git st
 ...
 Changes to be committed:
   (use "git restore --staged <file>..." to unstage)
-        new file:   dogfood/.summem/naps/20260819T213123Z-5e64febd8268823c-cfbf987aa25d8492e257e0484faa9be9903b3d3e9f74fcb83ed2ca443cada000-2-8f8111f124e6075e.summ
-        new file:   dogfood/.summem/naps/20260819T213123Z-5e64febd8268823c-cfbf987aa25d8492e257e0484faa9be9903b3d3e9f74fcb83ed2ca443cada000-2-8f8111f124e6075e.tree
+        new file:   dogfood/.summem/naps/20260819T213123Z-5e64febd8268823c-cfbf987aa25d8492-2-8f8111f124e6075e.summ
+        new file:   dogfood/.summem/naps/20260819T213123Z-5e64febd8268823c-cfbf987aa25d8492-2-8f8111f124e6075e.tree
         deleted:    dogfood/.summem/notes/20260819T213123Z-5e64febd8268823c
         deleted:    dogfood/.summem/notes/20260819T213139Z-e82628a6be85430a
         new file:   dogfood/.summem/notes/20260826T025412Z-7157ba614d46767c
