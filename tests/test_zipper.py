@@ -282,7 +282,7 @@ def test_rematerialize_note_writes_name_and_bytes(tmp_path):
 
 
 def test_rematerialize_nap_stem_uses_leftmost_seq_child_id_and_leaves(tmp_path):
-    """A NapChild stem is {leftmost NoteChild seq}-{child.id}-{leaves}."""
+    """A NapChild stem is nap_stem of the same tree and caption bytes later written."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     paths = _write_notes(m, repo, ["alpha", "beta"])
@@ -293,10 +293,86 @@ def test_rematerialize_nap_stem_uses_leftmost_seq_child_id_and_leaves(tmp_path):
     child = m.NapChild(id=node.id, sum=node.caption, tree=inner)
     m._unlink_node(node)
     m.rematerialize_child(repo, child)
-    stem = f"{paths[0].name}-{child.id}-2"
+    tree_bytes = m.dumps_tree(inner)
+    caption_bytes = m.note_file_bytes("pair")
+    stem = m.nap_stem(paths[0].name, child.id, 2, tree_bytes, caption_bytes)
     naps = repo / ".summem" / "naps"
-    assert (naps / f"{stem}.tree").read_bytes() == m.dumps_tree(inner)
-    assert (naps / f"{stem}.summ").read_bytes() == m.note_file_bytes("pair")
+    assert (naps / f"{stem}.tree").read_bytes() == tree_bytes
+    assert (naps / f"{stem}.summ").read_bytes() == caption_bytes
+
+
+def test_rematerialize_nap_is_idempotent_on_five_part(tmp_path):
+    """A second rematerialize of the same NapChild is a no-op on five-part dests."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    _write_notes(m, repo, ["alpha", "beta"])
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    node = m.list_view(repo)[0]
+    inner = m.loads_tree(node.tree_path.read_bytes())
+    child = m.NapChild(id=node.id, sum=node.caption, tree=inner)
+    first = {p.name for p in (repo / ".summem" / "naps").iterdir() if p.is_file()}
+    tree_bytes = node.tree_path.read_bytes()
+    sum_bytes = node.sum_path.read_bytes()
+    m.rematerialize_child(repo, child)
+    m.rematerialize_child(repo, child)
+    names = {p.name for p in (repo / ".summem" / "naps").iterdir() if p.is_file()}
+    assert names == first
+    assert node.tree_path.read_bytes() == tree_bytes
+    assert node.sum_path.read_bytes() == sum_bytes
+
+
+def test_rematerialize_nested_child_uses_child_pair_bytes(tmp_path):
+    """Rematerializing a nested grain-2 NapChild hashes that child's pair, not the parent's."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    parent = _balanced_4(m, repo, ["A", "B", "C", "D"], "ab", "cd", "abcd", start=1)
+    inner = m.loads_tree(parent.tree_path.read_bytes())
+    child = inner.kids[0]
+    assert isinstance(child, m.NapChild)
+    m._unlink_node(parent)
+    m.rematerialize_child(repo, child)
+    tree_bytes = m.dumps_tree(child.tree)
+    caption_bytes = m.note_file_bytes(child.sum)
+    leftmost = next(m._note_children(child.tree))
+    leaves = len(m._digests_of_tree(child.tree))
+    stem = m.nap_stem(m._seq_prefix(leftmost.name), child.id, leaves, tree_bytes, caption_bytes)
+    naps = repo / ".summem" / "naps"
+    assert (naps / f"{stem}.tree").read_bytes() == tree_bytes
+    assert (naps / f"{stem}.summ").read_bytes() == caption_bytes
+    parent_bytes = m.dumps_tree(inner)
+    parent_caption = m.note_file_bytes(parent.caption)
+    parent_stem = m.nap_stem(
+        m._seq_prefix(next(m._note_children(inner)).name),
+        parent.id,
+        4,
+        parent_bytes,
+        parent_caption,
+    )
+    assert stem != parent_stem
+
+
+def test_rematerialize_serializes_tree_once(tmp_path, monkeypatch):
+    """rematerialize_child calls dumps_tree once for a NapChild."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    _write_notes(m, repo, ["alpha", "beta"])
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    node = m.list_view(repo)[0]
+    inner = m.loads_tree(node.tree_path.read_bytes())
+    child = m.NapChild(id=node.id, sum=node.caption, tree=inner)
+    m._unlink_node(node)
+    orig = m.dumps_tree
+    calls = {"n": 0}
+
+    def wrapped(tree):
+        calls["n"] += 1
+        return orig(tree)
+
+    monkeypatch.setattr(m, "dumps_tree", wrapped)
+    m.rematerialize_child(repo, child)
+    assert calls["n"] == 1
 
 
 def test_rematerialize_does_not_clobber_existing_dest(tmp_path):

@@ -578,13 +578,6 @@ def leaf_digests(node: ViewNode) -> set[str] | None:
         return None
 
 
-def _nap_stem(child: NapChild) -> str:
-    """Return `{leftmost-seq}-{child.id}-{leaves}` for a rematerialized NapChild."""
-    leftmost = next(_note_children(child.tree))
-    leaves = len(_digests_of_tree(child.tree))
-    return f"{_seq_prefix(leftmost.name)}-{child.id}-{leaves}"
-
-
 def rematerialize_child(parent, child: NoteChild | NapChild) -> None:
     """Copy *child* bytes into the store without overwriting an existing dest."""
     store = ensure_store(parent)
@@ -594,14 +587,17 @@ def rematerialize_child(parent, child: NoteChild | NapChild) -> None:
             return
         _replace_bytes(dest, note_file_bytes(child.text))
         return
-    stem = _nap_stem(child)
+    leftmost = next(_note_children(child.tree))
+    leaves = len(_digests_of_tree(child.tree))
+    tree_bytes = dumps_tree(child.tree)
+    caption_bytes = note_file_bytes(child.sum)
+    stem = nap_stem(_seq_prefix(leftmost.name), child.id, leaves, tree_bytes, caption_bytes)
     naps = store / "naps"
     tree_path = naps / f"{stem}.tree"
     sum_path = naps / f"{stem}.summ"
-    if not tree_path.exists():
-        _replace_bytes(tree_path, dumps_tree(child.tree))
-    if not sum_path.exists():
-        _replace_bytes(sum_path, note_file_bytes(child.sum))
+    if tree_path.exists() and sum_path.exists():
+        return
+    _write_pair(naps, stem, tree_bytes, caption_bytes)
 
 
 def _first_overlap(
