@@ -1,1 +1,0 @@
-{"c":[{"name":"20260825T200855Z-2670ea812d7405e3","text":"Issue #51: heal digest walk is raw JSON only; rematerialize and write_nap still build Tree when writing a pack.","type":"note"},{"name":"20260825T202339Z-0c3a676acf423f91","text":"Heal overlap checks walk raw tree JSON; note/nap thread one list_view and knobs. PR #56 Fixes #51.","type":"note"}]}
