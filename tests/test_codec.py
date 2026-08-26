@@ -6,32 +6,31 @@ import hashlib
 import json
 
 import pytest
-from conftest import load_summem
 
 
-def test_note_file_bytes_appends_newline():
+def test_note_file_bytes_appends_newline(summem):
     """Note file bytes are UTF-8 of the text plus one trailing newline."""
-    m = load_summem()
+    m = summem
     assert m.note_file_bytes("hello") == b"hello\n"
 
 
-def test_note_digest_is_sha256_of_file_bytes():
+def test_note_digest_is_sha256_of_file_bytes(summem):
     """Digest is lowercase hex SHA-256 of those file bytes."""
-    m = load_summem()
+    m = summem
     raw = m.note_file_bytes("hello")
     assert m.note_digest(raw) == hashlib.sha256(raw).hexdigest()
 
 
-def test_leafset_id_singleton_hashes_hex_ascii():
+def test_leafset_id_singleton_hashes_hex_ascii(summem):
     """A singleton leaf-set id is SHA-256 of that digest's hex as ASCII."""
-    m = load_summem()
+    m = summem
     digest = m.note_digest(m.note_file_bytes("hello"))
     assert m.leafset_id([digest]) == hashlib.sha256(digest.encode("ascii")).hexdigest()
 
 
-def test_leafset_id_sorts_and_concatenates_without_delimiter():
+def test_leafset_id_sorts_and_concatenates_without_delimiter(summem):
     """Two digests sort as ASCII, concatenate with no delimiter, then SHA-256."""
-    m = load_summem()
+    m = summem
     a = m.note_digest(m.note_file_bytes("alpha"))
     b = m.note_digest(m.note_file_bytes("beta"))
     join = "".join(sorted((a, b)))
@@ -42,9 +41,9 @@ def test_leafset_id_sorts_and_concatenates_without_delimiter():
     assert m.leafset_id([a, b]) != comma
 
 
-def test_leafset_id_hashes_utf8_chinese_file_bytes():
+def test_leafset_id_hashes_utf8_chinese_file_bytes(summem):
     """Chinese notes hash as UTF-8 file bytes, not JSON \\uXXXX escapes."""
-    m = load_summem()
+    m = summem
     raw = "你好".encode("utf-8") + b"\n"
     assert m.note_file_bytes("你好") == raw
     digest = hashlib.sha256(raw).hexdigest()
@@ -54,9 +53,9 @@ def test_leafset_id_hashes_utf8_chinese_file_bytes():
     assert m.leafset_id([digest]) == hashlib.sha256(digest.encode("ascii")).hexdigest()
 
 
-def test_dumps_tree_one_note_exact_bytes():
+def test_dumps_tree_one_note_exact_bytes(summem):
     """One note child dumps to canonical JSON with a trailing newline."""
-    m = load_summem()
+    m = summem
     tree = m.Tree(kids=[m.NoteChild(name="20260101T000000Z-aaaaaaaaaaaaaaaa", text="hello")])
     expected = (
         b'{"c":[{"name":"20260101T000000Z-aaaaaaaaaaaaaaaa","text":"hello","type":"note"}]}\n'
@@ -64,9 +63,9 @@ def test_dumps_tree_one_note_exact_bytes():
     assert m.dumps_tree(tree) == expected
 
 
-def test_dumps_tree_keeps_chinese_not_uescaped():
+def test_dumps_tree_keeps_chinese_not_uescaped(summem):
     """Canonical JSON keeps UTF-8 characters; it does not emit \\uXXXX."""
-    m = load_summem()
+    m = summem
     tree = m.Tree(kids=[m.NoteChild(name="n1", text="你好")])
     raw = m.dumps_tree(tree)
     assert "你好".encode("utf-8") in raw
@@ -76,9 +75,9 @@ def test_dumps_tree_keeps_chinese_not_uescaped():
     assert json.loads(as_text)["c"][0]["text"] == "你好"
 
 
-def test_dumps_tree_nested_nap_exact_bytes():
+def test_dumps_tree_nested_nap_exact_bytes(summem):
     """A nap child's id is the leaf-set of the original notes in its nested tree."""
-    m = load_summem()
+    m = summem
     d1 = m.note_digest(m.note_file_bytes("alpha"))
     d2 = m.note_digest(m.note_file_bytes("beta"))
     nid = m.leafset_id([d1, d2])
@@ -98,9 +97,9 @@ def test_dumps_tree_nested_nap_exact_bytes():
     assert m.dumps_tree(outer) == expected
 
 
-def test_loads_tree_round_trip():
+def test_loads_tree_round_trip(summem):
     """loads_tree(dumps_tree(t)) round-trips note and nested nap trees."""
-    m = load_summem()
+    m = summem
     inner = m.Tree(
         kids=[
             m.NoteChild(name="a", text="alpha"),
@@ -118,9 +117,9 @@ def test_loads_tree_round_trip():
     assert m.loads_tree(m.dumps_tree(outer)) == outer
 
 
-def test_loads_tree_ignores_unknown_fields():
+def test_loads_tree_ignores_unknown_fields(summem):
     """loads_tree ignores unknown keys, including leftover v and kids beside c."""
-    m = load_summem()
+    m = summem
     tree = m.Tree(kids=[m.NoteChild(name="n1", text="hello")])
     payload = {
         "c": [{"name": "n1", "text": "hello", "type": "note", "extra": True}],
@@ -132,23 +131,23 @@ def test_loads_tree_ignores_unknown_fields():
     assert m.loads_tree(raw) == tree
 
 
-def test_loads_tree_rejects_kids_key_without_c():
+def test_loads_tree_rejects_kids_key_without_c(summem):
     """loads_tree of kids/v without c raises."""
-    m = load_summem()
+    m = summem
     with pytest.raises((KeyError, ValueError)):
         m.loads_tree(b'{"kids":[],"v":1}\n')
 
 
-def test_loads_tree_rejects_child_missing_type():
+def test_loads_tree_rejects_child_missing_type(summem):
     """loads_tree of a child object without type raises."""
-    m = load_summem()
+    m = summem
     with pytest.raises(ValueError):
         m.loads_tree(b'{"c":[{"name":"n1","text":"hello"}]}\n')
 
 
-def test_loads_tree_rejects_unknown_type():
+def test_loads_tree_rejects_unknown_type(summem):
     """loads_tree of a child with type pack raises; it does not become a nap."""
-    m = load_summem()
+    m = summem
     raw = (
         b'{"c":[{"id":"ab","sum":"s","tree":{"c":[]},"type":"pack"}]}\n'
     )
@@ -156,13 +155,13 @@ def test_loads_tree_rejects_unknown_type():
         m.loads_tree(raw)
 
 
-def test_variant_tag_is_16_lowercase_hex():
+def test_variant_tag_is_16_lowercase_hex(summem):
     """
     variant_tag returns 16 lowercase hex characters for a pair of buffers.
     Identical inputs match. The digest is SHA-256 of the domain tag plus
     length-prefixed tree bytes and caption bytes, truncated to 16 hex.
     """
-    m = load_summem()
+    m = summem
     tree_bytes = b'{"c":[]}\n'
     caption_bytes = b"pair\n"
     tag = m.variant_tag(tree_bytes, caption_bytes)
@@ -180,9 +179,9 @@ def test_variant_tag_is_16_lowercase_hex():
     assert m.variant_tag(tree_bytes, caption_bytes) == tag
 
 
-def test_variant_tag_changes_with_caption_or_tree():
+def test_variant_tag_changes_with_caption_or_tree(summem):
     """Same tree with a different caption, or same caption with a different tree, yields a different tag."""
-    m = load_summem()
+    m = summem
     tree_a = b'{"c":[{"name":"n1","text":"alpha","type":"note"}]}\n'
     tree_b = b'{"c":[{"name":"n1","text":"beta","type":"note"}]}\n'
     cap_a = b"one\n"
@@ -191,15 +190,15 @@ def test_variant_tag_changes_with_caption_or_tree():
     assert m.variant_tag(tree_a, cap_a) != m.variant_tag(tree_b, cap_a)
 
 
-def test_variant_tag_length_prefixes_are_unambiguous():
+def test_variant_tag_length_prefixes_are_unambiguous(summem):
     """Length prefixes keep b'ab'+b'c' from matching b'a'+b'bc'."""
-    m = load_summem()
+    m = summem
     assert m.variant_tag(b"ab", b"c") != m.variant_tag(b"a", b"bc")
 
 
-def test_nap_stem_is_five_part():
+def test_nap_stem_is_five_part(summem):
     """nap_stem is {seq}-{leafset}-{grain}-{tag} and tag equals variant_tag of those bytes."""
-    m = load_summem()
+    m = summem
     seq = "20260101T000000Z-" + "a" * 16
     leafset = "b" * 64
     grain = 2
@@ -217,9 +216,9 @@ def test_nap_stem_is_five_part():
     assert got_tag == tag
 
 
-def test_parse_nap_stem_five_part_only():
+def test_parse_nap_stem_five_part_only(summem):
     """Five-part stems parse; four-part stems are not view names."""
-    m = load_summem()
+    m = summem
     stamp = "20260101T000000Z"
     rand = "a" * 16
     leafset = "b" * 64
@@ -229,9 +228,9 @@ def test_parse_nap_stem_five_part_only():
     assert m._parse_nap_stem(five) == (stamp, rand, leafset, 2, "c" * 16)
 
 
-def test_parse_nap_stem_rejects_bad_shape():
+def test_parse_nap_stem_rejects_bad_shape(summem):
     """3-part, 6-part, non-hex variant, and non-digit grain stems parse as None."""
-    m = load_summem()
+    m = summem
     stamp = "20260101T000000Z"
     rand = "a" * 16
     leafset = "b" * 64
@@ -247,9 +246,9 @@ def test_parse_nap_stem_rejects_bad_shape():
     assert m._parse_nap_stem(non_digit) is None
 
 
-def test_child_nap_stem_returns_stem_and_pair_bytes():
+def test_child_nap_stem_returns_stem_and_pair_bytes(summem):
     """child_nap_stem serializes the NapChild once and names it with nap_stem."""
-    m = load_summem()
+    m = summem
     left = m.NoteChild(name="20260101T000001Z-" + "a" * 16, text="alpha")
     right = m.NoteChild(name="20260101T000002Z-" + "b" * 16, text="beta")
     tree = m.Tree(kids=[left, right])

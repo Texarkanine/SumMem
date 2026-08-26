@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from random import Random
 
-from conftest import dated_leaf, load_summem
+from conftest import dated_leaf
 from gitutil import fold_ids, init_repo
 
 UTC = timezone.utc
@@ -45,9 +45,9 @@ def _equal_grain_pair(nodes):
     return None
 
 
-def test_nap_stem_inherits_left_child_seq_prefix(tmp_path):
+def test_nap_stem_inherits_left_child_seq_prefix(tmp_path, summem):
     """Nap stem inherits the left child's {stamp}-{rand} and ends with the pair digest."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     pa = m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     pb = m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -75,9 +75,9 @@ def test_nap_stem_inherits_left_child_seq_prefix(tmp_path):
     assert tag == m.variant_tag(tree_bytes, caption_bytes)
 
 
-def test_write_nap_serializes_tree_once(tmp_path, monkeypatch):
+def test_write_nap_serializes_tree_once(tmp_path, monkeypatch, summem):
     """write_nap calls dumps_tree once for a two-note fold."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -94,9 +94,9 @@ def test_write_nap_serializes_tree_once(tmp_path, monkeypatch):
     assert calls["n"] == 1
 
 
-def test_same_second_nap_stays_in_left_slot(tmp_path):
+def test_same_second_nap_stays_in_left_slot(tmp_path, summem):
     """Four notes in one UTC second: napping the oldest two leaves grains [2, 1, 1]."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     now = datetime(2026, 1, 1, 0, 0, 0, tzinfo=UTC)
     rng = Random(0)
@@ -107,9 +107,9 @@ def test_same_second_nap_stays_in_left_slot(tmp_path):
     assert [n.leaves for n in m.list_view(repo)] == [2, 1, 1]
 
 
-def test_equal_grain_pair_returns_two_oldest_ids_when_all_ones(tmp_path):
+def test_equal_grain_pair_returns_two_oldest_ids_when_all_ones(tmp_path, summem):
     """equal_grain_pair returns the two oldest ids when every file is a 1."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     for i, text in enumerate(("alpha", "beta", "gamma"), start=1):
         m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
@@ -117,9 +117,9 @@ def test_equal_grain_pair_returns_two_oldest_ids_when_all_ones(tmp_path):
     assert _equal_grain_pair(nodes) == (nodes[0].id, nodes[1].id)
 
 
-def test_equal_grain_pair_returns_none_for_16_plus_1(tmp_path):
+def test_equal_grain_pair_returns_none_for_16_plus_1(tmp_path, summem):
     """A 16-pack plus a later note has no equal-grain pair."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _add_notes(m, repo, 16, 0, "n")
     _fold_loose_notes(m, repo, "pack")
@@ -127,9 +127,9 @@ def test_equal_grain_pair_returns_none_for_16_plus_1(tmp_path):
     assert _equal_grain_pair(m.list_view(repo)) is None
 
 
-def test_equal_grain_pair_returns_two_8s_not_16_plus_8(tmp_path):
+def test_equal_grain_pair_returns_two_8s_not_16_plus_8(tmp_path, summem):
     """Two 8-packs beside an older 16-pack yield the two 8s."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _add_notes(m, repo, 16, 0, "a")
     _fold_loose_notes(m, repo, "sixteen")
@@ -142,9 +142,9 @@ def test_equal_grain_pair_returns_two_8s_not_16_plus_8(tmp_path):
     assert _equal_grain_pair(nodes) == (nodes[1].id, nodes[2].id)
 
 
-def test_equal_grain_pair_returns_two_1s_not_2_plus_1(tmp_path):
+def test_equal_grain_pair_returns_two_1s_not_2_plus_1(tmp_path, summem):
     """Grains 2, 1, 1 yield the two 1s, not 2+1."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     for i, text in enumerate(("a", "b", "c", "d"), start=1):
         m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
@@ -155,9 +155,9 @@ def test_equal_grain_pair_returns_two_1s_not_2_plus_1(tmp_path):
     assert _equal_grain_pair(nodes) == (nodes[1].id, nodes[2].id)
 
 
-def test_equal_grain_pair_duplicate_ids_when_same_text(tmp_path):
+def test_equal_grain_pair_duplicate_ids_when_same_text(tmp_path, summem):
     """Two identical notes are requested as (id, id)."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "same", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "same", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -166,9 +166,9 @@ def test_equal_grain_pair_duplicate_ids_when_same_text(tmp_path):
     assert _equal_grain_pair(nodes) == (nodes[0].id, nodes[1].id)
 
 
-def test_over_budget_note_prints_saved_when_16_plus_1(tmp_path, monkeypatch, capsys):
+def test_over_budget_note_prints_saved_when_16_plus_1(tmp_path, monkeypatch, capsys, summem):
     """WAKE_LINES=1, a 16-pack plus a new note prints Saved. and no fold request."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _add_notes(m, repo, 16, 0, "n")
     _fold_loose_notes(m, repo, "pack")
@@ -181,9 +181,9 @@ def test_over_budget_note_prints_saved_when_16_plus_1(tmp_path, monkeypatch, cap
     assert "Compress these two" not in out
 
 
-def test_under_budget_note_prints_saved(tmp_path, monkeypatch, capsys):
+def test_under_budget_note_prints_saved(tmp_path, monkeypatch, capsys, summem):
     """Under-budget note exits 0 with stdout Saved. and no fold request."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     assert m.main(["note", "hello"]) == 0
@@ -193,9 +193,9 @@ def test_under_budget_note_prints_saved(tmp_path, monkeypatch, capsys):
     assert "Compress these two" not in out
 
 
-def test_long_stream_same_second_grains_are_powers_of_two(tmp_path, monkeypatch):
+def test_long_stream_same_second_grains_are_powers_of_two(tmp_path, monkeypatch, summem):
     """24 same-second notes at budget 8 fold to power-of-two grains, never a 17."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.setattr(m, "WAKE_LINES", 8)
     now = datetime(2026, 1, 1, tzinfo=UTC)
@@ -215,9 +215,9 @@ def test_long_stream_same_second_grains_are_powers_of_two(tmp_path, monkeypatch)
     assert 17 not in grains
 
 
-def test_sixteen_leaf_pack_tree_depth_is_log(tmp_path):
+def test_sixteen_leaf_pack_tree_depth_is_log(tmp_path, summem):
     """Sixteen 1s folded by equal_grain_pair produce NoteChild depth <= 4."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _add_notes(m, repo, 16, 0, "n")
     while True:
@@ -232,9 +232,9 @@ def test_sixteen_leaf_pack_tree_depth_is_log(tmp_path):
     assert _max_note_depth(m, tree) <= 4
 
 
-def test_nap_prints_remaining_ones_not_parent_plus_one(tmp_path, monkeypatch, capsys):
+def test_nap_prints_remaining_ones_not_parent_plus_one(tmp_path, monkeypatch, capsys, summem):
     """After napping two of four 1s at budget 2, stdout is the remaining two 1s."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     monkeypatch.setattr(m, "WAKE_LINES", 2)
@@ -250,9 +250,9 @@ def test_nap_prints_remaining_ones_not_parent_plus_one(tmp_path, monkeypatch, ca
     assert "Invent nothing." in out
 
 
-def test_nap_prints_nothing_when_at_or_under_budget(tmp_path, monkeypatch, capsys):
+def test_nap_prints_nothing_when_at_or_under_budget(tmp_path, monkeypatch, capsys, summem):
     """A successful nap at or under file budget prints nothing."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     monkeypatch.setattr(m, "WAKE_LINES", 2)
@@ -263,9 +263,9 @@ def test_nap_prints_nothing_when_at_or_under_budget(tmp_path, monkeypatch, capsy
     assert capsys.readouterr().out == ""
 
 
-def test_over_budget_note_requests_equal_grain_ones(tmp_path, monkeypatch, capsys):
+def test_over_budget_note_requests_equal_grain_ones(tmp_path, monkeypatch, capsys, summem):
     """With WAKE_LINES=3, a fourth note prints the two oldest ids and writes no nap."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     monkeypatch.setattr(m, "WAKE_LINES", 3)
@@ -294,15 +294,15 @@ def test_over_budget_note_requests_equal_grain_ones(tmp_path, monkeypatch, capsy
     assert list(naps.glob("*.tree")) == []
 
 
-def test_default_wake_lines_is_32():
+def test_default_wake_lines_is_32(summem):
     """Default WAKE_LINES is 32."""
-    m = load_summem()
+    m = summem
     assert m.WAKE_LINES == 32
 
 
-def test_config_toml_wake_lines_is_read(tmp_path, monkeypatch, capsys):
+def test_config_toml_wake_lines_is_read(tmp_path, monkeypatch, capsys, summem):
     """A committed config.toml WAKE_LINES value is the store's budget."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     m.ensure_store(repo)
@@ -319,9 +319,9 @@ def test_config_toml_wake_lines_is_read(tmp_path, monkeypatch, capsys):
     assert list((repo / ".summem" / "naps").glob("*.summ")) == []
 
 
-def test_fold_request_reuses_nodes_and_entry_chars(tmp_path, monkeypatch):
+def test_fold_request_reuses_nodes_and_entry_chars(tmp_path, monkeypatch, summem):
     """fold_request(nodes=..., entry_chars=...) does not list or parse knobs."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     for i, text in enumerate(("a", "b", "c"), start=1):
@@ -338,9 +338,9 @@ def test_fold_request_reuses_nodes_and_entry_chars(tmp_path, monkeypatch):
     assert out == expected
 
 
-def test_fold_request_mentions_remaining(tmp_path, monkeypatch):
+def test_fold_request_mentions_remaining(tmp_path, monkeypatch, summem):
     """Five notes at budget 3: fold_request says compressions remain after this one."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     monkeypatch.setattr(m, "WAKE_LINES", 3)
@@ -354,9 +354,9 @@ def test_fold_request_mentions_remaining(tmp_path, monkeypatch):
     assert "Run: summem nap " not in out
 
 
-def test_fold_request_identical_notes_use_short_prefix(tmp_path, monkeypatch):
+def test_fold_request_identical_notes_use_short_prefix(tmp_path, monkeypatch, summem):
     """Two identical notes over budget emit 8-hex prefixes, not 64-hex ids."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     monkeypatch.setattr(m, "WAKE_LINES", 1)
@@ -370,9 +370,9 @@ def test_fold_request_identical_notes_use_short_prefix(tmp_path, monkeypatch):
     assert f"nap {prefix} {prefix} " in out
 
 
-def test_fold_request_uses_config_entry_chars(tmp_path, monkeypatch):
+def test_fold_request_uses_config_entry_chars(tmp_path, monkeypatch, summem):
     """A store ENTRY_CHARS value appears in the fold prompt."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     m.ensure_store(repo)
@@ -385,9 +385,9 @@ def test_fold_request_uses_config_entry_chars(tmp_path, monkeypatch):
     assert "280 characters" not in out
 
 
-def test_fold_request_includes_path_when_cwd_misses_store(tmp_path, monkeypatch):
+def test_fold_request_includes_path_when_cwd_misses_store(tmp_path, monkeypatch, summem):
     """Walk-up from $PWD is a different store: Run: includes --path to the folded store."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     nested = repo / "foo" / "packages" / "baz"
     nested.mkdir(parents=True)
@@ -400,9 +400,9 @@ def test_fold_request_includes_path_when_cwd_misses_store(tmp_path, monkeypatch)
     assert "nap --path foo/packages/baz " in out
 
 
-def test_fold_request_omits_path_when_cwd_selects_store(tmp_path, monkeypatch):
+def test_fold_request_omits_path_when_cwd_selects_store(tmp_path, monkeypatch, summem):
     """Walk-up from $PWD already finds the folded store: Run: has no --path."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     pkg = repo / "pkg"
     pkg.mkdir()

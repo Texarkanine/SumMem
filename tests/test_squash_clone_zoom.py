@@ -5,15 +5,14 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from random import Random
 
-from conftest import load_summem
 from gitutil import fold_ids, git, init_repo, zoom_reaches
 
 UTC = timezone.utc
 
 
-def test_three_packs_squash_clone_zooms_originals(tmp_path, monkeypatch):
+def test_three_packs_squash_clone_zooms_originals(tmp_path, monkeypatch, summem):
     """100 notes folded as 64/32/4, squashed to main; a clone zooms one original per pack."""
-    m = load_summem()
+    m = summem
     main = init_repo(tmp_path / "main")
     git(["checkout", "-b", "packed"], main)
     base = datetime(2026, 1, 1, tzinfo=UTC)

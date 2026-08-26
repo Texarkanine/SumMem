@@ -1,0 +1,14 @@
+---
+description: How to run SumMem tests — iterate on py311, full matrix only at the end, no overlapping tox
+alwaysApply: true
+---
+
+# SumMem Testing
+
+Default iteration is `tox -e py311`, or a single test or file under that env (`tox -e py311 -- tests/test_foo.py::test_bar`).
+
+The full declared matrix is `tox run-parallel` (py311–py314). Run it only at end-of-work final verification. Sequential `tox` is the same envs one after another; do not treat it as the documented full suite.
+
+If tox is not on `PATH`, prefix with `uvx --with tox`.
+
+Do not run overlapping tox invocations on the same env in one checkout. Each env has its own `.tox/py3xx/` tree, but two concurrent `tox -e py311` processes stomp. One orchestrator: `tox run-parallel`, or a single `tox -e …`.

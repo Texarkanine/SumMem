@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from random import Random
 
-from conftest import load_summem
 from gitutil import init_repo
 
 UTC = timezone.utc
@@ -19,9 +18,9 @@ def _nap_two(m, repo):
     return ids
 
 
-def test_view_includes_nap_stem_when_sum_is_missing(tmp_path):
+def test_view_includes_nap_stem_when_sum_is_missing(tmp_path, summem):
     """A .tree without a .summ is still one view node."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _nap_two(m, repo)
     naps = repo / ".summem" / "naps"
@@ -35,9 +34,9 @@ def test_view_includes_nap_stem_when_sum_is_missing(tmp_path):
     assert nodes[0].caption == ""
 
 
-def test_view_ignores_leftover_sum_caption(tmp_path):
+def test_view_ignores_leftover_sum_caption(tmp_path, summem):
     """A leftover .sum beside a .tree does not supply the caption."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _nap_two(m, repo)
     naps = repo / ".summem" / "naps"
@@ -52,9 +51,9 @@ def test_view_ignores_leftover_sum_caption(tmp_path):
     assert nodes[0].caption == ""
 
 
-def test_view_includes_nap_stem_when_sum_has_conflict_markers(tmp_path):
+def test_view_includes_nap_stem_when_sum_has_conflict_markers(tmp_path, summem):
     """A .summ containing <<<<<<< is still one view node."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _nap_two(m, repo)
     sums = list((repo / ".summem" / "naps").glob("*.summ"))
@@ -66,9 +65,9 @@ def test_view_includes_nap_stem_when_sum_has_conflict_markers(tmp_path):
     assert nodes[0].caption == ""
 
 
-def test_view_sorts_notes_and_naps_by_filename(tmp_path):
+def test_view_sorts_notes_and_naps_by_filename(tmp_path, summem):
     """Mixed notes and naps sort by filename, not by kind."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))

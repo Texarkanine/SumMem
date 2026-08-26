@@ -5,24 +5,24 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from random import Random
 
-from conftest import dated_leaf, load_summem
+from conftest import dated_leaf
 from gitutil import init_repo
 
 UTC = timezone.utc
 
 
-def test_recall_matches_loose_note(tmp_path):
+def test_recall_matches_loose_note(tmp_path, summem):
     """Recall finds a sentence that is still a loose note."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha hello", datetime(2026, 1, 1, tzinfo=UTC), Random(0))
     out = m.recall_text(repo, "hello")
     assert out == dated_leaf("20260101T000000Z", "alpha hello") + "\n"
 
 
-def test_recall_matches_caption(tmp_path, monkeypatch):
+def test_recall_matches_caption(tmp_path, monkeypatch, summem):
     """Recall finds a nap caption in the view."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -33,9 +33,9 @@ def test_recall_matches_caption(tmp_path, monkeypatch):
     assert "folded pair" in out
 
 
-def test_recall_matches_sentence_inside_tree(tmp_path):
+def test_recall_matches_sentence_inside_tree(tmp_path, summem):
     """Recall finds an original sentence that lives only inside a .tree."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "unique-leaf-sentence", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "other", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -45,9 +45,9 @@ def test_recall_matches_sentence_inside_tree(tmp_path):
     assert out == dated_leaf("20260101T000001Z", "unique-leaf-sentence") + "\n"
 
 
-def test_recall_output_omits_notes_naps_and_git(tmp_path):
+def test_recall_output_omits_notes_naps_and_git(tmp_path, summem):
     """Recall output does not mention notes/, naps/, or git."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "hello", datetime(2026, 1, 1, tzinfo=UTC), Random(0))
     out = m.recall_text(repo, "hello")
@@ -56,9 +56,9 @@ def test_recall_output_omits_notes_naps_and_git(tmp_path):
     assert "git" not in out
 
 
-def test_recall_matches_loose_note_when_over_budget(tmp_path, monkeypatch):
+def test_recall_matches_loose_note_when_over_budget(tmp_path, monkeypatch, summem):
     """Recall still finds a loose note when the view is over WAKE_LINES."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     for i in range(11):
         m.write_note(repo, f"n{i}", datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
@@ -66,9 +66,9 @@ def test_recall_matches_loose_note_when_over_budget(tmp_path, monkeypatch):
     assert "n0" in m.recall_text(repo, "n0")
 
 
-def test_recall_skips_unreadable_sibling_warns(tmp_path, capsys):
+def test_recall_skips_unreadable_sibling_warns(tmp_path, capsys, summem):
     """Recall still matches a good pack and warns when a sibling children file is unreadable."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -91,9 +91,9 @@ def test_recall_skips_unreadable_sibling_warns(tmp_path, capsys):
     assert "Traceback" not in err
 
 
-def test_recall_malformed_tree_does_not_raise(tmp_path, capsys):
+def test_recall_malformed_tree_does_not_raise(tmp_path, capsys, summem):
     """A nap whose .tree is not JSON does not make recall raise."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -111,9 +111,9 @@ def test_recall_malformed_tree_does_not_raise(tmp_path, capsys):
     assert "Traceback" not in err
 
 
-def test_recall_matches_nested_nap_caption(tmp_path):
+def test_recall_matches_nested_nap_caption(tmp_path, summem):
     """Recall finds a nap caption that lives only inside a parent children file."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     for i, text in enumerate(["a1", "a2", "b1", "b2"], start=1):
         m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
@@ -135,9 +135,9 @@ def test_recall_matches_nested_nap_caption(tmp_path):
     assert "both" not in out
 
 
-def test_recall_nested_caption_omits_notes_naps_and_git(tmp_path):
+def test_recall_nested_caption_omits_notes_naps_and_git(tmp_path, summem):
     """A nested-caption hit does not mention notes/, naps/, or git."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     for i, text in enumerate(["a1", "a2", "b1", "b2"], start=1):
         m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
@@ -153,9 +153,9 @@ def test_recall_nested_caption_omits_notes_naps_and_git(tmp_path):
     assert "git" not in out
 
 
-def test_recall_does_not_match_grain_day_or_prefix(tmp_path):
+def test_recall_does_not_match_grain_day_or_prefix(tmp_path, summem):
     """Recall matches captions and note text, not grain, day, or id prefix."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -170,9 +170,9 @@ def test_recall_does_not_match_grain_day_or_prefix(tmp_path):
     assert "folded pair" not in m.recall_text(repo, ch)
 
 
-def test_recall_keeps_duplicate_note_dates(tmp_path):
+def test_recall_keeps_duplicate_note_dates(tmp_path, summem):
     """Recall prints both dated lines when two nested notes share text but not a day."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "same-text", datetime(2026, 1, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "same-text", datetime(2026, 1, 2, tzinfo=UTC), Random(2))
@@ -183,9 +183,9 @@ def test_recall_keeps_duplicate_note_dates(tmp_path):
     assert dated_leaf("20260102T000000Z", "same-text") in out.splitlines()
 
 
-def test_recall_nested_caption_before_matching_leaves(tmp_path):
+def test_recall_nested_caption_before_matching_leaves(tmp_path, summem):
     """A nested nap caption hit is printed before matching leaves under that nap."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     for i, text in enumerate(["theme-a1", "theme-a2", "other-b1", "other-b2"], start=1):
         m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
@@ -200,9 +200,9 @@ def test_recall_nested_caption_before_matching_leaves(tmp_path):
     assert cap < leaf
 
 
-def test_recall_parses_each_view_tree_once(tmp_path, monkeypatch):
+def test_recall_parses_each_view_tree_once(tmp_path, monkeypatch, summem):
     """recall_text parses each view children file once while searching nested leaves."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -228,9 +228,9 @@ def test_recall_parses_each_view_tree_once(tmp_path, monkeypatch):
         assert seen.count(body) == 1
 
 
-def test_recall_does_not_call_short_id_per_hit(tmp_path, monkeypatch):
+def test_recall_does_not_call_short_id_per_hit(tmp_path, monkeypatch, summem):
     """recall_text formats pack hits from a prefix map and does not call short_id."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     for i, text in enumerate(["a1", "a2", "b1", "b2"], start=1):
         m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
@@ -249,9 +249,9 @@ def test_recall_does_not_call_short_id_per_hit(tmp_path, monkeypatch):
     assert out.split()[0].startswith("x")
 
 
-def test_recall_unprojectable_note_name_skips(tmp_path, capsys):
+def test_recall_unprojectable_note_name_skips(tmp_path, capsys, summem):
     """Recall does not traceback when a note child's name is not a string."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -268,9 +268,9 @@ def test_recall_unprojectable_note_name_skips(tmp_path, capsys):
     assert "Traceback" not in err
 
 
-def test_recall_invalid_pattern_is_cli_error(tmp_path, monkeypatch, capsys):
+def test_recall_invalid_pattern_is_cli_error(tmp_path, monkeypatch, capsys, summem):
     """An invalid regex is a CLI error and does not mention store paths."""
-    m = load_summem()
+    m = summem
     monkeypatch.chdir(init_repo(tmp_path / "r"))
     assert m.main(["recall", "["]) != 0
     err = capsys.readouterr().err.lower()

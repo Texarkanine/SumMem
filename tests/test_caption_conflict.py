@@ -7,7 +7,7 @@ import sys
 from datetime import datetime, timezone
 from random import Random
 
-from conftest import SCRIPT, load_summem
+from conftest import SCRIPT
 from gitutil import init_repo
 
 UTC = timezone.utc
@@ -22,9 +22,9 @@ def _run(args, cwd, check=True):
     return result
 
 
-def test_same_pair_two_captions_conflict_only_on_sum(tmp_path, monkeypatch):
+def test_same_pair_two_captions_conflict_only_on_sum(tmp_path, monkeypatch, summem):
     """Two nappers of the same pair merge as distinct paths; wake may show two same-id rows."""
-    m = load_summem()
+    m = summem
     monkeypatch.setattr(m, "WAKE_LINES", 1)
     main = init_repo(tmp_path / "main")
     _run([sys.executable, str(SCRIPT), "note", "alpha"], main)
@@ -65,9 +65,9 @@ def test_same_pair_two_captions_conflict_only_on_sum(tmp_path, monkeypatch):
     assert "beta" in zoom_out
 
 
-def test_planted_conflict_markers_wake_skips_caption_zoom_prints_leaves(tmp_path, monkeypatch):
+def test_planted_conflict_markers_wake_skips_caption_zoom_prints_leaves(tmp_path, monkeypatch, summem):
     """Planted <<<<<<< in a .summ: wake omits the caption; zoom still prints the leaves."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))

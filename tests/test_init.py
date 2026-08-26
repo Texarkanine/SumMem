@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from conftest import ROOT, load_summem
+from conftest import ROOT
 
 
-def test_init_prints_recipe_and_prompt(capsys):
+def test_init_prints_recipe_and_prompt(capsys, summem):
     """main(['init']) exits 0 and prints the insert recipe plus prompt_text()."""
-    m = load_summem()
+    m = summem
     prompt = m.prompt_text()
     assert m.main(["init"]) == 0
     out = capsys.readouterr().out
@@ -21,9 +21,9 @@ def test_init_prints_recipe_and_prompt(capsys):
     assert "AGENTS.md or CLAUDE.md" not in out
 
 
-def test_usage_init_line_does_not_say_paste():
+def test_usage_init_line_does_not_say_paste(summem):
     """usage_text() init catalog line does not tell the operator to paste."""
-    m = load_summem()
+    m = summem
     lines = [
         ln
         for ln in m.usage_text().splitlines()
@@ -33,9 +33,9 @@ def test_usage_init_line_does_not_say_paste():
     assert "paste" not in lines[0].lower()
 
 
-def test_init_outside_repository_writes_nothing(tmp_path, monkeypatch, capsys):
+def test_init_outside_repository_writes_nothing(tmp_path, monkeypatch, capsys, summem):
     """init outside a repository exits 0 and creates neither a store nor AGENTS.md."""
-    m = load_summem()
+    m = summem
     monkeypatch.chdir(tmp_path)
     assert m.main(["init"]) == 0
     capsys.readouterr()
@@ -43,15 +43,15 @@ def test_init_outside_repository_writes_nothing(tmp_path, monkeypatch, capsys):
     assert not (tmp_path / "AGENTS.md").exists()
 
 
-def test_init_rejects_extra_args():
+def test_init_rejects_extra_args(summem):
     """init with an extra token exits nonzero."""
-    m = load_summem()
+    m = summem
     assert m.main(["init", "x"]) != 0
 
 
-def test_init_rejects_path_flag(capsys):
+def test_init_rejects_path_flag(capsys, summem):
     """init --path is rejected; init -h does not list --path."""
-    m = load_summem()
+    m = summem
     assert m.main(["init", "--path", "."]) != 0
     capsys.readouterr()
     assert m.main(["init", "-h"]) == 0
@@ -60,9 +60,9 @@ def test_init_rejects_path_flag(capsys):
     assert "--path" not in text
 
 
-def test_help_before_init_prints_init_help(capsys):
+def test_help_before_init_prints_init_help(capsys, summem):
     """-h init prints init help, not top-level-only usage."""
-    m = load_summem()
+    m = summem
     catalog = m.usage_text()
     assert m.main(["-h", "init"]) == 0
     captured = capsys.readouterr()
@@ -72,9 +72,9 @@ def test_help_before_init_prints_init_help(capsys):
     assert catalog.strip() not in text
 
 
-def test_prompt_text_invariants():
+def test_prompt_text_invariants(summem):
     """prompt_text() is the bootstrap: always-unless root wake, note, no versioned how-to."""
-    m = load_summem()
+    m = summem
     prompt = m.prompt_text()
     lower = prompt.lower()
     assert prompt.startswith("# Project Memory")
@@ -101,9 +101,9 @@ def test_prompt_text_invariants():
     assert "prior **root** SumMem wake" not in prompt
 
 
-def test_prompt_text_notes_are_part_of_the_work():
+def test_prompt_text_notes_are_part_of_the_work(summem):
     """prompt_text() treats script-written files as part of your work, not a separate git procedure."""
-    m = load_summem()
+    m = summem
     prompt = m.prompt_text()
     lower = prompt.lower()
     assert "part of your work" in lower
@@ -118,17 +118,17 @@ def test_prompt_text_notes_are_part_of_the_work():
     assert "naps/" not in prompt
 
 
-def test_agents_md_starts_with_prompt_text():
+def test_agents_md_starts_with_prompt_text(summem):
     """This repo's AGENTS.md starts with prompt_text() so the shipped prompt does not drift."""
-    m = load_summem()
+    m = summem
     agents = Path(ROOT, "AGENTS.md").read_text(encoding="utf-8")
     prompt = m.prompt_text().strip()
     assert agents.startswith(prompt)
 
 
-def test_how_to_text_is_the_usage_section():
+def test_how_to_text_is_the_usage_section(summem):
     """how_to_text() is the root-wake Usage section: header, taught verbs, no runbook."""
-    m = load_summem()
+    m = summem
     text = m.how_to_text()
     lower = text.lower()
     assert text.startswith("== SumMem Usage ==")
@@ -155,9 +155,9 @@ def test_how_to_text_is_the_usage_section():
     assert "wake --path pkg" not in text
 
 
-def test_how_to_text_is_not_operator_help():
+def test_how_to_text_is_not_operator_help(summem):
     """how_to_text() is not usage_text(); agent bin vs operator catalog name."""
-    m = load_summem()
+    m = summem
     how_to = m.how_to_text()
     usage = m.usage_text()
     assert how_to != usage

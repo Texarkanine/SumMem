@@ -12,7 +12,7 @@ from random import Random
 
 import pytest
 
-from conftest import ROOT, load_summem
+from conftest import ROOT
 from gitutil import assert_unique_cover, init_repo, reaches
 
 UTC = timezone.utc
@@ -67,20 +67,20 @@ def _payload_names(repo: Path) -> set[str]:
     return names
 
 
-def test_contains_unique_nested_note(tmp_path):
+def test_contains_unique_nested_note(tmp_path, summem):
     """--contains matching one nested NoteChild returns that filename."""
     s = load_surgery()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     secret = "sentinel-surgery-secret-aa11"
     paths, _parent = _balanced_4(m, repo, [secret, "keep-b", "keep-c", "keep-d"], "ab", "cd", "abcd", start=1)
     assert s.locate_note(m, repo, contains=secret, name=None) == paths[0].name
 
 
-def test_filename_locates_nested_note(tmp_path):
+def test_filename_locates_nested_note(tmp_path, summem):
     """A unique note filename or seq prefix locates a nested NoteChild."""
     s = load_surgery()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     paths, _parent = _balanced_4(m, repo, ["keep-a", "keep-b", "keep-c", "keep-d"], "ab", "cd", "abcd", start=1)
     assert s.locate_note(m, repo, contains=None, name=paths[2].name) == paths[2].name
@@ -88,10 +88,10 @@ def test_filename_locates_nested_note(tmp_path):
     assert s.locate_note(m, repo, contains=None, name=seq) == paths[2].name
 
 
-def test_contains_duplicate_text_requires_filename(tmp_path):
+def test_contains_duplicate_text_requires_filename(tmp_path, summem):
     """--contains that matches two identical notes raises until a filename is given."""
     s = load_surgery()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     paths = _write_notes(m, repo, ["same-line", "same-line"])
     with pytest.raises(ValueError):
@@ -99,10 +99,10 @@ def test_contains_duplicate_text_requires_filename(tmp_path):
     assert s.locate_note(m, repo, contains=None, name=paths[1].name) == paths[1].name
 
 
-def test_contains_nap_caption_only_is_not_found(tmp_path):
+def test_contains_nap_caption_only_is_not_found(tmp_path, summem):
     """A substring that hits only a nap caption is not a delete target."""
     s = load_surgery()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _write_notes(m, repo, ["alpha", "beta"])
     ids = [n.id for n in m.list_view(repo)]
@@ -111,10 +111,10 @@ def test_contains_nap_caption_only_is_not_found(tmp_path):
         s.locate_note(m, repo, contains="SECRET_CAPTION_ONLY", name=None)
 
 
-def test_unknown_target_errors(tmp_path):
+def test_unknown_target_errors(tmp_path, summem):
     """A missing note raises ValueError and does not change the store."""
     s = load_surgery()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _write_notes(m, repo, ["keep-me"])
     before = _payload_names(repo)
@@ -154,10 +154,10 @@ def _store_bytes(repo: Path) -> dict[str, bytes]:
     return out
 
 
-def test_excise_loose_note(tmp_path):
+def test_excise_loose_note(tmp_path, summem):
     """A loose note is unlinked; siblings remain; heal still covers unique leaves."""
     s = load_surgery()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     secret = "sentinel-loose-secret-cc33"
     paths = _write_notes(m, repo, [secret, "keep-sibling"])
@@ -171,10 +171,10 @@ def test_excise_loose_note(tmp_path):
     assert reaches(m, repo, "keep-sibling")
 
 
-def test_excise_nested_note_unzips_then_unlinks(tmp_path):
+def test_excise_nested_note_unzips_then_unlinks(tmp_path, summem):
     """Nested target is rematerialized to notes/, unlinked, and gone from remaining trees."""
     s = load_surgery()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     secret = "sentinel-nested-secret-dd44"
     paths, parent = _balanced_4(
@@ -194,10 +194,10 @@ def test_excise_nested_note_unzips_then_unlinks(tmp_path):
     assert reaches(m, repo, "keep-d")
 
 
-def test_excise_overlapping_packs_clears_remaining_trees(tmp_path):
+def test_excise_overlapping_packs_clears_remaining_trees(tmp_path, summem):
     """Every view nap that embeds the target is split before unlink."""
     s = load_surgery()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     secret = "sentinel-overlap-secret-ee55"
     paths = _write_notes(m, repo, [secret, "keep-b", "keep-c", "keep-d"])
@@ -221,10 +221,10 @@ def test_excise_overlapping_packs_clears_remaining_trees(tmp_path):
     assert reaches(m, repo, "keep-d")
 
 
-def test_excise_does_not_call_write_nap(tmp_path, monkeypatch):
+def test_excise_does_not_call_write_nap(tmp_path, monkeypatch, summem):
     """Excise never invents a caption via write_nap."""
     s = load_surgery()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     secret = "sentinel-nonap-secret-ff66"
     paths, _parent = _balanced_4(
@@ -239,10 +239,10 @@ def test_excise_does_not_call_write_nap(tmp_path, monkeypatch):
     assert not reaches(m, repo, secret)
 
 
-def test_plan_break_out_kid_stem_is_rematerialize_dest(tmp_path):
+def test_plan_break_out_kid_stem_is_rematerialize_dest(tmp_path, summem):
     """The nested nap stem plan_break_out predicts is the dest rematerialize_child writes."""
     s = load_surgery()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     secret = "sentinel-stem-pin-secret-qq11"
     paths, parent = _balanced_4(
@@ -262,10 +262,10 @@ def test_plan_break_out_kid_stem_is_rematerialize_dest(tmp_path):
     assert (naps / f"{chain[1]}.summ").is_file()
 
 
-def test_dry_run_prints_chain_and_writes_nothing(tmp_path):
+def test_dry_run_prints_chain_and_writes_nothing(tmp_path, summem):
     """Dry-run returns the rematerialize chain and does not change store bytes."""
     s = load_surgery()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     secret = "sentinel-dryrun-secret-gg77"
     paths, parent = _balanced_4(
@@ -280,10 +280,10 @@ def test_dry_run_prints_chain_and_writes_nothing(tmp_path):
     assert reaches(m, repo, secret)
 
 
-def test_dry_run_unknown_writes_nothing(tmp_path):
+def test_dry_run_unknown_writes_nothing(tmp_path, summem):
     """Dry-run of a missing note still errors and writes nothing."""
     s = load_surgery()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _write_notes(m, repo, ["keep-me"])
     before = _store_bytes(repo)
@@ -292,10 +292,10 @@ def test_dry_run_unknown_writes_nothing(tmp_path):
     assert _store_bytes(repo) == before
 
 
-def test_identical_text_deletes_only_named_file(tmp_path):
+def test_identical_text_deletes_only_named_file(tmp_path, summem):
     """Filename addressing drops one of two identical notes and keeps the other."""
     s = load_surgery()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     paths = _write_notes(m, repo, ["same-line", "same-line"])
     s.excise_note(m, repo, paths[0].name)
@@ -305,10 +305,10 @@ def test_identical_text_deletes_only_named_file(tmp_path):
     assert "same-line" in m.recall_text(repo, "same-line")
 
 
-def test_main_contains_excises(tmp_path, monkeypatch, capsys):
+def test_main_contains_excises(tmp_path, monkeypatch, capsys, summem):
     """main(['--contains', sentence]) excises that nested note from cwd's store."""
     s = load_surgery()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     secret = "sentinel-cli-secret-hh88"
     paths, parent = _balanced_4(
@@ -324,10 +324,10 @@ def test_main_contains_excises(tmp_path, monkeypatch, capsys):
     assert_unique_cover(m, repo)
 
 
-def test_main_dry_run(tmp_path, monkeypatch, capsys):
+def test_main_dry_run(tmp_path, monkeypatch, capsys, summem):
     """main(['--dry-run', '--contains', sentence]) prints the chain and writes nothing."""
     s = load_surgery()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     secret = "sentinel-clidry-secret-ii99"
     paths, parent = _balanced_4(
@@ -344,10 +344,10 @@ def test_main_dry_run(tmp_path, monkeypatch, capsys):
     assert reaches(m, repo, secret)
 
 
-def test_main_path_flag(tmp_path, monkeypatch):
+def test_main_path_flag(tmp_path, monkeypatch, summem):
     """--path aims at a started store the same way resolve_parent does."""
     s = load_surgery()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     assert m.main(["start", "pkg"]) == 0
@@ -390,10 +390,10 @@ def test_main_version_rejects_extra_args():
     assert s.main(["version", "x"]) != 0
 
 
-def test_main_prints_fold_request_when_over_budget(tmp_path, monkeypatch, capsys):
+def test_main_prints_fold_request_when_over_budget(tmp_path, monkeypatch, capsys, summem):
     """After excision, stdout includes fold_request so an agent can start the nap cascade."""
     s = load_surgery()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     secret = "sentinel-fold-secret-kk11"
     paths = _write_notes(m, repo, [secret, "keep-b", "keep-c", "keep-d"])
@@ -414,10 +414,10 @@ def test_main_prints_fold_request_when_over_budget(tmp_path, monkeypatch, capsys
     assert ids_before[0] not in out
 
 
-def test_main_path_fold_request_is_copy_paste_safe(tmp_path, monkeypatch, capsys):
+def test_main_path_fold_request_is_copy_paste_safe(tmp_path, monkeypatch, capsys, summem):
     """After --path excision over budget, Run: naps that store from $PWD."""
     s = load_surgery()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     assert m.main(["start", "pkg"]) == 0
@@ -434,10 +434,10 @@ def test_main_path_fold_request_is_copy_paste_safe(tmp_path, monkeypatch, capsys
     assert any(node.kind == "nap" and node.caption == "pair" for node in view)
 
 
-def test_main_dry_run_omits_fold_request(tmp_path, monkeypatch, capsys):
+def test_main_dry_run_omits_fold_request(tmp_path, monkeypatch, capsys, summem):
     """Dry-run does not print a fold request; the store is unchanged."""
     s = load_surgery()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     secret = "sentinel-dryfold-secret-ll22"
     _write_notes(m, repo, [secret, "keep-b", "keep-c", "keep-d"])

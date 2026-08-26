@@ -7,13 +7,12 @@ import shutil
 import subprocess
 import tomllib
 
-from conftest import load_summem
 from gitutil import init_repo
 
 
-def test_resolve_subdir_without_store_is_git_root(tmp_path):
+def test_resolve_subdir_without_store_is_git_root(tmp_path, summem):
     """A subdirectory with no nested store resolves to the git root."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     nested = repo / "foo" / "packages" / "baz"
     nested.mkdir(parents=True)
@@ -21,9 +20,9 @@ def test_resolve_subdir_without_store_is_git_root(tmp_path):
     assert m.resolve_parent(nested / "fee.ts") == repo.resolve()
 
 
-def test_resolve_inside_started_dir_is_that_store(tmp_path):
+def test_resolve_inside_started_dir_is_that_store(tmp_path, summem):
     """Resolve from inside a started directory returns that directory."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     nested = repo / "foo" / "packages" / "baz"
     nested.mkdir(parents=True)
@@ -34,9 +33,9 @@ def test_resolve_inside_started_dir_is_that_store(tmp_path):
     assert m.resolve_parent(nested / "src") == nested.resolve()
 
 
-def test_resolve_path_file_walks_from_parent(tmp_path):
+def test_resolve_path_file_walks_from_parent(tmp_path, summem):
     """An existing file path walks from the file's parent directory."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     nested = repo / "foo" / "packages" / "baz"
     nested.mkdir(parents=True)
@@ -46,9 +45,9 @@ def test_resolve_path_file_walks_from_parent(tmp_path):
     assert m.resolve_parent(repo, "foo/packages/baz/fee.ts") == nested.resolve()
 
 
-def test_resolve_missing_file_walks_from_parent(tmp_path):
+def test_resolve_missing_file_walks_from_parent(tmp_path, summem):
     """A missing file path walks from its parent directory."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     nested = repo / "foo" / "packages" / "baz"
     nested.mkdir(parents=True)
@@ -56,9 +55,9 @@ def test_resolve_missing_file_walks_from_parent(tmp_path):
     assert m.resolve_parent(repo, "foo/packages/baz/fee.ts") == nested.resolve()
 
 
-def test_resolve_omitted_path_uses_cwd(tmp_path):
+def test_resolve_omitted_path_uses_cwd(tmp_path, summem):
     """Omitting path_arg walks from cwd."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     nested = repo / "pkg"
     nested.mkdir()
@@ -70,9 +69,9 @@ def test_resolve_omitted_path_uses_cwd(tmp_path):
     assert m.resolve_parent(repo, None) == repo.resolve()
 
 
-def test_start_creates_store_in_dir(tmp_path, monkeypatch):
+def test_start_creates_store_in_dir(tmp_path, monkeypatch, summem):
     """start <dir> creates a store in that directory."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     assert m.main(["start", "foo/packages/baz"]) == 0
@@ -85,9 +84,9 @@ def test_start_creates_store_in_dir(tmp_path, monkeypatch):
     assert config.lstrip().startswith("#")
 
 
-def test_start_does_not_create_ancestor_stores(tmp_path, monkeypatch):
+def test_start_does_not_create_ancestor_stores(tmp_path, monkeypatch, summem):
     """start does not create .summem on ancestor directories."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     assert m.main(["start", "foo/packages/baz"]) == 0
@@ -96,16 +95,16 @@ def test_start_does_not_create_ancestor_stores(tmp_path, monkeypatch):
     assert (repo / "foo" / "packages" / "baz" / ".summem").is_dir()
 
 
-def test_start_without_dir_is_usage(tmp_path, monkeypatch):
+def test_start_without_dir_is_usage(tmp_path, monkeypatch, summem):
     """start without a directory exits nonzero."""
-    m = load_summem()
+    m = summem
     monkeypatch.chdir(init_repo(tmp_path / "r"))
     assert m.main(["start"]) == 2
 
 
-def test_note_path_writes_started_store(tmp_path, monkeypatch):
+def test_note_path_writes_started_store(tmp_path, monkeypatch, summem):
     """note --path into a started package writes there, not at git root."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     assert m.main(["start", "foo/packages/baz"]) == 0
@@ -119,9 +118,9 @@ def test_note_path_writes_started_store(tmp_path, monkeypatch):
     assert not root_notes.exists() or not any(p.name.startswith(".") is False for p in root_notes.iterdir())
 
 
-def test_note_path_rolls_up_when_unstarted(tmp_path, monkeypatch):
+def test_note_path_rolls_up_when_unstarted(tmp_path, monkeypatch, summem):
     """note --path under an unstarted sibling writes to the git-root store."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     assert m.main(["start", "foo/packages/baz"]) == 0
@@ -133,9 +132,9 @@ def test_note_path_rolls_up_when_unstarted(tmp_path, monkeypatch):
     assert not other.exists()
 
 
-def test_nap_zoom_recall_path_use_started_store(tmp_path, monkeypatch, capsys):
+def test_nap_zoom_recall_path_use_started_store(tmp_path, monkeypatch, capsys, summem):
     """nap, zoom, and recall --path operate on the child store only."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     assert m.main(["start", "pkg"]) == 0
@@ -161,9 +160,9 @@ def test_nap_zoom_recall_path_use_started_store(tmp_path, monkeypatch, capsys):
     assert "root-only" not in recalled
 
 
-def test_note_path_fold_request_is_copy_paste_safe(tmp_path, monkeypatch, capsys):
+def test_note_path_fold_request_is_copy_paste_safe(tmp_path, monkeypatch, capsys, summem):
     """A fold request after note --path is a command that naps that store from $PWD."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     assert m.main(["start", "pkg"]) == 0
@@ -182,9 +181,9 @@ def test_note_path_fold_request_is_copy_paste_safe(tmp_path, monkeypatch, capsys
     assert view[0].caption == "pair"
 
 
-def test_config_wake_lines_is_per_store(tmp_path, monkeypatch, capsys):
+def test_config_wake_lines_is_per_store(tmp_path, monkeypatch, capsys, summem):
     """WAKE_LINES in one store's config does not change another store's budget."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     m.ensure_store(repo)
@@ -204,9 +203,9 @@ def test_config_wake_lines_is_per_store(tmp_path, monkeypatch, capsys):
     assert "Run:" not in pkg_out
 
 
-def test_config_entry_chars_is_per_store_for_notes_and_naps(tmp_path, monkeypatch, capsys):
+def test_config_entry_chars_is_per_store_for_notes_and_naps(tmp_path, monkeypatch, capsys, summem):
     """ENTRY_CHARS applies per store to notes and nap captions, including above 280."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     assert m.main(["start", "tight"]) == 0
@@ -234,9 +233,9 @@ def test_config_entry_chars_is_per_store_for_notes_and_naps(tmp_path, monkeypatc
     assert m.main(["note", "--path", "wide", "x" * 281]) == 0
 
 
-def test_unreadable_config_uses_defaults(tmp_path, monkeypatch, capsys):
+def test_unreadable_config_uses_defaults(tmp_path, monkeypatch, capsys, summem):
     """Unreadable config.toml uses defaults and is not rewritten."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     m.ensure_store(repo)
@@ -250,9 +249,9 @@ def test_unreadable_config_uses_defaults(tmp_path, monkeypatch, capsys):
     assert config.read_bytes() == before
 
 
-def test_monkeypatch_wake_lines_still_applies_when_config_omits_knob(tmp_path, monkeypatch, capsys):
+def test_monkeypatch_wake_lines_still_applies_when_config_omits_knob(tmp_path, monkeypatch, capsys, summem):
     """Omitted WAKE_LINES still follows the module constant, including a monkeypatch."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     monkeypatch.setattr(m, "WAKE_LINES", 1)
@@ -277,9 +276,9 @@ def _catalog_section(out: str) -> str:
     return "\n".join(lines[start:end])
 
 
-def test_root_wake_catalog_is_labeled_paths_not_commands(tmp_path, monkeypatch, capsys):
+def test_root_wake_catalog_is_labeled_paths_not_commands(tmp_path, monkeypatch, capsys, summem):
     """Root wake labels extra stores as ./paths, not as wake --path commands."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     assert m.main(["start", "pkg"]) == 0
@@ -298,9 +297,9 @@ def test_root_wake_catalog_is_labeled_paths_not_commands(tmp_path, monkeypatch, 
     assert "pkg-note" not in out
 
 
-def test_empty_root_omits_project_root_header(tmp_path, monkeypatch, capsys):
+def test_empty_root_omits_project_root_header(tmp_path, monkeypatch, capsys, summem):
     """A cataloged repo with no root notes omits == Project-root Memories ==."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     assert m.main(["start", "pkg"]) == 0
@@ -311,9 +310,9 @@ def test_empty_root_omits_project_root_header(tmp_path, monkeypatch, capsys):
     assert "== Project-root Memories ==" not in out
 
 
-def test_root_wake_starts_with_usage(tmp_path, monkeypatch, capsys):
+def test_root_wake_starts_with_usage(tmp_path, monkeypatch, capsys, summem):
     """Empty root wake is how_to_text() plus the footer; no other sections."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     assert m.main(["wake"]) == 0
@@ -324,9 +323,9 @@ def test_root_wake_starts_with_usage(tmp_path, monkeypatch, capsys):
     assert "== Additional SumMem Catalogs ==" not in out
 
 
-def test_pull_wake_omits_usage(tmp_path, monkeypatch, capsys):
+def test_pull_wake_omits_usage(tmp_path, monkeypatch, capsys, summem):
     """wake --path omits the Usage section."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     assert m.main(["start", "pkg"]) == 0
@@ -339,9 +338,9 @@ def test_pull_wake_omits_usage(tmp_path, monkeypatch, capsys):
     assert out.endswith("You are up to speed.\n")
 
 
-def test_root_wake_catalogs_other_store(tmp_path, monkeypatch, capsys):
+def test_root_wake_catalogs_other_store(tmp_path, monkeypatch, capsys, summem):
     """Root wake lists another started store under a catalog header."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     assert m.main(["start", "pkg"]) == 0
@@ -361,9 +360,9 @@ def test_root_wake_catalogs_other_store(tmp_path, monkeypatch, capsys):
     assert "git" not in out
 
 
-def test_catalog_count_preserves_folded_note_grain(tmp_path, monkeypatch, capsys):
+def test_catalog_count_preserves_folded_note_grain(tmp_path, monkeypatch, capsys, summem):
     """Catalog note count keeps encoded nap grain after a fold."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     assert m.main(["start", "pkg"]) == 0
@@ -384,9 +383,9 @@ def test_catalog_count_preserves_folded_note_grain(tmp_path, monkeypatch, capsys
     assert loose == []
 
 
-def test_pull_wake_omits_catalog_and_root_notes(tmp_path, monkeypatch, capsys):
+def test_pull_wake_omits_catalog_and_root_notes(tmp_path, monkeypatch, capsys, summem):
     """wake --path on a child store omits the catalog and root notes."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     assert m.main(["start", "pkg"]) == 0
@@ -403,9 +402,9 @@ def test_pull_wake_omits_catalog_and_root_notes(tmp_path, monkeypatch, capsys):
     assert "== SumMem Usage ==" not in out
 
 
-def test_ignored_store_omitted_from_catalog(tmp_path, monkeypatch, capsys):
+def test_ignored_store_omitted_from_catalog(tmp_path, monkeypatch, capsys, summem):
     """A gitignored store is omitted from the catalog."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     (repo / ".git" / "info" / "exclude").write_text("secret/.summem\n", encoding="utf-8")
@@ -422,9 +421,9 @@ def test_ignored_store_omitted_from_catalog(tmp_path, monkeypatch, capsys):
     assert "wake --path secret" not in out
 
 
-def test_gitignore_store_omitted_from_catalog(tmp_path, monkeypatch, capsys):
+def test_gitignore_store_omitted_from_catalog(tmp_path, monkeypatch, capsys, summem):
     """A store ignored by .gitignore is omitted from the catalog."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     (repo / ".gitignore").write_text("hidden/.summem\n", encoding="utf-8")
@@ -437,9 +436,9 @@ def test_gitignore_store_omitted_from_catalog(tmp_path, monkeypatch, capsys):
     assert "./hidden" not in out
 
 
-def test_catalog_does_not_os_walk(tmp_path, monkeypatch, capsys):
+def test_catalog_does_not_os_walk(tmp_path, monkeypatch, capsys, summem):
     """Root catalog lists other stores without calling os.walk."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     assert m.main(["start", "pkg"]) == 0
@@ -455,9 +454,9 @@ def test_catalog_does_not_os_walk(tmp_path, monkeypatch, capsys):
     assert "== Additional SumMem Catalogs ==" in out
 
 
-def test_file_ignored_config_still_catalogs_store(tmp_path, monkeypatch, capsys):
+def test_file_ignored_config_still_catalogs_store(tmp_path, monkeypatch, capsys, summem):
     """A file-level gitignore of config.toml does not hide a store that has notes."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     (repo / ".gitignore").write_text("config.toml\n", encoding="utf-8")
@@ -470,9 +469,9 @@ def test_file_ignored_config_still_catalogs_store(tmp_path, monkeypatch, capsys)
     assert "== Additional SumMem Catalogs ==" in out
 
 
-def test_catalog_requires_config_toml_sentinel(tmp_path, monkeypatch, capsys):
+def test_catalog_requires_config_toml_sentinel(tmp_path, monkeypatch, capsys, summem):
     """A child .summem directory without config.toml is not cataloged."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     (repo / "bare" / ".summem").mkdir(parents=True)
@@ -484,9 +483,9 @@ def test_catalog_requires_config_toml_sentinel(tmp_path, monkeypatch, capsys):
     assert "./bare" not in out
 
 
-def test_root_only_wake_labels_nonempty_document(tmp_path, monkeypatch, capsys):
+def test_root_only_wake_labels_nonempty_document(tmp_path, monkeypatch, capsys, summem):
     """A repo with only the git-root store labels a non-empty document."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     assert m.main(["note", "hello"]) == 0
@@ -503,9 +502,9 @@ def test_root_only_wake_labels_nonempty_document(tmp_path, monkeypatch, capsys):
     assert "== Additional SumMem Catalogs ==" not in out
 
 
-def test_started_stores_includes_root_and_other_parents(tmp_path):
+def test_started_stores_includes_root_and_other_parents(tmp_path, summem):
     """started_stores lists the git root store and a cataloged child store."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.ensure_store(repo)
     pkg = repo / "pkg"
@@ -515,9 +514,9 @@ def test_started_stores_includes_root_and_other_parents(tmp_path):
     assert pkg.resolve() in stores
 
 
-def test_started_stores_omits_root_without_store_directory(tmp_path):
+def test_started_stores_omits_root_without_store_directory(tmp_path, summem):
     """Tracked .summem paths do not list the git root if .summem is not a directory."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.ensure_store(repo)
     (repo / ".summem" / "notes" / "placeholder").write_text("x\n", encoding="utf-8")

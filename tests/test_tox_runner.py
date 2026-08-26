@@ -62,3 +62,11 @@ def test_default_tox_commands_have_no_cov():
     assert "coverage" not in env_list
 
 
+def test_tox_pytest_does_not_set_basetemp():
+    """pytest keeps its default basetemp; an explicit path is a cross-checkout clobber."""
+    testenv = _ini(ROOT / "tox.ini")["testenv"]["commands"]
+    assert "--basetemp" not in testenv
+    coverage = _ini(ROOT / "tox.ini")["testenv:coverage"]["commands"]
+    assert "--basetemp" not in coverage
+
+
