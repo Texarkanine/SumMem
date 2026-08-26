@@ -106,3 +106,15 @@ Investigate whether pytest-xdist is safe inside each tox env, then apply it (wit
 * Insights
     - The cap is the load-bearing part of the change; the flag alone would have shipped a matrix regression, so the tests lock `--maxprocesses=4` and not merely `-n auto`
     - Coverage artifacts being tracked in git means every `tox -e coverage` verification dirties the worktree; that friction predates this task and will recur until the tracking decision is revisited
+
+## 2026-08-25 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-pytest-xdist.md`
+    - Restored `.coverage` and `coverage/lcov.info` (QA advisory; not part of this change)
+* Decisions made
+    - Persistent files: techContext already carries the runner contract from Build; productContext and systemPatterns unchanged
+* Insights
+    - Measure the documented end-of-work command during Plan, not only the iteration env
+    - Two parallelism dials multiply; cap workers so concurrent tox envs stay near one core budget
+
