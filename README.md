@@ -88,12 +88,11 @@ $ git st
 ...
 Changes to be committed:
   (use "git restore --staged <file>..." to unstage)
-        new file:   dogfood/.summem/naps/20260819T213123Z-5e64febd8268823c-cfbf987aa25d8492e257e0484faa9be9903b3d3e9f74fcb83ed2ca443cada000-2.summ
-        new file:   dogfood/.summem/naps/20260819T213123Z-5e64febd8268823c-cfbf987aa25d8492e257e0484faa9be9903b3d3e9f74fcb83ed2ca443cada000-2.tree
+        new file:   dogfood/.summem/naps/20260819T213123Z-5e64febd8268823c-cfbf987aa25d8492e257e0484faa9be9903b3d3e9f74fcb83ed2ca443cada000-2-8f8111f124e6075e.summ
+        new file:   dogfood/.summem/naps/20260819T213123Z-5e64febd8268823c-cfbf987aa25d8492e257e0484faa9be9903b3d3e9f74fcb83ed2ca443cada000-2-8f8111f124e6075e.tree
         deleted:    dogfood/.summem/notes/20260819T213123Z-5e64febd8268823c
         deleted:    dogfood/.summem/notes/20260819T213139Z-e82628a6be85430a
-        new file:   dogfood/.summem/notes/20260825T141300Z-46540ead99c4e20b
-
+        new file:   dogfood/.summem/notes/20260826T025412Z-7157ba614d46767c
 ```
 
 You can see two old notes were `deleted` - the old individual `g` and `h`. A new note is added - that's our `i` memory.
@@ -168,7 +167,7 @@ Agents invoke `.summem/summem`. Sometimes recording a `note` will ask for a `nap
 
 ## Developing
 
-Tests load repo-root `summem` (the path has no `.py` suffix). Iterate with `tox -e py311`, or a single test or file under that env. The full local matrix is `tox run-parallel`: pytest on `tests/` for every declared non-EOL CPython from the 3.11 floor (3.11–3.14) that is installed, concurrently. Do not start two tox processes on the same env in one checkout. If tox is not on `PATH`, prefix the same command with `uvx --with tox` (for example `uvx --with tox tox run-parallel`). Pull-request checks are [`.github/workflows/pr.yaml`](.github/workflows/pr.yaml) (`tox -e py311` … `py314`). Pushes to `main` run [`.github/workflows/ci.yaml`](.github/workflows/ci.yaml): the same matrix plus `tox -e coverage` and the Codecov upload. `tox -e coverage` is the opt-in lcov command (`coverage/lcov.info`); the default matrix does not pass `--cov`. The Codecov badge 404s until the `CODECOV_TOKEN` repository secret exists and CI has uploaded once.
+Tests load repo-root `summem` (the path has no `.py` suffix). Iterate with `tox -e py311`, or a single test or file under that env. Each py3xx env runs pytest with xdist (`-n auto --maxprocesses=4`) so tests inside an env share at most four workers; pass `-n0` in posargs for a serial rerun. The full local matrix is `tox run-parallel`: pytest on `tests/` for every declared non-EOL CPython from the 3.11 floor (3.11–3.14) that is installed, concurrently. The worker cap is there so four concurrent envs do not each take every core. Do not start two tox processes on the same env in one checkout. If tox is not on `PATH`, prefix the same command with `uvx --with tox` (for example `uvx --with tox tox run-parallel`). Pull-request checks are [`.github/workflows/pr.yaml`](.github/workflows/pr.yaml) (`tox -e py311` … `py314`). Pushes to `main` run [`.github/workflows/ci.yaml`](.github/workflows/ci.yaml): the same matrix plus `tox -e coverage` and the Codecov upload. `tox -e coverage` is the opt-in lcov command (`coverage/lcov.info`); it stays serial and the default matrix does not pass `--cov`. The Codecov badge 404s until the `CODECOV_TOKEN` repository secret exists and CI has uploaded once.
 
 There is no test-result cache. This suite is heavy on `tmp_path`, git worktrees, and a no-suffix script loaded via `SourceFileLoader`; coverage-based selection (pytest-testmon and the like) is not proven not to skip a test that should run.
 

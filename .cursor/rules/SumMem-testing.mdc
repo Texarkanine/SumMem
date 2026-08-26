@@ -5,9 +5,9 @@ alwaysApply: true
 
 # SumMem Testing
 
-Default iteration is `tox -e py311`, or a single test or file under that env (`tox -e py311 -- tests/test_foo.py::test_bar`).
+Default iteration is `tox -e py311`, or a single test or file under that env (`tox -e py311 -- tests/test_foo.py::test_bar`). Full env runs use pytest-xdist (`-n auto --maxprocesses=4`). Pass `-n0` in posargs for a serial rerun.
 
-The full declared matrix is `tox run-parallel` (py311–py314). Run it only at end-of-work final verification. Sequential `tox` is the same envs one after another; do not treat it as the documented full suite.
+The full declared matrix is `tox run-parallel` (py311–py314). Run it only at end-of-work final verification. Sequential `tox` is the same envs one after another; do not treat it as the documented full suite. The worker cap is there so four concurrent envs do not each take every core.
 
 If tox is not on `PATH`, prefix with `uvx --with tox`.
 
