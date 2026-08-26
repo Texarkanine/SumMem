@@ -15,7 +15,7 @@ Spec: [issue #63](https://github.com/Texarkanine/SumMem/issues/63).
 - Session fixture: requesting `summem` → the object is the SourceFileLoader module for repo-root `summem`, and the fixture scope is `session`.
 - Monkeypatch restore: `monkeypatch.setattr(summem, "WAKE_LINES", 1)` then `monkeypatch.undo()` → `summem.WAKE_LINES` is the original default (32).
 - Call-site contract: every `tests/test_*.py` except `test_summem_fixture.py` → source text does not contain `load_summem` (`conftest.py` still defines the loader; the contract test may mention the name).
-- Parallel-safe pytest: `tox.ini` `[testenv]` commands → `pytest --basetemp="{env_tmp_dir}" {posargs}` (coverage env pytest line includes the same `--basetemp`).
+- Parallel-safe pytest: `tox.ini` `[testenv]` commands → `pytest --basetemp="{env:TMPDIR:/tmp}/summem-{env_name}" {posargs}` (coverage env pytest line includes the same `--basetemp`; not `{env_tmp_dir}`, which is inside the git worktree).
 - Unchanged tox contract: env_list stays py311–py314; `package = skip`; coverage stays out of env_list; default commands still have no `--cov`.
 - Existing suite: any test that used `load_summem()` → same assertions via the `summem` fixture; process-level git/worktree proofs unchanged.
 
@@ -58,8 +58,10 @@ No tests for README, `techContext.md`, or `.cursor/rules/SumMem-testing.mdc` (pr
 
 1. Stub tests: empty `test_tox_pytest_basetemp_is_env_tmp_dir` in `tests/test_tox_runner.py`.
 2. Stub interface: none (ini keys already exist).
-3. Write tests and run red: `[testenv] commands` contains `--basetemp="{env_tmp_dir}"` and still starts with `pytest` and includes `{posargs}`; `[testenv:coverage]` pytest line contains the same `--basetemp`. Do not subprocess tox.
-4. Write code and run green: `[testenv] commands = pytest --basetemp="{env_tmp_dir}" {posargs}`; add the same `--basetemp` to the coverage pytest line. This is the tox.ini hook that makes `tox run-parallel` safe ([tox FAQ](https://tox.wiki/en/latest/faq.html)). There is no ini key that turns default `tox` into parallel; that remains the CLI subcommand.
+3. Write tests and run red: `[testenv] commands` contains `--basetemp="{env:TMPDIR:/tmp}/summem-{env_name}"` (not `{env_tmp_dir}`, which is inside the git worktree) and still starts with `pytest` and includes `{posargs}`; `[testenv:coverage]` pytest line contains the same `--basetemp`. Do not subprocess tox.
+4. Write code and run green: `[testenv] commands = pytest --basetemp="{env:TMPDIR:/tmp}/summem-{env_name}" {posargs}`; add the same `--basetemp` to the coverage pytest line. Parallel pytest needs isolated temps ([tox FAQ](https://tox.wiki/en/latest/faq.html)); this suite's outside-repo tests `chdir` to `tmp_path`, so temps must not live under `{toxinidir}`. There is no ini key that turns default `tox` into parallel; that remains the CLI subcommand.
+
+- [x] Done
 
 ### 4. Document the full-suite command — prose/policy
 
@@ -70,6 +72,8 @@ No tests for README, `techContext.md`, or `.cursor/rules/SumMem-testing.mdc` (pr
 2. Keep `tox -e py311` as the single-interpreter form; `uvx --with tox tox …` when tox is not on PATH; `tox -e coverage` unchanged; CI unchanged.
 3. State that two concurrent tox invocations on the same env in one checkout stomp; one orchestrator process only.
 
+- [x] Done
+
 ### 5. Agent iteration rule — prose/policy
 
 - Files: `.cursor/rules/SumMem-testing.mdc`
@@ -77,6 +81,8 @@ No tests for README, `techContext.md`, or `.cursor/rules/SumMem-testing.mdc` (pr
 
 1. Frontmatter matches sibling rules (`alwaysApply: true` like `.cursor/rules/shared/test-running-practices.mdc`; fill `description`).
 2. Body: default iteration is `tox -e py311` or a single test/file under that env; full declared matrix is `tox run-parallel` only at end-of-work; do not overlap tox on the same env in one checkout.
+
+- [x] Done
 
 ## Technology Validation
 
@@ -92,7 +98,7 @@ No new technology - validation not required. tox 4 already declares `min_version
 ## Challenges & Mitigations
 
 - Leaked module mutation under a session fixture: grep found no `m.ATTR =` assignments; tests already `monkeypatch.setattr` on the loaded module. Pytest restores patches at test teardown; the undo test pins that. Cache `load_summem` so a stray reload cannot swap `sys.modules["summem"]`.
-- Parallel envs sharing pytest temps: tox FAQ requires `--basetemp="{env_tmp_dir}"`; lock it in ini tests. `.pyc` files are version-tagged; process-level proofs use `tmp_path` / worktrees under that basetemp.
+- Parallel envs sharing pytest temps: isolate with `--basetemp` per env under `TMPDIR`, not `{env_tmp_dir}` (that path is inside the clone; outside-repo tests `chdir` to `tmp_path`). `.pyc` files are version-tagged.
 - Issue example `-j auto` is not tox’s flag: document `tox run-parallel` (`-p auto` default).
 - Do not subprocess tox from pytest (recursion under the suite): prove parallel-safety with ini locks; Build runs `tox run-parallel` live.
 - Mechanical miss of a call site: the substring contract test stays red until none remain outside `conftest.py`.
@@ -112,5 +118,5 @@ No new technology - validation not required. tox 4 already declares `min_version
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
 - [x] Preflight
-- [ ] Build
+- [x] Build
 - [ ] QA

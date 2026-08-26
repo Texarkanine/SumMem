@@ -38,3 +38,14 @@ Speed up local tox: parallel py311–py314 environments, an agent iteration rule
     - Plan is acceptable as-is
 * Insights
     - Automated refactoring (e.g. `sed` or Python script) could be used to speed up the mechanical replacement of `load_summem` across 21 test files
+
+## 2026-08-25 - BUILD - COMPLETE
+
+* Work completed
+    - Session `summem` fixture; 21 modules converted; tox basetemp under TMPDIR; docs and `.cursor/rules/SumMem-testing.mdc`
+    - `tox run-parallel`: 354 passed on py311–py314 (~49s)
+* Decisions made
+    - `--basetemp` must not be `{env_tmp_dir}` (inside the clone); use `{env:TMPDIR:/tmp}/summem-{env_name}`
+* Insights
+    - tox FAQ's in-repo basetemp is wrong for tests that `chdir` to tmp_path to leave the git worktree
+
