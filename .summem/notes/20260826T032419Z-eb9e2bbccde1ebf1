@@ -1,0 +1,1 @@
+16-hex leafset (#67): truncate inside leafset_id so note view ids, nap stems, and nested NapChild.id share one width; migrate.py is the only 4-part and 5-part-64 reader.

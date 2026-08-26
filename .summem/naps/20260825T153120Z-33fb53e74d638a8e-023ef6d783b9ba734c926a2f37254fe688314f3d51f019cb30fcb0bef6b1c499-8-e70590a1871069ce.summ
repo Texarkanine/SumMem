@@ -1,1 +1,0 @@
-Nap captions are .summ, not .sum. SLOBAC 2026-08-25 ratchet (proofs stay; 3.11 floor because CI has no 3.10). Process-level tests renamed off test_proof_*; zoom pin is the selected nap's two public wake lines. slobac-audit-ratchet archived PR #48 (findings 14, 60-63 kept).

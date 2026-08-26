@@ -97,9 +97,9 @@ def note_digest(file_bytes: bytes) -> str:
 
 
 def leafset_id(digests: list[str]) -> str:
-    """Return lowercase hex SHA-256 of sorted hex digests joined with no delimiter."""
+    """Return the first 16 lowercase hex characters of SHA-256 of sorted digest hex."""
     join = "".join(sorted(digests))
-    return hashlib.sha256(join.encode("ascii")).hexdigest()
+    return hashlib.sha256(join.encode("ascii")).hexdigest()[:16]
 
 
 def _replace(obj, **changes):
@@ -137,7 +137,7 @@ class Tree:
 
 
 class NapChild:
-    """A nap child. *id* is the leaf-set id of the original notes."""
+    """A nap child. *id* is the 16-hex leaf-set id of the original notes."""
 
     __slots__ = ("id", "sum", "tree")
     __eq__ = _eq_by_slots
@@ -437,7 +437,7 @@ def nap_stem(
     tree_bytes: bytes,
     caption_bytes: bytes,
 ) -> str:
-    """Return `{seq}-{leafset}-{grain}-{variant_tag}` for a nap pair."""
+    """Return `{seq}-{leafset16}-{grain}-{variant16}` for a nap pair."""
     tag = variant_tag(tree_bytes, caption_bytes)
     return f"{seq_prefix}-{leafset}-{grain}-{tag}"
 
@@ -453,11 +453,12 @@ def child_nap_stem(child: NapChild) -> tuple[str, bytes, bytes]:
 
 
 def _parse_nap_stem(stem: str) -> tuple[str, str, str, int, str] | None:
+    """Return stamp, rand, 16-hex leafset, grain, and variant, or None if not a five-part-16 stem."""
     parts = stem.split("-")
     if len(parts) != 5:
         return None
     stamp, rand, leafset, leaves_s, variant = parts
-    if len(stamp) != 16 or len(rand) != 16 or len(leafset) != 64 or len(variant) != 16:
+    if len(stamp) != 16 or len(rand) != 16 or len(leafset) != 16 or len(variant) != 16:
         return None
     if not leaves_s.isdigit():
         return None
@@ -749,7 +750,7 @@ def _warn_skipped_pack() -> None:
 
 
 def zoom_text(parent, token: str) -> str:
-    """Return one-level zoom of *token* (full id or unique prefix), or raise ValueError if unknown."""
+    """Return one-level zoom of *token* (16-hex id or unique prefix), or raise ValueError if unknown."""
     ids, packs = _view_packs(parent)
     prefixes = unique_prefixes(ids)
     cid = resolve_id(token, ids)

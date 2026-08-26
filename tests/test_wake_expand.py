@@ -179,7 +179,7 @@ def test_nested_empty_nap_child_does_not_split(tmp_path, monkeypatch, summem):
             m.Tree(
                 kids=[
                     m.NoteChild(name="20260101T000001Z-aaaaaaaaaaaaaaaa", text="alpha"),
-                    m.NapChild(id="0" * 64, sum="empty", tree=m.Tree(kids=[])),
+                    m.NapChild(id="0" * 16, sum="empty", tree=m.Tree(kids=[])),
                 ]
             )
         )

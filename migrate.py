@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""Rename complete four-part SumMem nap pairs to five-part stems. Not a shipped CLI command."""
+"""Rewrite complete 4-part-64 and 5-part-64 nap pairs to five-part-16. Not a shipped CLI command."""
 
 from __future__ import annotations
 
@@ -39,12 +39,17 @@ def load_summem():
     return mod
 
 
-def _four_part_stem(stem: str) -> tuple[str, str, str, int] | None:
-    """Return stamp, rand, leafset, grain for a pre-variant nap stem, or None."""
+def _old_stem(stem: str) -> tuple[str, str, str, int] | None:
+    """Return stamp, rand, 64-hex leafset, grain for a 4-part-64 or 5-part-64 stem, or None."""
     parts = stem.split("-")
-    if len(parts) != 4:
+    if len(parts) == 4:
+        stamp, rand, leafset, leaves_s = parts
+    elif len(parts) == 5:
+        stamp, rand, leafset, leaves_s, variant = parts
+        if len(variant) != 16 or any(c not in "0123456789abcdef" for c in variant):
+            return None
+    else:
         return None
-    stamp, rand, leafset, leaves_s = parts
     if len(stamp) != 16 or len(rand) != 16 or len(leafset) != 64 or not leaves_s.isdigit():
         return None
     if any(c not in "0123456789abcdef" for c in rand + leafset):
@@ -52,8 +57,21 @@ def _four_part_stem(stem: str) -> tuple[str, str, str, int] | None:
     return stamp, rand, leafset, int(leaves_s)
 
 
+def _shorten_tree(m, tree):
+    """Return a copy of *tree* with every 64-hex NapChild.id truncated to 16 hex, recursively."""
+    kids = []
+    for child in tree.kids:
+        if isinstance(child, m.NapChild):
+            nested = _shorten_tree(m, child.tree)
+            nid = child.id[:16] if len(child.id) == 64 else child.id
+            kids.append(m._replace(child, id=nid, tree=nested))
+        else:
+            kids.append(child)
+    return m._replace(tree, kids=kids)
+
+
 def _migrate_store(m, parent) -> bool:
-    """Rename complete four-part pairs under *parent*. Return True if an incomplete pair was skipped."""
+    """Rewrite complete old pairs under *parent*. Return True if an incomplete pair was skipped."""
     naps = Path(parent) / ".summem" / "naps"
     if not naps.is_dir():
         return False
@@ -66,32 +84,38 @@ def _migrate_store(m, parent) -> bool:
         stems.setdefault(path.stem, {})[path.suffix] = path
     incomplete = False
     for stem, files in stems.items():
-        four = _four_part_stem(stem)
-        if four is None:
+        old = _old_stem(stem)
+        if old is None:
             continue
-        stamp, rand, leafset, grain = four
+        stamp, rand, leafset, grain = old
         tree_path = files.get(".tree")
         sum_path = files.get(".summ")
         if tree_path is None or sum_path is None:
             sys.stderr.write(f"incomplete pair: {stem}\n")
             incomplete = True
             continue
-        tree_bytes = tree_path.read_bytes()
-        caption_bytes = sum_path.read_bytes()
-        dest = m.nap_stem(f"{stamp}-{rand}", leafset, grain, tree_bytes, caption_bytes)
-        if dest == stem:
+        try:
+            tree = m.loads_tree(tree_path.read_bytes())
+        except m._TREE_PARSE_ERRORS:
+            sys.stderr.write(f"incomplete pair: {stem}\n")
+            incomplete = True
             continue
+        caption_bytes = sum_path.read_bytes()
+        rewritten_tree_bytes = m.dumps_tree(_shorten_tree(m, tree))
+        dest = m.nap_stem(f"{stamp}-{rand}", leafset[:16], grain, rewritten_tree_bytes, caption_bytes)
         dest_tree = naps / f"{dest}.tree"
         dest_summ = naps / f"{dest}.summ"
         if dest_tree.exists() or dest_summ.exists():
             continue
-        tree_path.replace(dest_tree)
-        sum_path.replace(dest_summ)
+        m._write_pair(naps, dest, rewritten_tree_bytes, caption_bytes)
+        if dest != stem:
+            tree_path.unlink()
+            sum_path.unlink()
     return incomplete
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Rewrite complete four-part nap pairs. Return 0 on success, 1 on skip or error."""
+    """Rewrite complete 4-part-64 and 5-part-64 nap pairs. Return 0 on success, 1 on skip or error."""
     m = load_summem()
     m.require_python()
     args_list = list(argv) if argv is not None else sys.argv[1:]

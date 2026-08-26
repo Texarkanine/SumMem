@@ -60,7 +60,7 @@ A **nap** is a summary of two neighbors in the listing. It is two files that sha
 - The **caption** (`.summ`) is one line, the same length limit as a note. Wake prints it.
 - The **children file** (`.tree`) is a dump of those two neighbors. Zoom and deep recall need it after squash.
 
-The shared name starts with the left child’s time and random suffix so the nap sorts where that child sorted, not at “now.” After that come the leaf-set id, the grain, and a 16-hex variant tag of the pair bytes. Agents never see or type the tag. The public id is still the leaf-set field. Four-part names are not view nodes; `migrate.py` rewrites them.
+The shared name starts with the left child’s time and random suffix so the nap sorts where that child sorted, not at “now.” After that come the 16-hex leaf-set id, the grain, and a 16-hex variant tag of the pair bytes. Agents never see or type the tag. The public id is still the leaf-set field. Four-part names and five-part names whose leaf-set field is 64 hex are not view nodes; `migrate.py` rewrites both and nested JSON ids.
 
 Fold writes a new pair, then removes the children from the listing. Children leave the working tree only after the parent children file exists on disk.
 
@@ -86,7 +86,7 @@ A view node’s **content id** is a digest of the original notes it stands for, 
 
 1. Hash each original note’s file bytes.
 2. Sort those hashes and concatenate them with no delimiter.
-3. Hash that join. That value is the **leaf-set id**.
+3. Hash that join and keep the first 16 hex characters. That value is the **leaf-set id**.
 
 The script computes both hashes itself. It does not shell out, and it does not use git’s hasher: those would change the id when the machine or the repository hash changes.
 
@@ -94,7 +94,7 @@ The children file is a JSON document: a list of exactly two children. A child is
 
 That document is deterministic for one tree: same child order, nested captions, and grouping produce the same bytes. Two agents who nap the same two loose notes with different pair bytes write different complete paths; git unions them. Wake may print two same-id rows until the next `note` or `nap`. The same leaf-set id folded in a different grouping, or with different nested captions, is the same id and different children-file bytes.
 
-Wake prints a unique prefix of the id, long enough to be unambiguous in that listing. Stored names keep the full id. Two notes with the same text share an id; they remain two view nodes. A command that looks like a positional range is rejected.
+Wake, recall, and zoom print a unique prefix of the id, long enough to be unambiguous in that listing. Stored leaf-set ids are 16 hex; display is that unique prefix (floor 8). Two notes with the same text share an id; they remain two view nodes. A command that looks like a positional range is rejected.
 
 ## Fold
 
@@ -306,7 +306,7 @@ Zoom walks a children file in the current commit. Every sentence zoom still owes
 
 Everyday recall is the view, with captions standing in for napped children. Recall that must see original sentences or nested nap captions reads children files as well.
 
-Listings share `format_wake_line`: dated leaves and unique-prefix packs. Recall searches note text and nap captions, not grain, prefix, or day. Pack prefixes are unique among `named_ids` (view plus nested tree ids). Recall and zoom build that uniqueness once per command — sort the distinct ids and take the longest common prefix with each neighbor — so each printed line is a lookup. They parse each view children file at most once; `named_ids` is that walk's id list. Wake and fold may still call `short_id` per line. 64-hex stays on disk.
+Listings share `format_wake_line`: dated leaves and unique-prefix packs. Recall searches note text and nap captions, not grain, prefix, or day. Pack prefixes are unique among `named_ids` (view plus nested tree ids). Recall and zoom build that uniqueness once per command — sort the distinct ids and take the longest common prefix with each neighbor — so each printed line is a lookup. They parse each view children file at most once; `named_ids` is that walk's id list. Wake and fold may still call `short_id` per line. Stored leaf-set ids are 16 hex; listings unique-prefix that field.
 
 Zoom and recall print one agent-safe line when they skip an unreadable sibling children file, and do not fail if another pack answered. Wake stays silent.
 
@@ -364,4 +364,4 @@ SumMem is also not:
 | Package vs repo vs machine-global | Scopes. Store, driver, and activation. |
 | How a directory becomes a store | `start`. Empty packages stay empty. |
 | Disk format or a new backend | The agent interface must not change. Store roles must still exist. See [Notes](../notes.md). |
-| On-disk nap filenames (four-part to five-part) | Run `migrate.py` from a clone of this repository against the target git root. Do not `mv` by hand. The script hashes on-disk pair bytes and renames complete pairs. Unmigrated four-part files are invisible to the driver. |
+| On-disk nap filenames (four-part-64 and five-part-64 to five-part-16) | Run `migrate.py` from a clone of this repository against the target git root. Do not `mv` by hand. The script shortens nested `.tree` nap ids, recomputes the variant tag from the rewritten pair bytes, and writes five-part-16. Unmigrated old stems are invisible to the driver. |

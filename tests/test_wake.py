@@ -55,7 +55,7 @@ def test_wake_line_is_dated_grain_for_a_note(tmp_path, summem):
     line = m.wake_text(repo).splitlines()[0]
     assert line == dated_leaf("20260818T123005Z", "hello")
     assert path.read_bytes() == b"hello\n"
-    assert len(m.list_view(repo)[0].id) == 64
+    assert len(m.list_view(repo)[0].id) == 16
 
 
 def test_wake_pack_line_has_no_date(tmp_path, monkeypatch, summem):
@@ -267,7 +267,7 @@ def test_wake_over_budget_prints_every_view_node(tmp_path, monkeypatch, summem):
         dated_leaf(datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC).strftime("%Y%m%dT%H%M%SZ"), f"n{i}")
         for i in range(11)
     ]
-    assert all(len(part) != 64 for line in lines for part in line.split())
+    assert all(len(part) != 16 for line in lines for part in line.split())
 
 
 def test_wake_zero_budget_prints_every_view_node(tmp_path, summem):
