@@ -22,10 +22,14 @@ def test_note_digest_is_sha256_of_file_bytes(summem):
 
 
 def test_leafset_id_singleton_hashes_hex_ascii(summem):
-    """A singleton leaf-set id is SHA-256 of that digest's hex as ASCII."""
+    """A singleton leaf-set id is the first 16 hex of SHA-256 of that digest's hex as ASCII."""
     m = summem
     digest = m.note_digest(m.note_file_bytes("hello"))
-    assert m.leafset_id([digest]) == hashlib.sha256(digest.encode("ascii")).hexdigest()
+    got = m.leafset_id([digest])
+    assert got == hashlib.sha256(digest.encode("ascii")).hexdigest()[:16]
+    assert len(got) == 16
+    assert got == got.lower()
+    assert all(c in "0123456789abcdef" for c in got)
 
 
 def test_leafset_id_sorts_and_concatenates_without_delimiter(summem):
@@ -34,10 +38,11 @@ def test_leafset_id_sorts_and_concatenates_without_delimiter(summem):
     a = m.note_digest(m.note_file_bytes("alpha"))
     b = m.note_digest(m.note_file_bytes("beta"))
     join = "".join(sorted((a, b)))
-    expected = hashlib.sha256(join.encode("ascii")).hexdigest()
+    expected = hashlib.sha256(join.encode("ascii")).hexdigest()[:16]
     assert m.leafset_id([a, b]) == expected
     assert m.leafset_id([b, a]) == expected
-    comma = hashlib.sha256(f"{min(a, b)},{max(a, b)}".encode("ascii")).hexdigest()
+    assert len(expected) == 16
+    comma = hashlib.sha256(f"{min(a, b)},{max(a, b)}".encode("ascii")).hexdigest()[:16]
     assert m.leafset_id([a, b]) != comma
 
 
@@ -50,7 +55,7 @@ def test_leafset_id_hashes_utf8_chinese_file_bytes(summem):
     assert m.note_digest(raw) == digest
     uxxxx = "\\u4f60\\u597d".encode("ascii") + b"\n"
     assert m.note_digest(raw) != hashlib.sha256(uxxxx).hexdigest()
-    assert m.leafset_id([digest]) == hashlib.sha256(digest.encode("ascii")).hexdigest()
+    assert m.leafset_id([digest]) == hashlib.sha256(digest.encode("ascii")).hexdigest()[:16]
 
 
 def test_dumps_tree_one_note_exact_bytes(summem):
@@ -197,10 +202,10 @@ def test_variant_tag_length_prefixes_are_unambiguous(summem):
 
 
 def test_nap_stem_is_five_part(summem):
-    """nap_stem is {seq}-{leafset}-{grain}-{tag} and tag equals variant_tag of those bytes."""
+    """nap_stem is {seq}-{leafset16}-{grain}-{tag} and tag equals variant_tag of those bytes."""
     m = summem
     seq = "20260101T000000Z-" + "a" * 16
-    leafset = "b" * 64
+    leafset = "b" * 16
     grain = 2
     tree_bytes = b'{"c":[]}\n'
     caption_bytes = b"pair\n"
@@ -214,18 +219,29 @@ def test_nap_stem_is_five_part(summem):
     assert got_leafset == leafset
     assert got_grain == grain
     assert got_tag == tag
+    wide = m.nap_stem(seq, "b" * 64, grain, tree_bytes, caption_bytes)
+    assert m._parse_nap_stem(wide) is None
 
 
 def test_parse_nap_stem_five_part_only(summem):
-    """Five-part stems parse; four-part stems are not view names."""
+    """Five-part stems with a 16-hex leaf-set parse; four-part stems are not view names."""
     m = summem
     stamp = "20260101T000000Z"
     rand = "a" * 16
-    leafset = "b" * 64
+    leafset = "b" * 16
     four = f"{stamp}-{rand}-{leafset}-2"
     five = f"{four}-{'c' * 16}"
     assert m._parse_nap_stem(four) is None
     assert m._parse_nap_stem(five) == (stamp, rand, leafset, 2, "c" * 16)
+
+
+def test_parse_nap_stem_rejects_64_hex_leafset(summem):
+    """A five-part stem whose leaf-set field is 64 hex is not a view name."""
+    m = summem
+    stamp = "20260101T000000Z"
+    rand = "a" * 16
+    five64 = f"{stamp}-{rand}-{'b' * 64}-2-{'c' * 16}"
+    assert m._parse_nap_stem(five64) is None
 
 
 def test_parse_nap_stem_rejects_bad_shape(summem):
@@ -233,7 +249,7 @@ def test_parse_nap_stem_rejects_bad_shape(summem):
     m = summem
     stamp = "20260101T000000Z"
     rand = "a" * 16
-    leafset = "b" * 64
+    leafset = "b" * 16
     four = f"{stamp}-{rand}-{leafset}-2"
     five = f"{four}-{'c' * 16}"
     three = f"{stamp}-{rand}-{leafset}"
@@ -252,7 +268,7 @@ def test_child_nap_stem_returns_stem_and_pair_bytes(summem):
     left = m.NoteChild(name="20260101T000001Z-" + "a" * 16, text="alpha")
     right = m.NoteChild(name="20260101T000002Z-" + "b" * 16, text="beta")
     tree = m.Tree(kids=[left, right])
-    child = m.NapChild(id="c" * 64, sum="pair", tree=tree)
+    child = m.NapChild(id="c" * 16, sum="pair", tree=tree)
     stem, tree_bytes, caption_bytes = m.child_nap_stem(child)
     assert tree_bytes == m.dumps_tree(tree)
     assert caption_bytes == m.note_file_bytes("pair")

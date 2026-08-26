@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
@@ -335,6 +336,40 @@ def test_legacy_four_part_is_not_a_view_node(tmp_path, summem):
     assert "pair" not in m.wake_text(repo)
     with pytest.raises(ValueError, match="unknown id"):
         m.zoom_text(repo, leafset)
+    assert "pair" not in m.recall_text(repo, "pair")
+
+
+def test_legacy_five_part_64_is_not_a_view_node(tmp_path, summem):
+    """A planted five-part pair with a 64-hex leaf-set field is not a view node."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    node = m.list_view(repo)[0]
+    parsed = m._parse_nap_stem(node.name)
+    assert parsed is not None
+    stamp, rand, _leafset, grain, _tag = parsed
+    tree_bytes = node.tree_path.read_bytes()
+    caption_bytes = node.sum_path.read_bytes()
+    digests = [
+        m.note_digest(path.read_bytes())
+        for path in (repo / ".summem" / "notes").iterdir()
+        if path.is_file() and not path.name.startswith(".")
+    ]
+    full = hashlib.sha256("".join(sorted(digests)).encode("ascii")).hexdigest()
+    assert len(full) == 64
+    five64 = m.nap_stem(f"{stamp}-{rand}", full, grain, tree_bytes, caption_bytes)
+    naps = repo / ".summem" / "naps"
+    node.tree_path.unlink()
+    node.sum_path.unlink()
+    (naps / f"{five64}.tree").write_bytes(tree_bytes)
+    (naps / f"{five64}.summ").write_bytes(caption_bytes)
+    assert [n for n in m.list_view(repo) if n.kind == "nap"] == []
+    assert "pair" not in m.wake_text(repo)
+    with pytest.raises(ValueError, match="unknown id"):
+        m.zoom_text(repo, full)
     assert "pair" not in m.recall_text(repo, "pair")
 
 

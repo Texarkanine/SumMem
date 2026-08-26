@@ -80,7 +80,7 @@ def test_planted_conflict_markers_wake_skips_caption_zoom_prints_leaves(tmp_path
     assert "secret caption" not in wake
     assert "<<<<<<<" not in wake
     nap_id = m.list_view(repo)[0].id
-    assert len(nap_id) == 64
+    assert len(nap_id) == 16
     assert "x2 " in wake
     assert wake.rstrip().endswith(":")
     zoom = m.zoom_text(repo, nap_id)

@@ -97,9 +97,9 @@ def note_digest(file_bytes: bytes) -> str:
 
 
 def leafset_id(digests: list[str]) -> str:
-    """Return lowercase hex SHA-256 of sorted hex digests joined with no delimiter."""
+    """Return the first 16 lowercase hex characters of SHA-256 of sorted digest hex."""
     join = "".join(sorted(digests))
-    return hashlib.sha256(join.encode("ascii")).hexdigest()
+    return hashlib.sha256(join.encode("ascii")).hexdigest()[:16]
 
 
 def _replace(obj, **changes):
@@ -457,7 +457,7 @@ def _parse_nap_stem(stem: str) -> tuple[str, str, str, int, str] | None:
     if len(parts) != 5:
         return None
     stamp, rand, leafset, leaves_s, variant = parts
-    if len(stamp) != 16 or len(rand) != 16 or len(leafset) != 64 or len(variant) != 16:
+    if len(stamp) != 16 or len(rand) != 16 or len(leafset) != 16 or len(variant) != 16:
         return None
     if not leaves_s.isdigit():
         return None
