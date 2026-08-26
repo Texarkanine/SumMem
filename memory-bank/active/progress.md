@@ -53,3 +53,18 @@ Investigate whether pytest-xdist is safe inside each tox env, then apply it (wit
     - 4 is a suite cap (git-heavy tests + four tox envs), not this machine's nproc; CI 2-core still gets 2 workers
 * Insights
     - The cap that saves the matrix is also the fastest iteration width here; those two constraints agreed rather than traded
+
+## 2026-08-25 - PREFLIGHT - COMPLETE (rework)
+
+`.preflight-status` first line: `PASS WITH ADVISORY`
+
+* Work completed
+    - Revalidated TDD ordering, conventions, dependency impact, conflicts, and requirement coverage against the revised plan and current tox/test/CI surfaces
+    - Confirmed the worker cap resolves the local matrix regression and the issue-comment step owns the zero-marker justification
+    - Confirmed pytest-xdist documents `--maxprocesses` as an upper bound on `-n auto` and `-n0` as serial execution
+* Decisions made
+    - Build may proceed with `pytest -n auto --maxprocesses=4 {posargs}`
+    - No TDD step swap or change-detector strike was required; `tasks.md` was not edited
+* Insights
+    - The revised matrix verification protects performance as an acceptance condition, not merely test correctness
+    - Advisory only: a future scheduled py311 soak at worker counts 2 and 4 could detect low-frequency races without burdening required PR checks

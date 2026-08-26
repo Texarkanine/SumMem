@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: pytest-xdist
-**Phase:** PLAN - COMPLETE (rework after preflight FAIL)
+**Phase:** PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
 
 ## What Was Done
 - Preflight FAIL (fixable): unbounded `-n auto` made `tox run-parallel` slower (67s vs 53s); AC3 had no owning step.
