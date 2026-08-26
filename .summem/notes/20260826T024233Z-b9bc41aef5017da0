@@ -1,0 +1,1 @@
+Each tox env runs pytest -n auto --maxprocesses=4; coverage stays serial. Serial markers: 0. Unbounded auto made tox run-parallel slower.

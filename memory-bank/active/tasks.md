@@ -126,6 +126,6 @@ pytest-cov can combine xdist workers. Out of scope: coverage env stays serial.
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
-- [ ] Build
+- [x] Preflight
+- [x] Build
 - [ ] QA

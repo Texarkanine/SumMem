@@ -1,12 +1,27 @@
 # Active Context
 
 ## Current Task: pytest-xdist
-**Phase:** PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Preflight FAIL (fixable): unbounded `-n auto` made `tox run-parallel` slower (67s vs 53s); AC3 had no owning step.
-- Re-measured: `-n 4` is the fastest single-env width (19.55s) and `tox run-parallel -- -n 4` is 31.49s (355 ×4).
-- Revised plan: `pytest -n auto --maxprocesses=4 {posargs}`; Build `gh issue comment` on #64 owns the 0-marker justification.
+- `tox.ini`: `pytest-xdist` dep; `[testenv] commands = pytest -n auto --maxprocesses=4 {posargs}`. Coverage commands unchanged (serial).
+- Three contracts in `tests/test_tox_runner.py`. Docs: `README.md`, `memory-bank/techContext.md`, `.cursor/rules/SumMem-testing.mdc`.
+- Serial-marker count **0**, justified on [issue #64](https://github.com/Texarkanine/SumMem/issues/64#issuecomment-5419816806).
+- `tox -e py311`: 358 passed, 4 workers, 19.96s. `tox run-parallel`: 28.77s vs `-n0` 38.78s. `tox -e coverage`: 358 passed serial, lcov written, no xdist workers.
+
+## Files modified
+- `/home/mobaxterm/git/SumMem/tox.ini`
+- `/home/mobaxterm/git/SumMem/tests/test_tox_runner.py`
+- `/home/mobaxterm/git/SumMem/README.md`
+- `/home/mobaxterm/git/SumMem/memory-bank/techContext.md`
+- `/home/mobaxterm/git/SumMem/.cursor/rules/SumMem-testing.mdc`
+- `/home/mobaxterm/git/SumMem/memory-bank/active/tasks.md`
+- `/home/mobaxterm/git/SumMem/memory-bank/active/progress.md`
+- `/home/mobaxterm/git/SumMem/memory-bank/active/activeContext.md`
+
+## Key decisions
+- Cap at 4, not unbounded `auto`. Coverage stays serial.
+- `test_coverage_env_runs_serial` was already green (lock on absence of `-n`); not a TDD miss of a new behavior.
 
 ## Next Step
-- Preflight validation (subagent).
+- QA review (subagent).

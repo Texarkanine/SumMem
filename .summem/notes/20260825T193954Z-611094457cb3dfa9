@@ -1,1 +1,0 @@
-Issue #49 plan: catalog_text becomes one git ls-files -z --cached --others --exclude-standard filtered for .summem/config.toml; _ignored_store goes away.

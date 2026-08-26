@@ -70,3 +70,27 @@ def test_tox_pytest_does_not_set_basetemp():
     assert "--basetemp" not in coverage
 
 
+def test_tox_deps_include_pytest_xdist():
+    """[testenv] deps includes pytest-xdist."""
+    deps = [
+        line.strip()
+        for line in _ini(ROOT / "tox.ini")["testenv"]["deps"].splitlines()
+        if line.strip()
+    ]
+    assert "pytest-xdist" in deps
+
+
+def test_tox_commands_enable_xdist():
+    """[testenv] commands pass -n auto --maxprocesses=4."""
+    commands = _ini(ROOT / "tox.ini")["testenv"]["commands"].split()
+    n = commands.index("-n")
+    assert commands[n + 1] == "auto"
+    assert "--maxprocesses=4" in commands
+
+
+def test_coverage_env_runs_serial():
+    """[testenv:coverage] commands do not pass -n."""
+    tokens = _ini(ROOT / "tox.ini")["testenv:coverage"]["commands"].split()
+    assert "-n" not in tokens
+
+

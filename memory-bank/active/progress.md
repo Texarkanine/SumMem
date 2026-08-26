@@ -68,3 +68,26 @@ Investigate whether pytest-xdist is safe inside each tox env, then apply it (wit
 * Insights
     - The revised matrix verification protects performance as an acceptance condition, not merely test correctness
     - Advisory only: a future scheduled py311 soak at worker counts 2 and 4 could detect low-frequency races without burdening required PR checks
+
+## 2026-08-25 - BUILD - IN-PROGRESS
+
+* Work completed
+    - TDD: three contracts in `tests/test_tox_runner.py`; `tox.ini` `[testenv]` is `pytest -n auto --maxprocesses=4 {posargs}` with `pytest-xdist` in deps
+    - Docs: README, `techContext.md`, `.cursor/rules/SumMem-testing.mdc`
+    - [Issue #64 comment](https://github.com/Texarkanine/SumMem/issues/64#issuecomment-5419816806): serial-marker count **0**; flock / session fixture / subprocess / worktree tests ran under xdist on `tmp_path` and per-worker processes; 358 passed on `tox -e py311` (4 workers, 19.96s)
+* Decisions made
+    - Coverage test `test_coverage_env_runs_serial` was already green before the tox.ini edit (asserting absence of `-n`); kept as a lock so coverage cannot pick up workers
+* Insights
+    - None yet; matrix vs `-n0` still to run
+
+## 2026-08-25 - BUILD - COMPLETE
+
+* Work completed
+    - Shipped `[testenv] commands = pytest -n auto --maxprocesses=4 {posargs}` with `pytest-xdist` in deps
+    - 358 passed on `tox -e py311` (4 workers, 19.96s); `tox run-parallel` 28.77s vs same-session `-n0` 38.78s; `tox -e coverage` 358 passed serial, `coverage/lcov.info` written, no xdist workers
+    - Serial markers: **0**. Justification: [issue comment](https://github.com/Texarkanine/SumMem/issues/64#issuecomment-5419816806)
+* Decisions made
+    - Built to plan. One TDD quirk: `test_coverage_env_runs_serial` was green before the tox.ini change because it asserts `-n` stays absent
+* Insights
+    - The shipped matrix is faster than serial-within-env, not merely green
+    - Coverage env installs xdist (inherited deps) but does not start workers without `-n`
