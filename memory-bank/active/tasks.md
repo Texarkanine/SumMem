@@ -113,18 +113,14 @@ No new technology - validation not required. tox 4 already declares `min_version
 
 ## QA Results
 
-FAIL. Full findings in `memory-bank/active/.qa-validation-status`. Build must rerun; the plan itself is sound.
+PASS. Full findings in `memory-bank/active/.qa-validation-status`.
 
-### Blocking
+### Findings
 
-1. **`tox.ini` `--basetemp` (step 3) is a regression and is not needed.** An explicit basetemp is `rm_rf`'d at first use with no numbering, lock, or ownership check, so two concurrent runs on `/tmp/summem-{env_name}` from different checkouts share and clobber the same `tmp_path`. Proven by probe: two concurrent runs on one explicit basetemp both got `.../test_a0`. Also proven unnecessary: pytest's default basetemp already isolates concurrent runs (`pytest-0`..`pytest-3`) and already lands outside the worktree, because inside a tox env `TMPDIR` is unset and `gettempdir()` is `/tmp`. Fix: drop `--basetemp` from `[testenv]` and `[testenv:coverage]`; drop or invert `test_tox_pytest_basetemp_is_per_env_system_tmp`; re-check the "in one checkout" wording in README / `techContext.md` / `.cursor/rules/SumMem-testing.mdc` once the flag is gone.
-2. **`test_summem_fixture_is_session_scoped` asserts pytest's private `_fixture_function_marker`.** That attribute already renamed once (Build's own deviation note) and `deps = pytest` is unpinned, so a future pytest reddens the suite for a non-SumMem reason. The scope it locks is also unobservable, since `load_summem()` returns the cached module regardless of fixture scope — a change-detector by `always-tdd.mdc`. The cache that actually delivers "load once" is untested. Fix: assert the behavior (`load_summem() is load_summem()`, and the fixture is that object) instead of the marker.
-
-### Advisory
-
-- `m = summem` at 318 sites (plan-sanctioned minimal diff).
-- `conftest.load_summem` duplicates `tests/gitutil.py::_load_driver`'s cache-then-load body.
-- `test_test_modules_do_not_reference_load_summem` now guards style, not behavior, since a stray `load_summem()` call is a cache hit.
+1. The two prior blockers are resolved: explicit `--basetemp` is gone, and fixture loading is covered through cache identity without pytest-private metadata.
+2. AST validation found 321 fixture-using tests, no unused `summem` fixture parameters, and no direct driver loads outside the fixture contract.
+3. Advisory: `m = summem` remains the plan-sanctioned minimal conversion; the source-text call-site guard now protects style rather than behavior and should not become a broader testing pattern.
+4. `uvx --with tox tox run-parallel`: py311–py314 all OK in 47.94 seconds.
 
 ## Status
 
@@ -135,4 +131,5 @@ FAIL. Full findings in `memory-bank/active/.qa-validation-status`. Build must re
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build (rework for QA FAIL)
-- [ ] QA (rerun)
+- [x] QA (PASS)
+- [x] Reflect

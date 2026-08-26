@@ -1,20 +1,19 @@
-FAIL
+PASS
 
-## Blocking findings
+## Findings
 
-1. **Regression — `tox.ini` `--basetemp` is a fixed shared path, and is not needed.** `--basetemp="{env:TMPDIR:/tmp}/summem-{env_name}"` replaces pytest's numbered, per-user, lock-protected default with one fixed name per env. `_pytest/tmpdir.py::TempPathFactory.getbasetemp` does `if basetemp.exists(): rm_rf(basetemp)` for an explicit basetemp — no numbering, no lock, no ownership check. Verified: two concurrent pytest runs sharing one explicit basetemp were both handed the identical `tmp_path` (`.../test_a0`), the later run wiping the earlier run's tree at startup, both exiting 0. So two `tox -e py311` runs from two checkouts (git worktree, second clone, agent worktrees) now silently share and clobber `/tmp/summem-py311`; before this change they were isolated. This suite is entirely `tmp_path` git repos, so the corruption would surface as arbitrary, unreproducible failures. Also verified the flag buys nothing: pytest's default already isolates concurrent runs (four concurrent runs got `pytest-0`..`pytest-3`), and inside a tox env `TMPDIR` is unset with `tempfile.gettempdir() == /tmp` (`tox exec -e py311`), so the default basetemp already lands outside the git worktree. Consequence for docs: README, `techContext.md`, and `.cursor/rules/SumMem-testing.mdc` all scope the hazard to "the same env in one checkout", which this flag makes machine-wide. Remedy: drop `--basetemp` from `[testenv]` and `[testenv:coverage]`, and drop or invert `test_tox_pytest_basetemp_is_per_env_system_tmp` accordingly. If a per-env temp is still wanted, it must carry a checkout-unique component.
-
-2. **Integrity / change-detector — `test_summem_fixture_is_session_scoped` asserts a pytest private attribute.** It reads `conftest.summem._fixture_function_marker`. Build already recorded that this attribute renamed from `_pytestfixturefunction`; `tox.ini` pins nothing (`deps = pytest`), so every fresh `.tox` build takes the newest pytest and the next rename turns the whole suite red for a reason unrelated to SumMem. The property it locks is also unobservable: `load_summem()` returns the cached `sys.modules["summem"]`, so a function-scoped fixture would load exactly once too. The test can only go red on a deliberate edit to `scope="session"` — a change-detector under `always-tdd.mdc`. Meanwhile the mechanism that actually delivers "load once", the `sys.modules` cache added in plan step 1.4, has no test: nothing asserts `load_summem() is load_summem()`. Remedy: replace the marker assertion with the behavioral one, which covers both the requirement and the cache.
+1. **PASS — the fixed pytest basetemp regression is removed.** `[testenv]` and `[testenv:coverage]` now use pytest's default basetemp, restoring numbered concurrent-run isolation outside the worktree. The tox lock test and all three documentation surfaces agree that callers must not add a fixed `--basetemp`.
+2. **PASS — fixture loading now has a behavioral contract.** `load_summem() is load_summem()` proves the process cache, the fixture is that cached object, and replacing `sys.modules["summem"]` later does not swap it. No pytest-private fixture metadata is asserted.
+3. **PASS — the mechanical conversion is complete.** An AST check found 321 fixture-using tests, no unused `summem` fixture parameters, and no direct `load_summem` references outside the fixture contract module.
+4. **PASS — requirements and established patterns hold.** No product code changed; the declared matrix remains py311–py314 with packaging skipped and coverage opt-in; README, `techContext.md`, and `.cursor/rules/SumMem-testing.mdc` consistently document cheap iteration and `tox run-parallel` final verification.
 
 ## Advisory findings
 
-1. `m = summem` appears 318 times. Plan-sanctioned as the minimal-diff conversion and it keeps the existing `m.` call sites untouched; using `summem` directly would be cleaner if these files are revisited.
-2. `conftest.load_summem` now duplicates the cache-then-load body of `tests/gitutil.py::_load_driver` (distinct `sys.modules` key so `gitutil` need not import `conftest`). Two cached loaders of the same script; pre-existing split, not worth churn now.
-3. `test_test_modules_do_not_reference_load_summem` locks test source text. Its value was highest during the 21-file conversion; with the cache in place a stray `load_summem()` call is free, so it now guards style rather than behavior.
+1. `m = summem` remains in 318 plan-sanctioned call sites. It preserves the minimal mechanical diff; direct `summem` use can wait until those tests are otherwise edited.
+2. `test_test_modules_do_not_reference_load_summem` is now a source-style guard rather than a behavioral test because direct calls hit the cache. It is non-blocking for this task but should not be extended as a testing pattern.
+3. `conftest.load_summem` and `tests/gitutil.py::_load_driver` retain similar cache-then-load bodies under distinct module keys. This split predates the task and does not justify churn here.
 
-## Verified good
+## Verification
 
-- No product code changed: `52bf36d..HEAD` touches only `tests/`, `tox.ini`, `README.md`, `memory-bank/`, and the new rule. Constraint "do not change product behavior" holds.
-- No test carries an unused `summem` parameter (AST check over all `tests/test_*.py`); no test module loads the driver directly.
-- README, `techContext.md`, and `.cursor/rules/SumMem-testing.mdc` agree on the command set (iterate `tox -e py311`; full matrix `tox run-parallel`; `uvx --with tox` prefix; `tox -e coverage` unchanged).
-- `tox run-parallel` at HEAD: py311–py314 all OK in 42.4s wall (~40s per env), so the parallel speedup is real and acceptance criterion 3 holds.
+- `uvx --with tox tox run-parallel`: py311, py312, py313, and py314 all OK in 47.94 seconds.
+- `git diff --check 52bf36d..HEAD`: only the pre-existing trailing blank line in `memory-bank/active/progress.md`, removed while recording this QA result.

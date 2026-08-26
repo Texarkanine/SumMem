@@ -77,3 +77,26 @@ Speed up local tox: parallel py311–py314 environments, an agent iteration rule
 * Insights
     - `test_migrate.py` runs before `test_summem_fixture.py` and `mig.main()` replaces `sys.modules["summem"]`; identity against that dict is order-dependent unless the cache lives elsewhere
 
+## 2026-08-25 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Reviewed the rework and full task diff against the brief and implementation plan
+    - Confirmed the prior basetemp and private-pytest-metadata blockers are resolved
+    - AST-checked all test modules: 321 fixture-using tests, no unused `summem` parameters, and no direct driver loads outside the fixture contract
+    - `uvx --with tox tox run-parallel`: py311–py314 all OK in 47.94 seconds
+* Decisions made
+    - PASS: the implementation is acceptable as-is and can proceed to reflection
+    - The source-text call-site guard remains advisory because the cached loader makes direct calls behaviorally free
+* Insights
+    - A cache owned by `conftest` preserves one fixture module even when CLI helper tests replace `sys.modules["summem"]`
+
+## 2026-08-25 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-tox-speedup.md`
+    - Reconciled persistent files: techContext gained the `_SUMMEM` cache contract; productContext and systemPatterns skipped
+* Decisions made
+    - The FAQ `--basetemp` detour is the lesson; the post-rework shape is the elegant one
+* Insights
+    - Pytest default basetemp under tox already isolates; explicit `--basetemp` disables numbering
+    - `sys.modules["summem"]` is not a stable test cache while migrate/surgery reload the driver
