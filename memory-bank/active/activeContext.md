@@ -1,12 +1,12 @@
 # Active Context
 
 ## Current Task: pytest-xdist
-**Phase:** PLAN - COMPLETE
+**Phase:** PLAN - COMPLETE (rework after preflight FAIL)
 
 ## What Was Done
-- Level 2. Intent is issue #64 (within-env xdist, not parallel tox envs).
-- Investigation: pytest-xdist 3.8.0, 355 passed at `-n auto` (16 workers, 26.65s) and `-n 8` (22.71s); serial 36.57s. No serial markers.
-- Plan: TDD three `test_tox_runner.py` contracts, then `tox.ini` `pytest-xdist` + `pytest -n auto {posargs}`; coverage stays serial; docs note xdist on full env runs.
+- Preflight FAIL (fixable): unbounded `-n auto` made `tox run-parallel` slower (67s vs 53s); AC3 had no owning step.
+- Re-measured: `-n 4` is the fastest single-env width (19.55s) and `tox run-parallel -- -n 4` is 31.49s (355 ×4).
+- Revised plan: `pytest -n auto --maxprocesses=4 {posargs}`; Build `gh issue comment` on #64 owns the 0-marker justification.
 
 ## Next Step
 - Preflight validation (subagent).

@@ -27,3 +27,29 @@ Investigate whether pytest-xdist is safe inside each tox env, then apply it (wit
 * Insights
     - Flock/sys.modules/worktree risks in #64 did not fire: locks and git state are per `tmp_path`; each xdist worker is a process with its own session fixture
     - pytest-cov can combine xdist workers; we still keep `tox -e coverage` serial as the issue allowed
+
+## 2026-08-25 - PREFLIGHT - COMPLETE
+
+`.preflight-status` first line: `FAIL (fixable)`
+
+* Work completed
+    - Validated the plan against `tox.ini`, `tests/test_tox_runner.py`, README, CI workflows, and the Level 2 workflow references
+    - TDD encoding passed; no change-detector strike and no test/code step swap, so `tasks.md` was not edited
+    - Measured the `tox run-parallel` interaction: 4 concurrent envs at 53s serial-within-env vs 67s with `-n auto` each (355 passed per env both times, py311-py314)
+    - Verified `-n 0` is legal and last-wins over `-n auto`, and that xdist 3.8.0 installs and passes on py312/py313/py314
+* Decisions made
+    - FAIL (fixable) on two grounds: the plan does not account for `-n auto` multiplying against #63's `tox run-parallel` (and its `--maxprocesses` prohibition rests on single-env data), and AC3's serial-marker justification has no owning step in any Level 2 phase
+* Insights
+    - The two parallelism dials compound: `-n auto` per env times 4 concurrent envs is ~64 workers on 16 cores, making the documented full-matrix command ~26% slower even though every env stays green
+    - CI is unaffected in kind - `pr.yaml` and `ci.yaml` run one env per job, so oversubscription is a local-matrix-only concern
+
+## 2026-08-25 - PLAN - COMPLETE (rework)
+
+* Work completed
+    - Measured `-n 4`: py311 19.55s (fastest single-env width); `tox run-parallel -- -n 4` 31.49s vs 53s serial-within-env and 67s unbounded auto
+    - Rewrote `tasks.md`: cap `--maxprocesses=4`, owned AC3 via `gh issue comment` during Build, matrix step compares wall time to `-n0`
+* Decisions made
+    - Accepted trade-off: `pytest -n auto --maxprocesses=4 {posargs}` — not unbounded auto, not a `PYTEST_WORKERS` env var (forgettable unsafe default)
+    - 4 is a suite cap (git-heavy tests + four tox envs), not this machine's nproc; CI 2-core still gets 2 workers
+* Insights
+    - The cap that saves the matrix is also the fastest iteration width here; those two constraints agreed rather than traded
