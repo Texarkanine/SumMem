@@ -49,3 +49,18 @@ Speed up local tox: parallel py311–py314 environments, an agent iteration rule
 * Insights
     - tox FAQ's in-repo basetemp is wrong for tests that `chdir` to tmp_path to leave the git worktree
 
+## 2026-08-25 - QA - COMPLETE (FAIL)
+
+* Work completed
+    - Reviewed `52bf36d..HEAD` against plan and brief; confirmed no product code changed
+    - AST-checked every `tests/test_*.py` for unused `summem` params (none) and direct driver loads (none)
+    - Probed pytest basetemp semantics: default vs explicit, single vs concurrent runs
+    - `tox run-parallel` at HEAD: py311-py314 OK in 42.4s
+* Decisions made
+    - FAIL: step 3's `--basetemp` must go, and the session-scope test must assert behavior instead of a pytest private attribute
+    - Plan itself is sound; Build reruns, Plan does not
+* Insights
+    - An explicit pytest `--basetemp` is `rm_rf`'d at first use with no numbering, lock, or ownership check; two concurrent runs on the same explicit basetemp are handed the identical `tmp_path`
+    - pytest's default basetemp is already parallel-safe and already outside the worktree under tox (`TMPDIR` unset in the env, `gettempdir()` is `/tmp`), so the tox FAQ's advice bought nothing here
+    - The `load_summem` cache makes fixture scope unobservable, which turns the scope assertion into a change-detector and leaves the cache itself untested
+

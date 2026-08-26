@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: tox-speedup
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (FAIL)
 
 ## What Was Done
 - Session-scoped `summem` fixture in `tests/conftest.py`; `load_summem` caches on `sys.modules["summem"]`.
@@ -29,4 +29,4 @@
 - Pytest 9 fixture objects expose `_fixture_function_marker`, not `_pytestfixturefunction`.
 
 ## Next Step
-- QA review.
+- QA FAILED. Build reruns for two blocking findings (see `.qa-validation-status`): remove `tox.ini` `--basetemp` and its lock test; replace the fixture-scope marker assertion with a behavioral test of the load-once cache.
