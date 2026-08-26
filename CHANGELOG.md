@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.8.0](https://github.com/Texarkanine/SumMem/compare/v0.7.0...v0.8.0) (2026-08-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* Nap pair filenames are five-part (`{seq}-{leafset}-{grain}-{variant}`), not four-part. Unmigrated four-part files are invisible to wake, zoom, and recall. After copying the new script, rewrite existing complete pairs (including nested `.summem` stores). Do not `mv` by hand — the variant tag is a digest of the on-disk pair bytes. From a clone of this repository, with Python 3.11+, run `migrate.py` against the target git root as cwd (the script loads its sibling `summem`):
+
+### Features
+
+* **catalog:** enumerate stores with one git ls-files ([#54](https://github.com/Texarkanine/SumMem/issues/54)) ([ebb2583](https://github.com/Texarkanine/SumMem/commit/ebb25833c457be9e513ab05de334c2419fe995e6))
+* drop dataclasses and lazy-import command-only modules ([#57](https://github.com/Texarkanine/SumMem/issues/57)) ([044d4cd](https://github.com/Texarkanine/SumMem/commit/044d4cd8d24cffb60203d665fc6d87d93aa7e047))
+* five-part nap stems so same-block folds merge [[#61](https://github.com/Texarkanine/SumMem/issues/61)] ([#62](https://github.com/Texarkanine/SumMem/issues/62)) ([30b8293](https://github.com/Texarkanine/SumMem/commit/30b82938b6d72ae60d9b7b1400be44ee4ae647f2))
+* **heal:** walk raw tree JSON for overlap checks ([#56](https://github.com/Texarkanine/SumMem/issues/56)) ([e2d50a4](https://github.com/Texarkanine/SumMem/commit/e2d50a4e4c6c1019dfa34bfeed802e9610df3b38))
+
+
+### Bug Fixes
+
+* **perf:** unique-prefix once and parse each view tree once ([#55](https://github.com/Texarkanine/SumMem/issues/55)) ([f5bd927](https://github.com/Texarkanine/SumMem/commit/f5bd92763adb3591a90b8e0fbf60397b5972326c))
+* **wake:** never drop view nodes to fit WAKE_LINES ([#60](https://github.com/Texarkanine/SumMem/issues/60)) ([dcc27b8](https://github.com/Texarkanine/SumMem/commit/dcc27b88ed7b5abb1f432d8b1df783697f2c28a3))
+
 ## [0.7.0](https://github.com/Texarkanine/SumMem/compare/v0.6.0...v0.7.0) (2026-08-25)
 
 
