@@ -116,4 +116,9 @@ Shorten stored nap leaf-set ids to 16 hex; grow `migrate.py` so one pass rewrite
 * Insights
     - Mixing 16-hex view ids with leftover 64-hex nested ids is a `resolve_id` prefix bug, not a display bug. Filename-only truncate is that bug.
 
+## 2026-08-26 - ARCHIVE - STARTING
+
+* Work completed
+    - Operator reported PR #68 review clean (no findings, including CodeRabbit). Leaving REFLECT for archive.
+
 
