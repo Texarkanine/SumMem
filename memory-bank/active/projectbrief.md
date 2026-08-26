@@ -22,7 +22,7 @@ An operator upgrades a repository that still has four-part nap stems. They run t
 
 1. Implement [issue #61](https://github.com/Texarkanine/SumMem/issues/61) as specified: five-part nap stem `{seq-prefix}-{leaf-set id}-{grain}-{variant tag}`, variant tag = first 16 hex of SHA-256 over domain tag + length-prefixed tree bytes + caption bytes.
 2. `write_nap` and `rematerialize_child` share one stem constructor. Bytes hashed are bytes written.
-3. `_parse_nap_stem` accepts legacy four-part stems and new five-part stems. New folds and rematerialized nested naps always use five-part stems.
+3. `_parse_nap_stem` accepts five-part stems only. `migrate.py` is the only four-part reader. New folds and rematerialized nested naps always use five-part stems.
 4. Public commands (`note`, `wake`, `nap`, `zoom`, `recall`) and leaf-set identity are unchanged. Variant tag is not shown to agents and is not accepted by `nap` or `zoom`.
 5. Sequence prefix stays the inherited leftmost-note `{timestamp}-{random}` byte-for-byte. Variant tag is a same-block arbitrary tie-break, not preference.
 6. After merge, `heal_view` drops equal-leaf-set variants by existing overlap (`<=`); survivor is the lexicographically greatest complete stem. Wake stays read-only.
@@ -49,7 +49,7 @@ An operator upgrades a repository that still has four-part nap stems. They run t
 7. Triple-worker 1→2→4: zero `.summem/` conflicts; next mutation heals to one internally consistent pack; all four notes remain zoomable.
 8. Distinct chronological positions keep inherited sequence-prefix order; variants of one logical block are adjacent and ordered only by variant tag.
 9. Splitting and re-emitting a nested new-format nap reconstructs byte-identical paths; repeat is idempotent.
-10. Four-part stems still wake/zoom/recall; rematerialized legacy children use new stems.
+10. Unmigrated four-part stems are not view nodes (wake/zoom/recall do not see them). Rematerialized children still use five-part stems. `migrate.py` rewrites complete four-part pairs.
 11. Strict-subset, partial-overlap, odd-arity, and crash-recovery zipper tests remain green.
 12. After merge, heal, commit, and squash, a fresh clone can zoom every original note from the surviving tree.
 13. After the merge scenario, no conflict markers and no `.tree`/`.summ` cross-variant mismatch.

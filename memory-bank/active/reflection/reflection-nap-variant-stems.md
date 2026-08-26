@@ -64,3 +64,7 @@ The plan's delete-`_nap_stem` shape passed preflight and shipped; QA named it th
 
 - Invert or retire tests in the same unit that changes the behavior they pin. "We'll fix that oracle in a later unit" fails the encoding check and, if it slipped through, would strand intermediate commits red.
 - A sibling operator script that loads `summem` by `__file__` needs the same "from a clone of this repository" sentence `surgery.py` already has. An atlas change-surface row is not that sentence.
+
+## Post-reflect operator change
+
+After QA PASS and reflect, the operator dropped dual-read. `_parse_nap_stem` is five-part only; `migrate.py` is the only four-part reader. Draft PR #62 carries the migrate `BREAKING CHANGE:` footer. `child_nap_stem` landed as the post-QA DRY fix the reflection recommended.

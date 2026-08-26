@@ -4,7 +4,7 @@
 * Complexity: Level 3
 * Type: feature (breaking disk-format)
 
-Give nap pairs a five-part stem whose last field is a 16-hex digest of the pair bytes, so concurrent same-block folds merge as distinct paths. Git union, then the existing zipper drops all but one equal-leaf-set variant on the next `note`/`nap`. Dual-read four-part stems. Ship sibling `migrate.py` to rename complete legacy pairs. Spec: [issue #61](https://github.com/Texarkanine/SumMem/issues/61). Migration home: `memory-bank/active/creative/creative-nap-stem-migrate.md`.
+Give nap pairs a five-part stem whose last field is a 16-hex digest of the pair bytes, so concurrent same-block folds merge as distinct paths. Git union, then the existing zipper drops all but one equal-leaf-set variant on the next `note`/`nap`. Clean break: the driver does not dual-read four-part stems. Ship sibling `migrate.py` to rename complete legacy pairs. Spec: [issue #61](https://github.com/Texarkanine/SumMem/issues/61). Migration home: `memory-bank/active/creative/creative-nap-stem-migrate.md`.
 
 ## Pinned Info
 

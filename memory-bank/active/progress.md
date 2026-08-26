@@ -124,3 +124,14 @@ Give naps a five-part stem with a pair-bytes variant tag so concurrent same-bloc
 * Insights
     - The ls-files `.summem/` branch was adding the root a second time whenever `is_store(root)` was already true, and was the only way a missing working-tree store could appear in the list.
 
+## 2026-08-25 - PR + CLEAN BREAK
+
+* Work completed
+    - Opened draft [PR #62](https://github.com/Texarkanine/SumMem/pull/62) with a `BREAKING CHANGE:` footer (clone-of-this-repo `migrate.py` against the target git root as cwd).
+    - Operator dropped dual-read: `_parse_nap_stem` is five-part only; `migrate.py._four_part_stem` recognizes old names. Atlas and PR body say unmigrated four-part files are invisible.
+    - `tox` py311–py314: 349 passed after the clean break.
+* Decisions made
+    - Happy-path migrate is a full rewrite of complete pairs. Incomplete pairs stay four-part, invisible, and fail migrate with exit 1. No driver cushion.
+* Insights
+    - Dual-read was a skip-migrate cushion, not a migrate gap. The operator's 0.x consumer set does not need it.
+
