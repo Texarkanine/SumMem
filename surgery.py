@@ -142,7 +142,7 @@ def plan_break_out(m, parent, note_name: str) -> list[str]:
                 kid_name = kid.name
                 kid_row = ("note", kid_name, None)
             else:
-                kid_name = m._nap_stem(kid)
+                kid_name, _, _ = m.child_nap_stem(kid)
                 kid_row = ("nap", kid_name, kid.tree)
             if kid_name in seen:
                 continue

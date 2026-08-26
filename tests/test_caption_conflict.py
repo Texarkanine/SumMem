@@ -23,7 +23,7 @@ def _run(args, cwd, check=True):
 
 
 def test_same_pair_two_captions_conflict_only_on_sum(tmp_path, monkeypatch):
-    """Two nappers of the same pair conflict on .summ only; both resolutions wake and zoom."""
+    """Two nappers of the same pair merge as distinct paths; wake may show two same-id rows."""
     m = load_summem()
     monkeypatch.setattr(m, "WAKE_LINES", 1)
     main = init_repo(tmp_path / "main")
@@ -50,26 +50,19 @@ def test_same_pair_two_captions_conflict_only_on_sum(tmp_path, monkeypatch):
     nap_and_commit(wt_b, "theirs caption")
 
     merged = _run(["git", "merge", "--no-edit", "nap-b"], wt_a, check=False)
-    assert merged.returncode != 0
+    assert merged.returncode == 0
     unmerged = _run(["git", "diff", "--name-only", "--diff-filter=U"], wt_a)
     names = [line for line in unmerged.stdout.decode("utf-8").splitlines() if line]
-    assert names
-    assert all(name.endswith(".summ") for name in names)
-    assert not any(name.endswith(".tree") for name in names)
-    sumfile = names[0]
-
-    def check_resolution(which, expected, forbidden):
-        _run(["git", "checkout", f"--{which}", "--", sumfile], wt_a)
-        wake_out = m.wake_text(wt_a)
-        assert expected in wake_out
-        assert forbidden not in wake_out
-        nap_id = m.list_view(wt_a)[0].id
-        zoom_out = _run([sys.executable, str(SCRIPT), "zoom", nap_id], wt_a).stdout.decode("utf-8")
-        assert "alpha" in zoom_out
-        assert "beta" in zoom_out
-
-    check_resolution("ours", "ours caption", "theirs caption")
-    check_resolution("theirs", "theirs caption", "ours caption")
+    assert names == []
+    naps = [node for node in m.list_view(wt_a) if node.kind == "nap"]
+    assert len(naps) == 2
+    assert naps[0].id == naps[1].id
+    wake_out = m.wake_text(wt_a)
+    assert "ours caption" in wake_out
+    assert "theirs caption" in wake_out
+    zoom_out = _run([sys.executable, str(SCRIPT), "zoom", naps[0].id], wt_a).stdout.decode("utf-8")
+    assert "alpha" in zoom_out
+    assert "beta" in zoom_out
 
 
 def test_planted_conflict_markers_wake_skips_caption_zoom_prints_leaves(tmp_path, monkeypatch):

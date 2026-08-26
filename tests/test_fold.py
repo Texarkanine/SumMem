@@ -46,18 +46,52 @@ def _equal_grain_pair(nodes):
 
 
 def test_nap_stem_inherits_left_child_seq_prefix(tmp_path):
-    """Nap stem is {left.stamp}-{left.rand}-{leafset}-2 from the left child's filename."""
+    """Nap stem inherits the left child's {stamp}-{rand} and ends with the pair digest."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     pa = m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     pb = m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
     leafset = m.leafset_id([m.note_digest(pa.read_bytes()), m.note_digest(pb.read_bytes())])
+    tree = m.Tree(
+        kids=[
+            m.NoteChild(name=pa.name, text="alpha"),
+            m.NoteChild(name=pb.name, text="beta"),
+        ]
+    )
+    tree_bytes = m.dumps_tree(tree)
+    caption_bytes = m.note_file_bytes("pair")
+    stem = m.nap_stem(pa.name, leafset, 2, tree_bytes, caption_bytes)
     nodes = m.list_view(repo)
     m.write_nap(repo, nodes[0].id, nodes[1].id, "pair")
-    stem = f"{pa.name}-{leafset}-2"
     naps = repo / ".summem" / "naps"
     assert (naps / f"{stem}.summ").is_file()
     assert (naps / f"{stem}.tree").is_file()
+    parsed = m._parse_nap_stem(stem)
+    assert parsed is not None
+    stamp, rand, got_leafset, grain, tag = parsed
+    assert f"{stamp}-{rand}" == pa.name
+    assert got_leafset == leafset
+    assert grain == 2
+    assert tag == m.variant_tag(tree_bytes, caption_bytes)
+
+
+def test_write_nap_serializes_tree_once(tmp_path, monkeypatch):
+    """write_nap calls dumps_tree once for a two-note fold."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    orig = m.dumps_tree
+    calls = {"n": 0}
+
+    def wrapped(tree):
+        calls["n"] += 1
+        return orig(tree)
+
+    monkeypatch.setattr(m, "dumps_tree", wrapped)
+    nodes = m.list_view(repo)
+    m.write_nap(repo, nodes[0].id, nodes[1].id, "pair")
+    assert calls["n"] == 1
 
 
 def test_same_second_nap_stays_in_left_slot(tmp_path):

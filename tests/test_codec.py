@@ -154,3 +154,107 @@ def test_loads_tree_rejects_unknown_type():
     )
     with pytest.raises(ValueError):
         m.loads_tree(raw)
+
+
+def test_variant_tag_is_16_lowercase_hex():
+    """
+    variant_tag returns 16 lowercase hex characters for a pair of buffers.
+    Identical inputs match. The digest is SHA-256 of the domain tag plus
+    length-prefixed tree bytes and caption bytes, truncated to 16 hex.
+    """
+    m = load_summem()
+    tree_bytes = b'{"c":[]}\n'
+    caption_bytes = b"pair\n"
+    tag = m.variant_tag(tree_bytes, caption_bytes)
+    payload = (
+        b"SumMem nap pair v1\0"
+        + len(tree_bytes).to_bytes(8, "big")
+        + tree_bytes
+        + len(caption_bytes).to_bytes(8, "big")
+        + caption_bytes
+    )
+    expected = hashlib.sha256(payload).hexdigest()[:16]
+    assert tag == expected
+    assert len(tag) == 16
+    assert all(c in "0123456789abcdef" for c in tag)
+    assert m.variant_tag(tree_bytes, caption_bytes) == tag
+
+
+def test_variant_tag_changes_with_caption_or_tree():
+    """Same tree with a different caption, or same caption with a different tree, yields a different tag."""
+    m = load_summem()
+    tree_a = b'{"c":[{"name":"n1","text":"alpha","type":"note"}]}\n'
+    tree_b = b'{"c":[{"name":"n1","text":"beta","type":"note"}]}\n'
+    cap_a = b"one\n"
+    cap_b = b"two\n"
+    assert m.variant_tag(tree_a, cap_a) != m.variant_tag(tree_a, cap_b)
+    assert m.variant_tag(tree_a, cap_a) != m.variant_tag(tree_b, cap_a)
+
+
+def test_variant_tag_length_prefixes_are_unambiguous():
+    """Length prefixes keep b'ab'+b'c' from matching b'a'+b'bc'."""
+    m = load_summem()
+    assert m.variant_tag(b"ab", b"c") != m.variant_tag(b"a", b"bc")
+
+
+def test_nap_stem_is_five_part():
+    """nap_stem is {seq}-{leafset}-{grain}-{tag} and tag equals variant_tag of those bytes."""
+    m = load_summem()
+    seq = "20260101T000000Z-" + "a" * 16
+    leafset = "b" * 64
+    grain = 2
+    tree_bytes = b'{"c":[]}\n'
+    caption_bytes = b"pair\n"
+    stem = m.nap_stem(seq, leafset, grain, tree_bytes, caption_bytes)
+    tag = m.variant_tag(tree_bytes, caption_bytes)
+    assert stem == f"{seq}-{leafset}-{grain}-{tag}"
+    parsed = m._parse_nap_stem(stem)
+    assert parsed is not None
+    stamp, rand, got_leafset, got_grain, got_tag = parsed
+    assert f"{stamp}-{rand}" == seq
+    assert got_leafset == leafset
+    assert got_grain == grain
+    assert got_tag == tag
+
+
+def test_parse_nap_stem_five_part_only():
+    """Five-part stems parse; four-part stems are not view names."""
+    m = load_summem()
+    stamp = "20260101T000000Z"
+    rand = "a" * 16
+    leafset = "b" * 64
+    four = f"{stamp}-{rand}-{leafset}-2"
+    five = f"{four}-{'c' * 16}"
+    assert m._parse_nap_stem(four) is None
+    assert m._parse_nap_stem(five) == (stamp, rand, leafset, 2, "c" * 16)
+
+
+def test_parse_nap_stem_rejects_bad_shape():
+    """3-part, 6-part, non-hex variant, and non-digit grain stems parse as None."""
+    m = load_summem()
+    stamp = "20260101T000000Z"
+    rand = "a" * 16
+    leafset = "b" * 64
+    four = f"{stamp}-{rand}-{leafset}-2"
+    five = f"{four}-{'c' * 16}"
+    three = f"{stamp}-{rand}-{leafset}"
+    six = f"{five}-{'d' * 16}"
+    non_hex = f"{four}-{'g' * 16}"
+    non_digit = f"{stamp}-{rand}-{leafset}-xx-{'c' * 16}"
+    assert m._parse_nap_stem(three) is None
+    assert m._parse_nap_stem(six) is None
+    assert m._parse_nap_stem(non_hex) is None
+    assert m._parse_nap_stem(non_digit) is None
+
+
+def test_child_nap_stem_returns_stem_and_pair_bytes():
+    """child_nap_stem serializes the NapChild once and names it with nap_stem."""
+    m = load_summem()
+    left = m.NoteChild(name="20260101T000001Z-" + "a" * 16, text="alpha")
+    right = m.NoteChild(name="20260101T000002Z-" + "b" * 16, text="beta")
+    tree = m.Tree(kids=[left, right])
+    child = m.NapChild(id="c" * 64, sum="pair", tree=tree)
+    stem, tree_bytes, caption_bytes = m.child_nap_stem(child)
+    assert tree_bytes == m.dumps_tree(tree)
+    assert caption_bytes == m.note_file_bytes("pair")
+    assert stem == m.nap_stem(left.name, child.id, 2, tree_bytes, caption_bytes)

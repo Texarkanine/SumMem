@@ -239,6 +239,29 @@ def test_excise_does_not_call_write_nap(tmp_path, monkeypatch):
     assert not reaches(m, repo, secret)
 
 
+def test_plan_break_out_kid_stem_is_rematerialize_dest(tmp_path):
+    """The nested nap stem plan_break_out predicts is the dest rematerialize_child writes."""
+    s = load_surgery()
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    secret = "sentinel-stem-pin-secret-qq11"
+    paths, parent = _balanced_4(
+        m, repo, [secret, "keep-b", "keep-c", "keep-d"], "ab", "cd", "abcd", start=1
+    )
+    inner = m.loads_tree(parent.tree_path.read_bytes())
+    chain = s.plan_break_out(m, repo, paths[0].name)
+    assert chain[0] == parent.name
+    kid = next(
+        k
+        for k in inner.kids
+        if isinstance(k, m.NapChild) and any(n.text == secret for n in m._note_children(k.tree))
+    )
+    m.rematerialize_child(repo, kid)
+    naps = repo / ".summem" / "naps"
+    assert (naps / f"{chain[1]}.tree").is_file()
+    assert (naps / f"{chain[1]}.summ").is_file()
+
+
 def test_dry_run_prints_chain_and_writes_nothing(tmp_path):
     """Dry-run returns the rematerialize chain and does not change store bytes."""
     s = load_surgery()

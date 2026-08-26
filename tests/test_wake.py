@@ -171,7 +171,7 @@ def test_wake_missing_sum_prints_id_and_grain_without_caption(tmp_path, monkeypa
     ids = [node.id for node in m.list_view(repo)]
     m.write_nap(repo, ids[0], ids[1], "pair")
     sums = list((repo / ".summem" / "naps").glob("*.summ"))
-    leafset = sums[0].name.split("-")[-2]
+    leafset = m._parse_nap_stem(sums[0].stem)[2]
     sums[0].unlink()
     monkeypatch.setattr(m, "WAKE_LINES", 1)
     out = m.wake_text(repo)
@@ -189,13 +189,38 @@ def test_wake_conflict_sum_omits_caption(tmp_path, monkeypatch):
     ids = [node.id for node in m.list_view(repo)]
     m.write_nap(repo, ids[0], ids[1], "pair")
     sums = list((repo / ".summem" / "naps").glob("*.summ"))
-    leafset = sums[0].name.split("-")[-2]
+    leafset = m._parse_nap_stem(sums[0].stem)[2]
     sums[0].write_text("<<<<<<< HEAD\npair\n=======\nother\n>>>>>>>\n", encoding="utf-8")
     monkeypatch.setattr(m, "WAKE_LINES", 1)
     out = m.wake_text(repo)
     prefix = m.short_id(leafset, [leafset])
     assert out == f"x2 {prefix}:\n"
     assert "pair" not in out
+
+
+def test_wake_pack_line_uses_leafset_prefix_not_variant_tag(tmp_path, monkeypatch):
+    """A five-part nap's wake line uses a prefix of the leaf-set id, not the variant tag."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    nap = m.list_view(repo)[0]
+    parsed = m._parse_nap_stem(nap.name)
+    assert parsed is not None
+    _stamp, _rand, leafset, _grain, tag = parsed
+    assert tag
+    monkeypatch.setattr(m, "WAKE_LINES", 1)
+    out = m.wake_text(repo)
+    prefix = m.short_id(leafset, [leafset])
+    assert out == f"x2 {prefix}: pair\n"
+    assert tag not in out
+    with pytest.raises(ValueError, match="unknown id"):
+        m.zoom_text(repo, tag)
+    named = m.named_ids(repo)
+    with pytest.raises(ValueError, match="unknown id"):
+        m.resolve_id(tag, named)
 
 
 def test_wake_does_not_call_loads_tree(tmp_path, monkeypatch):

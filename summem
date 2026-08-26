@@ -343,37 +343,44 @@ def knobs(parent):
         return defaults
 
 
-def catalog_text(git_root, resolved_parent) -> str:
-    """Return root-wake catalog of other started stores, or empty."""
+def started_stores(git_root) -> list[Path]:
+    """Return git-root (if a store) plus parents of other git-visible `/.summem/` trees."""
     import subprocess
 
     root = Path(git_root).resolve()
-    if Path(resolved_parent).resolve() != root:
-        return ""
+    found: set[Path] = set()
+    if is_store(root):
+        found.add(root)
     result = subprocess.run(
         ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
         cwd=root,
         capture_output=True,
     )
     if result.returncode != 0:
-        return ""
-    found: set[Path] = set()
+        return sorted(found)
     for raw in result.stdout.split(b"\0"):
         if not raw:
             continue
         rel = raw.decode("utf-8", "surrogateescape")
         posix = Path(rel).as_posix()
-        if posix == ".summem" or posix.startswith(".summem/"):
-            continue
         marker = "/.summem/"
         idx = posix.find(marker)
         if idx < 0:
             continue
         found.add(root / posix[:idx])
-    if not found:
+    return sorted(found)
+
+
+def catalog_text(git_root, resolved_parent) -> str:
+    """Return root-wake catalog of other started stores, or empty."""
+    root = Path(git_root).resolve()
+    if Path(resolved_parent).resolve() != root:
+        return ""
+    others = [parent for parent in started_stores(root) if parent != root]
+    if not others:
         return ""
     lines = ["== Additional SumMem Catalogs =="]
-    for parent in sorted(found):
+    for parent in others:
         rel = parent.relative_to(root).as_posix()
         lines.append(f"./{rel}")
     return "\n".join(lines) + "\n"
@@ -400,21 +407,63 @@ def _replace_bytes(dest: Path, data: bytes) -> None:
     os.replace(tmp, dest)
 
 
+def _write_pair(naps_dir, stem, tree_bytes, caption_bytes) -> None:
+    """Temp-replace `{stem}.tree` then `{stem}.summ` with the hashed buffers."""
+    _replace_bytes(naps_dir / f"{stem}.tree", tree_bytes)
+    _replace_bytes(naps_dir / f"{stem}.summ", caption_bytes)
+
+
 def _seq_prefix(name: str) -> str:
     """Return the {stamp}-{rand} order key from a note or nap filename."""
     return "-".join(name.split("-")[:2])
 
 
-def _parse_nap_stem(stem: str) -> tuple[str, str, str, int] | None:
+def variant_tag(tree_bytes: bytes, caption_bytes: bytes) -> str:
+    """Return the 16-hex pair digest used as a nap-stem variant tag."""
+    payload = (
+        b"SumMem nap pair v1\0"
+        + len(tree_bytes).to_bytes(8, "big")
+        + tree_bytes
+        + len(caption_bytes).to_bytes(8, "big")
+        + caption_bytes
+    )
+    return hashlib.sha256(payload).hexdigest()[:16]
+
+
+def nap_stem(
+    seq_prefix: str,
+    leafset: str,
+    grain: int,
+    tree_bytes: bytes,
+    caption_bytes: bytes,
+) -> str:
+    """Return `{seq}-{leafset}-{grain}-{variant_tag}` for a nap pair."""
+    tag = variant_tag(tree_bytes, caption_bytes)
+    return f"{seq_prefix}-{leafset}-{grain}-{tag}"
+
+
+def child_nap_stem(child: NapChild) -> tuple[str, bytes, bytes]:
+    """Return ``(stem, tree_bytes, caption_bytes)`` for *child*'s nap pair."""
+    leftmost = next(_note_children(child.tree))
+    leaves = len(_digests_of_tree(child.tree))
+    tree_bytes = dumps_tree(child.tree)
+    caption_bytes = note_file_bytes(child.sum)
+    stem = nap_stem(_seq_prefix(leftmost.name), child.id, leaves, tree_bytes, caption_bytes)
+    return stem, tree_bytes, caption_bytes
+
+
+def _parse_nap_stem(stem: str) -> tuple[str, str, str, int, str] | None:
     parts = stem.split("-")
-    if len(parts) != 4:
+    if len(parts) != 5:
         return None
-    stamp, rand, leafset, leaves_s = parts
-    if len(stamp) != 16 or len(rand) != 16 or len(leafset) != 64 or not leaves_s.isdigit():
+    stamp, rand, leafset, leaves_s, variant = parts
+    if len(stamp) != 16 or len(rand) != 16 or len(leafset) != 64 or len(variant) != 16:
         return None
-    if any(c not in "0123456789abcdef" for c in rand + leafset):
+    if not leaves_s.isdigit():
         return None
-    return stamp, rand, leafset, int(leaves_s)
+    if any(c not in "0123456789abcdef" for c in rand + leafset + variant):
+        return None
+    return stamp, rand, leafset, int(leaves_s), variant
 
 
 def _nap_caption(sum_path: Path | None) -> str:
@@ -470,7 +519,7 @@ def list_view(parent) -> list[ViewNode]:
         parsed = _parse_nap_stem(stem)
         if parsed is None:
             continue
-        stamp, _, leafset, leaves = parsed
+        stamp, _, leafset, leaves, _variant = parsed
         sum_path = files.get(".summ")
         tree_path = files.get(".tree")
         nodes.append(
@@ -544,13 +593,6 @@ def leaf_digests(node: ViewNode) -> set[str] | None:
         return None
 
 
-def _nap_stem(child: NapChild) -> str:
-    """Return `{leftmost-seq}-{child.id}-{leaves}` for a rematerialized NapChild."""
-    leftmost = next(_note_children(child.tree))
-    leaves = len(_digests_of_tree(child.tree))
-    return f"{_seq_prefix(leftmost.name)}-{child.id}-{leaves}"
-
-
 def rematerialize_child(parent, child: NoteChild | NapChild) -> None:
     """Copy *child* bytes into the store without overwriting an existing dest."""
     store = ensure_store(parent)
@@ -560,14 +602,13 @@ def rematerialize_child(parent, child: NoteChild | NapChild) -> None:
             return
         _replace_bytes(dest, note_file_bytes(child.text))
         return
-    stem = _nap_stem(child)
+    stem, tree_bytes, caption_bytes = child_nap_stem(child)
     naps = store / "naps"
     tree_path = naps / f"{stem}.tree"
     sum_path = naps / f"{stem}.summ"
-    if not tree_path.exists():
-        _replace_bytes(tree_path, dumps_tree(child.tree))
-    if not sum_path.exists():
-        _replace_bytes(sum_path, note_file_bytes(child.sum))
+    if tree_path.exists() and sum_path.exists():
+        return
+    _write_pair(naps, stem, tree_bytes, caption_bytes)
 
 
 def _first_overlap(
@@ -679,15 +720,14 @@ def write_nap(parent, id_a, id_b, caption, entry_chars: int | None = None, nodes
     digests = digs_l + digs_r
     leafset = leafset_id(digests)
     leaves = len(digests)
-    stem = f"{_seq_prefix(left.name)}-{leafset}-{leaves}"
+    tree_bytes = dumps_tree(tree)
+    caption_bytes = note_file_bytes(caption)
+    stem = nap_stem(_seq_prefix(left.name), leafset, leaves, tree_bytes, caption_bytes)
     naps = ensure_store(parent) / "naps"
-    tree_path = naps / f"{stem}.tree"
-    sum_path = naps / f"{stem}.summ"
-    _replace_bytes(tree_path, dumps_tree(tree))
-    _replace_bytes(sum_path, note_file_bytes(caption))
+    _write_pair(naps, stem, tree_bytes, caption_bytes)
     _unlink_node(left)
     _unlink_node(right)
-    return sum_path
+    return naps / f"{stem}.summ"
 
 
 def _zoom_kids(tree: Tree, ids, child_rows: list[ProjectedNode | None] | None = None) -> str:

@@ -27,7 +27,7 @@ def test_view_includes_nap_stem_when_sum_is_missing(tmp_path):
     naps = repo / ".summem" / "naps"
     sums = list(naps.glob("*.summ"))
     assert len(sums) == 1
-    leafset = sums[0].name.split("-")[-2]
+    leafset = m._parse_nap_stem(sums[0].stem)[2]
     sums[0].unlink()
     nodes = m.list_view(repo)
     assert len(nodes) == 1
@@ -58,7 +58,7 @@ def test_view_includes_nap_stem_when_sum_has_conflict_markers(tmp_path):
     repo = init_repo(tmp_path / "r")
     _nap_two(m, repo)
     sums = list((repo / ".summem" / "naps").glob("*.summ"))
-    leafset = sums[0].name.split("-")[-2]
+    leafset = m._parse_nap_stem(sums[0].stem)[2]
     sums[0].write_text("<<<<<<< HEAD\npair\n=======\nother\n>>>>>>>\n", encoding="utf-8")
     nodes = m.list_view(repo)
     assert len(nodes) == 1
