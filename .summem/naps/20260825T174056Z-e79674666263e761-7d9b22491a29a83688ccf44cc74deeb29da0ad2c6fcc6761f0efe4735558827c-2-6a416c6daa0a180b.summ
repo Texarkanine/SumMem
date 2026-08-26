@@ -1,1 +1,0 @@
-SLOBAC 2026-08-25 audit (284 tests) found 63 smells; ratchet applied. Proofs stay as file-backend acceptance; the 3.11-floor pin stays because CI has no 3.10.

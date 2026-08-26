@@ -1,0 +1,1 @@
+Nap captions are .summ, not .sum; leftover .sum is not a caption. SLOBAC 2026-08-25 ratchet applied (proofs stay; 3.11 floor because CI has no 3.10). Consumer .sum→.summ find recipe was on PR #47.
