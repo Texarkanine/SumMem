@@ -500,3 +500,15 @@ def test_root_only_wake_labels_nonempty_document(tmp_path, monkeypatch, capsys):
     )
     assert "== Additional SumMem Catalogs ==" not in out
 
+
+def test_started_stores_includes_root_and_other_parents(tmp_path):
+    """started_stores lists the git root store and a cataloged child store."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.ensure_store(repo)
+    pkg = repo / "pkg"
+    m.ensure_store(pkg)
+    stores = {path.resolve() for path in m.started_stores(repo)}
+    assert repo.resolve() in stores
+    assert pkg.resolve() in stores
+

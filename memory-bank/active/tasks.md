@@ -235,13 +235,13 @@ No new technology - validation not required. `hashlib` and `SourceFileLoader` ar
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
 - [x] Preflight
-- [ ] Build
+- [x] Build
   - [x] Unit 1: pair digest, stem constructor, dual-read parse
   - [x] Unit 2: write_nap five-part
   - [x] Unit 3: rematerialize uses nap_stem
   - [x] Unit 4: equal-set heal survivor
   - [x] Unit 5: concurrent union proofs
   - [x] Unit 6: legacy read and rematerialize-from-legacy
-  - [ ] Unit 7: migrate.py
-  - [ ] Unit 8: atlas, patterns, product copy
+  - [x] Unit 7: migrate.py
+  - [x] Unit 8: atlas, patterns, product copy
 - [ ] QA

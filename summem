@@ -343,37 +343,47 @@ def knobs(parent):
         return defaults
 
 
-def catalog_text(git_root, resolved_parent) -> str:
-    """Return root-wake catalog of other started stores, or empty."""
+def started_stores(git_root) -> list[Path]:
+    """Return git-root (if a store) plus parents of other git-visible `/.summem/` trees."""
     import subprocess
 
     root = Path(git_root).resolve()
-    if Path(resolved_parent).resolve() != root:
-        return ""
+    found: set[Path] = set()
+    if is_store(root):
+        found.add(root)
     result = subprocess.run(
         ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
         cwd=root,
         capture_output=True,
     )
     if result.returncode != 0:
-        return ""
-    found: set[Path] = set()
+        return sorted(found)
     for raw in result.stdout.split(b"\0"):
         if not raw:
             continue
         rel = raw.decode("utf-8", "surrogateescape")
         posix = Path(rel).as_posix()
         if posix == ".summem" or posix.startswith(".summem/"):
+            found.add(root)
             continue
         marker = "/.summem/"
         idx = posix.find(marker)
         if idx < 0:
             continue
         found.add(root / posix[:idx])
-    if not found:
+    return sorted(found)
+
+
+def catalog_text(git_root, resolved_parent) -> str:
+    """Return root-wake catalog of other started stores, or empty."""
+    root = Path(git_root).resolve()
+    if Path(resolved_parent).resolve() != root:
+        return ""
+    others = [parent for parent in started_stores(root) if parent != root]
+    if not others:
         return ""
     lines = ["== Additional SumMem Catalogs =="]
-    for parent in sorted(found):
+    for parent in others:
         rel = parent.relative_to(root).as_posix()
         lines.append(f"./{rel}")
     return "\n".join(lines) + "\n"

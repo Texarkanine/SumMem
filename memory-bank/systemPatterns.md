@@ -41,7 +41,7 @@ Walk up. Do not parse workspace manifests. Do not create a store because someone
 
 ## Ingest commutes; naps are content-addressed
 
-Two notes are two paths. There is no next id and no shared index. A nap's identity is a digest of the leaves, never of the summary sentence. The same two loose notes produce the same id and the same payload bytes; different wording produces the same id and a different caption. Nested captions and grouping are part of the payload, so the same leaf set can dump to different bytes.
+Two notes are two paths. There is no next id and no shared index. A nap's identity is a digest of the leaves, never of the summary sentence. The same two loose notes produce the same id and the same payload bytes; different wording produces the same id, a different caption, and a different filename. Git unions those paths. Nested captions and grouping are part of the payload, so the same leaf set can dump to different bytes.
 
 ## Sequence is in the filename
 
@@ -51,9 +51,9 @@ Note names carry writer time in UTC. Nap names carry the leftmost child's `{stam
 
 A range such as `#16-31` is a picture of one listing and a lie after the next merge. Wake prints `x1 YYYY-MM-DD: text` for a note. The day is the UTC calendar date of the filename stamp, not note prose. Packs print `xN <prefix>: caption` with no date. `nap` and `zoom` accept the unique prefix of a content id they can already name; a leaf line is not a zoom target. A command that looks like a range is rejected. Filenames and `.tree` identity stay 64 hex. Wake, recall hits, and zoom children share that grammar. Recall searches the sentence (note text / nap caption), not the formatted line. Proofs walk `Tree.kids` for nested pack ids; they do not parse zoom stdout. A content id names leaves, not a unique view row: two notes with the same text share an id, and adjacency must keep both. Prefix uniqueness is among distinct ids, not view-row count; a repeated id is still that one prefix. Recall and zoom unique-prefix against `named_ids`, which can print a longer prefix than wake for the same view pack.
 
-## Payloads are write-once; captions are the honest conflict
+## Payloads are write-once; same-block naps union then zipper
 
-Fold writes a new pair. Children leave the view only after the parent payload exists on disk. Zoom is a property of `HEAD`: every sentence still owed lives in a file at the tip. Conflict markers in a caption mean skip that caption. Conflict markers in a payload are the failure the canonical dump exists to avoid.
+Fold writes a new pair. Children leave the view only after the parent payload exists on disk. Zoom is a property of `HEAD`: every sentence still owed lives in a file at the tip. Different pair bytes are different paths; git unions them. Wake may print two same-id rows until the next `note` or `nap`. Equal leaf-sets collapse to the lexicographically greatest complete stem. `.tree` and `.summ` stay one atomic variant pair. Conflict markers in a caption mean skip that caption. Conflict markers in a payload are the failure the canonical dump exists to avoid.
 
 ## Wake is wait-free
 

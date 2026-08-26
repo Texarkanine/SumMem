@@ -77,3 +77,15 @@ Give naps a five-part stem with a pair-bytes variant tag so concurrent same-bloc
     - Follow the eight-unit plan in order. Dry-run on `migrate.py` stays out of this build: it was an advisory, not a planned unit, and would need its own tests.
 * Insights
     - Creative decision is still sibling `migrate.py`; hash on-disk bytes, never re-dump.
+
+## 2026-08-25 - BUILD - COMPLETE
+
+* Work completed
+    - Eight plan units: five-part constructor, `write_nap`/`rematerialize` share `_write_pair`, heal survivor pins, union/heal/squash proofs, dual-read legacy, `migrate.py` plus dogfood rewrite, atlas/patterns/product copy.
+    - `tox` py311–py314: 346 passed.
+* Decisions made
+    - Dry-run on `migrate.py` stayed out: advisory only, would have needed its own tests.
+    - Heal production code unchanged; existing `<=` plus filename sort already unlinks the lex-smaller equal set.
+* Insights
+    - Caption-conflict inversion in unit 2 let units 2–4 stay green. Same-block twins are transient view rows, not a git conflict.
+
