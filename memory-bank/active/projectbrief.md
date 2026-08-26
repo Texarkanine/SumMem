@@ -29,7 +29,7 @@ As specified in [SumMem #67](https://github.com/Texarkanine/SumMem/issues/67):
 5. `migrate.py` one pass consumes whichever old form it finds: 4-part 64-hex and 5-part 64-hex become 5-part 16-hex (rewrite nested tree ids 64→16, recompute `variant_tag`); 5-part 16-hex left alone; incomplete pair prints and exits 1; dest already exists skips silently.
 6. Filename-only truncate is not enough: truncate every stored leaf-set id, including JSON `id` fields, so `list_view` and `_index_tree` agree.
 7. `migrate.py` remains the only old-stem reader (sibling script, not a `summem` verb, no `__version__`).
-8. Atlas, `systemPatterns.md` (“Filenames and `.tree` identity stay 64 hex”), and the #61 path-length “do not shorten” sentence update to 16 hex stored / unique-prefix displayed.
+8. Atlas (`docs/architecture/index.md`: Identity “Stored names keep the full id”; Zoom “64-hex stays on disk”; Naps naming; change-surfaces migrate row), `systemPatterns.md` (“Filenames and `.tree` identity stay 64 hex”), and the README on-disk walkthrough (64-hex leaf-set in the pair basename) update to 16 hex stored / unique-prefix displayed. There is no #61 “do not shorten” sentence in-tree; issue #67’s path-length note is the decision, not a doc to delete.
 9. This clone's root and `dogfood` stores are rewritten in the same change.
 10. Wake / nap / zoom / recall still address by unique prefix of the (now 16-hex) leaf-set field. `short_id` floor 8 unchanged.
 
@@ -46,5 +46,5 @@ As specified in [SumMem #67](https://github.com/Texarkanine/SumMem/issues/67):
 3. `migrate.py` converts complete 4-part and 5-part-64 pairs to 5-part-16 as specified; second run is a no-op; `--path` and default-all-started-stores unchanged.
 4. This clone's root and `dogfood` stores are rewritten in the same change.
 5. Wake / nap / zoom / recall still address by unique prefix of the (now 16-hex) leaf-set field. Agents never see or type the variant tag.
-6. Atlas, `systemPatterns.md`, and the #61 path-length sentence update to 16 hex stored / unique-prefix displayed.
+6. Atlas, `systemPatterns.md`, and the README on-disk walkthrough update to 16 hex stored / unique-prefix displayed.
 7. `tox` py311–py314 green.

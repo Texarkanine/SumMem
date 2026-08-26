@@ -1,0 +1,83 @@
+FAIL (fixable)
+
+# Preflight - 16-hex-leafset
+
+Three fixable plan defects, four advisories. No blocking redesign: the identity decision (truncate inside `leafset_id`), the dual-source migrate grammar, and the nested-id rewrite all check out against the code.
+
+## FAIL (fixable)
+
+### 1. `README.md` is a canonical document this change falsifies, and unit 3 omits it
+
+`README.md:91-92` print a nap pair basename with a 64-hex leaf-set field inside the on-disk walkthrough:
+
+    dogfood/.summem/naps/20260819T213123Z-5e64febd8268823c-cfbf987aa25d8492e257e0484faa9be9903b3d3e9f74fcb83ed2ca443cada000-2-8f8111f124e6075e.summ
+
+`techContext.md` lists `README.md` as a canonical document, and this walkthrough is the project's front door. Requirement 8 and Acceptance Criterion 6 enumerate only the atlas and `systemPatterns.md`; unit 3's file list is `docs/architecture/index.md` and `memory-bank/systemPatterns.md`. A builder following the plan ships a stale README.
+
+Fix: add `README.md` to unit 3 and a numbered step truncating that field to `cfbf987aa25d8492` in both filenames. The example `.tree` (README:106-121) is note-only, so its bytes do not change and the variant tag `8f8111f124e6075e` stays. Prose artifact; no test owed.
+
+### 2. The "#61 do not shorten the leaf-set id" sentence does not exist
+
+Requirement 8, Acceptance Criterion 6, the Component Analysis Atlas row, and Pre-Mortem item 3 all assert that a #61 path-length sentence saying "do not shorten the leaf-set id" is in the atlas and must be retired. Repo-wide search for `shorten`, `path length`, `path-length`, `NAME_MAX`, `MAX_PATH`, `full id`, and `basename` across `docs/`, `README.md`, `summem`, `memory-bank/systemPatterns.md`, `CHANGELOG.md`, and the #61 archive (`memory-bank/archive/enhancements/20260825-nap-variant-stems.md`) finds nothing of the kind. The nearest real sentence is `docs/architecture/index.md:97` "Stored names keep the full id.", which unit 3 step 1 already covers.
+
+Fix: strike the clause from the Component Analysis Atlas row, drop Pre-Mortem item 3, and drop it from requirement 8 / AC 6 (or restate it as atlas line 97). Nothing to implement.
+
+### 3. Unit 1 leaves `tests/test_migrate.py` red and the plan does not say so
+
+`_legacy_complete_pair` (`tests/test_migrate.py:35-51`) derives its four-part fixture from a live `write_nap` stem via `_parse_nap_stem`. Once `leafset_id` truncates, that fixture is four-part-**16**; `migrate._four_part_stem` (`migrate.py:48`) requires `len(leafset) == 64` and returns `None`; so at the end of unit 1 `test_migrate_renames_four_part_complete_pair`, `test_migrate_skips_incomplete_pair`, `test_migrate_path_leaves_other_store_untouched`, and `test_migrate_default_rewrites_root_and_cataloged_store` fail, and `test_migrate_second_run_is_noop` passes vacuously. Unit 1 step 4's re-run list omits `tests/test_migrate.py` entirely and says "run green".
+
+This is the same failure class the #61 preflight caught (tests scheduled on the wrong side of a red-making change). The unit order itself is fine - unit 2 step 1 replants the fixtures with `hashlib` - but the plan must say so.
+
+Fix: in unit 1 step 4, state that `tests/test_migrate.py` is expected red until unit 2 step 1 and must not be patched in unit 1.
+
+## Advisory
+
+### 4. Unit 4 is labeled "prose/policy"; it is neither
+
+Running `migrate.py` over this repository's committed `.summem/naps` and `dogfood/.summem/naps` is a one-shot data migration of tracked artifacts, not prose or policy. The conclusion (no tests owed) is correct, but the reason is that unit 2 owns the product behavior and unit 4 adds no executable behavior. Relabel; no scope change.
+
+Scale check: the root store holds grain-32, 16, 8, 4, and 4 pairs whose `.tree` files carry hundreds of distinct 64-hex nested `"id"` values; dogfood holds grain-4 and grain-2. Unit 4 is real work, not a formality.
+
+### 5. `_shorten_tree` must recurse, and `summem._replace` already exists for it
+
+The root store's grain-32 pair nests naps several levels deep. A one-level walk of `tree.kids` would leave grandchild ids at 64 hex - exactly the split-width failure Challenge 2 exists to prevent. Unit 2 step 2 says "walking `NapChild` ids"; make the recursion explicit. `summem._replace(obj, **changes)` (`summem:105`) is the existing slot-copy helper; use it rather than reconstructing `NapChild(...)`.
+
+### 6. Acceptance Criterion 7 has no mapped step
+
+AC 7 is "`tox` py311-py314 green". Every unit iterates with `tox -e py311`; no unit ends with `tox run-parallel`. `.cursor/rules/SumMem-testing.mdc` mandates the full matrix at end-of-work regardless, so coverage is not at risk - but the criterion is unmapped. Consider adding it to unit 4.
+
+### 7. `tests/test_wake.py:270` becomes vacuous
+
+`assert all(len(part) != 64 for line in lines for part in line.split())` guarded against wake printing a 64-hex id. After this change nothing on disk or in memory is 64 hex, so it can never fire. `== 16` is the live equivalent. The plan's "adjust length assertions in `tests/test_wake.py`" arguably covers it; worth naming explicitly alongside line 58.
+
+### 8. Radical innovation - make `migrate.py` a content rebuild, not a grammar translator
+
+Every breaking on-disk change so far has grown `migrate.py` a new bespoke source grammar that then lives forever: `.sum` -> `.summ`, four-part -> five-part, and now 64-hex -> 16-hex leaf-set. This plan adds `_old_stem` (two grammars) plus `_shorten_tree` (one width-specific truncation at `len(id) == 64`).
+
+The accretive alternative: stop translating grammars and rebuild identity from content. For each complete `.tree`/`.summ` pair under `naps/`, `loads_tree`, then recompute every id bottom-up from the leaves the subtree actually contains -
+
+    def _rebuild(m, tree):
+        kids = [k if isinstance(k, m.NoteChild)
+                else m._replace(k, tree=_rebuild(m, k.tree),
+                                id=m.leafset_id(m._digests_of_tree(k.tree)))
+                for k in tree.kids]
+        return m.Tree(kids=kids)
+
+- then `dumps_tree` and `nap_stem(_seq_prefix(leftmost.name), m.leafset_id(m._digests_of_tree(new_tree)), len(digests), new_tree_bytes, caption_bytes)`.
+
+That deletes `_old_stem` and `_shorten_tree` outright. The source stem's shape stops mattering - the only question is "is this a complete pair whose `.tree` parses" - so four-part-64, five-part-64, and any future width all convert with zero new code. Stored width lives in exactly one place (`leafset_id`), which is already this plan's central decision. "Second run is a no-op" holds by construction (a correct pair rebuilds to its own name) rather than by an `_old_stem is None` early return, and it self-heals a stem whose leaf-set field disagrees with its tree.
+
+Cost to weigh: it derives identity from content rather than trusting the old filename, so a hand-edited `.tree` would land on a different id than its old name claimed - defensible, but a behavior change from today's "hash the on-disk bytes and rename." It also means migrate touches every pair it can parse, not only old-shaped ones, so the dest-exists and incomplete policies get exercised on stores that are already current. Recorded as advisory only; the plan is not changed.
+
+## Checks that passed
+
+- TDD encoding: units 1 and 2 both order stub tests -> stub interface -> write tests and run red -> write code and run green. No test steps trail their production code. No scheduled change-detectors (every listed behavior asserts on `leafset_id`, `_parse_nap_stem`, `write_nap`, `list_view`, or `migrate.py`, never on a document's contents). Units 3 and 4 owe no tests.
+- Every test name and line the plan cites is real and accurate: `test_wake.py:58` is inside `test_wake_line_is_dated_grain_for_a_note` (the test unit 1 step 3 names); `test_caption_conflict.py:83`; `test_wake_expand.py:182`; `test_codec.py:203/224/236/255`; `test_leafset_id_*`, `test_parse_nap_stem_five_part_only`, `test_parse_nap_stem_rejects_bad_shape`, `test_nap_stem_is_five_part`, `test_child_nap_stem_returns_stem_and_pair_bytes`.
+- Driver side is complete: `summem` contains exactly one `64` literal, `_parse_nap_stem` line 460. Truncating inside `leafset_id` covers `list_view` note ids (line 501), `_index_tree` note ids (line 818), and `write_nap`'s leaf-set (line 721) from one place, and `NapChild.id` flows from the stem through `_as_child`. The plan's rejection of call-site slicing is correct.
+- `surgery.py` needs no change: its only contact is `m.child_nap_stem(kid)` (line 145), no width assumption. The plan's omission is correct, not a gap.
+- The existing four-part tests in `tests/test_nap_variants.py:315-373` keep passing untouched: `_parse_nap_stem` rejects a four-part stem on part count before any length check, so a four-part-16 plant is still invisible.
+- No new stem ambiguity: five-part-16 is `{stamp}-{rand16}-{leafset16}-{grain}-{variant16}`, old five-part-64 has a 64-char field, old four-part has four parts. `_old_stem`'s `len(leafset) == 64` correctly refuses five-part-16.
+- Conventions hold: no new test files, private helpers in `migrate.py` match `_four_part_stem`/`_migrate_store`, migrate stays a sibling script with no `__version__` (`techContext.md`).
+- `CHANGELOG.md:8` needs no edit: it sits in the released 0.8.0 section and Release Please appends. The new `BREAKING CHANGE:` footer required by brief constraint 3 carries the new instructions.
+- Agent-facing text needs no edit: `how_to_text` (`summem:1182`) says `x<N> <hash>:` with no width claim.
+- Migrate oracle is self-consistent: after rewrite, `leafset_id(_digests_of_tree(tree))` equals the stem's `full[:16]` field, so heal and the zipper's stem/tree agreement still hold.

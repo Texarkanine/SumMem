@@ -4,8 +4,8 @@
 **Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Classified Level 3. No open questions: #67 already chose 16 hex, dual-source migrate, nested-id rewrite, and no driver dual-read.
-- Plan decision: truncate inside `leafset_id` so note view ids, nap stems, and `NapChild.id` share one width. Migrate tests plant 64-hex fixtures with `hashlib`, not `write_nap` then strip.
+- Preflight [16-hex](b3553147-eb60-419f-867f-23d3d5c62477) returned FAIL (fixable). Replanned: README walkthrough in unit 3; struck the phantom #61 “do not shorten” sentence; unit 1 names `tests/test_migrate.py` expected-red until unit 2. Also: recursive `_shorten_tree` via `_replace`; unit 4 relabeled data migration + `tox run-parallel`; wake line 270 named.
+- Did not adopt the advisory rebuild-from-content migrate: #67 specifies truncate stored ids, not recompute from leaves.
 
 ## Next Step
-- Preflight phase to validate the plan.
+- Re-run Preflight on the revised plan.

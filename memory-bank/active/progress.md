@@ -27,3 +27,25 @@ Shorten stored nap leaf-set ids to 16 hex; grow `migrate.py` so one pass rewrite
 * Insights
     - Grain-2 note-only trees have no nested nap `id`; the load-bearing rewrite is grain-4+.
     - Heal overlap still hashes note file bytes; that 64-hex layer is not this issue.
+
+## 2026-08-26 - PREFLIGHT - FAIL (fixable)
+
+* Work completed
+    - First preflight (Claude Opus) recorded three fixable defects and four advisories in `memory-bank/active/.preflight-status`.
+* Decisions made
+    - Replan rather than build: README is a canonical document this change falsifies; the #61 “do not shorten” sentence is not in-tree; unit 1 must name `tests/test_migrate.py` as expected-red.
+    - Keep truncate-stored-ids migrate (issue spec). Content-rebuild migrate stays advisory.
+* Insights
+    - Same failure class as #61 preflight: tests scheduled on the wrong side of a red-making change must be named, not omitted from the green list.
+
+## 2026-08-26 - PLAN - COMPLETE
+
+* Work completed
+    - Unit 3 gains `README.md` (truncate walkthrough leaf-set to `cfbf987aa25d8492`; variant unchanged).
+    - Brief req 8 / AC 6 restated to real sentences (atlas “full id”, systemPatterns, README). Phantom #61 clause struck.
+    - Unit 1 step 4: `tests/test_migrate.py` stays red until unit 2; do not patch it in unit 1.
+    - `_shorten_tree` recurses with `m._replace`; unit 4 is data migration plus `tox run-parallel`.
+* Decisions made
+    - Advisories 4–7 folded into the plan because they would fail a second preflight or ship a vacuous test. Advisory 8 (rebuild identity from content) not adopted.
+* Insights
+    - Grain-32 in this clone is why recursion is load-bearing, not only the grain-4 migrate test.

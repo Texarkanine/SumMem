@@ -1,0 +1,1 @@
+Preflight #67: README on-disk walkthrough still shows a 64-hex leaf-set in the pair basename; there is no in-tree #61 do-not-shorten sentence — atlas Identity 'Stored names keep the full id' is the real line.

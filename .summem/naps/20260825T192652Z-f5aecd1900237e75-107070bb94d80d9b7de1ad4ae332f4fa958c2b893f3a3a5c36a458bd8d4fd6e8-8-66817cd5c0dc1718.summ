@@ -1,0 +1,1 @@
+Perf shards: catalog is one git ls-files of .summem/config.toml; recall/zoom unique-prefix once (sort+neighbor LCP) and parse each view .tree once; named_ids shares that walk. Heal overlap is raw JSON; rematerialize/write_nap build Tree. Wave #49∥#50 then #51 then #53 then #52.
