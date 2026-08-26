@@ -88,12 +88,11 @@ $ git st
 ...
 Changes to be committed:
   (use "git restore --staged <file>..." to unstage)
-        new file:   dogfood/.summem/naps/20260819T213123Z-5e64febd8268823c-cfbf987aa25d8492e257e0484faa9be9903b3d3e9f74fcb83ed2ca443cada000-2.summ
-        new file:   dogfood/.summem/naps/20260819T213123Z-5e64febd8268823c-cfbf987aa25d8492e257e0484faa9be9903b3d3e9f74fcb83ed2ca443cada000-2.tree
+        new file:   dogfood/.summem/naps/20260819T213123Z-5e64febd8268823c-cfbf987aa25d8492e257e0484faa9be9903b3d3e9f74fcb83ed2ca443cada000-2-8f8111f124e6075e.summ
+        new file:   dogfood/.summem/naps/20260819T213123Z-5e64febd8268823c-cfbf987aa25d8492e257e0484faa9be9903b3d3e9f74fcb83ed2ca443cada000-2-8f8111f124e6075e.tree
         deleted:    dogfood/.summem/notes/20260819T213123Z-5e64febd8268823c
         deleted:    dogfood/.summem/notes/20260819T213139Z-e82628a6be85430a
-        new file:   dogfood/.summem/notes/20260825T141300Z-46540ead99c4e20b
-
+        new file:   dogfood/.summem/notes/20260826T025412Z-7157ba614d46767c
 ```
 
 You can see two old notes were `deleted` - the old individual `g` and `h`. A new note is added - that's our `i` memory.
