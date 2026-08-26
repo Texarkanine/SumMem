@@ -1,1 +1,0 @@
-Issues #49/#50: catalog via one git ls-files of .summem/config.toml; recall/zoom unique-prefix once (sort+neighbor LCP) and parse each view .tree at most once; named_ids shares that walk.
