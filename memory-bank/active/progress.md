@@ -107,4 +107,13 @@ Shorten stored nap leaf-set ids to 16 hex; grow `migrate.py` so one pass rewrite
 * Insights
     - Truncation inside `leafset_id` plus `_as_child` copying `node.id` is why new folds cannot split stem width from nested JSON width without a separate write-path change.
 
+## 2026-08-26 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-16-hex-leafset.md`. Reconciled persistent files (systemPatterns already 16 hex; productContext and techContext unchanged).
+* Decisions made
+    - No further product changes from reflection. Operator already asked for docstring tidy and a PR after reflect.
+* Insights
+    - Mixing 16-hex view ids with leftover 64-hex nested ids is a `resolve_id` prefix bug, not a display bug. Filename-only truncate is that bug.
+
 
