@@ -107,6 +107,6 @@ No new technology - validation not required. tox 4 already declares `min_version
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
+- [x] Preflight
 - [ ] Build
 - [ ] QA
