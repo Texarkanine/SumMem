@@ -1,0 +1,1 @@
+catalog is one git ls-files of .summem/config.toml; recall/zoom unique-prefix once and parse each view .tree once (#50).

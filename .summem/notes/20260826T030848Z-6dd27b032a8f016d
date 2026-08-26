@@ -1,0 +1,1 @@
+Issue #67: stored leaf-set ids become 16 hex; migrate.py consumes 4-part and 5-part-64 stems, writes 5-part-16 only (rewrite nested .tree ids, recompute variant).

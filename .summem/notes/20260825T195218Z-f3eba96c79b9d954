@@ -1,1 +1,0 @@
-Root catalog enumerates via one git ls-files --cached --others --exclude-standard filtered on .summem/config.toml; no committed index.

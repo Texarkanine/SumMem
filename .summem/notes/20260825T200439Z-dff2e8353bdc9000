@@ -1,1 +1,0 @@
-recall-zoom-prefix archived: recall/zoom unique-prefix once per command (sort+neighbor LCP) and parse each view .tree at most once; named_ids shares that walk. Issue #50.
