@@ -119,6 +119,16 @@ pytest-cov can combine xdist workers. Out of scope: coverage env stays serial.
 - Contract tests on `tox.ini` dismissed as change-detectors: they match the existing runner-lock tests; they fail when the advertised command drops xdist or drops the cap (matrix regression waiting to happen).
 - Task is secretly L3 (design fork: loadfile vs loadgroup vs serial marks vs PYTEST_WORKERS): investigation found default `--dist load`, 0 marks, and a fixed cap. Stays L2.
 
+## QA Results
+
+**PASS** (`.qa-validation-status`). Reverified rather than accepted on report: `tox run-parallel` green py311–py314 in 28.83s; `tox -e py311 -- tests/test_tox_runner.py` 10 passed. All four acceptance criteria are satisfied, including the zero-serial-marker justification on [issue #64](https://github.com/Texarkanine/SumMem/issues/64#issuecomment-5419816806) and the three documentation surfaces.
+
+Three non-blocking advisories:
+
+1. `.coverage` and `coverage/lcov.info` are tracked and left dirty (~1,750 lines) by the step 4.3 coverage verification. Restore or commit before the PR; not caused by the xdist change.
+2. Single-file iteration now pays xdist startup: 1.30s default vs 0.05s with `-n0` on `tests/test_tox_runner.py`. The `-n0` escape hatch is documented as "serial rerun"; it is also the fast path for targeted runs.
+3. `test_tox_commands_enable_xdist` uses `commands.index("-n")`, so a dropped flag fails as `ValueError` rather than a named assertion.
+
 ## Status
 
 - [x] Initialization complete
@@ -128,4 +138,4 @@ pytest-cov can combine xdist workers. Out of scope: coverage env stays serial.
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA (PASS)

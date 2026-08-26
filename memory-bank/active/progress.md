@@ -91,3 +91,18 @@ Investigate whether pytest-xdist is safe inside each tox env, then apply it (wit
 * Insights
     - The shipped matrix is faster than serial-within-env, not merely green
     - Coverage env installs xdist (inherited deps) but does not start workers without `-n`
+
+## 2026-08-25 - QA - COMPLETE
+
+`.qa-validation-status` first line: `PASS`
+
+* Work completed
+    - Reviewed the shipped diff (`tox.ini`, three contracts in `tests/test_tox_runner.py`, README / `techContext.md` / `.cursor/rules/SumMem-testing.mdc`) against the plan for KISS, DRY, YAGNI, completeness, regression, integrity, and documentation
+    - Reverified acceptance rather than accepting Build's report: `tox run-parallel` green py311–py314 in 28.83s (matching the recorded 28.77s); `tox -e py311 -- tests/test_tox_runner.py` 10 passed
+    - Confirmed AC1–AC4: investigation outcome recorded, matrix green with xdist, zero serial markers justified on [issue #64](https://github.com/Texarkanine/SumMem/issues/64#issuecomment-5419816806), all three doc surfaces updated with no stale active document left behind
+* Decisions made
+    - PASS with three non-blocking advisories: dirty tracked `.coverage` / `coverage/lcov.info` from the coverage verification run; single-file iteration now pays ~1.25s of xdist worker startup; `commands.index("-n")` fails as `ValueError` rather than a named assertion
+    - The three tox.ini contracts are not change-detectors: `tox.ini` is executable configuration and they go red when the advertised runner silently loses xdist or the cap
+* Insights
+    - The cap is the load-bearing part of the change; the flag alone would have shipped a matrix regression, so the tests lock `--maxprocesses=4` and not merely `-n auto`
+    - Coverage artifacts being tracked in git means every `tox -e coverage` verification dirties the worktree; that friction predates this task and will recur until the tracking decision is revisited
