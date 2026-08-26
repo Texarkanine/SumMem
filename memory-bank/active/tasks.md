@@ -176,4 +176,7 @@ No new technology - validation not required.
   - [x] Unit 2: migrate.py dual-source rewrite
   - [x] Unit 3: atlas, systemPatterns, README
   - [x] Unit 4: clone stores + `tox run-parallel`
-- [ ] QA
+- [x] QA
+  - Result: PASS (advisories non-blocking)
+  - Nested fold test does not assert `len(NapChild.id) == 16`; write path copies the 16-hex view id
+  - Build note of four root pairs vs three view pairs; nested grain-8 is inside those trees; stores are five-part-16

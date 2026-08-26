@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: 16-hex-leafset
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
 - Unit 1: `leafset_id` returns SHA-256 `[:16]`; `_parse_nap_stem` requires a 16-hex leaf-set field. Four-part and five-part-64 stems are not view nodes.
@@ -30,4 +30,4 @@
 - Full matrix: py311–py314 OK.
 
 ## Next Step
-- QA review (`/niko-qa`).
+- Reflect (`/niko-reflect`).

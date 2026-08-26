@@ -1,0 +1,25 @@
+PASS
+
+Semantic review of 16-hex-leafset against the plan in memory-bank/active/tasks.md and brief in memory-bank/active/projectbrief.md. No creative-phase docs (none were produced). Judge only; product code untouched.
+
+## Findings
+
+1. **KISS — PASS.** Truncation is one slice inside `leafset_id`. `_parse_nap_stem` adds a length check on the existing five-part split. `migrate.py` is `_old_stem`, recursive `_shorten_tree`, `dumps_tree`, `_write_pair`, unlink. No extra identity type, no production `leafset_id_full`, no driver dual-read.
+
+2. **DRY — PASS.** New folds still go `leafset_id` → `nap_stem` → `_write_pair`. Nested `NapChild.id` on write is `node.id` from the stem (`_as_child`). Migrate is the only old-stem reader. Test-module `_truncate_nap_ids` duplicates `_shorten_tree` as the plan's independent oracle, not a second production path.
+
+3. **YAGNI — PASS.** No Base32, no `summem migrate` verb, no `__version__` on `migrate.py`, no shortening of seq/grain/note rands/variant tag, no `short_id` floor change. `if dest != stem` is defensive for forms that cannot collide; not speculative feature work.
+
+4. **Completeness — PASS.** Driver lists only five-part-16. Four-part and five-part-64 are invisible (`test_legacy_four_part_is_not_a_view_node`, `test_legacy_five_part_64_is_not_a_view_node`). Migrate covers 4-part-64, 5-part-64 grain-2/4/8 (two nested depths), 5-part-16 untouched, incomplete, unreadable `.tree`, dest-exists, `--path`, default root+catalog. Atlas Identity/Zoom/Naps/change-surfaces, `systemPatterns.md`, and README walkthrough leaf-set `cfbf987aa25d8492` (variant `8f8111f124e6075e` unchanged; example `.tree` note-only). Root and dogfood naps are five-part-16; every nested nap `"id"` is 16 hex; dest stems equal `nap_stem` of the on-disk bytes.
+
+5. **Regression — PASS.** `write_nap` / `child_nap_stem` / `nap_stem` stay one serialize-then-name path. Heal still hashes note file bytes. `short_id` floor 8. Note rands and variant tags remain 16 hex. `_write_pair` then unlink; no `Path.replace` of source `.tree` onto dest.
+
+6. **Integrity — PASS.** No TODOs, placeholders, or debug leftovers in the changed driver/migrate path. Legacy migrate fixtures plant 64-hex ids with `hashlib`, not `write_nap`. Unknown-id sentinels (`"0" * 64` in zoom/nap CLI) left as non-stored ids.
+
+7. **Documentation — PASS.** Named canonical docs updated. Archives and in-progress brief/plan still mention 64-hex as the old grammar, which is correct.
+
+## Advisories (non-blocking)
+
+1. `test_nap_of_two_naps_nests_napchild_and_unions_digests` zooms by nested `NapChild.id` but does not assert `len(kid.id) == 16`. New folds copy the 16-hex view id, so the write path cannot emit 64-hex nested ids without changing `_as_child`. Does not block.
+
+2. Build notes said four root pairs. The view has three complete pairs (grain-32 and two grain-16). Grain-8 exists only as nested JSON inside those trees, which is what unit 4 described. Stores are migrated correctly. Does not block.

@@ -97,4 +97,14 @@ Shorten stored nap leaf-set ids to 16 hex; grow `migrate.py` so one pass rewrite
 * Insights
     - Grain-2 note-only pairs keep the same variant tag after migrate; grain-4+ recomputes it because nested ids change the tree bytes.
 
+## 2026-08-26 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Semantic review of driver width, migrate dual-source rewrite, atlas/systemPatterns/README, and this clone's stores against the plan. No product-code edits.
+    - Confirmed root (3 view pairs) and dogfood (2 pairs) are five-part-16, nested nap `"id"` values are 16 hex, and each stem equals `nap_stem` of the on-disk pair bytes.
+* Decisions made
+    - PASS with two non-blocking advisories. Implementation is acceptable as-is.
+* Insights
+    - Truncation inside `leafset_id` plus `_as_child` copying `node.id` is why new folds cannot split stem width from nested JSON width without a separate write-path change.
+
 
