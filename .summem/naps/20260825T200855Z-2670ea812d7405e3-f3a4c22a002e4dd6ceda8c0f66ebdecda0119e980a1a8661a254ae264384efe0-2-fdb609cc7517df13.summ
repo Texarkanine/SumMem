@@ -1,0 +1,1 @@
+heal overlap is raw JSON; rematerialize and write_nap still build Tree. PR #56 Fixes #51.
