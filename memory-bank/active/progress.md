@@ -89,3 +89,17 @@ Give naps a five-part stem with a pair-bytes variant tag so concurrent same-bloc
 * Insights
     - Caption-conflict inversion in unit 2 let units 2–4 stay green. Same-block twins are transient view rows, not a git conflict.
 
+## 2026-08-25 - QA - COMPLETE
+
+* Work completed
+    - Semantic review of the eight-unit build against the plan, brief, and `systemPatterns.md`. Wrote `memory-bank/active/.qa-validation-status` with first line `PASS`.
+    - Re-ran `tox` (py311–py314, 346 passed each) and independently verified every committed nap pair in the root and `dogfood` stores: all five-part, every variant tag equals `variant_tag` of the on-disk bytes, nothing untracked.
+    - Confirmed all three stale “caption is the only honest conflict” statements are retired and that archives correctly keep the old wording as historical record.
+* Decisions made
+    - PASS with advisories. Nothing in the diff is incorrect, incomplete, or unacceptable as shipped, so no Build rerun.
+    - The DRY advisory is real but not a blocker: the plan named the shape and preflight passed it, and current behavior is correct.
+* Insights
+    - Deleting `_nap_stem` left four copies of the child-stem block. `surgery.plan_break_out` only predicts names while `excise_note` renames separately, so surgery holds a shadow implementation of the naming rule that no test pins. A `child_nap_stem(child) -> (stem, tree_bytes, caption_bytes)` helper would collapse all four.
+    - `migrate.py` loads its sibling `summem` by `__file__` and picks stores from `cwd`. The atlas row does not say so, and a consumer repo has `.summem/summem` but no `migrate.py`. Use-Case 3 needs that sentence in the PR body.
+    - Five-part stems make `test_rematerialize_does_not_clobber_existing_dest`'s nap half vacuous: a different caption can no longer collide.
+

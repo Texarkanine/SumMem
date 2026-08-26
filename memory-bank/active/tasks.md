@@ -244,4 +244,12 @@ No new technology - validation not required. `hashlib` and `SourceFileLoader` ar
   - [x] Unit 6: legacy read and rematerialize-from-legacy
   - [x] Unit 7: migrate.py
   - [x] Unit 8: atlas, patterns, product copy
-- [ ] QA
+- [x] QA
+
+## QA Results
+
+**PASS** (advisories recorded). Full findings in `memory-bank/active/.qa-validation-status`.
+
+- Completeness, integrity, regression, and documentation checks all pass. `tox` py311-py314: 346 passed each.
+- Committed root and `dogfood` stores verified five-part with every variant tag matching the on-disk pair bytes; nothing untracked.
+- Advisories, none blocking: the deleted `_nap_stem` left four copies of the child-stem block (`summem`, `surgery.py`, two test files) with no test pinning surgery's predicted names against what rematerialize writes; the atlas migrate row does not tell a consumer-repo operator that `migrate.py` needs a sibling `summem` and takes its store from `cwd`; `migrate.py` skips a dest-exists pair silently and carries a dead `SystemExit` guard; `started_stores` has a near-dead root branch; `test_rematerialize_does_not_clobber_existing_dest`'s nap half is now vacuous.

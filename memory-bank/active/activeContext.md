@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: nap-variant-stems
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
 
@@ -11,6 +11,8 @@
 - Sibling `migrate.py` hashes on-disk pair bytes and rewrites complete four-part pairs. This clone's root and dogfood stores were migrated.
 - Atlas, `systemPatterns.md`, and `productContext.md` now describe union-then-zipper. Dry-run on migrate stayed out (advisory, not a planned unit).
 
+- QA PASS with advisories: `tox` py311-py314 green (346 each); committed root and `dogfood` stores verified five-part and pair-consistent. Advisories in `memory-bank/active/.qa-validation-status`, none blocking.
+
 ## Next Step
 
-- QA review will now run automatically.
+- QA passed. Reflect is the next phase.
