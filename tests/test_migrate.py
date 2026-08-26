@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from importlib.machinery import SourceFileLoader
 from random import Random
 
-from conftest import ROOT, load_summem
+from conftest import ROOT
 from gitutil import init_repo
 
 UTC = timezone.utc
@@ -56,10 +56,10 @@ def _five_part(m, four: str, tree_bytes: bytes, caption_bytes: bytes) -> str:
     return m.nap_stem(f"{stamp}-{rand}", leafset, int(grain), tree_bytes, caption_bytes)
 
 
-def test_migrate_renames_four_part_complete_pair(tmp_path, monkeypatch):
+def test_migrate_renames_four_part_complete_pair(tmp_path, monkeypatch, summem):
     """A complete four-part pair is renamed to nap_stem of the on-disk bytes."""
     mig = load_migrate()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     four, tree_bytes, caption_bytes = _legacy_complete_pair(m, repo)
     expected = _five_part(m, four, tree_bytes, caption_bytes)
@@ -77,10 +77,10 @@ def test_migrate_renames_four_part_complete_pair(tmp_path, monkeypatch):
     assert parsed is not None and parsed[4]
 
 
-def test_migrate_second_run_is_noop(tmp_path, monkeypatch):
+def test_migrate_second_run_is_noop(tmp_path, monkeypatch, summem):
     """A second run on an already five-part store exits 0 and does not rename."""
     mig = load_migrate()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _legacy_complete_pair(m, repo)
     monkeypatch.chdir(repo)
@@ -90,10 +90,10 @@ def test_migrate_second_run_is_noop(tmp_path, monkeypatch):
     assert sorted(p.name for p in (repo / ".summem" / "naps").iterdir() if p.is_file()) == names
 
 
-def test_migrate_skips_incomplete_pair(tmp_path, monkeypatch, capsys):
+def test_migrate_skips_incomplete_pair(tmp_path, monkeypatch, capsys, summem):
     """An incomplete four-part pair is skipped with a stderr message and non-zero exit."""
     mig = load_migrate()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     four, tree_bytes, _caption_bytes = _legacy_complete_pair(m, repo)
     naps = repo / ".summem" / "naps"
@@ -106,10 +106,10 @@ def test_migrate_skips_incomplete_pair(tmp_path, monkeypatch, capsys):
     assert not (naps / f"{four}.summ").exists()
 
 
-def test_migrate_path_leaves_other_store_untouched(tmp_path, monkeypatch):
+def test_migrate_path_leaves_other_store_untouched(tmp_path, monkeypatch, summem):
     """--path rewrites one store and does not touch another."""
     mig = load_migrate()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     four_root, _, _ = _legacy_complete_pair(m, repo, "root-pair")
     pkg = repo / "pkg"
@@ -122,10 +122,10 @@ def test_migrate_path_leaves_other_store_untouched(tmp_path, monkeypatch):
     assert (repo / ".summem" / "naps" / f"{four_root}.tree").is_file()
 
 
-def test_migrate_default_rewrites_root_and_cataloged_store(tmp_path, monkeypatch):
+def test_migrate_default_rewrites_root_and_cataloged_store(tmp_path, monkeypatch, summem):
     """A default run rewrites the root store and a cataloged child store."""
     mig = load_migrate()
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     four_root, tree_root, cap_root = _legacy_complete_pair(m, repo, "root-pair")
     pkg = repo / "pkg"

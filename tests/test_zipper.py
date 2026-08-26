@@ -9,7 +9,6 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from random import Random
 
-from conftest import load_summem
 from gitutil import assert_unique_cover, init_repo, reaches, zoom_reaches
 
 UTC = timezone.utc
@@ -123,18 +122,18 @@ def _sum_sentences(m, repo) -> set[str]:
     return found
 
 
-def test_leaf_digests_of_note_is_its_digest(tmp_path):
+def test_leaf_digests_of_note_is_its_digest(tmp_path, summem):
     """A note's leaf-set is the digest of its file bytes."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     path = _write_notes(m, repo, ["alpha"])[0]
     node = m.list_view(repo)[0]
     assert m.leaf_digests(node) == {m.note_digest(path.read_bytes())}
 
 
-def test_leaf_digests_of_nap_is_union_of_tree_digests(tmp_path):
+def test_leaf_digests_of_nap_is_union_of_tree_digests(tmp_path, summem):
     """A nap's leaf-set is the set of digests in its canonical tree."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     texts = ["alpha", "beta"]
     _write_notes(m, repo, texts)
@@ -145,9 +144,9 @@ def test_leaf_digests_of_nap_is_union_of_tree_digests(tmp_path):
     assert m.leaf_digests(node) == expected
 
 
-def test_leaf_digests_none_when_tree_missing_or_malformed(tmp_path):
+def test_leaf_digests_none_when_tree_missing_or_malformed(tmp_path, summem):
     """Missing, unreadable, or malformed .tree yields no leaf-set."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _write_notes(m, repo, ["alpha", "beta", "gamma", "delta"])
     ids = [node.id for node in m.list_view(repo)]
@@ -167,9 +166,9 @@ def test_leaf_digests_none_when_tree_missing_or_malformed(tmp_path):
     assert m.leaf_digests(ez) is None
 
 
-def test_leaf_digests_nap_does_not_build_tree(tmp_path, monkeypatch):
+def test_leaf_digests_nap_does_not_build_tree(tmp_path, monkeypatch, summem):
     """A nap's leaf-set is hashed from raw tree JSON, not a Tree graph."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     texts = ["alpha", "beta"]
     _write_notes(m, repo, texts)
@@ -186,9 +185,9 @@ def test_leaf_digests_nap_does_not_build_tree(tmp_path, monkeypatch):
     assert m.leaf_digests(node) == expected
 
 
-def test_write_nap_reuses_nodes(tmp_path, monkeypatch):
+def test_write_nap_reuses_nodes(tmp_path, monkeypatch, summem):
     """write_nap(nodes=...) does not call list_view."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _write_notes(m, repo, ["alpha", "beta"])
     nodes = m.list_view(repo)
@@ -204,9 +203,9 @@ def test_write_nap_reuses_nodes(tmp_path, monkeypatch):
     assert all(n.kind == "nap" for n in m.list_view(repo))
 
 
-def test_cli_note_lists_once_when_disjoint(tmp_path, monkeypatch):
+def test_cli_note_lists_once_when_disjoint(tmp_path, monkeypatch, summem):
     """A no-overlap note under budget lists the view once."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     _write_notes(m, repo, ["alpha", "beta"])
@@ -230,9 +229,9 @@ def test_cli_note_lists_once_when_disjoint(tmp_path, monkeypatch):
     assert knobs_n["n"] == 1
 
 
-def test_cli_nap_passes_heal_nodes_to_write_nap(tmp_path, monkeypatch):
+def test_cli_nap_passes_heal_nodes_to_write_nap(tmp_path, monkeypatch, summem):
     """nap hands heal's view to write_nap instead of listing again."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     _write_notes(m, repo, ["alpha", "beta"])
@@ -250,9 +249,9 @@ def test_cli_nap_passes_heal_nodes_to_write_nap(tmp_path, monkeypatch):
     assert {n.id for n in seen["nodes"]} == set(ids)
 
 
-def test_heal_view_returns_final_view(tmp_path):
+def test_heal_view_returns_final_view(tmp_path, summem):
     """heal_view returns the same nodes a subsequent list_view would."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _write_notes(m, repo, ["A", "B"], start=1)
     ids = [n.id for n in m.list_view(repo)]
@@ -267,9 +266,9 @@ def test_heal_view_returns_final_view(tmp_path):
     ]
 
 
-def test_two_identical_notes_stay(tmp_path):
+def test_two_identical_notes_stay(tmp_path, summem):
     """Two notes with the same text are not unlinked by leaf-set helpers."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     paths = _write_notes(m, repo, ["hello", "hello"])
     nodes = m.list_view(repo)
@@ -279,9 +278,9 @@ def test_two_identical_notes_stay(tmp_path):
     assert paths[0].is_file() and paths[1].is_file()
 
 
-def test_rematerialize_note_writes_name_and_bytes(tmp_path):
+def test_rematerialize_note_writes_name_and_bytes(tmp_path, summem):
     """A NoteChild is written to notes/{name} with note_file_bytes."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.ensure_store(repo)
     child = m.NoteChild(name="20260101T000001Z-aaaaaaaaaaaaaaaa", text="alpha")
@@ -290,9 +289,9 @@ def test_rematerialize_note_writes_name_and_bytes(tmp_path):
     assert dest.read_bytes() == m.note_file_bytes("alpha")
 
 
-def test_rematerialize_nap_stem_uses_leftmost_seq_child_id_and_leaves(tmp_path):
+def test_rematerialize_nap_stem_uses_leftmost_seq_child_id_and_leaves(tmp_path, summem):
     """A NapChild stem is nap_stem of the same tree and caption bytes later written."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _write_notes(m, repo, ["alpha", "beta"])
     ids = [node.id for node in m.list_view(repo)]
@@ -308,9 +307,9 @@ def test_rematerialize_nap_stem_uses_leftmost_seq_child_id_and_leaves(tmp_path):
     assert (naps / f"{stem}.summ").read_bytes() == caption_bytes
 
 
-def test_rematerialize_nap_is_idempotent_on_five_part(tmp_path):
+def test_rematerialize_nap_is_idempotent_on_five_part(tmp_path, summem):
     """A second rematerialize of the same NapChild is a no-op on five-part dests."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _write_notes(m, repo, ["alpha", "beta"])
     ids = [node.id for node in m.list_view(repo)]
@@ -329,9 +328,9 @@ def test_rematerialize_nap_is_idempotent_on_five_part(tmp_path):
     assert node.sum_path.read_bytes() == sum_bytes
 
 
-def test_rematerialize_nested_child_uses_child_pair_bytes(tmp_path):
+def test_rematerialize_nested_child_uses_child_pair_bytes(tmp_path, summem):
     """Rematerializing a nested grain-2 NapChild hashes that child's pair, not the parent's."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     parent = _balanced_4(m, repo, ["A", "B", "C", "D"], "ab", "cd", "abcd", start=1)
     inner = m.loads_tree(parent.tree_path.read_bytes())
@@ -348,9 +347,9 @@ def test_rematerialize_nested_child_uses_child_pair_bytes(tmp_path):
     assert stem != parent_stem
 
 
-def test_rematerialize_serializes_tree_once(tmp_path, monkeypatch):
+def test_rematerialize_serializes_tree_once(tmp_path, monkeypatch, summem):
     """rematerialize_child calls dumps_tree once for a NapChild."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _write_notes(m, repo, ["alpha", "beta"])
     ids = [node.id for node in m.list_view(repo)]
@@ -371,9 +370,9 @@ def test_rematerialize_serializes_tree_once(tmp_path, monkeypatch):
     assert calls["n"] == 1
 
 
-def test_heal_equal_five_part_variants_keeps_lex_greatest(tmp_path):
+def test_heal_equal_five_part_variants_keeps_lex_greatest(tmp_path, summem):
     """Two five-part equal-set pairs collapse to the lexicographically greatest stem."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     paths = _write_notes(m, repo, ["alpha", "beta"])
     ids = [node.id for node in m.list_view(repo)]
@@ -393,9 +392,9 @@ def test_heal_equal_five_part_variants_keeps_lex_greatest(tmp_path):
     assert reaches(m, repo, "alpha") and reaches(m, repo, "beta")
 
 
-def test_heal_three_equal_variants_same_survivor_any_order(tmp_path):
+def test_heal_three_equal_variants_same_survivor_any_order(tmp_path, summem):
     """Three equal-set variants collapse to the same lex-greatest stem in any plant order."""
-    m = load_summem()
+    m = summem
     captions_orders = [("one", "two", "zzz"), ("zzz", "one", "two"), ("two", "zzz", "one")]
     survivors = []
     for i, captions in enumerate(captions_orders):
@@ -419,9 +418,9 @@ def test_heal_three_equal_variants_same_survivor_any_order(tmp_path):
     assert len(set(survivors)) == 1
 
 
-def test_heal_ignores_four_part_twin(tmp_path):
+def test_heal_ignores_four_part_twin(tmp_path, summem):
     """A four-part equal-set twin is not a view node; heal leaves those files and the five-part pair."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     paths = _write_notes(m, repo, ["alpha", "beta"])
     ids = [node.id for node in m.list_view(repo)]
@@ -442,9 +441,9 @@ def test_heal_ignores_four_part_twin(tmp_path):
     assert reaches(m, repo, "alpha") and reaches(m, repo, "beta")
 
 
-def test_rematerialize_does_not_clobber_existing_dest(tmp_path):
+def test_rematerialize_does_not_clobber_existing_dest(tmp_path, summem):
     """A second rematerialize leaves an existing dest unchanged, including at the child's actual nap stem."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.ensure_store(repo)
     name = "20260101T000001Z-aaaaaaaaaaaaaaaa"
@@ -468,9 +467,9 @@ def test_rematerialize_does_not_clobber_existing_dest(tmp_path):
     assert node.sum_path.read_bytes() == sentinel_summ
 
 
-def test_heal_ab_vs_abcd_keeps_coarse_pack(tmp_path):
+def test_heal_ab_vs_abcd_keeps_coarse_pack(tmp_path, summem):
     """{A,B} next to {A,B,C,D} drops the 2-pack and does not write {C,D}."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     parent = _balanced_4(m, repo, ["A", "B", "C", "D"], "ab", "cd", "abcd", start=1)
     tree = m.loads_tree(parent.tree_path.read_bytes())
@@ -484,9 +483,9 @@ def test_heal_ab_vs_abcd_keeps_coarse_pack(tmp_path):
     assert reaches(m, repo, "A") and reaches(m, repo, "D")
 
 
-def test_heal_parent_plus_children_keeps_parent(tmp_path):
+def test_heal_parent_plus_children_keeps_parent(tmp_path, summem):
     """Parent plus both children with no neighbor keeps the parent and drops the kids."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     parent = _balanced_4(m, repo, ["A", "B", "C", "D"], "ab", "cd", "abcd", start=1)
     tree = m.loads_tree(parent.tree_path.read_bytes())
@@ -501,9 +500,9 @@ def test_heal_parent_plus_children_keeps_parent(tmp_path):
         zoom_reaches(repo, parent.id, sentence)
 
 
-def test_heal_parent_plus_children_plus_neighbor_resplits(tmp_path):
+def test_heal_parent_plus_children_plus_neighbor_resplits(tmp_path, summem):
     """Parent plus children plus an overlapping neighbor drops kids, then splits the parent."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     parent = _balanced_4(m, repo, ["A", "B", "C", "D"], "ab", "cd", "abcd", start=1)
     tree = m.loads_tree(parent.tree_path.read_bytes())
@@ -524,9 +523,9 @@ def test_heal_parent_plus_children_plus_neighbor_resplits(tmp_path):
         assert reaches(m, repo, sentence)
 
 
-def test_heal_abd_vs_abe_unique_cover(tmp_path):
+def test_heal_abd_vs_abe_unique_cover(tmp_path, summem):
     """Prefix overlap heals to a unique-leaf cover without new caption text or O(T) notes."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _write_notes(m, repo, ["A", "B", "D"], start=1)
     ids = [n.id for n in m.list_view(repo)]
@@ -556,9 +555,9 @@ def test_heal_abd_vs_abe_unique_cover(tmp_path):
     assert after_sums <= before_sums
 
 
-def test_heal_note_covered_by_nap_dropped(tmp_path):
+def test_heal_note_covered_by_nap_dropped(tmp_path, summem):
     """A loose note whose digest sits inside a nap is unlinked; zoom still reaches it."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _write_notes(m, repo, ["A", "B"], start=1)
     ids = [n.id for n in m.list_view(repo)]
@@ -574,9 +573,9 @@ def test_heal_note_covered_by_nap_dropped(tmp_path):
     zoom_reaches(repo, nap.id, "A")
 
 
-def test_heal_disjoint_is_noop(tmp_path):
+def test_heal_disjoint_is_noop(tmp_path, summem):
     """Disjoint packs are left unchanged."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _write_notes(m, repo, ["A", "B"], start=1)
     ids = [n.id for n in m.list_view(repo)]
@@ -590,9 +589,9 @@ def test_heal_disjoint_is_noop(tmp_path):
     assert_unique_cover(m, repo)
 
 
-def test_heal_odd_arity_finishes_under_iteration_cap(tmp_path, monkeypatch):
+def test_heal_odd_arity_finishes_under_iteration_cap(tmp_path, monkeypatch, summem):
     """A one-kid or three-kid nap finishes without hanging."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     one = m.NoteChild(name="20260101T000001Z-aaaaaaaaaaaaaaaa", text="solo")
     _plant_nap(m, repo, [one], "one")
@@ -619,9 +618,9 @@ def test_heal_odd_arity_finishes_under_iteration_cap(tmp_path, monkeypatch):
     assert reaches(m, repo, "t1")
 
 
-def test_heal_malformed_overlapping_nap_skipped(tmp_path):
+def test_heal_malformed_overlapping_nap_skipped(tmp_path, summem):
     """An overlapping pair with a malformed .tree does not raise and does not drop leaves."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     parent = _balanced_4(m, repo, ["A", "B", "C", "D"], "ab", "cd", "abcd", start=1)
     tree = m.loads_tree(parent.tree_path.read_bytes())
@@ -635,9 +634,9 @@ def test_heal_malformed_overlapping_nap_skipped(tmp_path):
     assert set(m._digests_of_tree(inner)) == {_digest(m, text) for text in ("A", "B", "C", "D")}
 
 
-def test_heal_to_8_2_1_empty_fold_request_wake_projects(tmp_path, monkeypatch):
+def test_heal_to_8_2_1_empty_fold_request_wake_projects(tmp_path, monkeypatch, summem):
     """Heal to grains 8,2,1: fold_request is empty at budget 2; wake lists all three and expands when short."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _fold_balanced(m, repo, [f"a{i}" for i in range(8)], "eight", start=1)
     _write_notes(m, repo, ["b0", "b1"], start=100)
@@ -656,9 +655,9 @@ def test_heal_to_8_2_1_empty_fold_request_wake_projects(tmp_path, monkeypatch):
     assert len(lines) == 4
 
 
-def test_heal_idempotent_on_disjoint_store(tmp_path):
+def test_heal_idempotent_on_disjoint_store(tmp_path, summem):
     """heal_view is a no-op the second time on an already-disjoint store."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _write_notes(m, repo, ["A", "B"], start=1)
     ids = [n.id for n in m.list_view(repo)]
@@ -672,9 +671,9 @@ def test_heal_idempotent_on_disjoint_store(tmp_path):
     assert _payload_names(repo) == before
 
 
-def test_heal_ignores_dot_prefixed_temp(tmp_path):
+def test_heal_ignores_dot_prefixed_temp(tmp_path, summem):
     """Dot-prefixed temp files in naps/ stay ignored."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _write_notes(m, repo, ["A", "B"], start=1)
     ids = [n.id for n in m.list_view(repo)]
@@ -686,9 +685,9 @@ def test_heal_ignores_dot_prefixed_temp(tmp_path):
     assert tmp.read_bytes() == b"scratch"
 
 
-def test_same_second_notes_keep_left_child_stem(tmp_path):
+def test_same_second_notes_keep_left_child_stem(tmp_path, summem):
     """Same-second notes inside a rematerialized pack keep the left child's {stamp}-{rand} stem."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     now = datetime(2026, 1, 1, 0, 0, 0, tzinfo=UTC)
     rng = Random(0)
@@ -722,9 +721,9 @@ def _plant_abd_abe(m, repo):
     return abd
 
 
-def test_cli_note_and_nap_call_heal(tmp_path, monkeypatch, capsys):
+def test_cli_note_and_nap_call_heal(tmp_path, monkeypatch, capsys, summem):
     """main(['note', ...]) and main(['nap', ...]) call heal; wake does not."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     calls = {"n": 0}
@@ -747,9 +746,9 @@ def test_cli_note_and_nap_call_heal(tmp_path, monkeypatch, capsys):
     assert calls["n"] == 0
 
 
-def test_cli_wake_on_overlapping_head_writes_nothing(tmp_path, monkeypatch):
+def test_cli_wake_on_overlapping_head_writes_nothing(tmp_path, monkeypatch, summem):
     """CLI wake on overlapping HEAD prints and adds no file; wake must not flock."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     _plant_abd_abe(m, repo)
@@ -767,9 +766,9 @@ def test_cli_wake_on_overlapping_head_writes_nothing(tmp_path, monkeypatch):
     assert _payload_names(repo) == before
 
 
-def test_cli_nap_overlapping_ids_exits_1_without_concat(tmp_path, monkeypatch):
+def test_cli_nap_overlapping_ids_exits_1_without_concat(tmp_path, monkeypatch, summem):
     """nap of two overlapping ids exits 1, does not concat, writes no new .summ sentence."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     _plant_abd_abe(m, repo)
@@ -785,9 +784,9 @@ def test_cli_nap_overlapping_ids_exits_1_without_concat(tmp_path, monkeypatch):
     assert_unique_cover(m, repo)
 
 
-def test_cli_note_text_inside_nap_exits_0_no_loose_note(tmp_path, monkeypatch):
+def test_cli_note_text_inside_nap_exits_0_no_loose_note(tmp_path, monkeypatch, summem):
     """note of text already in a nap exits 0; that note does not remain in the view."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     _write_notes(m, repo, ["A", "B"], start=1)
@@ -799,9 +798,9 @@ def test_cli_note_text_inside_nap_exits_0_no_loose_note(tmp_path, monkeypatch):
     assert not any(n.kind == "note" and n.caption == "A" for n in nodes)
 
 
-def test_cli_invalid_nap_caption_does_not_heal(tmp_path, monkeypatch):
+def test_cli_invalid_nap_caption_does_not_heal(tmp_path, monkeypatch, summem):
     """Invalid nap caption on an overlapping store exits nonzero and leaves payloads unchanged."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     _plant_abd_abe(m, repo)
@@ -820,9 +819,9 @@ def test_cli_invalid_nap_caption_does_not_heal(tmp_path, monkeypatch):
     assert _payload_names(repo) == before
 
 
-def test_identical_notes_nappable_after_heal_view(tmp_path):
+def test_identical_notes_nappable_after_heal_view(tmp_path, summem):
     """Two identical notes stay through heal_view and can still be napped via write_nap."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _write_notes(m, repo, ["hello", "hello"], start=1)
     m.heal_view(repo)
@@ -832,9 +831,9 @@ def test_identical_notes_nappable_after_heal_view(tmp_path):
     assert all(n.kind == "nap" for n in m.list_view(repo))
 
 
-def test_with_store_lock_blocks_and_writes_no_lock_file(tmp_path):
+def test_with_store_lock_blocks_and_writes_no_lock_file(tmp_path, summem):
     """A second non-blocking flock of naps/ fails while the lock is held; no lock file appears."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.ensure_store(repo)
     naps = repo / ".summem" / "naps"

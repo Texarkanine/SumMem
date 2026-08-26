@@ -7,6 +7,8 @@ import sys
 from importlib.machinery import SourceFileLoader
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "summem"
 
@@ -20,7 +22,10 @@ def dated_leaf(stamp: str, text: str) -> str:
 
 
 def load_summem():
-    """Load repo-root `summem` via SourceFileLoader (no .py suffix)."""
+    """Load repo-root `summem` via SourceFileLoader (no .py suffix). Cached for the process."""
+    existing = sys.modules.get("summem")
+    if existing is not None and getattr(existing, "__file__", None) == str(SCRIPT):
+        return existing
     loader = SourceFileLoader("summem", str(SCRIPT))
     spec = importlib.util.spec_from_loader("summem", loader)
     if spec is None or spec.loader is None:
@@ -29,3 +34,9 @@ def load_summem():
     sys.modules["summem"] = mod
     spec.loader.exec_module(mod)
     return mod
+
+
+@pytest.fixture(scope="session")
+def summem():
+    """Session-scoped loaded repo-root `summem` module."""
+    return load_summem()

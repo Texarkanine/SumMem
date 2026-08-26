@@ -5,15 +5,14 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from random import Random
 
-from conftest import load_summem
 from gitutil import assert_unique_cover, fold_ids, git, init_repo, reaches, zoom_reaches
 
 UTC = timezone.utc
 
 
-def test_two_branch_packs_merge_then_nap_neighbors(tmp_path, monkeypatch):
+def test_two_branch_packs_merge_then_nap_neighbors(tmp_path, monkeypatch, summem):
     """Two disjoint packs merge clean; wake is two lines; nap of those ids zooms both sides."""
-    m = load_summem()
+    m = summem
     main = init_repo(tmp_path / "main")
     base = datetime(2026, 1, 1, tzinfo=UTC)
 
@@ -57,9 +56,9 @@ def test_two_branch_packs_merge_then_nap_neighbors(tmp_path, monkeypatch):
     assert parent.is_file()
 
 
-def test_two_branch_overlapping_packs_heal_on_next_mutate(tmp_path, monkeypatch):
+def test_two_branch_overlapping_packs_heal_on_next_mutate(tmp_path, monkeypatch, summem):
     """Two branches nap overlapping-but-unequal packs; merge then CLI note leaves a unique cover."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "main")
     base = datetime(2026, 1, 1, tzinfo=UTC)
     m.write_note(repo, "A", base, Random(1))

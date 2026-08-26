@@ -8,7 +8,7 @@ from random import Random
 
 import pytest
 
-from conftest import dated_leaf, load_summem
+from conftest import dated_leaf
 from gitutil import init_repo
 
 UTC = timezone.utc
@@ -34,9 +34,9 @@ def _payload_names(repo: Path) -> set[str]:
     return names
 
 
-def test_nap_two_adjacent_notes_writes_pair_and_unlinks(tmp_path, monkeypatch):
+def test_nap_two_adjacent_notes_writes_pair_and_unlinks(tmp_path, monkeypatch, summem):
     """Two adjacent notes become one nap pair; both notes are gone."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     pa, pb = _two_notes(m, repo)
     da = m.note_digest(pa.read_bytes())
@@ -67,9 +67,9 @@ def test_nap_two_adjacent_notes_writes_pair_and_unlinks(tmp_path, monkeypatch):
     assert lines == [f"x2 {prefix}: pair"]
 
 
-def test_write_nap_hashes_the_bytes_it_writes(tmp_path):
+def test_write_nap_hashes_the_bytes_it_writes(tmp_path, summem):
     """On-disk .tree and .summ bytes equal the buffers hashed into the stem."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _two_notes(m, repo)
     ids = _ids(m, repo)
@@ -88,9 +88,9 @@ def test_write_nap_hashes_the_bytes_it_writes(tmp_path):
     assert caption_bytes == m.note_file_bytes("pair")
 
 
-def test_same_children_same_tree_bytes_and_paths(tmp_path):
+def test_same_children_same_tree_bytes_and_paths(tmp_path, summem):
     """Same two notes and different captions share .tree bytes, not stems or .summ bytes."""
-    m = load_summem()
+    m = summem
     repo_a = init_repo(tmp_path / "a")
     repo_b = init_repo(tmp_path / "b")
     _two_notes(m, repo_a)
@@ -113,9 +113,9 @@ def test_same_children_same_tree_bytes_and_paths(tmp_path):
     assert parsed_a[4] and parsed_a[4] != parsed_b[4]
 
 
-def test_first_unlink_sees_both_parent_files(tmp_path, monkeypatch):
+def test_first_unlink_sees_both_parent_files(tmp_path, monkeypatch, summem):
     """At the first child unlink, both parent .summ and .tree already exist."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _two_notes(m, repo)
     ids = _ids(m, repo)
@@ -135,9 +135,9 @@ def test_first_unlink_sees_both_parent_files(tmp_path, monkeypatch):
     assert len(seen["tree"]) == 1
 
 
-def test_tree_replace_failure_leaves_children(tmp_path, monkeypatch):
+def test_tree_replace_failure_leaves_children(tmp_path, monkeypatch, summem):
     """If parent .tree replace fails, both notes remain and no nap pair is left."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     pa, pb = _two_notes(m, repo)
     ids = _ids(m, repo)
@@ -160,9 +160,9 @@ def test_tree_replace_failure_leaves_children(tmp_path, monkeypatch):
     assert _payload_names(repo) == before
 
 
-def test_nap_rejects_empty_caption(tmp_path):
+def test_nap_rejects_empty_caption(tmp_path, summem):
     """An empty caption is rejected and the store is unchanged."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _two_notes(m, repo)
     ids = _ids(m, repo)
@@ -172,9 +172,9 @@ def test_nap_rejects_empty_caption(tmp_path):
     assert _payload_names(repo) == before
 
 
-def test_nap_rejects_overlong_caption(tmp_path):
+def test_nap_rejects_overlong_caption(tmp_path, summem):
     """A caption over ENTRY_CHARS is rejected and the store is unchanged."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _two_notes(m, repo)
     ids = _ids(m, repo)
@@ -184,9 +184,9 @@ def test_nap_rejects_overlong_caption(tmp_path):
     assert _payload_names(repo) == before
 
 
-def test_nap_overlong_caption_message_is_a_ratchet(tmp_path):
+def test_nap_overlong_caption_message_is_a_ratchet(tmp_path, summem):
     """An over-long nap caption names actual UTF-8 bytes, the limit, and the compress hint."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _two_notes(m, repo)
     ids = _ids(m, repo)
@@ -202,9 +202,9 @@ def test_nap_overlong_caption_message_is_a_ratchet(tmp_path):
     assert _payload_names(repo) == before
 
 
-def test_nap_rejects_newline_caption(tmp_path):
+def test_nap_rejects_newline_caption(tmp_path, summem):
     """A caption with a newline is rejected and the store is unchanged."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _two_notes(m, repo)
     ids = _ids(m, repo)
@@ -218,9 +218,9 @@ def test_nap_rejects_newline_caption(tmp_path):
     assert _payload_names(repo) == before
 
 
-def test_nap_rejects_non_adjacent_ids(tmp_path):
+def test_nap_rejects_non_adjacent_ids(tmp_path, summem):
     """Non-adjacent ids are rejected without mentioning store paths or git."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -238,9 +238,9 @@ def test_nap_rejects_non_adjacent_ids(tmp_path):
     assert _payload_names(repo) == before
 
 
-def test_nap_rejects_unknown_id(tmp_path):
+def test_nap_rejects_unknown_id(tmp_path, summem):
     """An unknown id is rejected without mentioning store paths or git."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _two_notes(m, repo)
     ids = _ids(m, repo)
@@ -256,9 +256,9 @@ def test_nap_rejects_unknown_id(tmp_path):
     assert _payload_names(repo) == before
 
 
-def test_nap_missing_tree_unknown_id_has_no_wake_hint(tmp_path):
+def test_nap_missing_tree_unknown_id_has_no_wake_hint(tmp_path, summem):
     """A view nap with no .tree raises unknown id and does not say to copy from wake."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _two_notes(m, repo)
     ids = _ids(m, repo)
@@ -274,9 +274,9 @@ def test_nap_missing_tree_unknown_id_has_no_wake_hint(tmp_path):
     assert "Copy an id from wake" not in err
 
 
-def test_nap_of_two_naps_nests_napchild_and_unions_digests(tmp_path):
+def test_nap_of_two_naps_nests_napchild_and_unions_digests(tmp_path, summem):
     """A nap of two naps stores NapChild nodes and the union of original digests."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     texts = ["a1", "a2", "b1", "b2"]
     for i, text in enumerate(texts, start=1):
@@ -303,9 +303,9 @@ def test_nap_of_two_naps_nests_napchild_and_unions_digests(tmp_path):
     ]
 
 
-def test_napchild_sum_empty_when_child_sum_missing(tmp_path):
+def test_napchild_sum_empty_when_child_sum_missing(tmp_path, summem):
     """Napping a child whose .summ is missing stores an empty NapChild.sum."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "a1", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "a2", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -324,9 +324,9 @@ def test_napchild_sum_empty_when_child_sum_missing(tmp_path):
     assert "a1" in out and "a2" in out
 
 
-def test_napchild_sum_empty_when_child_sum_conflict(tmp_path):
+def test_napchild_sum_empty_when_child_sum_conflict(tmp_path, summem):
     """Napping a child whose .summ is conflict-marked stores an empty NapChild.sum."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "a1", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "a2", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -345,9 +345,9 @@ def test_napchild_sum_empty_when_child_sum_conflict(tmp_path):
     assert "a1" in out and "a2" in out
 
 
-def test_nap_two_identical_notes_by_repeated_id(tmp_path, monkeypatch):
+def test_nap_two_identical_notes_by_repeated_id(tmp_path, monkeypatch, summem):
     """Two adjacent notes with the same text share an id and can still be napped."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -370,9 +370,9 @@ def _agent_err(err: str) -> None:
     assert "git" not in err
 
 
-def test_write_nap_overlapping_adjacent_naps_raises(tmp_path):
+def test_write_nap_overlapping_adjacent_naps_raises(tmp_path, summem):
     """Adjacent naps whose leaf-sets intersect raise before writing a parent."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.ensure_store(repo)
     shared = m.NoteChild(name="20260101T000002Z-bbbbbbbbbbbbbbbb", text="B")
@@ -410,9 +410,9 @@ def test_write_nap_overlapping_adjacent_naps_raises(tmp_path):
     assert _payload_names(repo) == before
 
 
-def test_write_nap_note_inside_adjacent_nap_raises(tmp_path):
+def test_write_nap_note_inside_adjacent_nap_raises(tmp_path, summem):
     """A note whose digest sits in the adjacent nap is overlapping packs."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     pa, _pb = _two_notes(m, repo)
     ids = _ids(m, repo)
@@ -429,9 +429,9 @@ def test_write_nap_note_inside_adjacent_nap_raises(tmp_path):
     assert pa.name in _payload_names(repo)
 
 
-def test_write_nap_disjoint_adjacent_naps_still_concat(tmp_path):
+def test_write_nap_disjoint_adjacent_naps_still_concat(tmp_path, summem):
     """Disjoint adjacent naps still unlink and concat."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     texts = ["a1", "a2", "b1", "b2"]
     for i, text in enumerate(texts, start=1):
@@ -447,9 +447,9 @@ def test_write_nap_disjoint_adjacent_naps_still_concat(tmp_path):
     assert all(isinstance(kid, m.NapChild) for kid in tree.kids)
 
 
-def test_write_nap_identical_text_notes_still_concat(tmp_path):
+def test_write_nap_identical_text_notes_still_concat(tmp_path, summem):
     """Two identical-text notes still concat; the overlap guard requires a nap."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -461,9 +461,9 @@ def test_write_nap_identical_text_notes_still_concat(tmp_path):
     assert len(trees) == 1
 
 
-def test_write_nap_malformed_tree_raises_unreadable_pack(tmp_path):
+def test_write_nap_malformed_tree_raises_unreadable_pack(tmp_path, summem):
     """A selected nap whose .tree is malformed raises ValueError without store paths."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _two_notes(m, repo)
     ids = _ids(m, repo)

@@ -39,6 +39,8 @@ No tests for README, `techContext.md`, or `.cursor/rules/SumMem-testing.mdc` (pr
 3. Write tests and run red: fixture scope is `session` via the pytest fixture marker; `summem.__file__` equals `SCRIPT`; after setattr+undo, `WAKE_LINES == 32`.
 4. Write code and run green: `summem` fixture returns `load_summem()`. Cache the loaded module in `load_summem()` (return `sys.modules["summem"]` when that module's `__file__` is `SCRIPT`) so an accidental extra call cannot replace the session object.
 
+- [x] Done
+
 ### 2. Replace per-test load_summem call sites — executable
 
 - Files: `tests/test_summem_fixture.py`; every `tests/test_*.py` that currently does `from conftest import load_summem` / `m = load_summem()` (21 files: `test_branch_pack_merge`, `test_caption_conflict`, `test_cli`, `test_codec`, `test_fold`, `test_gitutil`, `test_init`, `test_migrate`, `test_nap`, `test_nap_variants`, `test_recall`, `test_scopes`, `test_squash_clone_zoom`, `test_store`, `test_surgery`, `test_version`, `test_view`, `test_wake`, `test_wake_expand`, `test_zoom`, `test_zipper`)
@@ -47,6 +49,8 @@ No tests for README, `techContext.md`, or `.cursor/rules/SumMem-testing.mdc` (pr
 2. Stub interface: none.
 3. Write tests and run red: no `tests/test_*.py` other than `test_summem_fixture.py` contains the substring `load_summem`. Red while ~200 call sites remain.
 4. Write code and run green: drop `load_summem` from imports; add `summem` to each affected test signature; replace `m = load_summem()` with `m = summem` (or use `summem` directly). Keep `dated_leaf`, `ROOT`, `SCRIPT` imports. Leave `surgery.py` / `migrate.py` loaders alone. `tox -e py311`.
+
+- [x] Done
 
 ### 3. Isolate pytest temps for parallel envs — executable
 

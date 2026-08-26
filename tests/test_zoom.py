@@ -7,7 +7,7 @@ from random import Random
 
 import pytest
 
-from conftest import dated_leaf, load_summem
+from conftest import dated_leaf
 from gitutil import init_repo
 
 UTC = timezone.utc
@@ -19,9 +19,9 @@ def _two_notes(m, repo):
     return [node.id for node in m.list_view(repo)]
 
 
-def test_zoom_two_note_nap_prints_both_texts(tmp_path):
+def test_zoom_two_note_nap_prints_both_texts(tmp_path, summem):
     """Zoom of a two-note nap prints both original texts."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     ids = _two_notes(m, repo)
     m.write_nap(repo, ids[0], ids[1], "pair")
@@ -33,9 +33,9 @@ def test_zoom_two_note_nap_prints_both_texts(tmp_path):
     assert lines[1] == dated_leaf("20260101T000002Z", "beta")
 
 
-def test_zoom_conflict_sum_still_prints_leaves(tmp_path):
+def test_zoom_conflict_sum_still_prints_leaves(tmp_path, summem):
     """Conflict markers in the parent .summ do not affect zoom of the leaves."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     ids = _two_notes(m, repo)
     m.write_nap(repo, ids[0], ids[1], "pair")
@@ -47,18 +47,18 @@ def test_zoom_conflict_sum_still_prints_leaves(tmp_path):
     assert "beta" in out
 
 
-def test_zoom_loose_note_id_prints_the_note(tmp_path):
+def test_zoom_loose_note_id_prints_the_note(tmp_path, summem):
     """Zoom of a loose-note id succeeds and prints that note."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "hello", datetime(2026, 1, 1, tzinfo=UTC), Random(0))
     cid = m.list_view(repo)[0].id
     assert m.zoom_text(repo, cid) == dated_leaf("20260101T000000Z", "hello") + "\n"
 
 
-def test_zoom_unknown_id_omits_store_paths_and_git(tmp_path):
+def test_zoom_unknown_id_omits_store_paths_and_git(tmp_path, summem):
     """Unknown zoom id is rejected without mentioning notes/, naps/, or git."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     with pytest.raises(ValueError) as caught:
         m.zoom_text(repo, "0" * 64)
@@ -70,9 +70,9 @@ def test_zoom_unknown_id_omits_store_paths_and_git(tmp_path):
     assert "git" not in err
 
 
-def test_zoom_missing_tree_unknown_id_has_no_wake_hint(tmp_path):
+def test_zoom_missing_tree_unknown_id_has_no_wake_hint(tmp_path, summem):
     """Zoom of a view nap with no .tree says unknown id and does not say to copy from wake."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     ids = _two_notes(m, repo)
     m.write_nap(repo, ids[0], ids[1], "pair")
@@ -85,9 +85,9 @@ def test_zoom_missing_tree_unknown_id_has_no_wake_hint(tmp_path):
     assert "Copy an id from wake" not in err
 
 
-def test_zoom_nap_of_naps_prints_two_children_not_leaves(tmp_path):
+def test_zoom_nap_of_naps_prints_two_children_not_leaves(tmp_path, summem):
     """Zoom of a nap-of-naps prints two child ids and captions, not all original texts."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     for i, text in enumerate(["a1", "a2", "b1", "b2"], start=1):
         m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
@@ -109,9 +109,9 @@ def test_zoom_nap_of_naps_prints_two_children_not_leaves(tmp_path):
         assert text not in out
 
 
-def test_zoom_accepts_unique_prefix(tmp_path):
+def test_zoom_accepts_unique_prefix(tmp_path, summem):
     """zoom accepts a unique prefix of a pack id."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     ids = _two_notes(m, repo)
     m.write_nap(repo, ids[0], ids[1], "pair")
@@ -122,9 +122,9 @@ def test_zoom_accepts_unique_prefix(tmp_path):
     assert "beta" in out
 
 
-def test_ambiguous_prefix_is_error(tmp_path, monkeypatch):
+def test_ambiguous_prefix_is_error(tmp_path, monkeypatch, summem):
     """zoom raises ValueError when a prefix matches two ids."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _two_notes(m, repo)
     a = "a3f2c1b8" + "0" * 56
@@ -135,9 +135,9 @@ def test_ambiguous_prefix_is_error(tmp_path, monkeypatch):
     assert "Give a longer prefix" in str(caught.value)
 
 
-def test_zoom_skips_unreadable_sibling_warns(tmp_path, capsys):
+def test_zoom_skips_unreadable_sibling_warns(tmp_path, capsys, summem):
     """Zoom of a nested id still works and warns when a sibling children file is unreadable."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "A", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "B", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -163,9 +163,9 @@ def test_zoom_skips_unreadable_sibling_warns(tmp_path, capsys):
     assert "Traceback" not in err
 
 
-def test_named_ids_parses_each_view_tree_once(tmp_path, monkeypatch):
+def test_named_ids_parses_each_view_tree_once(tmp_path, monkeypatch, summem):
     """named_ids and _view_packs parse each view children file once and agree on ids."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "A", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "B", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -196,9 +196,9 @@ def test_named_ids_parses_each_view_tree_once(tmp_path, monkeypatch):
         assert seen.count(body) == 1
 
 
-def test_named_ids_skips_non_mapping_tree_child(tmp_path):
+def test_named_ids_skips_non_mapping_tree_child(tmp_path, summem):
     """A children file whose child is not a mapping does not make named_ids raise."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     ids = _two_notes(m, repo)
     m.write_nap(repo, ids[0], ids[1], "pair")
@@ -208,9 +208,9 @@ def test_named_ids_skips_non_mapping_tree_child(tmp_path):
     assert nap.id in named
 
 
-def test_zoom_non_mapping_child_is_unreadable_pack(tmp_path, capsys):
+def test_zoom_non_mapping_child_is_unreadable_pack(tmp_path, capsys, summem):
     """zoom_text on a nap whose tree child is not a mapping raises unreadable pack."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     ids = _two_notes(m, repo)
     m.write_nap(repo, ids[0], ids[1], "pair")
@@ -226,9 +226,9 @@ def test_zoom_non_mapping_child_is_unreadable_pack(tmp_path, capsys):
     assert capsys.readouterr().err == ""
 
 
-def test_zoom_skips_sibling_non_mapping_child_warns(tmp_path, capsys):
+def test_zoom_skips_sibling_non_mapping_child_warns(tmp_path, capsys, summem):
     """Zoom of a nested id still works and warns when a sibling tree child is not a mapping."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "A", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "B", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -254,9 +254,9 @@ def test_zoom_skips_sibling_non_mapping_child_warns(tmp_path, capsys):
     assert "Traceback" not in err
 
 
-def test_zoom_unreadable_tree_is_unreadable_pack(tmp_path, capsys):
+def test_zoom_unreadable_tree_is_unreadable_pack(tmp_path, capsys, summem):
     """zoom_text on a nap whose .tree is not JSON raises unreadable pack."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     ids = _two_notes(m, repo)
     m.write_nap(repo, ids[0], ids[1], "pair")
@@ -272,9 +272,9 @@ def test_zoom_unreadable_tree_is_unreadable_pack(tmp_path, capsys):
     assert capsys.readouterr().err == ""
 
 
-def test_zoom_keeps_duplicate_note_dates(tmp_path):
+def test_zoom_keeps_duplicate_note_dates(tmp_path, summem):
     """Zoom of a nap prints both dated lines when two children share text but not a day."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "same-text", datetime(2026, 1, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "same-text", datetime(2026, 1, 2, tzinfo=UTC), Random(2))
@@ -287,9 +287,9 @@ def test_zoom_keeps_duplicate_note_dates(tmp_path):
     ]
 
 
-def test_zoom_parses_each_view_tree_once(tmp_path, monkeypatch):
+def test_zoom_parses_each_view_tree_once(tmp_path, monkeypatch, summem):
     """zoom_text of a nested id parses each view children file once."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "A", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "B", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -318,9 +318,9 @@ def test_zoom_parses_each_view_tree_once(tmp_path, monkeypatch):
         assert seen.count(body) == 1
 
 
-def test_zoom_nested_note_id_prints_dated_leaf(tmp_path):
+def test_zoom_nested_note_id_prints_dated_leaf(tmp_path, summem):
     """Zoom of a note id that lives only inside a children file prints a dated leaf."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     ids = _two_notes(m, repo)
     m.write_nap(repo, ids[0], ids[1], "pair")
@@ -332,9 +332,9 @@ def test_zoom_nested_note_id_prints_dated_leaf(tmp_path):
     assert m.zoom_text(repo, cid) == dated_leaf(stamp, child.text) + "\n"
 
 
-def test_zoom_shared_id_prints_first_view_row_children(tmp_path):
+def test_zoom_shared_id_prints_first_view_row_children(tmp_path, summem):
     """Zoom of a shared leaf-set id prints the first list_view row's children."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     ids = _two_notes(m, repo)
     m.write_nap(repo, ids[0], ids[1], "pair")
@@ -360,9 +360,9 @@ def test_zoom_shared_id_prints_first_view_row_children(tmp_path):
     ]
 
 
-def test_named_ids_skips_unprojectable_note_name(tmp_path):
+def test_named_ids_skips_unprojectable_note_name(tmp_path, summem):
     """A note child whose name is not a string does not make named_ids raise."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     ids = _two_notes(m, repo)
     m.write_nap(repo, ids[0], ids[1], "pair")
@@ -372,9 +372,9 @@ def test_named_ids_skips_unprojectable_note_name(tmp_path):
     assert nap.id in named
 
 
-def test_zoom_unprojectable_note_name_is_unreadable_pack(tmp_path, capsys):
+def test_zoom_unprojectable_note_name_is_unreadable_pack(tmp_path, capsys, summem):
     """zoom_text on a note child whose name is not a string raises unreadable pack."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     ids = _two_notes(m, repo)
     m.write_nap(repo, ids[0], ids[1], "pair")

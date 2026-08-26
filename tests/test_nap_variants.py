@@ -9,7 +9,7 @@ from random import Random
 
 import pytest
 
-from conftest import SCRIPT, load_summem
+from conftest import SCRIPT
 from gitutil import git, init_repo, reaches, zoom_reaches
 
 UTC = timezone.utc
@@ -82,9 +82,9 @@ def _worktrees(main, tmp_path, names):
     return trees
 
 
-def test_identical_pair_bytes_share_a_stem(tmp_path):
+def test_identical_pair_bytes_share_a_stem(tmp_path, summem):
     """Same tree and caption produce one stem; git merge keeps a single pair."""
-    m = load_summem()
+    m = summem
     main = init_repo(tmp_path / "main")
     _two_notes_on_main(m, main)
     ids = [node.id for node in m.list_view(main)]
@@ -105,9 +105,9 @@ def test_identical_pair_bytes_share_a_stem(tmp_path):
     _assert_pairs_match_stems(m, wt_a)
 
 
-def test_note_heals_equal_variants(tmp_path):
+def test_note_heals_equal_variants(tmp_path, summem):
     """CLI note after a twin merge zipper-collapses to one complete pair."""
-    m = load_summem()
+    m = summem
     main = init_repo(tmp_path / "main")
     _two_notes_on_main(m, main)
     ids = [node.id for node in m.list_view(main)]
@@ -127,9 +127,9 @@ def test_note_heals_equal_variants(tmp_path):
     assert reaches(m, wt_a, "gamma")
 
 
-def test_nap_heals_equal_variants(tmp_path):
+def test_nap_heals_equal_variants(tmp_path, summem):
     """CLI nap after a twin merge heals first, then folds the remaining notes."""
-    m = load_summem()
+    m = summem
     main = init_repo(tmp_path / "main")
     base = datetime(2026, 1, 1, tzinfo=UTC)
     for i, text in enumerate(("alpha", "beta", "gamma", "delta"), start=1):
@@ -153,9 +153,9 @@ def test_nap_heals_equal_variants(tmp_path):
         assert reaches(m, wt_a, text)
 
 
-def test_reversed_merge_order_same_survivor(tmp_path):
+def test_reversed_merge_order_same_survivor(tmp_path, summem):
     """Healing after A←B versus B←A keeps the same lex-greatest stem."""
-    m = load_summem()
+    m = summem
     main = init_repo(tmp_path / "main")
     _two_notes_on_main(m, main)
     ids = [node.id for node in m.list_view(main)]
@@ -181,9 +181,9 @@ def test_reversed_merge_order_same_survivor(tmp_path):
     assert survivor_ab == survivor_ba == max(stem_a, stem_b)
 
 
-def test_three_variants_merge_then_heal(tmp_path):
+def test_three_variants_merge_then_heal(tmp_path, summem):
     """Three same-block captions merge without conflict and heal to one pair."""
-    m = load_summem()
+    m = summem
     main = init_repo(tmp_path / "main")
     _two_notes_on_main(m, main)
     ids = [node.id for node in m.list_view(main)]
@@ -201,9 +201,9 @@ def test_three_variants_merge_then_heal(tmp_path):
     assert reaches(m, wt_a, "alpha") and reaches(m, wt_a, "beta")
 
 
-def test_triple_worker_one_two_four(tmp_path):
+def test_triple_worker_one_two_four(tmp_path, summem):
     """Three workers fold 1→2→4 with different captions; merge unions; next note heals to one pack."""
-    m = load_summem()
+    m = summem
     main = init_repo(tmp_path / "main")
     base = datetime(2026, 1, 1, tzinfo=UTC)
     texts = ("A", "B", "C", "D")
@@ -237,9 +237,9 @@ def test_triple_worker_one_two_four(tmp_path):
         assert reaches(m, workers[0], text)
 
 
-def test_sequence_prefix_order(tmp_path):
+def test_sequence_prefix_order(tmp_path, summem):
     """Distinct timestamps keep sequence-prefix order; variants of one block differ only at the tag."""
-    m = load_summem()
+    m = summem
     main = init_repo(tmp_path / "main")
     base = datetime(2026, 1, 1, tzinfo=UTC)
     for i, text in enumerate(("a1", "a2", "b1", "b2"), start=1):
@@ -270,9 +270,9 @@ def test_sequence_prefix_order(tmp_path):
     assert f"{stamp_a}-{rand_a}" < f"{b_rows[0][0]}-{b_rows[0][1]}"
 
 
-def test_squash_clone_zooms_after_heal(tmp_path):
+def test_squash_clone_zooms_after_heal(tmp_path, summem):
     """Merge, heal, commit, squash; a fresh clone zooms every original note."""
-    m = load_summem()
+    m = summem
     main = init_repo(tmp_path / "main")
     _two_notes_on_main(m, main)
     ids = [node.id for node in m.list_view(main)]
@@ -295,9 +295,9 @@ def test_squash_clone_zooms_after_heal(tmp_path):
     zoom_reaches(clone, naps[0].id, "beta")
 
 
-def test_no_conflict_markers_or_mismatched_pair(tmp_path):
+def test_no_conflict_markers_or_mismatched_pair(tmp_path, summem):
     """After the merge scenario, no conflict markers and no cross-variant .tree/.summ pair."""
-    m = load_summem()
+    m = summem
     main = init_repo(tmp_path / "main")
     _two_notes_on_main(m, main)
     ids = [node.id for node in m.list_view(main)]
@@ -312,9 +312,9 @@ def test_no_conflict_markers_or_mismatched_pair(tmp_path):
     assert _unmerged(wt_a) == []
 
 
-def test_legacy_four_part_is_not_a_view_node(tmp_path):
+def test_legacy_four_part_is_not_a_view_node(tmp_path, summem):
     """A planted four-part pair is invisible until migrate.py rewrites it."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -338,9 +338,9 @@ def test_legacy_four_part_is_not_a_view_node(tmp_path):
     assert "pair" not in m.recall_text(repo, "pair")
 
 
-def test_rematerialize_legacy_parent_writes_five_part_children(tmp_path):
+def test_rematerialize_legacy_parent_writes_five_part_children(tmp_path, summem):
     """NapChild kids rematerialized out of a four-part parent land on five-part stems."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     base = datetime(2026, 1, 1, tzinfo=UTC)
     for i, text in enumerate(("A", "B", "C", "D"), start=1):

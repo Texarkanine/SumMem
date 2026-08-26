@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from random import Random
 
-from conftest import dated_leaf, load_summem
+from conftest import dated_leaf
 from gitutil import fold_ids, init_repo
 
 UTC = timezone.utc
@@ -45,9 +45,9 @@ def _payload_names(repo: Path) -> set[str]:
     return names
 
 
-def test_under_budget_expands_right_edge_until_budget(tmp_path, monkeypatch):
+def test_under_budget_expands_right_edge_until_budget(tmp_path, monkeypatch, summem):
     """Two 8-packs at budget 4 print four lines; the directory still has two files."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _two_eights(m, repo)
     monkeypatch.setattr(m, "WAKE_LINES", 4)
@@ -58,9 +58,9 @@ def test_under_budget_expands_right_edge_until_budget(tmp_path, monkeypatch):
     assert "x8" in lines[0]
 
 
-def test_at_budget_does_not_expand(tmp_path, monkeypatch):
+def test_at_budget_does_not_expand(tmp_path, monkeypatch, summem):
     """Two 8-packs at budget 2 print the two captions and do not split."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _two_eights(m, repo)
     monkeypatch.setattr(m, "WAKE_LINES", 2)
@@ -70,9 +70,9 @@ def test_at_budget_does_not_expand(tmp_path, monkeypatch):
     assert "eight-b" in lines[1]
 
 
-def test_native_notes_fill_budget_without_split(tmp_path, monkeypatch):
+def test_native_notes_fill_budget_without_split(tmp_path, monkeypatch, summem):
     """Two 8-packs plus two later notes at budget 4 print four file lines."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _two_eights(m, repo)
     m.write_note(repo, "later-a", datetime(2026, 1, 1, 0, 1, 0, tzinfo=UTC), Random(80))
@@ -88,9 +88,9 @@ def test_native_notes_fill_budget_without_split(tmp_path, monkeypatch):
     assert len(m.list_view(repo)) == 4
 
 
-def test_lone_note_does_not_split(tmp_path, monkeypatch):
+def test_lone_note_does_not_split(tmp_path, monkeypatch, summem):
     """A single note never splits, even when the budget is larger."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "solo", datetime(2026, 1, 1, tzinfo=UTC), Random(0))
     monkeypatch.setattr(m, "WAKE_LINES", 32)
@@ -99,9 +99,9 @@ def test_lone_note_does_not_split(tmp_path, monkeypatch):
     assert lines[0] == dated_leaf("20260101T000000Z", "solo")
 
 
-def test_expand_writes_nothing(tmp_path, monkeypatch):
+def test_expand_writes_nothing(tmp_path, monkeypatch, summem):
     """Expanding an under-budget directory does not create or delete store files."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _two_eights(m, repo)
     before = _payload_names(repo)
@@ -110,9 +110,9 @@ def test_expand_writes_nothing(tmp_path, monkeypatch):
     assert _payload_names(repo) == before
 
 
-def test_missing_tree_does_not_split(tmp_path, monkeypatch):
+def test_missing_tree_does_not_split(tmp_path, monkeypatch, summem):
     """A nap whose .tree is missing prints as one line."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -126,9 +126,9 @@ def test_missing_tree_does_not_split(tmp_path, monkeypatch):
     assert "pair" in lines[0]
 
 
-def test_malformed_tree_does_not_split(tmp_path, monkeypatch):
+def test_malformed_tree_does_not_split(tmp_path, monkeypatch, summem):
     """A nap whose .tree is malformed prints as one line."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -142,9 +142,9 @@ def test_malformed_tree_does_not_split(tmp_path, monkeypatch):
     assert "pair" in lines[0]
 
 
-def test_unreadable_tree_does_not_split(tmp_path, monkeypatch):
+def test_unreadable_tree_does_not_split(tmp_path, monkeypatch, summem):
     """A nap whose .tree cannot be read prints as one line."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -165,9 +165,9 @@ def test_unreadable_tree_does_not_split(tmp_path, monkeypatch):
     assert "pair" in lines[0]
 
 
-def test_nested_empty_nap_child_does_not_split(tmp_path, monkeypatch):
+def test_nested_empty_nap_child_does_not_split(tmp_path, monkeypatch, summem):
     """A valid JSON tree with a nap child that has no notes prints as one line."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -190,9 +190,9 @@ def test_nested_empty_nap_child_does_not_split(tmp_path, monkeypatch):
     assert "pair" in lines[0]
 
 
-def test_malformed_tree_is_loaded_at_most_once(tmp_path, monkeypatch):
+def test_malformed_tree_is_loaded_at_most_once(tmp_path, monkeypatch, summem):
     """A failed file-backed .tree load is not retried during the same wake."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _two_eights(m, repo)
     nodes = m.list_view(repo)
@@ -214,9 +214,9 @@ def test_malformed_tree_is_loaded_at_most_once(tmp_path, monkeypatch):
     assert seen.count(bad) == 1
 
 
-def test_expand_prints_dated_nested_notes(tmp_path, monkeypatch):
+def test_expand_prints_dated_nested_notes(tmp_path, monkeypatch, summem):
     """An under-budget nap expands to dated leaf lines from each child's name stamp."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
@@ -230,9 +230,9 @@ def test_expand_prints_dated_nested_notes(tmp_path, monkeypatch):
     ]
 
 
-def test_zoom_expanded_child_id(tmp_path, monkeypatch):
+def test_zoom_expanded_child_id(tmp_path, monkeypatch, summem):
     """An id printed by expand can be zoomed to that child's kids or text."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     _two_eights(m, repo)
     monkeypatch.setattr(m, "WAKE_LINES", 4)

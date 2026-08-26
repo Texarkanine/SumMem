@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from random import Random
 
-from conftest import dated_leaf, load_summem
+from conftest import dated_leaf
 from gitutil import init_repo, reaches
 
 UTC = timezone.utc
@@ -36,9 +36,9 @@ def _tree_for(m, parent, cid: str):
     return None
 
 
-def test_reaches_nested_sentence_when_zoom_prints_wake_lines(tmp_path, monkeypatch):
+def test_reaches_nested_sentence_when_zoom_prints_wake_lines(tmp_path, monkeypatch, summem):
     """reaches finds a nested original when zoom_text prints wake grammar, not 64-hex ids."""
-    m = load_summem()
+    m = summem
     repo = init_repo(tmp_path / "r")
     for i, text in enumerate(["a1", "a2", "b1", "b2"], start=1):
         m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
