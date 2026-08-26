@@ -135,3 +135,12 @@ Give naps a five-part stem with a pair-bytes variant tag so concurrent same-bloc
 * Insights
     - Dual-read was a skip-migrate cushion, not a migrate gap. The operator's 0.x consumer set does not need it.
 
+## 2026-08-25 - ARCHIVE
+
+* Work completed
+    - [PR #62](https://github.com/Texarkanine/SumMem/pull/62) review judged; operator dismissed every item (CodeRabbit stale-346 / brief hash wording / mixed-pair `_write_pair`, and both migrate crash-between-`replace` comments). Leaving Reflect for Archive.
+* Decisions made
+    - No migrate recoverability work. Happy-path two-`replace` stays. The kill window is real and near-zero.
+* Insights
+    - The two migrate findings were one hole. Cursor's copy-then-unlink was the cheaper repair; neither was worth a Build rerun.
+

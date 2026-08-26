@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: nap-variant-stems
-**Phase:** REFLECT - COMPLETE
+**Phase:** ARCHIVE - IN-PROGRESS
 
 ## What Was Done
 
