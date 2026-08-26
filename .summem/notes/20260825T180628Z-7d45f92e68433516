@@ -1,1 +1,0 @@
-SLOBAC 2026-08-25 ratchet applied to tests: proofs kept as file-backend acceptance; CI has no 3.10 so the source-order 3.11-floor pin stays.

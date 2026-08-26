@@ -60,7 +60,7 @@ A **nap** is a summary of two neighbors in the listing. It is two files that sha
 - The **caption** (`.summ`) is one line, the same length limit as a note. Wake prints it.
 - The **children file** (`.tree`) is a dump of those two neighbors. Zoom and deep recall need it after squash.
 
-The shared name starts with the left child’s time and random suffix so the nap sorts where that child sorted, not at “now.” After that come the leaf-set id, the grain, and a 16-hex variant tag of the pair bytes. Agents never see or type the tag. The public id is still the leaf-set field.
+The shared name starts with the left child’s time and random suffix so the nap sorts where that child sorted, not at “now.” After that come the leaf-set id, the grain, and a 16-hex variant tag of the pair bytes. Agents never see or type the tag. The public id is still the leaf-set field. Four-part names are not view nodes; `migrate.py` rewrites them.
 
 Fold writes a new pair, then removes the children from the listing. Children leave the working tree only after the parent children file exists on disk.
 
@@ -364,4 +364,4 @@ SumMem is also not:
 | Package vs repo vs machine-global | Scopes. Store, driver, and activation. |
 | How a directory becomes a store | `start`. Empty packages stay empty. |
 | Disk format or a new backend | The agent interface must not change. Store roles must still exist. See [Notes](../notes.md). |
-| On-disk nap filenames (four-part to five-part) | Run `migrate.py` from the repository root. Do not `mv` by hand. The script hashes on-disk pair bytes and renames complete pairs. |
+| On-disk nap filenames (four-part to five-part) | Run `migrate.py` from a clone of this repository against the target git root. Do not `mv` by hand. The script hashes on-disk pair bytes and renames complete pairs. Unmigrated four-part files are invisible to the driver. |

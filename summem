@@ -454,17 +454,15 @@ def child_nap_stem(child: NapChild) -> tuple[str, bytes, bytes]:
 
 def _parse_nap_stem(stem: str) -> tuple[str, str, str, int, str] | None:
     parts = stem.split("-")
-    if len(parts) not in (4, 5):
+    if len(parts) != 5:
         return None
-    stamp, rand, leafset, leaves_s = parts[:4]
-    variant = parts[4] if len(parts) == 5 else ""
-    if len(stamp) != 16 or len(rand) != 16 or len(leafset) != 64 or not leaves_s.isdigit():
+    stamp, rand, leafset, leaves_s, variant = parts
+    if len(stamp) != 16 or len(rand) != 16 or len(leafset) != 64 or len(variant) != 16:
         return None
-    if any(c not in "0123456789abcdef" for c in rand + leafset):
+    if not leaves_s.isdigit():
         return None
-    if len(parts) == 5:
-        if len(variant) != 16 or any(c not in "0123456789abcdef" for c in variant):
-            return None
+    if any(c not in "0123456789abcdef" for c in rand + leafset + variant):
+        return None
     return stamp, rand, leafset, int(leaves_s), variant
 
 

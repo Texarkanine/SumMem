@@ -419,8 +419,8 @@ def test_heal_three_equal_variants_same_survivor_any_order(tmp_path):
     assert len(set(survivors)) == 1
 
 
-def test_heal_legacy_four_part_loses_to_five_part(tmp_path):
-    """A four-part equal-set twin unlinks; the five-part pair remains."""
+def test_heal_ignores_four_part_twin(tmp_path):
+    """A four-part equal-set twin is not a view node; heal leaves those files and the five-part pair."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     paths = _write_notes(m, repo, ["alpha", "beta"])
@@ -433,12 +433,12 @@ def test_heal_legacy_four_part_loses_to_five_part(tmp_path):
     naps = repo / ".summem" / "naps"
     (naps / f"{four}.tree").write_bytes(tree_bytes)
     (naps / f"{four}.summ").write_bytes(caption_bytes)
-    assert four < node.name
     m.heal_view(repo)
     left = [n for n in m.list_view(repo) if n.kind == "nap"]
     assert len(left) == 1
     assert left[0].name == node.name
-    assert not (naps / f"{four}.tree").exists()
+    assert (naps / f"{four}.tree").is_file()
+    assert (naps / f"{four}.summ").is_file()
     assert reaches(m, repo, "alpha") and reaches(m, repo, "beta")
 
 

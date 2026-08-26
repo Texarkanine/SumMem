@@ -217,15 +217,15 @@ def test_nap_stem_is_five_part():
     assert got_tag == tag
 
 
-def test_parse_nap_stem_four_and_five_part():
-    """Four-part stems parse with variant ''; five-part stems expose the 16-hex variant."""
+def test_parse_nap_stem_five_part_only():
+    """Five-part stems parse; four-part stems are not view names."""
     m = load_summem()
     stamp = "20260101T000000Z"
     rand = "a" * 16
     leafset = "b" * 64
     four = f"{stamp}-{rand}-{leafset}-2"
     five = f"{four}-{'c' * 16}"
-    assert m._parse_nap_stem(four) == (stamp, rand, leafset, 2, "")
+    assert m._parse_nap_stem(four) is None
     assert m._parse_nap_stem(five) == (stamp, rand, leafset, 2, "c" * 16)
 
 

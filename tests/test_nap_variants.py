@@ -7,6 +7,8 @@ import sys
 from datetime import datetime, timedelta, timezone
 from random import Random
 
+import pytest
+
 from conftest import SCRIPT, load_summem
 from gitutil import git, init_repo, reaches, zoom_reaches
 
@@ -310,8 +312,8 @@ def test_no_conflict_markers_or_mismatched_pair(tmp_path):
     assert _unmerged(wt_a) == []
 
 
-def test_legacy_four_part_wake_zoom_recall(tmp_path, monkeypatch):
-    """A planted four-part pair still wakes, zooms, and recalls."""
+def test_legacy_four_part_is_not_a_view_node(tmp_path):
+    """A planted four-part pair is invisible until migrate.py rewrites it."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
@@ -329,14 +331,11 @@ def test_legacy_four_part_wake_zoom_recall(tmp_path, monkeypatch):
     (naps / f"{four}.summ").write_bytes(node.sum_path.read_bytes())
     node.tree_path.unlink()
     node.sum_path.unlink()
-    monkeypatch.setattr(m, "WAKE_LINES", 1)
-    wake = m.wake_text(repo)
-    prefix = m.short_id(leafset, [leafset])
-    assert wake == f"x2 {prefix}: pair\n"
-    zoom = m.zoom_text(repo, leafset)
-    assert "alpha" in zoom and "beta" in zoom
-    recall = m.recall_text(repo, "pair")
-    assert "pair" in recall
+    assert [n for n in m.list_view(repo) if n.kind == "nap"] == []
+    assert "pair" not in m.wake_text(repo)
+    with pytest.raises(ValueError, match="unknown id"):
+        m.zoom_text(repo, leafset)
+    assert "pair" not in m.recall_text(repo, "pair")
 
 
 def test_rematerialize_legacy_parent_writes_five_part_children(tmp_path):

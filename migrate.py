@@ -39,6 +39,19 @@ def load_summem():
     return mod
 
 
+def _four_part_stem(stem: str) -> tuple[str, str, str, int] | None:
+    """Return stamp, rand, leafset, grain for a pre-variant nap stem, or None."""
+    parts = stem.split("-")
+    if len(parts) != 4:
+        return None
+    stamp, rand, leafset, leaves_s = parts
+    if len(stamp) != 16 or len(rand) != 16 or len(leafset) != 64 or not leaves_s.isdigit():
+        return None
+    if any(c not in "0123456789abcdef" for c in rand + leafset):
+        return None
+    return stamp, rand, leafset, int(leaves_s)
+
+
 def _migrate_store(m, parent) -> bool:
     """Rename complete four-part pairs under *parent*. Return True if an incomplete pair was skipped."""
     naps = Path(parent) / ".summem" / "naps"
@@ -53,12 +66,10 @@ def _migrate_store(m, parent) -> bool:
         stems.setdefault(path.stem, {})[path.suffix] = path
     incomplete = False
     for stem, files in stems.items():
-        parsed = m._parse_nap_stem(stem)
-        if parsed is None:
+        four = _four_part_stem(stem)
+        if four is None:
             continue
-        stamp, rand, leafset, grain, variant = parsed
-        if variant:
-            continue
+        stamp, rand, leafset, grain = four
         tree_path = files.get(".tree")
         sum_path = files.get(".summ")
         if tree_path is None or sum_path is None:

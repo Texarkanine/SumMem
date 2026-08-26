@@ -52,10 +52,8 @@ def _legacy_complete_pair(m, repo, caption="pair"):
 
 
 def _five_part(m, four: str, tree_bytes: bytes, caption_bytes: bytes) -> str:
-    parsed = m._parse_nap_stem(four)
-    assert parsed is not None
-    stamp, rand, leafset, grain, _variant = parsed
-    return m.nap_stem(f"{stamp}-{rand}", leafset, grain, tree_bytes, caption_bytes)
+    stamp, rand, leafset, grain = four.split("-")
+    return m.nap_stem(f"{stamp}-{rand}", leafset, int(grain), tree_bytes, caption_bytes)
 
 
 def test_migrate_renames_four_part_complete_pair(tmp_path, monkeypatch):
