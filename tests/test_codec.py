@@ -245,3 +245,16 @@ def test_parse_nap_stem_rejects_bad_shape():
     assert m._parse_nap_stem(six) is None
     assert m._parse_nap_stem(non_hex) is None
     assert m._parse_nap_stem(non_digit) is None
+
+
+def test_child_nap_stem_returns_stem_and_pair_bytes():
+    """child_nap_stem serializes the NapChild once and names it with nap_stem."""
+    m = load_summem()
+    left = m.NoteChild(name="20260101T000001Z-" + "a" * 16, text="alpha")
+    right = m.NoteChild(name="20260101T000002Z-" + "b" * 16, text="beta")
+    tree = m.Tree(kids=[left, right])
+    child = m.NapChild(id="c" * 64, sum="pair", tree=tree)
+    stem, tree_bytes, caption_bytes = m.child_nap_stem(child)
+    assert tree_bytes == m.dumps_tree(tree)
+    assert caption_bytes == m.note_file_bytes("pair")
+    assert stem == m.nap_stem(left.name, child.id, 2, tree_bytes, caption_bytes)

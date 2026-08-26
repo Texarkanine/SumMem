@@ -294,7 +294,7 @@ def test_rematerialize_nap_stem_uses_leftmost_seq_child_id_and_leaves(tmp_path):
     """A NapChild stem is nap_stem of the same tree and caption bytes later written."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
-    paths = _write_notes(m, repo, ["alpha", "beta"])
+    _write_notes(m, repo, ["alpha", "beta"])
     ids = [node.id for node in m.list_view(repo)]
     m.write_nap(repo, ids[0], ids[1], "pair")
     node = m.list_view(repo)[0]
@@ -302,9 +302,7 @@ def test_rematerialize_nap_stem_uses_leftmost_seq_child_id_and_leaves(tmp_path):
     child = m.NapChild(id=node.id, sum=node.caption, tree=inner)
     m._unlink_node(node)
     m.rematerialize_child(repo, child)
-    tree_bytes = m.dumps_tree(inner)
-    caption_bytes = m.note_file_bytes("pair")
-    stem = m.nap_stem(paths[0].name, child.id, 2, tree_bytes, caption_bytes)
+    stem, tree_bytes, caption_bytes = m.child_nap_stem(child)
     naps = repo / ".summem" / "naps"
     assert (naps / f"{stem}.tree").read_bytes() == tree_bytes
     assert (naps / f"{stem}.summ").read_bytes() == caption_bytes
@@ -341,23 +339,12 @@ def test_rematerialize_nested_child_uses_child_pair_bytes(tmp_path):
     assert isinstance(child, m.NapChild)
     m._unlink_node(parent)
     m.rematerialize_child(repo, child)
-    tree_bytes = m.dumps_tree(child.tree)
-    caption_bytes = m.note_file_bytes(child.sum)
-    leftmost = next(m._note_children(child.tree))
-    leaves = len(m._digests_of_tree(child.tree))
-    stem = m.nap_stem(m._seq_prefix(leftmost.name), child.id, leaves, tree_bytes, caption_bytes)
+    stem, tree_bytes, caption_bytes = m.child_nap_stem(child)
     naps = repo / ".summem" / "naps"
     assert (naps / f"{stem}.tree").read_bytes() == tree_bytes
     assert (naps / f"{stem}.summ").read_bytes() == caption_bytes
-    parent_bytes = m.dumps_tree(inner)
-    parent_caption = m.note_file_bytes(parent.caption)
-    parent_stem = m.nap_stem(
-        m._seq_prefix(next(m._note_children(inner)).name),
-        parent.id,
-        4,
-        parent_bytes,
-        parent_caption,
-    )
+    parent_as_child = m.NapChild(id=parent.id, sum=parent.caption, tree=inner)
+    parent_stem, _, _ = m.child_nap_stem(parent_as_child)
     assert stem != parent_stem
 
 
@@ -456,7 +443,7 @@ def test_heal_legacy_four_part_loses_to_five_part(tmp_path):
 
 
 def test_rematerialize_does_not_clobber_existing_dest(tmp_path):
-    """A second rematerialize leaves an existing dest unchanged."""
+    """A second rematerialize leaves an existing dest unchanged, including at the child's actual nap stem."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
     m.ensure_store(repo)
@@ -471,12 +458,14 @@ def test_rematerialize_does_not_clobber_existing_dest(tmp_path):
     m.write_nap(repo2, ids[0], ids[1], "pair")
     node = m.list_view(repo2)[0]
     inner = m.loads_tree(node.tree_path.read_bytes())
-    child = m.NapChild(id=node.id, sum="other", tree=inner)
-    tree_bytes = node.tree_path.read_bytes()
-    sum_bytes = node.sum_path.read_bytes()
+    child = m.NapChild(id=node.id, sum=node.caption, tree=inner)
+    sentinel_tree = b"SENTINEL_TREE\n"
+    sentinel_summ = b"SENTINEL_SUMM\n"
+    node.tree_path.write_bytes(sentinel_tree)
+    node.sum_path.write_bytes(sentinel_summ)
     m.rematerialize_child(repo2, child)
-    assert node.tree_path.read_bytes() == tree_bytes
-    assert node.sum_path.read_bytes() == sum_bytes
+    assert node.tree_path.read_bytes() == sentinel_tree
+    assert node.sum_path.read_bytes() == sentinel_summ
 
 
 def test_heal_ab_vs_abcd_keeps_coarse_pack(tmp_path):

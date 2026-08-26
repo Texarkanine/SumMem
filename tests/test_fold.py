@@ -79,7 +79,7 @@ def test_write_nap_serializes_tree_once(tmp_path, monkeypatch):
     """write_nap calls dumps_tree once for a two-note fold."""
     m = load_summem()
     repo = init_repo(tmp_path / "r")
-    pa = m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
     orig = m.dumps_tree
     calls = {"n": 0}
@@ -92,7 +92,6 @@ def test_write_nap_serializes_tree_once(tmp_path, monkeypatch):
     nodes = m.list_view(repo)
     m.write_nap(repo, nodes[0].id, nodes[1].id, "pair")
     assert calls["n"] == 1
-    assert pa.exists() is False
 
 
 def test_same_second_nap_stays_in_left_slot(tmp_path):

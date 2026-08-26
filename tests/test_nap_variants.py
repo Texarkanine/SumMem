@@ -367,13 +367,8 @@ def test_rematerialize_legacy_parent_writes_five_part_children(tmp_path):
     for kid in inner.kids:
         assert isinstance(kid, m.NapChild)
         m.rematerialize_child(repo, kid)
-        kid_bytes = m.dumps_tree(kid.tree)
-        kid_caption = m.note_file_bytes(kid.sum)
-        leftmost = next(m._note_children(kid.tree))
-        leaves = len(m._digests_of_tree(kid.tree))
-        stem = m.nap_stem(
-            m._seq_prefix(leftmost.name), kid.id, leaves, kid_bytes, kid_caption
-        )
+        stem, kid_bytes, _caption = m.child_nap_stem(kid)
         assert (naps / f"{stem}.tree").is_file()
+        assert (naps / f"{stem}.tree").read_bytes() == kid_bytes
         assert m._parse_nap_stem(stem)[4]
         assert four not in stem

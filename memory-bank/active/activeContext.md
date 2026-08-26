@@ -11,6 +11,7 @@
 - Sibling `migrate.py` hashes on-disk pair bytes and rewrites complete four-part pairs. This clone's root and dogfood stores were migrated.
 - Atlas, `systemPatterns.md`, and `productContext.md` now describe union-then-zipper. Dry-run on migrate stayed out (advisory, not a planned unit).
 - QA PASS with advisories (none blocking). Reflection in `memory-bank/active/reflection/reflection-nap-variant-stems.md`.
+- Post-QA: `child_nap_stem` shared by rematerialize and surgery; clobber and serialize-once tests repaired; `started_stores` no longer lists a phantom root.
 
 ## Next Step
 

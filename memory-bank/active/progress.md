@@ -113,3 +113,14 @@ Give naps a five-part stem with a pair-bytes variant tag so concurrent same-bloc
     - A four-part stem is a proper prefix of the matching five-part stem, so lex order already drops legacy. Deleting `_nap_stem` is not reuse until callers share the serialize-then-name helper.
     - Invert tests in the same unit that changes the behavior they pin; preflight's encoding check is what caught the first plan.
 
+## 2026-08-25 - QA-ADVISORY FOLLOW-UP
+
+* Work completed
+    - Added `child_nap_stem`; rematerialize and `plan_break_out` share it. Pinned that surgery's predicted kid stem is the dest rematerialize writes.
+    - Rewrote the nap half of `test_rematerialize_does_not_clobber_existing_dest` to plant sentinels at the child's actual stem. Dropped the unrelated unlink assert from `test_write_nap_serializes_tree_once`.
+    - `started_stores` lists the git root only when `.summem` is a directory; tracked `.summem/` paths no longer invent a phantom root.
+* Decisions made
+    - Leave migrate silent-skip, dest-exists, and consumer-repo docs alone: happy path is what this operator needs.
+* Insights
+    - The ls-files `.summem/` branch was adding the root a second time whenever `is_store(root)` was already true, and was the only way a missing working-tree store could appear in the list.
+

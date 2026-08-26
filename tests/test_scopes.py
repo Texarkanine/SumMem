@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import shlex
+import shutil
+import subprocess
 import tomllib
 
 from conftest import load_summem
@@ -511,4 +513,16 @@ def test_started_stores_includes_root_and_other_parents(tmp_path):
     stores = {path.resolve() for path in m.started_stores(repo)}
     assert repo.resolve() in stores
     assert pkg.resolve() in stores
+
+
+def test_started_stores_omits_root_without_store_directory(tmp_path):
+    """Tracked .summem paths do not list the git root if .summem is not a directory."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    m.ensure_store(repo)
+    (repo / ".summem" / "notes" / "placeholder").write_text("x\n", encoding="utf-8")
+    subprocess.run(["git", "add", ".summem"], cwd=repo, check=True, capture_output=True)
+    shutil.rmtree(repo / ".summem")
+    stores = {path.resolve() for path in m.started_stores(repo)}
+    assert repo.resolve() not in stores
 

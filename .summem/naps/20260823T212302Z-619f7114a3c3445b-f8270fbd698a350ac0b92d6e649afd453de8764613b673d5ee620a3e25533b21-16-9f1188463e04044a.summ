@@ -1,0 +1,1 @@
+Wake/recall/zoom share format_wake_line; named_ids catches tree-parse errors; fold_request adds --path when walk-up would miss. Root wake prints how_to under Usage; skip a second when that block is still readable. Onboarding is init; 3.11 floor is right after import sys.

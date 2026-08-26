@@ -363,9 +363,6 @@ def started_stores(git_root) -> list[Path]:
             continue
         rel = raw.decode("utf-8", "surrogateescape")
         posix = Path(rel).as_posix()
-        if posix == ".summem" or posix.startswith(".summem/"):
-            found.add(root)
-            continue
         marker = "/.summem/"
         idx = posix.find(marker)
         if idx < 0:
@@ -443,6 +440,16 @@ def nap_stem(
     """Return `{seq}-{leafset}-{grain}-{variant_tag}` for a nap pair."""
     tag = variant_tag(tree_bytes, caption_bytes)
     return f"{seq_prefix}-{leafset}-{grain}-{tag}"
+
+
+def child_nap_stem(child: NapChild) -> tuple[str, bytes, bytes]:
+    """Return ``(stem, tree_bytes, caption_bytes)`` for *child*'s nap pair."""
+    leftmost = next(_note_children(child.tree))
+    leaves = len(_digests_of_tree(child.tree))
+    tree_bytes = dumps_tree(child.tree)
+    caption_bytes = note_file_bytes(child.sum)
+    stem = nap_stem(_seq_prefix(leftmost.name), child.id, leaves, tree_bytes, caption_bytes)
+    return stem, tree_bytes, caption_bytes
 
 
 def _parse_nap_stem(stem: str) -> tuple[str, str, str, int, str] | None:
@@ -597,11 +604,7 @@ def rematerialize_child(parent, child: NoteChild | NapChild) -> None:
             return
         _replace_bytes(dest, note_file_bytes(child.text))
         return
-    leftmost = next(_note_children(child.tree))
-    leaves = len(_digests_of_tree(child.tree))
-    tree_bytes = dumps_tree(child.tree)
-    caption_bytes = note_file_bytes(child.sum)
-    stem = nap_stem(_seq_prefix(leftmost.name), child.id, leaves, tree_bytes, caption_bytes)
+    stem, tree_bytes, caption_bytes = child_nap_stem(child)
     naps = store / "naps"
     tree_path = naps / f"{stem}.tree"
     sum_path = naps / f"{stem}.summ"
