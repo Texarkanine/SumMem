@@ -1,0 +1,1 @@
+CI runs tox py311-py314 on pull requests and on main; tox -e coverage and the Codecov upload run only on pushes to main.

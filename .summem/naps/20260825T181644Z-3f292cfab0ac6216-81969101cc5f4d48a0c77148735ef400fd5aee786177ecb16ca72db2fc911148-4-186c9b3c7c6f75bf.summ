@@ -1,0 +1,1 @@
+Process-level tests renamed off test_proof_*; zoom pin is the selected nap's two public wake lines. slobac-audit-ratchet archived (19 fixes, PR #48; findings 14, 60-63 kept). Perf @5k: wake ~1ms, startup ~120ms, heal 81ms, recall short_id 19s, catalog walk 44ms vs ls-files 2.5ms

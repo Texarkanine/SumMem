@@ -1,1 +1,0 @@
-slobac-audit-ratchet archived: 19 fixes + PR #48 zoom pin; findings 14 and 60-63 kept. Perf audit @5k: wake ~1ms; startup ~120ms; heal 81ms/note; recall short_id 19s; catalog walk 44ms vs git ls-files 2.5ms
