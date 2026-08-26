@@ -49,3 +49,27 @@ Shorten stored nap leaf-set ids to 16 hex; grow `migrate.py` so one pass rewrite
     - Advisories 4–7 folded into the plan because they would fail a second preflight or ship a vacuous test. Advisory 8 (rebuild identity from content) not adopted.
 * Insights
     - Grain-32 in this clone is why recursion is load-bearing, not only the grain-4 migrate test.
+
+## 2026-08-26 - PREFLIGHT - FAIL (fixable)
+
+* Work completed
+    - Second preflight verified that the revised plan resolves every defect and advisory folded in from the first run.
+    - Found two remaining migration-unit defects: recursion lacks a depth-two red test, and the implementation step computes rewritten tree bytes without persisting them before `Path.replace`.
+* Decisions made
+    - Replan unit 2 before build: add a grain-8-or-deeper legacy fixture and name the atomic rewritten-tree write before the rename sequence.
+    - Keep content-derived identity rebuild as advisory only; #67 remains a stored-id truncation migration.
+* Insights
+    - The current root store's trees contain no nested `"id"` fields; dogfood exercises only one nested level, so applying migration to this clone cannot validate recursion.
+    - `Path.replace` moves the original file bytes; computing a new buffer and hashing it into the destination stem does not write that buffer.
+
+## 2026-08-26 - PLAN - COMPLETE
+
+* Work completed
+    - Unit 2 tests: add grain-8 five-part-64 fixture with nap ids at two nested depths; dest variant hashes fully rewritten bytes.
+    - Unit 2 code: `_write_pair(dest, rewritten_tree_bytes, caption_bytes)` then unlink sources. Never `Path.replace` source `.tree` onto dest.
+    - Unit 4 inventory corrected: root grain-32/16/8 trees nest 64-hex ids; dogfood grain-4 is one level. Recursion is still pinned by the grain-8 test.
+* Decisions made
+    - Keep content-rebuild migrate advisory. Truncate stored ids as specified.
+    - Did not copy the second preflight’s “root has no nested id fields” — that is false of the current trees.
+* Insights
+    - Grain-4 is one nested nap `id` level. Recursion needs a grandchild.

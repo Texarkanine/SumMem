@@ -4,8 +4,8 @@
 **Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Preflight [16-hex](b3553147-eb60-419f-867f-23d3d5c62477) returned FAIL (fixable). Replanned: README walkthrough in unit 3; struck the phantom #61 “do not shorten” sentence; unit 1 names `tests/test_migrate.py` expected-red until unit 2. Also: recursive `_shorten_tree` via `_replace`; unit 4 relabeled data migration + `tox run-parallel`; wake line 270 named.
-- Did not adopt the advisory rebuild-from-content migrate: #67 specifies truncate stored ids, not recompute from leaves.
+- Second preflight [16-hex v2](5d42cb54-e52c-4231-93b6-1bad20ff1992) FAIL (fixable): grain-4 cannot prove `_shorten_tree` recursion; `Path.replace` of source `.tree` would keep 64-hex bytes under the new stem.
+- Replanned unit 2: grain-8 two-depth fixture (child and grandchild `id`s 16 hex); persist via `_write_pair` then unlink sources. Unit 4 inventory: this clone’s grain-32/16/8 trees do nest 64-hex ids (preflight’s “no nested id” claim was wrong); tests still own recursion after migrate.
 
 ## Next Step
 - Re-run Preflight on the revised plan.
