@@ -88,6 +88,15 @@ def _fold_balanced(m, repo, texts, caption, start):
     return remaining[0]
 
 
+def _plant_variant(m, naps, seq, leafset, grain, tree_bytes, caption) -> str:
+    """Write a complete nap pair named by nap_stem of *tree_bytes* and *caption*."""
+    caption_bytes = m.note_file_bytes(caption)
+    stem = m.nap_stem(seq, leafset, grain, tree_bytes, caption_bytes)
+    (naps / f"{stem}.tree").write_bytes(tree_bytes)
+    (naps / f"{stem}.summ").write_bytes(caption_bytes)
+    return stem
+
+
 def _sum_sentences(m, repo) -> set[str]:
     found: set[str] = set()
     naps = repo / ".summem" / "naps"
@@ -373,6 +382,77 @@ def test_rematerialize_serializes_tree_once(tmp_path, monkeypatch):
     monkeypatch.setattr(m, "dumps_tree", wrapped)
     m.rematerialize_child(repo, child)
     assert calls["n"] == 1
+
+
+def test_heal_equal_five_part_variants_keeps_lex_greatest(tmp_path):
+    """Two five-part equal-set pairs collapse to the lexicographically greatest stem."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    paths = _write_notes(m, repo, ["alpha", "beta"])
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "one")
+    node = m.list_view(repo)[0]
+    tree_bytes = node.tree_path.read_bytes()
+    seq = m._seq_prefix(paths[0].name)
+    naps = repo / ".summem" / "naps"
+    stem_two = _plant_variant(m, naps, seq, node.id, 2, tree_bytes, "two")
+    stems = sorted({node.name, stem_two})
+    m.heal_view(repo)
+    left = [n for n in m.list_view(repo) if n.kind == "nap"]
+    assert len(left) == 1
+    assert left[0].name == max(stems)
+    assert (naps / f"{left[0].name}.tree").is_file()
+    assert (naps / f"{left[0].name}.summ").is_file()
+    assert reaches(m, repo, "alpha") and reaches(m, repo, "beta")
+
+
+def test_heal_three_equal_variants_same_survivor_any_order(tmp_path):
+    """Three equal-set variants collapse to the same lex-greatest stem in any plant order."""
+    m = load_summem()
+    captions_orders = [("one", "two", "zzz"), ("zzz", "one", "two"), ("two", "zzz", "one")]
+    survivors = []
+    for i, captions in enumerate(captions_orders):
+        repo = init_repo(tmp_path / f"r{i}")
+        paths = _write_notes(m, repo, ["alpha", "beta"])
+        ids = [node.id for node in m.list_view(repo)]
+        m.write_nap(repo, ids[0], ids[1], captions[0])
+        node = m.list_view(repo)[0]
+        tree_bytes = node.tree_path.read_bytes()
+        seq = m._seq_prefix(paths[0].name)
+        naps = repo / ".summem" / "naps"
+        stems = {node.name}
+        for caption in captions[1:]:
+            stems.add(_plant_variant(m, naps, seq, node.id, 2, tree_bytes, caption))
+        m.heal_view(repo)
+        left = [n for n in m.list_view(repo) if n.kind == "nap"]
+        assert len(left) == 1
+        assert left[0].name == max(stems)
+        survivors.append(left[0].name)
+        assert reaches(m, repo, "alpha") and reaches(m, repo, "beta")
+    assert len(set(survivors)) == 1
+
+
+def test_heal_legacy_four_part_loses_to_five_part(tmp_path):
+    """A four-part equal-set twin unlinks; the five-part pair remains."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    paths = _write_notes(m, repo, ["alpha", "beta"])
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    node = m.list_view(repo)[0]
+    tree_bytes = node.tree_path.read_bytes()
+    caption_bytes = node.sum_path.read_bytes()
+    four = f"{m._seq_prefix(paths[0].name)}-{node.id}-2"
+    naps = repo / ".summem" / "naps"
+    (naps / f"{four}.tree").write_bytes(tree_bytes)
+    (naps / f"{four}.summ").write_bytes(caption_bytes)
+    assert four < node.name
+    m.heal_view(repo)
+    left = [n for n in m.list_view(repo) if n.kind == "nap"]
+    assert len(left) == 1
+    assert left[0].name == node.name
+    assert not (naps / f"{four}.tree").exists()
+    assert reaches(m, repo, "alpha") and reaches(m, repo, "beta")
 
 
 def test_rematerialize_does_not_clobber_existing_dest(tmp_path):
