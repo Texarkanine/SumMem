@@ -245,6 +245,7 @@ No new technology - validation not required. `hashlib` and `SourceFileLoader` ar
   - [x] Unit 7: migrate.py
   - [x] Unit 8: atlas, patterns, product copy
 - [x] QA
+- [x] Reflect
 
 ## QA Results
 

@@ -103,3 +103,13 @@ Give naps a five-part stem with a pair-bytes variant tag so concurrent same-bloc
     - `migrate.py` loads its sibling `summem` by `__file__` and picks stores from `cwd`. The atlas row does not say so, and a consumer repo has `.summem/summem` but no `migrate.py`. Use-Case 3 needs that sentence in the PR body.
     - Five-part stems make `test_rematerialize_does_not_clobber_existing_dest`'s nap half vacuous: a different caption can no longer collide.
 
+## 2026-08-25 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-nap-variant-stems.md`. Reconciled persistent files: surgical `techContext.md` note that `migrate.py` has no `__version__` and is not a Release Please extra-file; `productContext.md` and `systemPatterns.md` already matched the shipped union-then-zipper contract.
+* Decisions made
+    - No Build rerun for QA advisories. Carry consumer-repo migrate invocation and close-#59-as-superseded into the PR body at archive.
+* Insights
+    - A four-part stem is a proper prefix of the matching five-part stem, so lex order already drops legacy. Deleting `_nap_stem` is not reuse until callers share the serialize-then-name helper.
+    - Invert tests in the same unit that changes the behavior they pin; preflight's encoding check is what caught the first plan.
+

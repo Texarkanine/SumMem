@@ -1,0 +1,1 @@
+Root wake prints how_to under Usage and catalogs other stores; skip a second root wake when that Usage block is still readable. Onboarding is init (bootstrap only); 3.11 floor is right after import sys.
