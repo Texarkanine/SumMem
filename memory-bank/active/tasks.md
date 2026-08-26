@@ -237,7 +237,7 @@ No new technology - validation not required. `hashlib` and `SourceFileLoader` ar
 - [x] Preflight
 - [ ] Build
   - [x] Unit 1: pair digest, stem constructor, dual-read parse
-  - [ ] Unit 2: write_nap five-part
+  - [x] Unit 2: write_nap five-part
   - [ ] Unit 3: rematerialize uses nap_stem
   - [ ] Unit 4: equal-set heal survivor
   - [ ] Unit 5: concurrent union proofs

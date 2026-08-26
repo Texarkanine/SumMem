@@ -42,13 +42,15 @@ def test_nap_two_adjacent_notes_writes_pair_and_unlinks(tmp_path, monkeypatch):
     da = m.note_digest(pa.read_bytes())
     db = m.note_digest(pb.read_bytes())
     leafset = m.leafset_id([da, db])
-    stem = f"{pa.name}-{leafset}-2"
     expected = m.Tree(
         kids=[
             m.NoteChild(name=pa.name, text="alpha"),
             m.NoteChild(name=pb.name, text="beta"),
         ]
     )
+    tree_bytes = m.dumps_tree(expected)
+    caption_bytes = m.note_file_bytes("pair")
+    stem = m.nap_stem(pa.name, leafset, 2, tree_bytes, caption_bytes)
     id_a, id_b = _ids(m, repo)
     sum_path = m.write_nap(repo, id_a, id_b, "pair")
     naps = repo / ".summem" / "naps"
@@ -65,8 +67,29 @@ def test_nap_two_adjacent_notes_writes_pair_and_unlinks(tmp_path, monkeypatch):
     assert lines == [f"x2 {prefix}: pair"]
 
 
+def test_write_nap_hashes_the_bytes_it_writes(tmp_path):
+    """On-disk .tree and .summ bytes equal the buffers hashed into the stem."""
+    m = load_summem()
+    repo = init_repo(tmp_path / "r")
+    _two_notes(m, repo)
+    ids = _ids(m, repo)
+    m.write_nap(repo, ids[0], ids[1], "pair")
+    naps = repo / ".summem" / "naps"
+    trees = list(naps.glob("*.tree"))
+    sums = list(naps.glob("*.summ"))
+    assert len(trees) == 1 and len(sums) == 1
+    tree_bytes = trees[0].read_bytes()
+    caption_bytes = sums[0].read_bytes()
+    parsed = m._parse_nap_stem(trees[0].stem)
+    assert parsed is not None
+    stamp, rand, leafset, grain, tag = parsed
+    assert tag == m.variant_tag(tree_bytes, caption_bytes)
+    assert trees[0].stem == m.nap_stem(f"{stamp}-{rand}", leafset, grain, tree_bytes, caption_bytes)
+    assert caption_bytes == m.note_file_bytes("pair")
+
+
 def test_same_children_same_tree_bytes_and_paths(tmp_path):
-    """Same two notes and different captions share .tree bytes and dest paths."""
+    """Same two notes and different captions share .tree bytes, not stems or .summ bytes."""
     m = load_summem()
     repo_a = init_repo(tmp_path / "a")
     repo_b = init_repo(tmp_path / "b")
@@ -76,17 +99,18 @@ def test_same_children_same_tree_bytes_and_paths(tmp_path):
     # Same text and timestamps in both repos → same content ids.
     m.write_nap(repo_a, ids[0], ids[1], "one")
     m.write_nap(repo_b, ids[0], ids[1], "two")
-    naps_a = sorted(p.name for p in (repo_a / ".summem" / "naps").iterdir() if not p.name.startswith("."))
-    naps_b = sorted(p.name for p in (repo_b / ".summem" / "naps").iterdir() if not p.name.startswith("."))
-    assert naps_a == naps_b
-    tree_name = [name for name in naps_a if name.endswith(".tree")][0]
-    assert (repo_a / ".summem" / "naps" / tree_name).read_bytes() == (
-        repo_b / ".summem" / "naps" / tree_name
-    ).read_bytes()
-    sum_name = tree_name.removesuffix(".tree") + ".summ"
-    assert (repo_a / ".summem" / "naps" / sum_name).read_bytes() != (
-        repo_b / ".summem" / "naps" / sum_name
-    ).read_bytes()
+    tree_a = next((repo_a / ".summem" / "naps").glob("*.tree"))
+    tree_b = next((repo_b / ".summem" / "naps").glob("*.tree"))
+    sum_a = next((repo_a / ".summem" / "naps").glob("*.summ"))
+    sum_b = next((repo_b / ".summem" / "naps").glob("*.summ"))
+    assert tree_a.read_bytes() == tree_b.read_bytes()
+    assert tree_a.stem != tree_b.stem
+    assert sum_a.read_bytes() != sum_b.read_bytes()
+    parsed_a = m._parse_nap_stem(tree_a.stem)
+    parsed_b = m._parse_nap_stem(tree_b.stem)
+    assert parsed_a is not None and parsed_b is not None
+    assert parsed_a[2] == parsed_b[2]
+    assert parsed_a[4] and parsed_a[4] != parsed_b[4]
 
 
 def test_first_unlink_sees_both_parent_files(tmp_path, monkeypatch):
@@ -268,7 +292,9 @@ def test_nap_of_two_naps_nests_napchild_and_unions_digests(tmp_path):
     assert len(tree.kids) == 2
     assert all(isinstance(kid, m.NapChild) for kid in tree.kids)
     digests = [m.note_digest(m.note_file_bytes(text)) for text in texts]
-    assert trees[0].name.split("-")[-2] == m.leafset_id(digests)
+    parsed = m._parse_nap_stem(trees[0].stem)
+    assert parsed is not None
+    assert parsed[2] == m.leafset_id(digests)
     assert {kid.sum for kid in tree.kids} == {"pack-a", "pack-b"}
     out = m.zoom_text(repo, tree.kids[0].id)
     assert out.splitlines() == [

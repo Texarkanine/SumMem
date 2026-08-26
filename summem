@@ -400,6 +400,12 @@ def _replace_bytes(dest: Path, data: bytes) -> None:
     os.replace(tmp, dest)
 
 
+def _write_pair(naps_dir, stem, tree_bytes, caption_bytes) -> None:
+    """Temp-replace `{stem}.tree` then `{stem}.summ` with the hashed buffers."""
+    _replace_bytes(naps_dir / f"{stem}.tree", tree_bytes)
+    _replace_bytes(naps_dir / f"{stem}.summ", caption_bytes)
+
+
 def _seq_prefix(name: str) -> str:
     """Return the {stamp}-{rand} order key from a note or nap filename."""
     return "-".join(name.split("-")[:2])
@@ -707,15 +713,14 @@ def write_nap(parent, id_a, id_b, caption, entry_chars: int | None = None, nodes
     digests = digs_l + digs_r
     leafset = leafset_id(digests)
     leaves = len(digests)
-    stem = f"{_seq_prefix(left.name)}-{leafset}-{leaves}"
+    tree_bytes = dumps_tree(tree)
+    caption_bytes = note_file_bytes(caption)
+    stem = nap_stem(_seq_prefix(left.name), leafset, leaves, tree_bytes, caption_bytes)
     naps = ensure_store(parent) / "naps"
-    tree_path = naps / f"{stem}.tree"
-    sum_path = naps / f"{stem}.summ"
-    _replace_bytes(tree_path, dumps_tree(tree))
-    _replace_bytes(sum_path, note_file_bytes(caption))
+    _write_pair(naps, stem, tree_bytes, caption_bytes)
     _unlink_node(left)
     _unlink_node(right)
-    return sum_path
+    return naps / f"{stem}.summ"
 
 
 def _zoom_kids(tree: Tree, ids, child_rows: list[ProjectedNode | None] | None = None) -> str:
