@@ -1,10 +1,12 @@
 # Active Context
 
 ## Current Task: tox-speedup
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Complexity Level 2 determined: self-contained test-infra enhancement (parallel tox envs, agent iteration rule, session-scoped `summem` fixture). Product behavior unchanged. Design choices remain (session vs module fixture, monkeypatch isolation, tox.ini hook vs documented `run-parallel`).
+- Classified Level 2.
+- Planned five steps: session `summem` fixture (TDD), replace ~200 `load_summem()` sites (substring contract), `--basetemp="{env_tmp_dir}"` in tox.ini (TDD; enables safe `tox run-parallel`), README/techContext, `.cursor/rules/SumMem-testing.mdc`.
+- Decision: no tox.ini key makes default `tox` parallel; document `tox run-parallel` (`-p auto`, not `-j`). Cache `load_summem` so a stray call cannot replace the session module.
 
 ## Next Step
-- Load the Level 2 workflow and enter Plan.
+- Preflight validation.
