@@ -170,6 +170,6 @@ No new technology - validation not required.
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight (re-run after second FAIL (fixable))
+- [x] Preflight
 - [ ] Build
 - [ ] QA

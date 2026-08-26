@@ -73,3 +73,16 @@ Shorten stored nap leaf-set ids to 16 hex; grow `migrate.py` so one pass rewrite
     - Did not copy the second preflight’s “root has no nested id fields” — that is false of the current trees.
 * Insights
     - Grain-4 is one nested nap `id` level. Recursion needs a grandchild.
+
+## 2026-08-26 - PREFLIGHT - PASS WITH ADVISORY
+
+* Work completed
+    - Third preflight verified the revised plan directly against live code (summem, migrate.py), live tests, live docs, and the fetched GitHub issue #67 body — not just against the plan's own prose.
+    - Confirmed both defects from the second preflight are fixed: grain-8 two-depth fixture pins `_shorten_tree` recursion; unit 2 step 4 now writes via `_write_pair` then unlinks sources instead of `Path.replace`.
+    - Independently re-derived the "leftover 64-hex fixture" grep across all of `tests/` and found no fixture the plan's enumeration missed.
+* Decisions made
+    - No plan changes required. Two advisories recorded, neither blocking: a declarative legacy-stem-upgrade table for `migrate.py` (future-proofing, not this issue), and a non-blocking docstring-precision nit in two unrelated tests.
+* Insights
+    - Live inspection of this clone's root store confirms nested 64-hex `NapChild.id` at depth up to 4 (grain-32), independently validating activeContext's correction of the prior preflight's "no nested id" claim.
+
+

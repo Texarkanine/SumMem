@@ -1,39 +1,18 @@
-FAIL (fixable)
+PASS WITH ADVISORY
 
-# Preflight - 16-hex-leafset
+Third preflight run on the 16-hex-leafset plan (memory-bank/active/tasks.md), after two prior FAIL (fixable) rounds. Verified against live codebase: summem (leafset_id, _parse_nap_stem, NapChild/Tree, dumps_tree/loads_tree, _digests_of_tree/_digests_of_dict, write_nap, child_nap_stem, nap_stem, variant_tag, _write_pair, list_view, _index_tree, named_ids, short_id, resolve_id), migrate.py (_four_part_stem, _migrate_store, main), tests/test_migrate.py, tests/test_codec.py, tests/test_nap_variants.py, tests/test_caption_conflict.py, tests/test_wake.py, tests/test_wake_expand.py, tests/test_cli.py, tests/test_zoom.py, tests/test_nap.py, docs/architecture/index.md, README.md, memory-bank/systemPatterns.md, and GitHub issue #67 (fetched live).
 
-The earlier documentation and sequencing defects are fixed. Two migration-unit defects remain; both have known local fixes and require no redesign.
+## Findings
 
-## FAIL (fixable)
+1. **TDD Plan Encoding — PASS.** Units 1 and 2 both order stub-tests -> stub-interface -> write-tests-red -> write-code-green; no executable unit skips to code-first. Unit 3 (docs) and Unit 4 (apply migrate.py to this clone's stores) correctly claim the prose/no-new-behavior exemption — unit 4 runs an already-tested tool against data, it does not add new production logic. No change-detector tests found in the plan.
+2. **Convention compliance — PASS.** Proposed names (`_old_stem`, `_shorten_tree`) match existing snake_case/underscore-private conventions (`_four_part_stem`, `_migrate_store`). `_shorten_tree`'s use of `m._replace(child, id=..., tree=...)` matches the real `_replace(obj, **changes)` helper (line 105) and `NapChild.__slots__ = ("id", "sum", "tree")` (line 142) — the recursive rebuild is structurally valid.
+3. **Dependency impact — PASS.** Verified `short_id`, `resolve_id`, `_index_tree`, `named_ids` are width-agnostic (no hardcoded 64 assumptions) — truncation living only inside `leafset_id` is sufficient, confirming the plan's stated decision. Verified `_index_tree` line 818 recomputes note ids fresh via `leafset_id(...)`, so note view-id width follows the same truncation automatically without a separate touchpoint.
+4. **Conflict detection — PASS.** No duplicate/overlapping utility found. Confirmed live: root store (`.summem/naps/`) trees nest 64-hex `NapChild.id` at up to depth 4 (grain-32: depth 4, 30 nested ids; grain-16: depth 3; grain-8: depth 2) — this validates the plan's activeContext.md correction of the prior preflight's "no nested id" claim, and confirms recursion is load-bearing for this clone's own unit-4 migration, independent of the unit-2 grain-8 test fixture.
+5. **Completeness — PASS.** Every projectbrief.md acceptance criterion (1-7) maps to a concrete unit/step. Verified all cited doc line numbers exist as claimed: `docs/architecture/index.md:97` ("Stored names keep the full id."), `:309` ("64-hex stays on disk."), `:367` (change-surfaces migrate row); `systemPatterns.md` "Filenames and `.tree` identity stay 64 hex" (single occurrence); `README.md:91-92` (64-hex leafset in both pair basenames) and `:106-121` (note-only example `.tree`, correctly left untouched by the plan). No other "64 hex"/"64-hex" prose occurrences exist in canonical docs beyond what units 3 already targets. Fetched issue #67 live: the table, acceptance list, and "not this issue" list match projectbrief.md and tasks.md verbatim in substance.
+6. **Test-fixture enumeration — PASS.** Grepped all of `tests/` for `== 64`, `!= 64`, and `* 64` independent of the plan's own list. Every hit is already accounted for: the six leaf-set-id fixtures the plan lists (`test_codec.py` x4, `test_wake.py:58`, `test_wake.py:270`, `test_caption_conflict.py:83`, `test_wake_expand.py:182`) need `16`; `test_zoom.py:64`, `test_nap.py:249` (`"0" * 64` passed as an unknown-id CLI argument) and `test_cli.py:37,46` (`"a"*64` as an argparse-arity placeholder, never parsed as a leafset) are correctly exempted as non-stored sentinels per the plan's own Test Infrastructure note. No missed fixture.
+7. **Previous FAIL findings — confirmed resolved.** Second preflight's two defects are both fixed in the current plan text: (a) unit 2 step 1 now specifies a grain-8 two-nested-depth fixture, which a one-level `tree.kids` walk cannot satisfy, correctly pinning `_shorten_tree` recursion; (b) unit 2 step 4 now explicitly forbids `Path.replace` of the source `.tree` onto the destination stem and requires `_write_pair` (verified this helper exists at `summem:410` with the exact signature the plan calls) followed by source unlink.
 
-### 1. Recursive nested-id rewriting has no failing test
+## Advisory items
 
-Unit 2 requires `_shorten_tree` to recurse, but its deepest planned fixture is grain 4: a root tree whose nap children contain notes. A one-level implementation that shortens only `tree.kids` passes that test while leaving grandchild `NapChild.id` values at 64 hex in a deeper tree. That misses Requirements 5-6 and the stated `_shorten_tree` contract.
-
-The plan's evidence is also stale: the current root store has grain 32, 16, 8, and 8 pairs but no nested `"id"` fields; dogfood's grain-4 tree has two 64-hex ids at one level. Applying the migration to this clone therefore cannot prove recursion.
-
-Fix: add or deepen a legacy five-part-64 fixture to at least grain 8, with nap ids at two nested depths. Before production code, assert that every child and grandchild nap id becomes 16 hex and that the destination stem's variant hashes the fully rewritten canonical tree bytes. Correct the unit 4 inventory sentence.
-
-### 2. The implementation step never writes the rewritten tree bytes
-
-Unit 2 step 4 computes `rewritten_tree_bytes = dumps_tree(_shorten_tree(...))`, but then prescribes only `Path.replace` for `.tree` and `.summ`. `Path.replace` renames the original source file; it does not install the rewritten buffer. Following the numbered step literally produces a destination name whose variant hashes rewritten bytes while its `.tree` still contains the old bytes and 64-hex nested ids.
-
-The planned migration test would expose this, but the implementation path itself is contradictory and incomplete.
-
-Fix: after the destination-exists check, explicitly persist the rewritten bytes before the existing rename sequence, for example `m._replace_bytes(tree_path, rewritten_tree_bytes)`, then `tree_path.replace(dest_tree)` and `sum_path.replace(dest_summ)`. An equivalent tested write-and-cleanup sequence is acceptable, but the plan must name it.
-
-## Advisory
-
-### Radical innovation - rebuild identity from content
-
-Instead of extending source-stem grammar on each disk-format change, migrate every complete parseable pair by recursively rebuilding nap ids from descendant note digests, then derive the outer leaf-set, canonical tree bytes, and destination stem from that rebuilt content. This would make future width migrations format-independent and self-heal stem/tree disagreement. The cost remains a broader behavior change: migration would derive identity from content and inspect current-format pairs rather than trusting and filtering old filenames. The operator previously declined this alternative for #67; it remains advisory and is not required for a passing plan.
-
-## Checks that passed
-
-- Prerequisites are complete for Level 3. No creative phase was flagged or required.
-- TDD ordering is explicit for both executable units: tests precede production code and run red first. Units 3 and 4 add no executable behavior, and no document change-detectors are scheduled.
-- The first preflight's defects are resolved: README is mapped, the nonexistent in-tree #61 sentence is no longer scheduled, unit 1 explicitly carries `tests/test_migrate.py` red into unit 2, the data migration is labeled correctly, the wake assertion remains live, and `tox run-parallel` maps Acceptance Criterion 7.
-- Truncating inside `leafset_id` correctly covers note view ids, nap stems, and nested ids created by new folds without call-site slicing.
-- `_parse_nap_stem` can cleanly distinguish five-part-16 from four-part-64 and five-part-64; keeping old parsing inside `migrate.py` preserves the driver boundary.
-- `surgery.py` needs no direct change because it delegates nap naming to `child_nap_stem`.
-- Atlas, `systemPatterns.md`, and README updates cover every current canonical width claim.
+1. **Radical innovation (advisory, not applied).** This is the second width-narrowing migration of the same on-disk field (#61: four-part→five-part-64; #67: five-part-64→five-part-16), and `migrate.py` hardcodes each generation's parser/rewriter pair directly into `_migrate_store`. A structurally accretive change: replace the ad hoc `_old_stem` + inline rewrite with an ordered table `_LEGACY_STEM_UPGRADES: list[tuple[parse_fn, upgrade_fn]]`, oldest-to-newest, where `_migrate_store` tries each `parse_fn` against a stem and, on the first match, calls the paired `upgrade_fn` to produce fresh `(tree_bytes, caption_bytes)` for `nap_stem`. Today's two generations (four-part-64, five-part-64) become two table entries instead of one bespoke function; the *next* identity-width or encoding change (the issue explicitly reserves Base32 as "not this issue," implying it may come later) becomes "append one entry," not "rewrite `_old_stem` and `_migrate_store` again." Not adopted for #67 — the two-generation dispatch this issue needs is small enough that the table's indirection isn't yet earning its keep, but it's worth a dedicated issue if a third generation is ever proposed.
+2. **Minor docstring staleness (advisory, non-blocking).** `tests/test_fold.py:358` ("emit 8-hex prefixes, not 64-hex ids") and `tests/test_gitutil.py:40` ("not 64-hex ids") are prose docstrings on tests whose assertions are width-agnostic (they derive expected prefixes dynamically via `short_id`); both remain literally true after this change (the full id is no longer 64 hex either, so "not 64-hex ids" still holds), so this is not a defect and not in scope for TDD Plan Encoding. An operator could reword for precision in a later pass but the plan is not required to touch these.
