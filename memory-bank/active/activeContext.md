@@ -1,10 +1,10 @@
 # Active Context
 
 ## Current Task: fold-pack-captions
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Classified Level 2: small enhancement to `fold_request`'s quoted pack lines; wake and `Run:` ids stay as they are
+- Plan: two `test_fold.py` cases (pack-pair captions; missing-`.summ` blank quotes); `fold_request` uses caption when kind is nap and grain > 1; atlas and systemPatterns stop implying fold pack lines share `format_wake_line`
 
 ## Next Step
-- Load the Level 2 workflow and execute Plan
+- Preflight validation
