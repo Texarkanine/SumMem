@@ -60,3 +60,14 @@ Retarget SumMem ingest membership so `note` is lore plus tree-affecting in-fligh
     - Did not apply the preflight shared-constant advisory
 * Insights
     - The old `clone not in prompt_text` pin was the only thing that made “this clone” look like a bootstrap break; once retargeted, lockstep was a copy
+
+## 2026-08-28 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Diffed the build commit against pre-build and confirmed it matches the plan and Option A creative decision verbatim across `prompt_text()`, `how_to_text()`, `AGENTS.md`, and `tests/test_init.py`
+    - Re-ran `tox -e py311 -- tests/test_init.py` (11 passed) and `tox run-parallel` (py311/py314 OK, py312/py313 skip)
+    - Grepped the repo for stale membership phrasing (`would still need`, `another machine`, `designs, decisions, invariants`) outside `memory-bank/`; none found in shipped docs
+* Decisions made
+    - PASS with the preflight's shared-constant advisory carried forward, not re-raised as a new finding
+* Insights
+    - Sentence-count parity (3 bootstrap, 4 how-to) held through Build exactly as Preflight verified by hand

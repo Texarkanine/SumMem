@@ -109,4 +109,10 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
+
+## QA Results
+
+**PASS.** Diff (`git diff a24d28e c47b0f2 -- AGENTS.md summem tests/test_init.py`) matches the plan and the Option A creative decision verbatim: `prompt_text()`, `how_to_text()`, and the `AGENTS.md` prefix all carry the new "work in this clone" wording; `test_init.py` pins retargeted exactly as specified. Lockstep holds (`AGENTS.md` still starts with `prompt_text().strip()`). Sentence counts unchanged (3 bootstrap, 4 how-to) — density requirement met. No OptMem naming; no stale `would still need` / `another machine` / `designs, decisions, invariants` text anywhere in shipped docs (README, `docs/`). `tox -e py311 -- tests/test_init.py`: 11 passed. `tox run-parallel`: py311/py314 OK, py312/py313 skip (no interpreters) — consistent with the Build phase's report.
+
+- Advisory (non-blocking, carried from Preflight, not re-raised as new): the "work in this clone" probe is still a hand-typed literal in both `prompt_text()` and `how_to_text()` rather than a shared constant, so a future wording edit could update one surface and silently miss the other. Deliberately deferred per "judge, do not fix"; no new risk introduced by this build.
