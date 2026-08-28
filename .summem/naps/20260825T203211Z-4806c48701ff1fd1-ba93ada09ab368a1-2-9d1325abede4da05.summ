@@ -1,1 +1,0 @@
-drop-dataclasses: slots + lazy tomllib/fcntl/subprocess/random/argparse; version/init/-h skip those imports; 3.14 isolation traces driver __import__, not fcntl absent from sys.modules
