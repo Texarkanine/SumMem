@@ -71,3 +71,14 @@ Retarget SumMem ingest membership so `note` is lore plus tree-affecting in-fligh
     - PASS with the preflight's shared-constant advisory carried forward, not re-raised as a new finding
 * Insights
     - Sentence-count parity (3 bootstrap, 4 how-to) held through Build exactly as Preflight verified by hand
+
+## 2026-08-28 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-note-membership.md`
+    - Reconciled persistent files (all skip)
+* Decisions made
+    - Shared-constant hoist stays a follow-up, not a silent build add
+* Insights
+    - Lockstep does not bind how-to to bootstrap; the two-surface probe can still drift
+    - An advisory that names a drift class this repo has already failed should be adopted in the plan, not carried across three phases
