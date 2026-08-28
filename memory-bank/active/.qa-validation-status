@@ -1,8 +1,0 @@
-PASS
-
-## Findings
-
-- KISS / DRY / YAGNI: PASS. The production change is limited to two local source-line selections in `fold_request`; no new abstraction, dependency, parameter, or speculative behavior was added.
-- Completeness: PASS. Pack captions, blank missing captions, unchanged `Run:` ids, unchanged pack wake lines, and unchanged dated leaf quotes are all implemented and covered.
-- Regression / Integrity: PASS. `format_wake_line`, wake, recall, zoom, path selection, compression counts, and entry limits remain untouched; no placeholders, TODOs, magic values, or debug artifacts were introduced.
-- Documentation: PASS. The atlas and system briefing now distinguish fold pack quotes from wake/recall/zoom formatting.
