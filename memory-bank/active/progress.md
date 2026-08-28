@@ -39,3 +39,17 @@ Successful `nap` prints `Saved.` then either the next fold prompt or `Nothing le
     - `tests/test_fold.py` lines 235-263 are the only tests asserting nap stdout; every other CLI nap call site discards stdout or asserts stderr
     - OptMem prints `Nothing left to compress.` verbatim (`memo` lines 770, 785), so the idle string is a verified borrow
     - `docs/surgery.md` Aftercare still tells the surgeon to repeat "until there is no fold request" - the same silence this task removes, one layer up
+
+## 2026-08-28 - BUILD - COMPLETE
+
+* Work completed
+    - Nap success stdout: `Saved.` then fold prompt or `Nothing left to compress.`
+    - Tests retargeted/added in `tests/test_fold.py` and `tests/test_cli.py`
+    - README example, systemPatterns, surgery Aftercare
+    - py311 367 passed, 1 skipped; tox run-parallel py311–py314 OK
+* Decisions made
+    - Mid-cascade asserts `"Saved.\n\n"`
+    - Did not extract `emit_result`; four lines on the nap arm
+* Insights
+    - Over-long nap already had no ACK; the new test locks that
+

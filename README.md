@@ -55,6 +55,9 @@ OK, let's nap:
 
 ```
 $ .summem/summem nap --path dogfood 3fc87382 fa6da6a9 "g & h"
+Saved.
+
+Nothing left to compress.
 ```
 
 Now what does memory look like?
