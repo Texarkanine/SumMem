@@ -77,4 +77,13 @@ Successful `nap` prints `Saved.` then either the next fold prompt or `Nothing le
 * Insights
     - If ACK+idle had been the nap contract from day one, `note` and `nap` would share one printer; #27’s silent nap was the fork this task closed
 
+## 2026-08-28 - ARCHIVE - IN-PROGRESS
+
+* Work completed
+    - Leaving REFLECT; archive document and ephemeral cleanup next
+* Decisions made
+    - Category: enhancements (nap stdout contract extended; not a new verb)
+* Insights
+    - Feature already merged as PR #70; archive records the Niko trail only
+
 
