@@ -1,10 +1,10 @@
 # Active Context
 
 ## Current Task: nap-ack
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Level 2 determined: small CLI enhancement on `nap` stdout (ACK + idle line), same size as `note-ack`; no architectural change; `fold_request` helper stays a prompt builder.
+- Level 2 plan: retarget nap stdout tests in `tests/test_fold.py` and add rejected-nap ACK guard in `tests/test_cli.py`; print `Saved.` then fold or `Nothing left to compress.` on `main`'s `nap` arm only; README example and `systemPatterns.md` follow.
 
 ## Next Step
-- Load the Level 2 workflow and run the plan phase.
+- Preflight validation of the plan.

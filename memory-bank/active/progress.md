@@ -15,3 +15,15 @@ Successful `nap` prints `Saved.` then either the next fold prompt or `Nothing le
     - `Nothing left to compress.` is nap-only; a note with no fold stays `Saved.` only
 * Insights
     - `"Saved." not in` / empty-stdout nap tests encode the old contract and must be retargeted, not deleted
+
+## 2026-08-28 - PLAN - COMPLETE
+
+* Work completed
+    - Test plan: retarget two `tests/test_fold.py` nap stdout cases; add remaining-count-after-ACK and rejected-nap no-ACK; keep under-budget note free of the idle line
+    - Implementation: `main` nap arm prints ACK then fold or OptMem idle copy; `fold_request` unchanged; README example and systemPatterns briefing
+* Decisions made
+    - Idle string is OptMem’s `Nothing left to compress.`
+    - Spacing matches `note`: `Saved.\n` then a blank line before the next block
+    - No `how_to_text` / `prompt_text` rewrite; stdout is the agent contract
+* Insights
+    - Idle means no next fold request, including over-budget with no equal-grain pair
