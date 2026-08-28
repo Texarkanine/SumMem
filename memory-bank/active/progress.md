@@ -50,3 +50,13 @@ Retarget SumMem ingest membership so `note` is lore plus tree-affecting in-fligh
 * Insights
     - The new `work in this clone` pin is a product-contract assertion (same class as today's `contributor` pin), not a change-detector
     - Radical (advisory, not applied): hoist the shared probe phrase into one module constant both surfaces interpolate, so the two-surface pin can't silently drift like the `wake-usage-prompt` first-preflight FAIL did
+
+## 2026-08-28 - BUILD - COMPLETE
+
+* Work completed
+    - Retargeted membership pins; rewrote `prompt_text` / `how_to_text` / `AGENTS.md` lockstep to Option A
+    - Full matrix: 369 passed, 1 skipped
+* Decisions made
+    - Did not apply the preflight shared-constant advisory
+* Insights
+    - The old `clone not in prompt_text` pin was the only thing that made “this clone” look like a bootstrap break; once retargeted, lockstep was a copy

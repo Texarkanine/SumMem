@@ -1,0 +1,1 @@
+drop-dataclasses: slots + lazy imports, 3.14 traces driver imports; perf-shards #49-52 shipped, #53 deferred; same-leaf-set conflicts take one side's .summem paths; wake never drops nodes to fit WAKE_LINES.

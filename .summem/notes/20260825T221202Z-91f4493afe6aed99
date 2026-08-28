@@ -1,1 +1,0 @@
-Wake never drops view nodes to fit WAKE_LINES; over-budget (including 0) lists every node; note/nap fold the count back.

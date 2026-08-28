@@ -64,6 +64,7 @@ Retarget shipped `note` membership so agents record lore and tree-affecting in-f
 
 - Files: `tests/test_init.py`, `summem` (`prompt_text`, `how_to_text`), `AGENTS.md`
 - Creative ref: `memory-bank/active/creative/creative-membership-wording.md`
+- [x] Complete
 
 1. Stub tests: no new cases. Leave `prompt_text()` / `how_to_text()` signatures unchanged.
 2. Stub interface: none.
@@ -75,6 +76,7 @@ Retarget shipped `note` membership so agents record lore and tree-affecting in-f
 - Files: none
 - No tests: prose/policy artifact
 - Creative ref: same
+- [x] Complete (no-op)
 
 1. Do not edit `productContext.md`, `README.md`, or OptMem. The product picture is still “learned a fact”; the README already says gotchas. OptMem stays unnamed and unedited.
 
@@ -106,5 +108,5 @@ No new technology - validation not required
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
 - [x] Preflight
-- [ ] Build
+- [x] Build
 - [ ] QA
