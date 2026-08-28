@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/Texarkanine/SumMem/compare/v0.9.0...v0.10.0) (2026-08-28)
+
+
+### Features
+
+* **cli:** print Saved. and idle line after successful nap ([#70](https://github.com/Texarkanine/SumMem/issues/70)) ([0e7eeb0](https://github.com/Texarkanine/SumMem/commit/0e7eeb0b4da96df2d33e25222249596639793f79))
+
 ## [0.9.0](https://github.com/Texarkanine/SumMem/compare/v0.8.0...v0.9.0) (2026-08-26)
 
 
