@@ -27,3 +27,15 @@ Successful `nap` prints `Saved.` then either the next fold prompt or `Nothing le
     - No `how_to_text` / `prompt_text` rewrite; stdout is the agent contract
 * Insights
     - Idle means no next fold request, including over-budget with no equal-grain pair
+
+## 2026-08-28 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Preflight ran all six checks against the codebase; `.preflight-status` first line is `PASS WITH ADVISORY`
+    - No plan edits: TDD ordering was already test-first and no change-detector step was scheduled
+* Decisions made
+    - Plan is buildable as-is; four advisories recorded, none gating Build
+* Insights
+    - `tests/test_fold.py` lines 235-263 are the only tests asserting nap stdout; every other CLI nap call site discards stdout or asserts stderr
+    - OptMem prints `Nothing left to compress.` verbatim (`memo` lines 770, 785), so the idle string is a verified borrow
+    - `docs/surgery.md` Aftercare still tells the surgeon to repeat "until there is no fold request" - the same silence this task removes, one layer up
