@@ -437,3 +437,56 @@ def test_fold_request_omits_path_when_cwd_selects_store(tmp_path, monkeypatch, s
     out = m.fold_request(pkg, 1)
     assert " --path " not in out
     assert "Run: .summem/summem nap " in out
+
+
+def test_fold_request_pack_pair_quotes_captions_only(tmp_path, monkeypatch, summem):
+    """Two x2 packs over budget: fold quotes captions; wake still has grain and prefix."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    monkeypatch.setattr(m, "WAKE_LINES", 2)
+    for i, text in enumerate(("a", "b", "c", "d", "i"), start=1):
+        m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "e & f")
+    m.write_nap(repo, ids[2], ids[3], "g & h")
+    packs = [node for node in m.list_view(repo) if node.kind == "nap"]
+    assert len(packs) == 2
+    view_ids = [node.id for node in m.list_view(repo)]
+    pa = m.short_id(packs[0].id, view_ids)
+    pb = m.short_id(packs[1].id, view_ids)
+    out = m.fold_request(repo, 2)
+    assert "  e & f\n" in out
+    assert "  g & h\n" in out
+    assert f"x2 {pa}:" not in out
+    assert f"x2 {pb}:" not in out
+    assert f"nap {pa} {pb} " in out
+    wake = m.wake_text(repo)
+    assert f"x2 {pa}: e & f" in wake
+    assert f"x2 {pb}: g & h" in wake
+
+
+def test_fold_request_empty_pack_caption_is_blank_quote(tmp_path, monkeypatch, summem):
+    """Missing .summ on two packs: fold quotes blank lines, not reconstructed xN prefix:."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    for i, text in enumerate(("a", "b", "c", "d", "i"), start=1):
+        m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "e & f")
+    m.write_nap(repo, ids[2], ids[3], "g & h")
+    for node in m.list_view(repo):
+        if node.kind == "nap" and node.sum_path is not None:
+            node.sum_path.unlink()
+    packs = [node for node in m.list_view(repo) if node.kind == "nap"]
+    assert len(packs) == 2
+    view_ids = [node.id for node in m.list_view(repo)]
+    pa = m.short_id(packs[0].id, view_ids)
+    pb = m.short_id(packs[1].id, view_ids)
+    out = m.fold_request(repo, 2)
+    assert "\n  \n  \n\nRun:" in out
+    assert f"x2 {pa}:" not in out
+    assert f"x2 {pb}:" not in out
+    assert f"nap {pa} {pb} " in out
+

@@ -2,35 +2,35 @@
 
 ## User Story
 
-As a coding agent, I want a successful `nap` to print `Saved.` and, when the cascade is finished, `Nothing left to compress.` so that a long fold sequence does not end in silence I could read as failure or leftover work.
+As an agent folding two packs, I want the nap directive to quote only the two captions so that grain and content ids do not compete with the text I am supposed to compress.
 
 ## Use-Case(s)
 
 ### Use-Case 1
 
-A note that needs a nap prints `Saved.` plus the fold prompt. The agent naps. Each successful nap prints `Saved.` then either the next fold prompt (including “N compressions remain after this one” when that applies) or `Nothing left to compress.` when the view is at budget.
+The view is over budget and the oldest equal-grain pair is two packs. `fold_request` prints the usual Compress / Keep / Run block. Each quoted source line is the pack's caption. The `Run:` line still carries the two unique prefixes.
 
 ### Use-Case 2
 
-An over-long `note` or `nap` hits the `ENTRY_CHARS` ratchet (`Too long: … Compress it further.`). The write does not land. Stdout has no `Saved.`
+The oldest equal-grain pair is two notes. The quoted lines stay wake-shaped (`x1 YYYY-MM-DD: text`). Wake listings are unchanged for both notes and packs.
 
 ## Requirements
 
-1. Successful `nap` prints `Saved.` then, if a fold is still owed, the existing fold prompt.
-2. Successful `nap` with no further fold prints `Saved.` then `Nothing left to compress.`
-3. A `note` that needs a nap still prints `Saved.` plus the fold prompt (unchanged).
-4. The over-long ratchet on `note` and `nap` exits 1, stderr only, no `Saved.`
-5. Retarget existing nap-stdout tests to this contract; do not delete them.
+1. When `fold_request` quotes two packs, each source line is the caption only: no `xN` grain and no content-id hash.
+2. The `Run:` line still names both packs by unique prefix (and `--path` when walk-up would miss the store).
+3. `format_wake_line` / `wake_text` keep `xN <prefix>: caption` for packs.
+4. Leaf-pair fold lines stay dated wake lines.
 
 ## Constraints
 
-1. `Saved.` and `Nothing left to compress.` are printed by the command after a write that landed, not by assembling them inside `fold_request` (that helper still returns empty when there is nothing to fold).
-2. Do not change OptMem.
-3. Do not put `Nothing left to compress.` on a successful `note` that needs no nap.
+1. Do not change OptMem.
+2. Do not put ACK or idle inside `fold_request`.
+3. Do not strip grain or hash from wake, recall, or zoom listings.
+4. Empty captions stay empty text, not a reconstructed `xN <prefix>:` line, in the fold quote.
 
 ## Acceptance Criteria
 
-1. Mid-cascade `nap` stdout starts with `Saved.` and still contains the next pair plus any remaining-count line.
-2. Last `nap` of a cascade stdout is `Saved.` then `Nothing left to compress.`
-3. Over-long `note` and `nap` do not print `Saved.`
-4. Tests that previously asserted empty nap stdout or `"Saved." not in` nap output assert the new bytes instead of being removed.
+1. A fold prompt for two packs with captions `e & f` and `g & h` contains those captions and does not contain `x2 ` or the packs' prefixes on the quoted lines.
+2. That same prompt's `Run:` line still includes both prefixes.
+3. A fold prompt for two notes still quotes `x1 YYYY-MM-DD: …` lines.
+4. Wake of the same packs still prints `xN <prefix>: caption`.

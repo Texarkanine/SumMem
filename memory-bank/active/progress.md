@@ -1,80 +1,72 @@
 # Progress
 
-Successful `nap` prints `Saved.` then either the next fold prompt or `Nothing left to compress.`; the over-long ratchet still does not ACK.
+When `fold_request` quotes two packs, show captions only. Grain and hash stay on wake and on the `Run:` line.
 
 **Complexity:** Level 2
 
 ## 2026-08-28 - COMPLEXITY-ANALYSIS - COMPLETE
 
 * Work completed
-    - Restated intent: nap ACK + idle line; ratchet stays silent; retarget nap-stdout tests
+    - Restated intent: pack-pair fold quotes are captions only; wake and `Run:` prefixes unchanged; leaf-pair quotes stay dated
     - Classified Level 2
 * Decisions made
-    - Enhancement, not a bug: #27 left `nap` stdout unchanged on purpose
-    - Self-contained: `nap` command stdout and its tests; `fold_request` is not the ACK printer
-    - `Nothing left to compress.` is nap-only; a note with no fold stays `Saved.` only
+    - Enhancement, not a bug: wake formatting is correct; the fold prompt was reusing it
+    - Self-contained: `fold_request` source lines for packs with grain > 1
 * Insights
-    - `"Saved." not in` / empty-stdout nap tests encode the old contract and must be retargeted, not deleted
+    - Grain-1 packs already print caption-only via `format_wake_line`; the noise is `xN <prefix>:` on larger packs
 
 ## 2026-08-28 - PLAN - COMPLETE
 
 * Work completed
-    - Test plan: retarget two `tests/test_fold.py` nap stdout cases; add remaining-count-after-ACK and rejected-nap no-ACK; keep under-budget note free of the idle line
-    - Implementation: `main` nap arm prints ACK then fold or OptMem idle copy; `fold_request` unchanged; README example and systemPatterns briefing
+    - Test plan: pack-pair caption quotes plus missing-`.summ` blank quotes in `tests/test_fold.py`; keep leaf-pair dated lines
+    - Implementation: `fold_request` quotes `node.caption` for naps with grain > 1; `format_wake_line` unchanged; atlas and systemPatterns surgical
 * Decisions made
-    - Idle string is OptMem’s `Nothing left to compress.`
-    - Spacing matches `note`: `Saved.\n` then a blank line before the next block
-    - No `how_to_text` / `prompt_text` rewrite; stdout is the agent contract
+    - No new public helper; two quoted lines in `fold_request` are the whole executable change
+    - Empty caption is a missing `.summ`, not `write_nap("")` (`require_entry` rejects empty)
 * Insights
-    - Idle means no next fold request, including over-budget with no equal-grain pair
+    - `note` / `nap` / surgery already print `fold_request` verbatim, so they inherit the new quotes with no extra printers
 
 ## 2026-08-28 - PREFLIGHT - COMPLETE
 
 * Work completed
-    - Preflight ran all six checks against the codebase; `.preflight-status` first line is `PASS WITH ADVISORY`
-    - No plan edits: TDD ordering was already test-first and no change-detector step was scheduled
+    - Validated TDD ordering, conventions, dependency impact, conflicts, and completeness against the actual `fold_request` / `format_wake_line` source and existing test callers
+    - Result: `PASS WITH ADVISORY`
 * Decisions made
-    - Plan is buildable as-is; four advisories recorded, none gating Build
+    - No plan edits needed; two advisory findings recorded (missing explicit `monkeypatch.chdir` note; optional `_fold_quote_line` helper) without touching the plan
 * Insights
-    - `tests/test_fold.py` lines 235-263 are the only tests asserting nap stdout; every other CLI nap call site discards stdout or asserts stderr
-    - OptMem prints `Nothing left to compress.` verbatim (`memo` lines 770, 785), so the idle string is a verified borrow
-    - `docs/surgery.md` Aftercare still tells the surgeon to repeat "until there is no fold request" - the same silence this task removes, one layer up
+    - `format_wake_line` already special-cases `leaves <= 1` to caption-only, confirming the plan's `kind != "note" and leaves > 1` branch is the minimal correct delta
+    - No existing test anywhere in `tests/` asserts an `xN <prefix>:` shape on a grain>1 fold quote line, so the change is safely self-contained
 
 ## 2026-08-28 - BUILD - COMPLETE
 
 * Work completed
-    - Nap success stdout: `Saved.` then fold prompt or `Nothing left to compress.`
-    - Tests retargeted/added in `tests/test_fold.py` and `tests/test_cli.py`
-    - README example, systemPatterns, surgery Aftercare
-    - py311 367 passed, 1 skipped; tox run-parallel py311–py314 OK
+    - `fold_request` quotes caption-only for naps with grain > 1
+    - Two tests in `tests/test_fold.py`; atlas and systemPatterns surgical
+    - py311 369 passed, 1 skipped
 * Decisions made
-    - Mid-cascade asserts `"Saved.\n\n"`
-    - Did not extract `emit_result`; four lines on the nap arm
+    - No new public helper; two ternaries in `fold_request`
+    - Pack-pair wake check uses `WAKE_LINES` 2 so the listing stays packed
 * Insights
-    - Over-long nap already had no ACK; the new test locks that
+    - Default-budget `wake_text` expands under-budget packs; a wake-shape assertion on packs must pin the budget at or over the view
 
-## 2026-08-28 - QA - COMPLETE
+## 2026-08-28 - QA - COMPLETE (PASS)
 
 * Work completed
-    - Semantic review of the `nap` arm, retargeted/new tests, README, `systemPatterns.md`, and `docs/surgery.md` against `projectbrief.md` and `tasks.md`
-    - Re-ran `tests/test_fold.py` + `tests/test_cli.py` and the full `py311` suite: 367 passed, 1 skipped, matching Build's report
-    - Result: PASS
+    - Reviewed the saved implementation against the Level 2 plan, project brief, architecture, and established code patterns
+    - Verified KISS, DRY, YAGNI, completeness, regression safety, integrity, and documentation
+    - Result: `PASS`
 * Decisions made
-    - The four-line `nap` block duplicating three lines of the `note` block is not a QA finding: Preflight Advisory 4 already named and deferred this exact duplication as out of scope for Level 2
-    - Advisory 2's suggested comment wording landed verbatim on the `nap` arm; Advisory 3's `docs/surgery.md` Aftercare fix landed as scheduled
+    - The two local source-line selections are simpler than introducing a helper for a rule used only in `fold_request`
+    - No implementation rework or plan revision is required
 * Insights
-    - All four acceptance criteria and five requirements map one-to-one to a passing test; no stubs or TODOs found
-    - `docs/architecture/index.md` does not mention CLI stdout contracts, so it needed no update
+    - The tests pin all changed and preserved surfaces: pack captions, blank captions, `Run:` ids, pack wake grammar, and dated leaf quotes
 
 ## 2026-08-28 - REFLECT - COMPLETE
 
 * Work completed
-    - Wrote `memory-bank/active/reflection/reflection-nap-ack.md`
+    - Wrote `memory-bank/active/reflection/reflection-fold-pack-captions.md`
     - Reconciled persistent files: systemPatterns already updated in build; productContext and techContext unchanged
 * Decisions made
-    - Idle is “no next fold request,” not “at WAKE_LINES”
-    - `emit_result` stays deferred until a third writer needs it
+    - Two local quote selections are the design; a helper waits for a second caller
 * Insights
-    - If ACK+idle had been the nap contract from day one, `note` and `nap` would share one printer; #27’s silent nap was the fork this task closed
-
-
+    - `wake_text` expands under-budget packs; pack-shape tests must pin `WAKE_LINES`
