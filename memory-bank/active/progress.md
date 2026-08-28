@@ -38,3 +38,15 @@ Retarget SumMem ingest membership so `note` is lore plus tree-affecting in-fligh
     - No new test files; `test_scopes.py` identity-compares `how_to_text()`
 * Insights
     - `clone not in prompt_text` was protecting the bootstrap from a portability lecture, not from the word “clone”
+
+## 2026-08-28 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Verified the plan's named test edits against the live `tests/test_init.py` lines 75-154; exact match
+    - Hand-checked the proposed `prompt_text()` / `how_to_text()` bodies against every surviving assertion; all hold
+    - Confirmed `test_scopes.py` compares by `how_to_text()` identity, not literal string; no other doc quotes the retargeted phrases
+* Decisions made
+    - `.preflight-status` first line: `PASS WITH ADVISORY`
+* Insights
+    - The new `work in this clone` pin is a product-contract assertion (same class as today's `contributor` pin), not a change-detector
+    - Radical (advisory, not applied): hoist the shared probe phrase into one module constant both surfaces interpolate, so the two-surface pin can't silently drift like the `wake-usage-prompt` first-preflight FAIL did

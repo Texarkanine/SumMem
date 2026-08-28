@@ -1,0 +1,21 @@
+PASS WITH ADVISORY
+
+Preflight for task `note-membership` (Level 3).
+
+## TDD Plan Encoding
+PASS. The single executable unit (membership language in `prompt_text()` / `how_to_text()` / `AGENTS.md`) orders stub → write tests, run red → write code, run green. The plan names the exact existing assertions to remove/add/keep in `test_prompt_text_invariants` and `test_how_to_text_is_the_usage_section`; verified against the live test file (lines 75-154 of `tests/test_init.py`) and they match precisely, including the new `work in this clone` pin, which is a product-contract assertion (same class as the existing `contributor` pin), not a change-detector. Unit 2 (persistent docs) is correctly exempted as a no-op prose/policy unit.
+
+## Convention Compliance
+PASS. No new files, modules, or naming patterns introduced; edits stay inside the existing `summem` functions, `tests/test_init.py`, and the `AGENTS.md` lockstep file per established convention.
+
+## Dependency Impact
+PASS. Confirmed `tests/test_scopes.py` compares root-wake stdout to `how_to_text()` by identity (`m.how_to_text()`), not by literal string, so it is unaffected. Grepped the repo for the strings being retargeted (`would still need`, `another machine`, `designs, decisions, invariants`, `redundant memories`) — no other test or shipped doc (README, productContext.md) quotes them verbatim, so no missed touchpoint.
+
+## Conflict Detection
+PASS. No existing utility or pattern duplicates this membership test; OptMem's global rule is untouched per constraint, and grep confirms no shipped text names it.
+
+## Completeness Precheck
+PASS. All 6 project-brief requirements and 5 acceptance criteria map to the single implementation-plan step. Verified by hand: the proposed new `prompt_text()` body keeps all other current assertions true (`contributor`, `personal`, `.summem/summem`, absence of `another machine` / `must still be true after a fresh clone`) while adding `work in this clone`; the proposed new `how_to_text()` paragraph does the same. Sentence count is unchanged (3 in the bootstrap paragraph, 4 in the how-to paragraph) versus today, satisfying "shorter or equal."
+
+## Radical Innovation (advisory, not applied)
+Both surfaces independently spell out the phrase `work in this clone` as a literal string inside two f-string blocks. Nothing stops the next wording pass from editing one copy and not the other — exactly the class of bug `wake-usage-prompt`'s first preflight FAIL caught for the `clone`/`another machine` pins. Extract the probe fragment into a single module-level constant (e.g. `MEMBERSHIP_PROBE = "work in this clone"`) that both `prompt_text()` and `how_to_text()` interpolate, and change the test pin to assert against that constant rather than a re-typed literal. That turns "the two surfaces agree" from a manually-maintained invariant into a structurally-guaranteed one, at the cost of one new module constant and a trivial test change. Not applied here per the "judge, do not fix" rule.
