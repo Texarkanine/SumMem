@@ -1,1 +1,0 @@
-Issue #52 L2 drop-dataclasses: slots for five types + lazy tomllib/fcntl/subprocess/random; version/init/help must not import those three; 3.11 gate stays after import sys; argparse leftover optional
