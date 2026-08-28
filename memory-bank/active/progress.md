@@ -60,3 +60,13 @@ When `fold_request` quotes two packs, show captions only. Grain and hash stay on
     - No implementation rework or plan revision is required
 * Insights
     - The tests pin all changed and preserved surfaces: pack captions, blank captions, `Run:` ids, pack wake grammar, and dated leaf quotes
+
+## 2026-08-28 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-fold-pack-captions.md`
+    - Reconciled persistent files: systemPatterns already updated in build; productContext and techContext unchanged
+* Decisions made
+    - Two local quote selections are the design; a helper waits for a second caller
+* Insights
+    - `wake_text` expands under-budget packs; pack-shape tests must pin `WAKE_LINES`
