@@ -1,11 +1,11 @@
 # Active Context
 
 ## Current Task: note-membership
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** CREATIVE - COMPLETE
 
 ## What Was Done
-- Level 3: membership-test wording is the design, not a copy tweak; L2 has no creative loop
-- Intent: lore plus tree-affecting in-flight work; not process telemetry; dense; no naming OptMem
+- Membership wording: work-in-this-clone probe, split surfaces, OptMem untouched
+- Documented in `memory-bank/active/creative/creative-membership-wording.md`
 
 ## Next Step
-- Load the Level 3 workflow and run plan (open questions → creative)
+- Resume Level 3 plan (test plan, implementation steps, pre-mortem)
