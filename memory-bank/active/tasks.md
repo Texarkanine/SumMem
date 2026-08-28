@@ -75,4 +75,4 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA — PASS (advisory: note/nap ACK-print duplication, already deferred at Preflight)

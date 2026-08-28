@@ -53,3 +53,16 @@ Successful `nap` prints `Saved.` then either the next fold prompt or `Nothing le
 * Insights
     - Over-long nap already had no ACK; the new test locks that
 
+## 2026-08-28 - QA - COMPLETE
+
+* Work completed
+    - Semantic review of the `nap` arm, retargeted/new tests, README, `systemPatterns.md`, and `docs/surgery.md` against `projectbrief.md` and `tasks.md`
+    - Re-ran `tests/test_fold.py` + `tests/test_cli.py` and the full `py311` suite: 367 passed, 1 skipped, matching Build's report
+    - Result: PASS
+* Decisions made
+    - The four-line `nap` block duplicating three lines of the `note` block is not a QA finding: Preflight Advisory 4 already named and deferred this exact duplication as out of scope for Level 2
+    - Advisory 2's suggested comment wording landed verbatim on the `nap` arm; Advisory 3's `docs/surgery.md` Aftercare fix landed as scheduled
+* Insights
+    - All four acceptance criteria and five requirements map one-to-one to a passing test; no stubs or TODOs found
+    - `docs/architecture/index.md` does not mention CLI stdout contracts, so it needed no update
+

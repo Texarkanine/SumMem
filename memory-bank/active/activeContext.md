@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: nap-ack
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
 - `main`'s `nap` arm prints `Saved.` then a blank line then either `fold_request` or `Nothing left to compress.`
@@ -10,7 +10,7 @@
 - `tox -e py311`: 367 passed, 1 skipped. `tox run-parallel` py311–py314 all OK
 
 ## Next Step
-- QA review
+- Reflect / archive
 
 ## Files modified
 - `/Users/tex/git/SumMem/summem`
