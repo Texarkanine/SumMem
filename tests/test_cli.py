@@ -115,6 +115,21 @@ def test_cli_nap_overlong_prints_ratchet(tmp_path, monkeypatch, capsys, summem):
     assert not naps.exists() or not any(p.is_file() and not p.name.startswith(".") for p in naps.iterdir())
 
 
+def test_rejected_nap_does_not_print_saved(tmp_path, monkeypatch, capsys, summem):
+    """A too-long nap caption exits 1 and does not print Saved."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["note", "alpha"]) == 0
+    assert m.main(["note", "beta"]) == 0
+    ids = [node.id for node in m.list_view(repo)]
+    capsys.readouterr()
+    assert m.main(["nap", ids[0], ids[1], "x" * 281]) == 1
+    captured = capsys.readouterr()
+    assert "Saved." not in captured.out
+    assert "Compress it further" in captured.err
+
+
 def test_rejected_note_does_not_print_saved(tmp_path, monkeypatch, capsys, summem):
     """A too-long note exits 1 and does not print Saved."""
     m = summem

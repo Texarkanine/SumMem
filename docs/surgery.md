@@ -44,14 +44,14 @@ From a clone of this repository, with Python 3.11+:
 
 ## Aftercare
 
-Excision can invalidate captions. `surgery.py` will not nap those back up. After a real excision (not `--dry-run`), if the view is still over budget, stdout includes the same first fold request `note` would print (`Compress these two` / `Run: .summem/summem nap …`). Feed that to an agent; each `nap` that is still over budget prints the next pair. `wake` does not demand a nap, so without this print you would have to `note` something else to start the cascade.
+Excision can invalidate captions. `surgery.py` will not nap those back up. After a real excision (not `--dry-run`), if the view is still over budget, stdout includes the same first fold request `note` would print (`Compress these two` / `Run: .summem/summem nap …`). Feed that to an agent; each successful `nap` prints `Saved.` then either the next pair or `Nothing left to compress.` `wake` does not demand a nap, so without this print you would have to `note` something else to start the cascade.
 
 Leaving the hole is allowed; the next honest `note` will also print a fold request. It is polite for the surgeon to finish the naps.
 
 After you commit the clean tip, run an agent in that repository:
 
 1. If surgery printed a fold request, feed that `Run:` line to the agent (or run it yourself). Caption the surviving children. Do not invent filenames. Do not patch `.tree` bytes.
-2. Each over-budget `nap` prints the next pair. Repeat until there is no fold request.
+2. Each `nap` prints `Saved.` then either the next pair or `Nothing left to compress.` Repeat until the idle line.
 3. `.summem/summem wake` still shows the view; it will not demand a nap.
 
 The files the script writes are part of the work; do not leave them untracked.

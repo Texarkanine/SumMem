@@ -1362,7 +1362,14 @@ def main(argv: list[str] | None = None) -> int:
         except ValueError as exc:
             sys.stderr.write(f"{exc}\n")
             return 1
-        sys.stdout.write(out)
+        # Idle is nap-only. Do not move it into fold_request: note shares that helper.
+        sys.stdout.write("Saved.\n")
+        if out:
+            sys.stdout.write("\n")
+            sys.stdout.write(out)
+        else:
+            sys.stdout.write("\n")
+            sys.stdout.write("Nothing left to compress.\n")
         return 0
     if args.cmd == "zoom":
         if is_range_token(args.id):
