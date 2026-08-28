@@ -1,0 +1,20 @@
+PASS WITH ADVISORY
+
+## TDD Plan Encoding
+Unit 1 (executable, `fold_request` in `summem`) stubs both new tests before the production edit and orders red-then-green correctly. Units 2-3 (docs/architecture/index.md, memory-bank/systemPatterns.md) are prose/policy and correctly carry no test steps. No change-detector tests were proposed; none to strike.
+
+## Convention Compliance
+Test location (`tests/test_fold.py`), helpers (`dated_leaf`, `init_repo`), and the `tox -e py311 -- tests/test_fold.py` iteration command match techContext.md and existing sibling tests. The two-pack build pattern (`write_nap` twice over four notes, then one more note) mirrors the established idiom already used in `tests/test_nap_variants.py` (lines 379-386) and `tests/test_recall.py`.
+
+## Dependency Impact
+Verified against the actual `fold_request`/`format_wake_line`/`short_id` source (`summem` lines 1039-1118): `format_wake_line` already special-cases `leaves <= 1` to caption-only, so the plan's `kind != "note" and leaves > 1` branch is the correct (and only) delta. Searched all callers/tests of `fold_request` (`tests/test_cli.py`, `test_fold.py`, `test_scopes.py`, `test_surgery.py`, `test_zipper.py`) - none assert an `xN <prefix>:` shape on a grain>1 pack quote line, so nothing downstream breaks. `note`, `nap`, and `surgery.py` print `fold_request` verbatim and need no changes, as the plan states.
+
+## Conflict Detection
+No existing helper duplicates "caption without grain/prefix" for grain>1 nodes - that shape currently exists only for `leaves <= 1` inside `format_wake_line`. No public contract changes: `format_wake_line`, `wake_text`, `short_id` signatures and output are untouched.
+
+## Completeness Precheck
+All four projectbrief requirements and all four constraints map to concrete steps: pack-caption-only quoting (Unit 1 code change), unchanged `Run:` prefixes and unchanged `wake_text`/`format_wake_line` (regression assertions in both new tests), and empty-caption-stays-blank (second new test, verified against real `node.caption == ""` behavior on a missing `.summ`). No requirement is aspirational-only.
+
+## Findings (advisory, non-blocking)
+- The plan's stubbing step for the two new tests doesn't explicitly call out `monkeypatch.chdir(repo)`, which every sibling `fold_request` test in `tests/test_fold.py` uses to keep the `Run:` line free of `--path`. This is an established, obvious convention rather than a plan defect - flagged so the implementer doesn't have to rediscover it.
+- Radical innovation (not applied): extract a tiny `_fold_quote_line(node, ids)` helper used for both the `left` and `right` lines in `fold_request`, instead of inlining the `kind != "note" and leaves > 1` conditional twice. This makes "how fold quotes a node" a named, single-sourced concept - useful if a future surface (e.g. a batch/multi-pair fold, or `surgery.py`) ever needs the same caption-only quoting rule and shouldn't have to re-derive the condition.

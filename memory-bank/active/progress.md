@@ -25,3 +25,14 @@ When `fold_request` quotes two packs, show captions only. Grain and hash stay on
     - Empty caption is a missing `.summ`, not `write_nap("")` (`require_entry` rejects empty)
 * Insights
     - `note` / `nap` / surgery already print `fold_request` verbatim, so they inherit the new quotes with no extra printers
+
+## 2026-08-28 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Validated TDD ordering, conventions, dependency impact, conflicts, and completeness against the actual `fold_request` / `format_wake_line` source and existing test callers
+    - Result: `PASS WITH ADVISORY`
+* Decisions made
+    - No plan edits needed; two advisory findings recorded (missing explicit `monkeypatch.chdir` note; optional `_fold_quote_line` helper) without touching the plan
+* Insights
+    - `format_wake_line` already special-cases `leaves <= 1` to caption-only, confirming the plan's `kind != "note" and leaves > 1` branch is the minimal correct delta
+    - No existing test anywhere in `tests/` asserts an `xN <prefix>:` shape on a grain>1 fold quote line, so the change is safely self-contained
