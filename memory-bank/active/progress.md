@@ -66,3 +66,15 @@ Successful `nap` prints `Saved.` then either the next fold prompt or `Nothing le
     - All four acceptance criteria and five requirements map one-to-one to a passing test; no stubs or TODOs found
     - `docs/architecture/index.md` does not mention CLI stdout contracts, so it needed no update
 
+## 2026-08-28 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-nap-ack.md`
+    - Reconciled persistent files: systemPatterns already updated in build; productContext and techContext unchanged
+* Decisions made
+    - Idle is “no next fold request,” not “at WAKE_LINES”
+    - `emit_result` stays deferred until a third writer needs it
+* Insights
+    - If ACK+idle had been the nap contract from day one, `note` and `nap` would share one printer; #27’s silent nap was the fork this task closed
+
+
