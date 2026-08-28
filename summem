@@ -1106,12 +1106,18 @@ def fold_request(parent, wake_lines: int | None = None, nodes=None, entry_chars:
     elif remain > 1:
         extra = f"{remain} compressions remain after this one.\n"
     limit = entry_chars
+    left_src = (
+        left.caption if left.kind != "note" and left.leaves > 1 else format_wake_line(left, ids)
+    )
+    right_src = (
+        right.caption if right.kind != "note" and right.leaves > 1 else format_wake_line(right, ids)
+    )
     return (
         f"Compress these two into one line of at most {limit} characters.\n"
         "Keep what has lasting effect, drop what does not. Invent nothing.\n"
         "\n"
-        f"  {format_wake_line(left, ids)}\n"
-        f"  {format_wake_line(right, ids)}\n"
+        f"  {left_src}\n"
+        f"  {right_src}\n"
         "\n"
         f'Run: {AGENT_BIN} nap{_fold_path_flag(parent)} {short_id(left.id, ids)} {short_id(right.id, ids)} "<your line>"\n'
         f"{extra}"

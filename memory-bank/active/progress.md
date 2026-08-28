@@ -36,3 +36,15 @@ When `fold_request` quotes two packs, show captions only. Grain and hash stay on
 * Insights
     - `format_wake_line` already special-cases `leaves <= 1` to caption-only, confirming the plan's `kind != "note" and leaves > 1` branch is the minimal correct delta
     - No existing test anywhere in `tests/` asserts an `xN <prefix>:` shape on a grain>1 fold quote line, so the change is safely self-contained
+
+## 2026-08-28 - BUILD - COMPLETE
+
+* Work completed
+    - `fold_request` quotes caption-only for naps with grain > 1
+    - Two tests in `tests/test_fold.py`; atlas and systemPatterns surgical
+    - py311 369 passed, 1 skipped
+* Decisions made
+    - No new public helper; two ternaries in `fold_request`
+    - Pack-pair wake check uses `WAKE_LINES` 2 so the listing stays packed
+* Insights
+    - Default-budget `wake_text` expands under-budget packs; a wake-shape assertion on packs must pin the budget at or over the view
