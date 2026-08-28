@@ -27,3 +27,14 @@ Retarget SumMem ingest membership so `note` is lore plus tree-affecting in-fligh
 * Insights
     - “Would still need” is the next agent on this PR; “work in this clone” is someone using the tree
     - “Decisions” in today’s how-to is how PR telemetry qualifies
+
+## 2026-08-28 - PLAN - COMPLETE
+
+* Work completed
+    - One executable step: retarget `test_init.py` then rewrite `prompt_text` / `how_to_text` / `AGENTS.md` lockstep
+    - Persistent docs and OptMem left alone
+* Decisions made
+    - Pin `work in this clone` on both surfaces; do not pin denylist examples
+    - No new test files; `test_scopes.py` identity-compares `how_to_text()`
+* Insights
+    - `clone not in prompt_text` was protecting the bootstrap from a portability lecture, not from the word “clone”
