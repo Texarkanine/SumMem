@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: fold-pack-captions
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
 - `fold_request` quotes `node.caption` when kind is nap and grain > 1; `format_wake_line` unchanged
@@ -10,7 +10,7 @@
 - py311: 369 passed, 1 skipped
 
 ## Next Step
-- QA review
+- Reflection
 
 ## Files modified
 - `/Users/tex/git/SumMem/summem`

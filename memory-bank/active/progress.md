@@ -48,3 +48,15 @@ When `fold_request` quotes two packs, show captions only. Grain and hash stay on
     - Pack-pair wake check uses `WAKE_LINES` 2 so the listing stays packed
 * Insights
     - Default-budget `wake_text` expands under-budget packs; a wake-shape assertion on packs must pin the budget at or over the view
+
+## 2026-08-28 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Reviewed the saved implementation against the Level 2 plan, project brief, architecture, and established code patterns
+    - Verified KISS, DRY, YAGNI, completeness, regression safety, integrity, and documentation
+    - Result: `PASS`
+* Decisions made
+    - The two local source-line selections are simpler than introducing a helper for a rule used only in `fold_request`
+    - No implementation rework or plan revision is required
+* Insights
+    - The tests pin all changed and preserved surfaces: pack captions, blank captions, `Run:` ids, pack wake grammar, and dated leaf quotes
