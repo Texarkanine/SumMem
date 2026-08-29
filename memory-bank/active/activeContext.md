@@ -1,12 +1,11 @@
 # Active Context
 
 ## Current Task: entry-gate-split
-**Phase:** PLAN - COMPLETE
+**Phase:** BUILD - IN-PROGRESS
 
 ## What Was Done
-- Intent approved; classified Level 2.
-- Plan: TDD on `tests/test_init.py` (retarget invariants, move writer-only pins onto how-to, add disjointness, extend init recipe); then rewrite `prompt_text` / `how_to_text` / `init_text` and the `AGENTS.md` prefix; then briefing (`systemPatterns.md`, architecture change-surface + invariant honesty, `productContext.md`, README Quick Start).
-- Creative already resolved; no open question for `/niko-creative`.
+- Preflight: PASS WITH ADVISORY ([Preflight](ba942c51-2601-4879-9c11-e3dc302587b3)). No plan edits.
+- Advisories to apply in-step: name the `how_to_text()` `git` forbid; drop intro `{AGENT_BIN}`; while briefing files are open, add sovereignty to activation and a productContext use case, and restate the skip rule without the Usage token. No write-rule delimiters.
 
 ## Next Step
-- Preflight validation.
+- Unit 1 TDD: stub and write `tests/test_init.py`, run red, then rewrite prompt functions and `AGENTS.md`.

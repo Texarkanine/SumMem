@@ -22,3 +22,13 @@ Split the agent write rule out of root-wake Usage and into the `init`-emitted `A
     - One executable unit covering tests + three prompt functions + lockstep prefix. Briefing is a separate prose/policy step. No new test file. No shared membership constant.
 * Insights
     - `test_scopes.py` equality against `how_to_text()` will follow the new Usage body without pin surgery. The leftover-pin risk is `test_init.py` only.
+
+## 2026-08-29 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Preflight subagent ([Preflight](ba942c51-2601-4879-9c11-e3dc302587b3)): PASS WITH ADVISORY. No plan edits. Traced every consumer of the three prompt functions; `test_scopes.py` and `test_path_walkup_and_catalog.py` need no pin surgery.
+* Decisions made
+    - Build as written. Apply advisories in-step (not as plan edits): name the `how_to_text()` `git` forbid; drop intro `{AGENT_BIN}`; while briefing files are open, add sovereignty to the activation definition and a productContext use case, and restate the skip rule without the Usage token. Do not adopt invisible write-rule delimiters.
+* Insights
+    - Writer-only moving into Usage is live against `"git" not in how_to`. Keep "untracked"; do not say "git".
+    - The atlas definition of activation and productContext's use cases go stale on the sovereignty fact; expand the scheduled briefing while those files are open.

@@ -1,0 +1,47 @@
+PASS WITH ADVISORY
+
+Preflight of `entry-gate-split` (Level 2) against `tasks.md`, `projectbrief.md`, `creative-entry-gate-split.md`, `systemPatterns.md`, `techContext.md`, and the code under review (`summem` `prompt_text` / `how_to_text` / `init_text`, `tests/test_init.py`, `tests/test_scopes.py`, `AGENTS.md`). Branch is `who-gates-entry`; working tree clean. No plan edits were made: no TDD step swap and no change-detector strike were warranted.
+
+## TDD plan encoding — PASS
+
+Unit 1 ("Agent prompt contract — executable") orders its numbered substeps stub-tests, stub-interface (correctly "none": the three functions already exist with the right signatures), write-tests-and-run-red with the expected red enumerated, then write-code-and-run-green. An implementer cannot follow those steps by coding first. Unit 2 ("Briefing — prose/policy") declares itself prose/policy and owes no tests; the four files it touches (`systemPatterns.md`, `docs/architecture/index.md`, `productContext.md`, `README.md`) are documentation content, so omitting tests passes this check.
+
+No scheduled step is a change-detector. The prompt-surface pins assert on the return values of functions in the shipped script — program output that is the product's agent interface, not a document. The new disjointness test in particular goes red on a real product regression (Usage restating the write rule stamps over a consumer's edited prefix every session, which is the failure the whole task exists to prevent), not merely when someone edits copy. `test_agents_md_starts_with_prompt_text` is a cross-file lockstep contract, which the always-tdd rule names explicitly as not a change-detector; the plan's instruction to comment it as dogfood-only is the right treatment.
+
+## Convention compliance — PASS
+
+Test placement matches existing structure: prompt contract in `tests/test_init.py`, root-wake assembly in `tests/test_scopes.py`, both under `pytest.ini` `testpaths = tests`. No new test file, correctly. The proposed name `test_prompt_and_how_to_are_disjoint` matches the file's naming. Keeping the two prompt bodies as direct f-strings rather than factoring a `MEMBERSHIP_PROBE` follows the stored decision (`.summem/notes/20260829T002301Z-2fe1954978d4b4e4`) and supersedes the earlier note that describes a shared constant. Step 2.1's `systemPatterns.md` edit lands in the existing narrative, not a new pattern section.
+
+## Dependency impact — PASS with one advisory
+
+Traced every consumer of the three functions. `how_to_text()` is called at `summem` root-wake body assembly and compared for full equality in `tests/test_scopes.py` (two sites), so the new body flows through without pin surgery, as the plan predicts. `tests/test_path_walkup_and_catalog.py` asserts only the `== SumMem Usage ==` header's presence on root wake and absence on a pull; the header is unchanged, so acceptance criterion 4 keeps its coverage even though the plan does not name that file. `prompt_text()` is consumed by `init_text()`, the two `init` dispatch sites, and the `AGENTS.md` lockstep — all listed. No `dogfood/AGENTS.md` or second lockstep target exists. `CLAUDE.md` is an `@AGENTS.md` include and is unaffected.
+
+ADVISORY (low): `tests/test_init.py:147` asserts `"git" not in lower` on `how_to_text()`. The writer-only paragraph moving into Usage is a live constraint against that pin. The current wording ("do not leave them untracked") satisfies it, but the plan's leftover-pin list does not name this forbid, and a natural rewrite such as "keep them in git" would fail it. Name it before rewriting `how_to_text()`.
+
+## Conflict detection — PASS
+
+No existing utility duplicates the planned work. Narrowing `how_to_text()` is not a broken contract: removing the membership paragraph from Usage is the deliberate product change, and there is no published interface that guarantees Usage teaches membership. The `0BSD` prompt-template permission in the `summem` header is scoped by description ("the agent prompt template this Program emits for insertion into AGENTS.md"), not by function name or line range, so moving writer-only text out of `prompt_text()` and into AGPL-only program output needs no header edit — constraint 4 holds as written.
+
+## Completeness precheck — PASS with advisories
+
+All six brief requirements map to concrete steps: R1 branch (verified), R2/R3 prompt bodies (step 1.4, behaviors 1-4), R4 `init_text()` wrapper (step 1.4, behavior 7), R5 lockstep (step 1.4, behavior 6), R6 unchanged shipped default (behavior 1 pins the membership probe, genre list, denylist, and personal/machine stay-out as present in `prompt_text()`). All five acceptance criteria have a named test: AC1 behavior 5, AC2 behavior 7, AC3 behavior 6, AC4 behavior 8 plus the existing pull test, AC5 behavior 5.
+
+ADVISORY (medium): a copy ambiguity between the creative and the plan's pin. The creative's component-boundary list says to keep "SumMem as this repository's shared memory" in `prompt_text()`; that sentence currently reads "invoked as `{AGENT_BIN}`", and behavior 2 pins `{AGENT_BIN}` to exactly one occurrence on the wake line. Both are satisfiable — keep the sentence, drop the "invoked as" clause, since the wake line supplies the path — but the implementer should make that call deliberately rather than discover it as a red test.
+
+ADVISORY (medium): `docs/architecture/index.md` defines activation in "Store, driver, and activation" as "a block of instructions at the top of committed `AGENTS.md`. The `init` command prints that block." After this change, that definition is materially incomplete: the block is also the repository's write rule, and the script will not reassert its own default over an operator's edit. Step 2.2 only touches the change-surface row and the invariant note. The sovereignty fact is the most important new architectural claim and its natural home is that section.
+
+ADVISORY (low): `memory-bank/productContext.md` Use Cases gains a real new one — an operator sets what this repository remembers by editing the activation block, and copying a newer script does not overwrite that choice. That is the brief's Use-Case 2 and Use-Case 3. Step 2.3 only fixes the "part of your work" sentence. Key Constraint "Personal and machine facts stay out of the repository" is correctly left alone per the creative: it remains product intent and the shipped default.
+
+ADVISORY (low): `systemPatterns.md` "Root pushes; other stores pull" states the skip rule as "Skip if a `== SumMem Usage ==` block is still readable in the conversation." That paraphrase names the exact token behavior 2 forbids in the prefix. It is not made wrong by this task, but while step 2.1 is already editing that file it is worth restating the skip condition the way the prompt does ("a prior project-root wake in this conversation") so the briefing does not tempt the next author into a pin failure.
+
+## Radical innovation — advisory, not applied
+
+Delimit the write-rule section inside `prompt_text()` with markdown-invisible markers, e.g. `<!-- summem:write-rule v1 -->` … `<!-- /summem:write-rule -->` around the Register Memories body, and nothing else.
+
+This costs two comment lines in the emitted prefix and changes no agent-facing prose (HTML comments do not render and read as noise to a model far less than a sentence does). What it buys is the one acknowledged casualty of the chosen design: the creative's tradeoff paragraph concedes that "the shipped default write rule no longer upgrades when someone copies a new script" and that operators "re-run `init` and merge by hand" with no way to see what changed. Delimiters give a later `summem init --diff` (or a plain `sed` recipe in the README) an exact, machine-findable span in a consumer's `AGENTS.md`: show the operator the shipped default's current text against the span they committed, and let them decide. It is a seam, not a mechanism — no store file, no overlay, no `summem upgrade`, none of what the overlay option was rejected for — and it is additive to the disjointness fence rather than in tension with it, because the markers bracket exactly the policy region the split just created.
+
+The risk to weigh is that a marker in the prefix is a second mechanical artifact beyond the wake handoff, and the pre-mortem is explicit that mechanical creep into `AGENTS.md` is the way this design rots. A comment that carries no instruction is a weaker precedent than argv, but it is a precedent. Do not adopt it inside this task; it is a separate decision about the upgrade path.
+
+## Verdict
+
+No finding requires the plan to change before build. Proceed to `/niko-build`.
