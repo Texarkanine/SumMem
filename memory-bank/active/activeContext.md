@@ -4,8 +4,8 @@
 **Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Second preflight FAIL (fixable): `assert_unique_cover` still skipped note/note.
-- Plan amended: unit 1 touches `tests/gitutil.py`; unit 2 Files includes `tests/test_cli.py`; unit 4 quotes the real `systemPatterns.md` sentence.
+- Third preflight FAIL (fixable): no numbered CLI `note` test for packed duplicate text.
+- Plan amended: unit 1 retargets `test_cli_note_text_inside_nap_exits_0_no_loose_note` for exit 0, `Saved.\n`, no loose duplicate, zoom reachability.
 
 ## Next Step
 - Re-run preflight, then wait for `/niko-build` on PASS.

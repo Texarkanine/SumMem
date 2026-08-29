@@ -96,3 +96,21 @@ Fix [issue #77](https://github.com/Texarkanine/SumMem/issues/77) under the opera
     - Do not make `assert_unique_cover` call `_first_overlap`; drop the skip in the helper instead
 * Insights
     - `test_two_identical_notes_stay` never calls `heal_view`; leave it alone
+
+## 2026-08-29 - PREFLIGHT - COMPLETE (FAIL (fixable))
+
+* Work completed
+    - Re-validated the amended Level 3 plan against the driver, existing tests, acceptance criteria, and documentation targets
+* Decisions made
+    - Build remains gated until the plan explicitly schedules the CLI `note` packed-duplicate regression test
+* Insights
+    - Naming `tests/test_cli.py` in Unit 2 only accounts for the same-id `nap` retarget; it does not cover acceptance criterion 1's `note` acknowledgement and post-heal behavior
+
+## 2026-08-29 - PLAN - COMPLETE
+
+* Work completed
+    - Unit 1 now numbers `test_cli_note_text_inside_nap_exits_0_no_loose_note`: exit 0, `Saved.\n`, no loose duplicate, zoom reaches
+* Decisions made
+    - Keep that test in `tests/test_zipper.py`; do not move it to `test_cli.py`
+* Insights
+    - The CLI case already exists; it was missing `Saved.` and zoom, not a missing file

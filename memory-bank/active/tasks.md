@@ -54,7 +54,7 @@ graph TD
 - After a grain-2 fold of two distinct notes, a later `write_note` of one packed sentence, then `heal_view` → that new file is gone; pack remains; zoom still reaches the sentence. (Trigger 1: intended. This is a pin, not a keep-the-file test.)
 - Rematerialize a packed `NoteChild` then `heal_view` → file gone; pack remains; zoom still reaches. Unchanged.
 - `write_nap` of two identical-text notes (no prior heal) → `ValueError` overlap; no pack written; both files still present until heal.
-- CLI `note` of text already inside a pack → exit 0, `Saved.`, new file absent after the command.
+- CLI `note` of text already inside a pack → exit 0, stdout `Saved.`, no loose duplicate, zoom still reaches the packed sentence. This is `tests/test_zipper.py::test_cli_note_text_inside_nap_exits_0_no_loose_note`, not a new file.
 - `fold_request` / CLI `nap` of two identical notes after heal: only one view node, so the old `(prefix, prefix)` nap path is gone.
 
 ### Test Infrastructure
@@ -62,11 +62,11 @@ graph TD
 - Framework: pytest via `tox -e py311` (iterate); `tox run-parallel` at end-of-work.
 - Test location: `tests/`
 - Conventions: `tmp_path` + `init_repo`; session `summem` fixture.
-- New test files: none. Cases in `tests/test_zipper.py`, `tests/test_nap.py`, `tests/test_nap_reject.py` (or existing overlap tests in `tests/test_nap.py`). Retarget `test_write_nap_identical_text_notes_still_concat`, `test_nap_two_identical_notes_by_repeated_id`, `test_identical_notes_nappable_after_heal_view`, `test_equal_grain_pair_duplicate_ids_when_same_text`, `test_fold_request_identical_notes_use_short_prefix`, `test_nap_accepts_prefix_of_identical_notes`.
+- New test files: none. Cases in `tests/test_zipper.py`, `tests/test_nap.py`, `tests/test_nap_reject.py` (or existing overlap tests in `tests/test_nap.py`). Retarget `test_cli_note_text_inside_nap_exits_0_no_loose_note`, `test_write_nap_identical_text_notes_still_concat`, `test_nap_two_identical_notes_by_repeated_id`, `test_identical_notes_nappable_after_heal_view`, `test_equal_grain_pair_duplicate_ids_when_same_text`, `test_fold_request_identical_notes_use_short_prefix`, `test_nap_accepts_prefix_of_identical_notes`.
 
 ### Integration Tests
 
-- `test_zipper.py`: packed text + new same-text note + heal → file gone, zoom reaches.
+- `test_zipper.py`: packed text + new same-text note + heal → file gone, zoom reaches. CLI: `test_cli_note_text_inside_nap_exits_0_no_loose_note` after packing A+B, `main(["note", "A"])`.
 - `test_nap.py` / `test_nap_reject.py`: `write_nap` of two same-digest notes raises before write.
 
 ## Implementation Plan
@@ -76,9 +76,9 @@ graph TD
 - Files: `summem`, `tests/test_zipper.py`, `tests/gitutil.py`
 - Creative ref: `memory-bank/active/creative/creative-leaf-identity.md`
 
-1. Stub tests: add `test_heal_two_identical_notes_keeps_newer` (two files → heal → one file, later stamp; then `assert_unique_cover`). Leave `test_two_identical_notes_stay` alone: it never calls `heal_view`. Change `test_identical_notes_nappable_after_heal_view` so it no longer requires both files after heal. Add `test_note_after_packed_text_is_healed_away` pinning trigger 1 as intended (file gone, zoom reaches, `Saved.` still printed if asserted at CLI).
-2. Stub interface: none; delete the skip in `_first_overlap` and in `assert_unique_cover` only in step 4.
-3. Write tests and run red: `tox -e py311 -- tests/test_zipper.py::test_heal_two_identical_notes_keeps_newer`.
+1. Stub tests: add `test_heal_two_identical_notes_keeps_newer` (two files → heal → one file, later stamp; then `assert_unique_cover`). Leave `test_two_identical_notes_stay` alone: it never calls `heal_view`. Change `test_identical_notes_nappable_after_heal_view` so it no longer requires both files after heal. Add `test_note_after_packed_text_is_healed_away` as a library pin (`write_note` + `heal_view`; file gone; zoom reaches). Retarget `tests/test_zipper.py::test_cli_note_text_inside_nap_exits_0_no_loose_note` (add `capsys`): after packing A+B, `main(["note", "A"])` returns 0, stdout is exactly `Saved.\n`, no loose note with caption `A`, `zoom_reaches` the remaining pack still finds `A`.
+2. Stub interface: none. No new signatures. Removing the note/note skip is step 4, not a stub.
+3. Write tests and run red: `tox -e py311 -- tests/test_zipper.py::test_heal_two_identical_notes_keeps_newer` (new; red until the skip is gone). Fill in the four CLI assertions on `test_cli_note_text_inside_nap_exits_0_no_loose_note` in this step; that case is a contract pin of intended trigger 1 and should stay green on current `note` (heal already drops the packed-text file and prints `Saved.`).
 4. Write code and run green: remove the note/note skip in `_first_overlap`. In `tests/gitutil.py::assert_unique_cover`, delete `if a.kind == "note" and b.kind == "note": continue` and replace the docstring claim “Two notes may share a digest” with: after heal, every pair of view nodes has disjoint leaf-sets, including two notes.
 
 ### 2. `write_nap` rejects digest overlap for notes — executable
