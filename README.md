@@ -137,7 +137,7 @@ And [that's how SumMem works](https://classic.play2048.co/)!
 ### Onboard a repository
 
 1. Copy [summem](./summem) into `.summem/summem` in your repository's root.
-2. Run `.summem/summem init` and insert that print at the top of committed `AGENTS.md`. The block is a starting write rule; you may edit what this repository remembers. Command syntax comes from root wake.
+2. Run `.summem/summem init` and insert that print at the top of committed `AGENTS.md`. The block is a starting write rule; you may edit what this repository remembers. Command syntax will come from `summem` itself when agents run `wake`.
 3. Add `**/.summem/__pycache__/` to your `.gitignore`
 4. The first `wake`, `note`, `nap`, `zoom`, or `recall` creates the root store. Until someone `start`s another path, every note in the tree rolls up there.
 5. (optional): run `.summem/summem start <path>` now for any sub-packages (i.e. in a monorepo)

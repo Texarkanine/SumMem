@@ -1224,6 +1224,8 @@ def init_text() -> str:
         "\n"
         "put @AGENTS.md at the top of CLAUDE.md.\n"
         "\n"
+        "---\n"
+        "\n"
         f"{prompt_text()}"
     )
 

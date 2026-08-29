@@ -22,6 +22,9 @@ def test_init_prints_recipe_and_prompt(capsys, summem):
     assert "you may edit" in recipe.lower()
     assert "command syntax" in recipe.lower()
     assert "you may edit" not in prompt.lower()
+    assert "---" in recipe
+    assert "---" not in prompt
+    assert recipe.rstrip().endswith("---")
     assert "paste" not in out.lower()
     assert "AGENTS.md or CLAUDE.md" not in out
 
