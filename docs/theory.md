@@ -51,7 +51,7 @@ Those objects have names:
 - the caption (`.summ`), one line, which is what `wake` prints;
 - the children file (`.tree`), which holds the full text of every note underneath it.
 
-The word *summary* misleads here. The caption summarises. The nap does not. A nap carries every original sentence inside it, spelled out. It is a bundle, not a précis.
+The word *summary* misleads here. The caption summarises. The nap does not. A nap carries every original sentence inside it, spelled out.
 
 ### The view and grain
 
@@ -188,11 +188,29 @@ flowchart TD
 
 Fold is: merge two adjacent blocks of equal size. Expand is: split a block, for display only, writing nothing back.
 
+## A nap's filename
+
+A nap's two files share one stem. Here is one:
+
+```
+20260829T161934Z-c4a81e07b39d52f6-7e2b0c91a4d8351f-2-b8f16d03e5a9274c
+```
+
+The same stem with `.summ` is the caption; with `.tree`, the children. The fields, in order:
+
+1. `20260829T161934Z` — the UTC time from the leftmost child
+2. `c4a81e07b39d52f6` — that child's random suffix
+3. `7e2b0c91a4d8351f` — the leaf-set id, a hash of the notes inside
+4. `2` — grain, how many notes
+5. `b8f16d03e5a9274c` — the variant tag, a hash of the children-file bytes and the caption bytes
+
+The first four fields are fixed by which notes went in, and which of them sorts first. Only the last field moves when two agents write different captions for the same pair.
+
 ## A max-register for captions
 
-Imagine: two agents fold the same two notes and each write different captions.
+Imagine: two agents fold the same two notes and each writes a different caption.
 
-Same notes means the same leaf-set field in the filename, the same leftmost child, the same grain. Only the variant tag differs — a hash of the bundle's bytes and the caption's bytes. Two filenames. Git unions them. Both appear in the view, briefly, as two rows with one id.
+Same notes means the same leaf-set field, the same leftmost child, the same grain. Only the variant tag differs. Two filenames. Git unions them. Both appear in the view, briefly, as two rows with one id.
 
 Heal settles it. The view is sorted by filename, and when two items cover the same notes, the earlier name loses. Since the names differ only in that trailing hash, the surviving caption is the one whose variant tag sorts highest.
 
