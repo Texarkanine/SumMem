@@ -622,8 +622,6 @@ def _first_overlap(
             left_set, right_set = sets[i], sets[j]
             if left_set is None or right_set is None:
                 continue
-            if left.kind == "note" and right.kind == "note":
-                continue
             if left_set.isdisjoint(right_set):
                 continue
             if left.leaves <= right.leaves:

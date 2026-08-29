@@ -71,7 +71,7 @@ graph TD
 
 ## Implementation Plan
 
-### 1. Heal note/note overlap — executable
+### 1. Heal note/note overlap — executable — done
 
 - Files: `summem`, `tests/test_zipper.py`, `tests/gitutil.py`
 - Creative ref: `memory-bank/active/creative/creative-leaf-identity.md`
@@ -137,6 +137,6 @@ No new technology - validation not required
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight (re-run after 2026-08-29 FAIL (fixable))
-- [ ] Build
+- [x] Preflight (PASS 2026-08-29)
+- [ ] Build ← in progress (unit 2)
 - [ ] QA

@@ -131,14 +131,12 @@ def zoom_reaches(cwd: Path, start_id: str, sentence: str, bound: int = 200) -> N
 
 
 def assert_unique_cover(m, repo) -> None:
-    """Fail unless every nap/note pair in the view has disjoint leaf-sets. Two notes may share a digest."""
+    """Fail unless every pair of view nodes has disjoint leaf-sets, including two notes."""
     nodes = m.list_view(repo)
     rows = [(n, m.leaf_digests(n)) for n in nodes]
     for i, (a, sa) in enumerate(rows):
         for b, sb in rows[i + 1 :]:
             if sa is None or sb is None:
-                continue
-            if a.kind == "note" and b.kind == "note":
                 continue
             assert sa.isdisjoint(sb), (a.name, b.name, sa & sb)
 

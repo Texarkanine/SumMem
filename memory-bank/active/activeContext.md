@@ -1,11 +1,10 @@
 # Active Context
 
 ## Current Task: heal-same-text
-**Phase:** PREFLIGHT - COMPLETE (PASS)
+**Phase:** BUILD - IN-PROGRESS (unit 2)
 
 ## What Was Done
-- Fourth preflight run: PASS. The CLI `note` regression test gap that caused three prior `FAIL (fixable)` results is closed and verified against the current codebase.
-- Two advisories recorded (non-blocking): a `view_is_consistent` proof helper for `assert_unique_cover`; a data-driven `OVERLAP_POLICY` table as a future structural improvement to `_first_overlap`.
+- Unit 1: removed the note/note skip in `_first_overlap`. Heal keeps the later filename of two identical loose notes. Packed-text duplicate notes still drop (trigger 1). `assert_unique_cover` now checks note/note pairs.
 
 ## Next Step
-- Proceed to `/niko-build`.
+- Unit 2: `write_nap` rejects any digest overlap.
