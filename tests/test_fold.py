@@ -248,8 +248,8 @@ def test_nap_prints_remaining_ones_not_parent_plus_one(tmp_path, monkeypatch, ca
     out = capsys.readouterr().out
     assert out.startswith("Saved.\n\n")
     assert out.index("Saved.") < out.index("Compress these two")
-    assert f"  {dated_leaf('20260101T000003Z', 'c')}\n" in out
-    assert f"  {dated_leaf('20260101T000004Z', 'd')}\n" in out
+    assert "  c\n" in out
+    assert "  d\n" in out
     assert "Run: .summem/summem nap " in out
     assert "Invent nothing." in out
 
@@ -280,8 +280,8 @@ def test_nap_prints_remaining_count_after_saved(tmp_path, monkeypatch, capsys, s
     out = capsys.readouterr().out
     assert out.startswith("Saved.\n\n")
     assert "1 compression remains after this one." in out
-    assert f"  {dated_leaf('20260101T000003Z', 'c')}\n" in out
-    assert f"  {dated_leaf('20260101T000004Z', 'd')}\n" in out
+    assert "  c\n" in out
+    assert "  d\n" in out
     assert "Nothing left to compress." not in out
 
 
@@ -301,8 +301,8 @@ def test_over_budget_note_requests_equal_grain_ones(tmp_path, monkeypatch, capsy
     assert out.index("Saved.") < out.index("Compress these two")
     assert "Compress these two into one line of at most 280 characters." in out
     assert "Invent nothing." in out
-    assert f"  {dated_leaf('20260101T000001Z', 'alpha')}\n" in out
-    assert f"  {dated_leaf('20260101T000002Z', 'beta')}\n" in out
+    assert "  alpha\n" in out
+    assert "  beta\n" in out
     assert 'Run: .summem/summem nap ' in out
     assert '"<your line>"' in out
     pa = m.short_id(ids[0], ids)
@@ -370,8 +370,8 @@ def test_fold_request_mentions_remaining(tmp_path, monkeypatch, summem):
         m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
     out = m.fold_request(repo, 3)
     assert "1 compression remains after this one." in out
-    assert f"  {dated_leaf('20260101T000001Z', 'a')}\n" in out
-    assert f"  {dated_leaf('20260101T000002Z', 'b')}\n" in out
+    assert "  a\n" in out
+    assert "  b\n" in out
     assert "Run: .summem/summem nap " in out
     assert "Run: summem nap " not in out
 
@@ -441,6 +441,30 @@ def test_fold_request_omits_path_when_cwd_selects_store(tmp_path, monkeypatch, s
     out = m.fold_request(pkg, 1)
     assert " --path " not in out
     assert "Run: .summem/summem nap " in out
+
+
+def test_fold_request_note_pair_quotes_text_only(tmp_path, monkeypatch, summem):
+    """Two notes over budget: fold quotes note text; wake still has x1 and the day."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    monkeypatch.setattr(m, "WAKE_LINES", 1)
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    nodes = m.list_view(repo)
+    ids = [node.id for node in nodes]
+    pa = m.short_id(nodes[0].id, ids)
+    pb = m.short_id(nodes[1].id, ids)
+    out = m.fold_request(repo, 1)
+    assert "  alpha\n" in out
+    assert "  beta\n" in out
+    assert dated_leaf("20260101T000001Z", "alpha") not in out
+    assert dated_leaf("20260101T000002Z", "beta") not in out
+    assert "x1 " not in out
+    assert f"nap {pa} {pb} " in out
+    wake = m.wake_text(repo)
+    assert dated_leaf("20260101T000001Z", "alpha") in wake
+    assert dated_leaf("20260101T000002Z", "beta") in wake
 
 
 def test_fold_request_pack_pair_quotes_captions_only(tmp_path, monkeypatch, summem):

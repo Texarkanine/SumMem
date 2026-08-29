@@ -13,3 +13,15 @@
     - L1: skip plan, creative, and preflight; go to Build.
 * Insights
     - #72 left leaf-pair quotes on `format_wake_line` on purpose. That split is now the defect.
+
+## 2026-08-29 - BUILD - COMPLETE
+
+* Work completed
+    - `fold_request` quotes `node.caption` for both sides of every pair.
+    - Tests: leaf-pair text-only quotes; dated pins in remaining/nap/note stdout retargeted; pack-pair and empty-caption tests still pass.
+    - Atlas, `systemPatterns.md`, README example: fold quotes, period.
+    - `tox -e py311`: 372 passed, 1 skipped.
+* Decisions made
+    - One code path for notes and packs. Empty caption stays a blank quote because caption is empty, not because of a special case.
+* Insights
+    - `format_wake_line` remains the listing grammar. Fold is not a listing.

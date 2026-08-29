@@ -1,10 +1,13 @@
 # Active Context
 
 ## Current Task: fold-leaf-quotes
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Classified as Level 1: bug leftover from #72; single function (`fold_request`) plus its test pin and contract wording.
+- Dropped the kind/grain branch in `fold_request`; every quoted source line is `node.caption`.
+- Retargeted dated leaf-pair pins in `tests/test_fold.py`; added `test_fold_request_note_pair_quotes_text_only`.
+- Atlas, `systemPatterns.md`, and the README fold example now say fold quotes, not pack captions only.
+- `tox -e py311`: 372 passed, 1 skipped.
 
 ## Next Step
-- Load the Level 1 workflow and go to Build (L1 skips plan, creative, and preflight).
+- Spawn `/niko-qa`.
