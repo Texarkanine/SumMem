@@ -164,6 +164,7 @@ Agents invoke `.summem/summem`. Sometimes recording a `note` will ask for a `nap
 ## Documentation
 
 - [Architecture](docs/architecture/index.md) — algorithm, store layout, invariants
+- [Theory](docs/theory.md) — why concurrent writers converge, from a shoebox of receipts up to the homomorphism
 - [Emergency surgery](docs/surgery.md) — zipper-excise one raw note at the branch tip (not a shipped command)
 - [Notes](docs/notes.md) — what this backend is not yet
 - [AGENTS.md](AGENTS.md) — this repository's activation plus extra agent context

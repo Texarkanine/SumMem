@@ -1,0 +1,1 @@
+theory.md argues why it converges: name the system, not summem:line. Architecture owns filenames and functions. Exception: the #77 leak names leafset_id vs leaf_digests because that disagreement is the defect. Do not cite notes.md from 'leaving the cut open is a judgement'.
