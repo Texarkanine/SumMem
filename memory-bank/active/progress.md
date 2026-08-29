@@ -132,3 +132,14 @@ Retarget SumMem ingest membership so `note` is lore plus tree-affecting in-fligh
     - Kept literal output assertions so the agent-facing membership wording remains explicitly tested
 * Insights
     - `MEMBERSHIP_PROBE` structurally keeps the two prompt surfaces aligned; the existing `AGENTS.md` lockstep test covers the bootstrap copy
+
+## 2026-08-28 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Reviewed unit 3 against the plan and `creative-membership-subject-wording.md`: both prompt surfaces interpolate `MEMBERSHIP_PROBE`, `AGENTS.md` is lockstep, and the init pins match the repository-work probe
+    - Confirmed how-to still carries genre, denylist, and skip-if-nothing; writer-only and the wake-usage split are unchanged; no OptMem naming in shipped agent text
+* Decisions made
+    - PASS with no new advisories; the prior shared-constant advisory is closed because this build applied it
+* Insights
+    - Literal `"work on this repository"` pins plus one interpolated constant split the two jobs correctly: the tests lock the agent-facing wording, the constant keeps the two surfaces from drifting
+
