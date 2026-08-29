@@ -6,5 +6,6 @@ A committed, concurrent memory for agents working in a git repository. Agents ru
 
 - Want it running? [README](../README.md)
 - Want the algorithm and store layout? [Architecture](architecture/index.md)
+- Want why concurrent writers agree on the notes? [Theory](theory.md)
 - Want to excise a raw note at the tip? [Emergency surgery](surgery.md)
 - Want what this backend is not yet? [Notes](notes.md)
