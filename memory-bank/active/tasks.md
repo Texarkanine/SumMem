@@ -81,7 +81,7 @@ graph TD
 3. Write tests and run red: `tox -e py311 -- tests/test_zipper.py::test_heal_two_identical_notes_keeps_newer` (new; red until the skip is gone). Fill in the four CLI assertions on `test_cli_note_text_inside_nap_exits_0_no_loose_note` in this step; that case is a contract pin of intended trigger 1 and should stay green on current `note` (heal already drops the packed-text file and prints `Saved.`).
 4. Write code and run green: remove the note/note skip in `_first_overlap`. In `tests/gitutil.py::assert_unique_cover`, delete `if a.kind == "note" and b.kind == "note": continue` and replace the docstring claim “Two notes may share a digest” with: after heal, every pair of view nodes has disjoint leaf-sets, including two notes.
 
-### 2. `write_nap` rejects digest overlap for notes — executable
+### 2. `write_nap` rejects digest overlap for notes — executable — done
 
 - Files: `summem`, `tests/test_nap.py`, `tests/test_nap_reject.py`, `tests/test_cli.py`
 - Creative ref: `memory-bank/active/creative/creative-leaf-identity.md`
@@ -138,5 +138,5 @@ No new technology - validation not required
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
 - [x] Preflight (PASS 2026-08-29)
-- [ ] Build ← in progress (unit 2)
+- [ ] Build ← in progress (unit 3)
 - [ ] QA

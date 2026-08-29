@@ -713,7 +713,7 @@ def write_nap(parent, id_a, id_b, caption, entry_chars: int | None = None, nodes
     left, right = _adjacent_nodes(nodes, id_a, id_b)
     child_l, digs_l = _as_child(left)
     child_r, digs_r = _as_child(right)
-    if (set(digs_l) & set(digs_r)) and (left.kind == "nap" or right.kind == "nap"):
+    if set(digs_l) & set(digs_r):
         raise ValueError("overlapping packs")
     tree = Tree(kids=[child_l, child_r])
     digests = digs_l + digs_r
