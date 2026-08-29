@@ -73,6 +73,12 @@ No new technology - validation not required
 - Briefing still teaches writer-only as activation: step 2 exists so the atlas and productContext do not lie after the move.
 - Treating lockstep as a consumer contract and "fixing" a foreign `AGENTS.md`: the test docstring states dogfood-only; do not add a foreign-repo lockstep test.
 
+## QA Findings
+
+- **Blocking — incomplete root-wake recipe:** `how_to_text()` teaches `note`, `recall`, `zoom`, and catalog-pull argv, but never teaches the `nap` command line required by Project Brief requirement 3 and the creative component boundary. `fold_request()` emits an exact `nap` command only after compression is requested; that does not satisfy the requirement that root-wake Usage own `nap` invocation syntax, and it makes `init_text()`'s claim that command syntax comes from root wake incomplete.
+- **Coverage gap:** `tests/test_init.py` pins the other Usage commands but does not assert `nap` argv, so the semantic omission passed the mechanical suite.
+- **Disposition:** QA FAIL. Rerun Build using TDD: add the missing Usage contract assertion first, observe red, then add the root-wake `nap` recipe and rerun verification.
+
 ## Status
 
 - [x] Initialization complete
@@ -82,4 +88,4 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA — FAIL; Build must rerun

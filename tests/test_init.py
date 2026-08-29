@@ -105,6 +105,7 @@ def test_prompt_text_invariants(summem):
     assert prompt.count(m.AGENT_BIN) == 1
     assert f"{m.AGENT_BIN} wake" in prompt
     assert f"{m.AGENT_BIN} note" not in prompt
+    assert f"{m.AGENT_BIN} nap" not in prompt
     assert "wake --path" not in prompt
     assert "== SumMem Usage ==" not in prompt
     assert "see and follow" not in lower
@@ -163,6 +164,7 @@ def test_how_to_text_is_the_usage_section(summem):
     assert "already stored" in lower
     assert "do not retry" in lower
     assert f'{m.AGENT_BIN} note' in text
+    assert f'{m.AGENT_BIN} nap' in text
     assert "invent filenames" in lower
     assert "the only writer" in lower
     assert "part of your work" in lower

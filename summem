@@ -1183,6 +1183,7 @@ def how_to_text() -> str:
 == SumMem Usage ==
 
 `{AGENT_BIN} note "…"` records one short line.
+`{AGENT_BIN} nap ID-A ID-B CAPTION` folds two adjacent ids.
 
 Never invent filenames, rewrite note bytes, or delete memory files by hand. The script is the only writer. The files it writes are part of your work; do not leave them untracked.
 
