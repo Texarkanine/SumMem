@@ -1,6 +1,6 @@
 # Progress
 
-Fix [issue #77](https://github.com/Texarkanine/SumMem/issues/77): heal must not delete a loose note whose text already sits inside a pack, and napping two identical notes must not produce a pack whose grain disagrees with its leaf set.
+Fix [issue #77](https://github.com/Texarkanine/SumMem/issues/77) under the operator vote: `L` is a set of facts. Trigger 1 is intended (shoebox). Trigger 2 is the remaining lie: two identical notes must not nap into grain 2 with one leaf.
 
 **Complexity:** Level 3
 
@@ -35,3 +35,23 @@ Fix [issue #77](https://github.com/Texarkanine/SumMem/issues/77): heal must not 
     - No new test files. Driver does not dual-read old content-only 16-hex stems.
 * Insights
     - Fold of two identical notes becomes two prefixes on `Run:`, not one prefix twice.
+
+## 2026-08-29 - CREATIVE - REVISED
+
+* Work completed
+    - Operator vote: `L` is a set of facts; same sentence is one leaf regardless of when noted
+    - Rewrote `memory-bank/active/creative/creative-leaf-identity.md`
+* Decisions made
+    - Keep content identity. Trigger 1 is the shoebox, not a keep-the-file bug. Remove the note/note skip; `write_nap` rejects any digest overlap. No migrate. `Saved.` stays.
+* Insights
+    - The first pass treated the theory “leak” section as spec. The shoebox is the spec. The leak section was the issue talking.
+
+## 2026-08-29 - PLAN - COMPLETE
+
+* Work completed
+    - Retargeted four units: heal skip, nap overlap for notes, fold/CLI same-id tests, atlas/theory
+    - Trigger 1 test now pins deletion, not survival
+* Decisions made
+    - Recency-by-renoting is out of scope
+* Insights
+    - After heal, `(id, id)` nap of two copies is gone because only one view node remains

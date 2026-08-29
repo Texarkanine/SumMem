@@ -4,29 +4,30 @@
 
 **Functional**
 
-- A note written after its text was folded still exists after the next `note` or `nap` (issue #77 trigger 1).
-- Napping two identical notes must not produce a pack whose grain disagrees with its leaf set (trigger 2).
-- Rematerializing a packed `NoteChild` and healing must still drop that file: the pack already holds that filename and those bytes (surgery / zipper unique-cover of the same physical note). `test_heal_note_covered_by_nap_dropped` stays.
-- Concurrent same-block naps of the *same files* still zipper: same names, same bytes, same leaf-set id.
+- `L` is a set of facts. Two recordings of the same sentence are one leaf. Heal dropping a loose note whose text already sits inside a pack is the shoebox: the loose receipt and the stapled one are the same receipt. Issue #77 trigger 1 is intended.
+- Napping two identical notes must not produce a pack whose grain disagrees with `|leaf set|` (trigger 2).
+- Rematerializing a packed `NoteChild` and healing must still drop that file. `test_heal_note_covered_by_nap_dropped` stays.
+- Concurrent same-block naps of the same files still zipper.
+- `Saved.` means the fact is in `L`. It stays even when heal then unlinks the new file. Do not add an “already remembered” message.
 
 **Quality attributes (ranked)**
 
-1. Honesty — grain equals `|leaf set|`; one identity used for ids, overlap, and fold.
-2. Fitness — both triggers, without a fold-stuck pair at budget.
-3. Simplicity — one digest rule, not a note/note skip plus a nap/note name walk plus a content-hash set.
-4. Maintainability — every overlap check uses the same helper.
-5. Migration cost — accepted; `migrate.py` already exists for this class of rewrite.
+1. Honesty with `docs/theory.md` — `L` is a set; content addressing names leaves.
+2. Honesty of grain — never a grain-2 pack with one content leaf.
+3. Simplicity — no migrate; `note_digest` stays bytes-only.
+4. Recency-as-a-feature — not a requirement. Re-noting a packed fact does not bump it to the front of the view.
 
 **Technical constraints**
 
-- Script is the only writer. Leaf identity is SHA-256 from stdlib, not git, not `sha256sum`.
-- Stored public ids stay 16 hex. `leafset_id` still sorts, concatenates, hashes, truncates.
-- Notes remain `{stamp}-{rand}` immutable files. Names do not contain NUL.
-- Trees already store `NoteChild.name` and `text`. Digests can be recomputed from the children file.
+- Script is the only writer. Leaf identity remains SHA-256 of file bytes.
+- Stored public ids stay 16 hex. No `migrate.py` pass.
+- Agents never write the store. Do not invent a repair in CLI output.
 
-**In scope:** which layer is honest about “two recordings of one sentence.”
+**In scope:** which layer is honest about “two recordings of one sentence,” given that `L` is a set of facts.
 
-**Out of scope:** changing seq/grain/variant width; a `summem migrate` verb; dual-read of old ids in the driver; vector identity; making surgery match on digest instead of filename.
+**Out of scope:** per-file identity; a recency-bump protocol; designing around a broken third-party write rule that re-notes the same line.
+
+**Operator direction (2026-08-29):** `L` is a set of facts. A fact is a fact regardless of when it is asserted. “The sky is blue” noted today and in a month is one fact. Chance of accidental collision is treated as miniscule; do not design around broken write rules.
 
 ## Components
 
@@ -35,62 +36,56 @@ graph TD
     classDef store fill:#f3e5f5,stroke:#7b1fa2;
     classDef script fill:#fff3e0,stroke:#ef6c00;
 
-    Note["note file: name + bytes"]:::store --> Digest["note_digest"]:::script
+    Bytes["note file bytes"]:::store --> Digest["note_digest"]:::script
     Digest --> Leafset["leafset_id"]:::script
-    Digest --> Walk["_digests_of_tree / leaf_digests"]:::script
+    Digest --> Walk["leaf_digests set"]:::script
     Leafset --> View["list_view id"]:::script
     Walk --> Heal["heal_view overlap"]:::script
-    Walk --> Nap["write_nap overlap and grain"]:::script
-    Tree[".tree NoteChild.name + text"]:::store --> Walk
+    Walk --> Nap["write_nap overlap"]:::script
 ```
 
-Heal today skips two notes, then treats a nap/note pair as covered when the note’s *content* digest is in the pack’s *set*. That is the leak: a new file is not a rematerialized child.
+Heal already drops a note covered by a pack. It skips two notes, which is what lets two copies sit in the view and later fold into a lying grain-2 pack.
 
 ## Options Evaluated
 
-- **Per-file identity:** Hash filename with file bytes. Two recordings are two leaves. Grain equals `|leaf set|`. Existing stems need `migrate.py`.
-- **Multiset heal (issue option 2):** Keep content identity; compare leaf multisets and drop only when multiplicity is covered.
-- **Nap-reject duplicates (issue option 3):** `write_nap` refuses a combined digest list with a repeat. Trigger 2 only.
-- **Heal by filename membership:** Keep content ids; a loose note is covered by a pack only when its filename is a `NoteChild.name` in that tree. No migrate.
+- **Per-file identity:** Hash filename with bytes. Two recordings are two leaves. Rejected by operator: that is not `L`.
+- **Multiset heal (issue option 2):** Keep copies until multiplicity is covered. Wrong model: `L` has no multiplicity.
+- **Nap-reject duplicates (issue option 3):** `write_nap` refuses a combined digest list with a repeat. Stops trigger 2. Does not by itself collapse two loose copies, so `fold_request` can stick on `(id, id)` at budget.
+- **Heal note/note overlap:** Remove the note/note skip. Two loose copies of one fact collapse to one file (newer stamp kept: view is filename-sorted, older is `left`, unlinked). Packed+loose stays as today. `write_nap` also rejects any digest overlap so a direct API call cannot build the lying pack.
 
 ## Analysis
 
-| Criterion | Per-file identity | Multiset heal | Nap-reject | Heal by filename |
-|-----------|-------------------|--------------|------------|------------------|
-| Trigger 1 | Yes | No: a grain-2 pack of two distinct notes already has multiplicity 1 of each digest; the new note is a subset | No | Yes |
-| Trigger 2 | Honest fold: two leaves, grain 2 | Pack still lies unless identity also counts files | Stops the lying pack | Pack still lies unless nap is also refused |
-| Rematerialize heal | Same name + bytes → same leaf → drop | Cannot tell rematerialize from a new recording | Unrelated | Same name in tree → drop |
-| Fold at budget | Two identical notes are a valid same-grain pair | Unchanged | If nap rejects them, fold_request can stick on that pair | Same stick if combined with nap-reject; if nap allowed, grain lies |
-| Zipper of same files | Same names → same ids | Unchanged | Unchanged | Unchanged |
-| Simplicity | One digest | `leafset_id` (multiset) vs `leaf_digests` (set) stay split | Extra reject rule | Two overlap rules: names for nap/note, digests for nap/nap |
-| Risk | Breaking: every note id and nap stem changes; migrate required | Small code change, wrong fix | Small, incomplete | Small blast radius, two rules forever |
+| Criterion | Per-file identity | Multiset heal | Nap-reject only | Heal note/note + nap-reject |
+|-----------|-------------------|--------------|-----------------|------------------------------|
+| Matches `L` as a set of facts | No | No | Partial | Yes |
+| Trigger 1 (packed+loose) | Keeps a second file | Would keep it | Unchanged (drop) | Drop; intended |
+| Trigger 2 (grain vs set) | Honest as two leaves | Still a lying pack | Stops the pack | Never a pair to nap |
+| Fold at budget | Valid pair of two ids | Unchanged | Can stick | Heal runs first; one node left |
+| Migration | Required | None | None | None |
 
 Key insights:
 
-- Issue option 2 does not fix trigger 1. A later copy of a sentence that already sits once inside a pack is still a subset of that pack’s content-hash multiset. Teaching heal to count does not distinguish “this file” from “this sentence.”
-- Nap-reject without identity change can stick fold: two identical grain-1 notes stay adjacent, `fold_request` asks for them, `nap` fails.
-- Heal-by-filename is the real no-migrate alternative. It keeps the atlas sentence “two notes with the same text share an id.” It also keeps two overlap definitions and leaves trigger 2 open unless nap is refused, which reintroduces the fold stick.
-- Per-file identity is the only option that makes grain, leaf set, overlap, and fold tell one story. Concurrent writers who folded the *same files* still zipper: names are in the tree. Independently recorded same sentences become two leaves, which is what [#77](https://github.com/Texarkanine/SumMem/issues/77) and `docs/theory.md` call correct about the world.
-- `test_heal_note_covered_by_nap_dropped` is not the bug. It rematerializes the packed child’s *name*. That must keep dropping.
+- The first creative pass treated `docs/theory.md` “Where the theory leaks” as spec. That section is the bug report talking. The shoebox is the spec: throw away the loose copy.
+- `note  |  one file appears  |  gains one note` is true only when the sentence is new. A duplicate, after heal, is a no-op on `L`. `Saved.` is still true of `L`.
+- Recency bump by re-noting a packed fact would require keeping the new file. That is a different product. Not this issue.
 
 ## Decision
 
 ### Choice Pre-Mortem
 
-- Independently recorded same sentences should still collapse as one leaf so the store is a set of sentences: checked — the issue and the theory leak section reject that. Two recordings are two things.
-- NUL-in-name could alias two files into one digest: checked — note names are `{stamp}-{rand}` filesystem names; they cannot contain NUL.
-- Operator wanted the no-migrate filename-coverage heal to avoid rewriting stores: checked as a tradeoff, not a requirement. Trigger 1 needs a per-occurrence leaf. Filename-only heal leaves grain dishonest or fold stuck. L3 still gates build on `/niko-build`.
+- The operator will later want re-noting to bump recency: checked as out of scope. If that becomes a product, it is a new task, not a silent per-file identity change.
+- Removing the note/note skip drops the older of two concurrent same-text files after merge: checked — that is `L` as a set. Git still has both in history. The view keeps one (the later filename).
+- `Saved.` after a healed-away file will confuse agents into retrying: checked — how-to already says the note is stored; retrying the same line is a no-op on `L` after heal. Do not add a second ack.
 
-**Selected**: Per-file identity
-**Rationale**: Honesty and fitness outrank migration cost. It is the only option that fixes both triggers, keeps rematerialize-heal, and leaves fold able to pair two same-text notes. `migrate.py` is the existing tool for rewriting stems and nested ids (#67).
-**Tradeoff**: Every stored public id changes, including unique notes, because the digest input grows. This clone’s root and `dogfood` stores must be rewritten in the same change. Agents must not reuse ids from a pre-fix wake.
+**Selected**: Heal note/note overlap, and `write_nap` reject any digest overlap
+**Rationale:** Operator: `L` is a set of facts. Trigger 1 is the shoebox. Trigger 2 is the remaining code lie. Collapsing loose copies on heal plus rejecting overlap in `write_nap` closes it with no migrate.
+**Tradeoff:** Atlas sentence “they remain two view nodes” is false after a mutating command. Two concurrent same-text files become one view node on the next `note` or `nap`. `test_nap_two_identical_notes_by_repeated_id` and friends retarget.
 
 ## Implementation Notes
 
-- `note_digest(name: str, file_bytes: bytes) -> str` returns lowercase hex SHA-256 of `name.encode("utf-8") + b"\0" + file_bytes`. Full 64 hex; `leafset_id` still truncates the join.
-- Pass `path.name` / `NoteChild.name` at every call site: `list_view`, `leaf_digests`, `_note_child`, `_digests_of_tree`, `_digests_of_dict`, `_projected_child`, and the `named_ids` walk.
-- `_digests_of_dict` already binds `name` and ignores it. That is the content-only walk in miniature.
-- `write_nap` overlap guard can stay: two different files with the same text are disjoint leaves, so they fold. Grain is `len(digests)`.
-- Heal’s note/note skip can stay (harmless) or go (redundant once ids differ). Prefer leave it: two notes still must not unique-cover each other if a future hash collision appears.
-- `migrate.py`: for each complete pair, recompute nested `NapChild.id` from the new digest walk, recompute stem leaf-set and variant, write, unlink source if the stem changed. Idempotent when already per-file. Keep the existing 4-part-64 / 5-part-64 path. Driver does not dual-read old content-only 16-hex stems.
-- Atlas Identity, `systemPatterns.md` wake-dates paragraph, and the `docs/theory.md` leak section update to: two notes with the same text are two leaves. `leafset_id` and `leaf_digests` agree because both walk per-file digests.
+- Do not change `note_digest`. It stays SHA-256 of file bytes.
+- `_first_overlap`: delete the `left.kind == "note" and right.kind == "note": continue` skip. Equal grain-1 sets: `left.leaves <= right.leaves`, unlink `left` (older filename). Packed vs note: unchanged.
+- `write_nap`: change `if (set(digs_l) & set(digs_r)) and (left.kind == "nap" or right.kind == "nap")` to reject on any intersecting digest sets. Error stays `overlapping packs` or a shared “overlapping leaves” if that string is already the contract — do not invent a new repair; keep the existing overlap error if tests pin it, or one error for both.
+- `fold_request`: after heal, two identical notes are not both in the view. No special case required if mutating commands always heal first. Direct `fold_request` in tests may still see two files; do not build a second overlap walker unless a test requires it.
+- Atlas Identity: two notes with the same text share an id; heal keeps one. `docs/theory.md` leak section: not a leak. `leaf_digests` (set) is the model; `leafset_id` hashing a duplicate list is a path heal should make unreachable.
+- No `migrate.py`. No rewrite of this clone’s naps for identity.

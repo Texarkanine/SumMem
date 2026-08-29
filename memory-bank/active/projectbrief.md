@@ -2,34 +2,36 @@
 
 ## User Story
 
-As a contributor, I want a newly recorded note to stay in the view even when its text already lives inside an older pack, so that a later `note` or `nap` does not silently delete a line I was just told was `Saved.`
+As a contributor, I want the store’s meaning `L` to be a set of facts, so that two recordings of the same sentence are one leaf, heal can throw away a loose copy already inside a pack, and a nap cannot claim grain 2 for one fact.
 
 ## Use-Case(s)
 
 ### Use-Case 1
 
-Two distinct notes fold into a grain-2 pack. Later, another agent records a line whose text matches one already inside that pack. The next `note` or `nap` runs `heal_view`. The new note file must still exist.
+Two distinct notes fold into a grain-2 pack. Later, another agent records a line whose text matches one already inside that pack. The next `note` or `nap` runs `heal_view`. The new note file is gone. `L` is unchanged. `Saved.` still prints: the fact is in the store. This is the shoebox, not a defect.
 
 ### Use-Case 2
 
-Two loose notes with identical text are napped. The resulting pack must not claim grain 2 while holding a one-member leaf set. Heal from that state must not delete a third, never-napped copy.
+Two loose notes with identical text exist. Heal keeps one (later filename). `write_nap` of the pair without heal refuses overlap. No pack claims grain 2 with a one-member leaf set.
 
 ## Requirements
 
-1. Fix [issue #77](https://github.com/Texarkanine/SumMem/issues/77): `heal` must not delete a loose note whose text already sits inside a pack.
-2. Napping two identical notes must not produce a pack whose grain disagrees with its leaf set.
-3. A note written after its text was folded still exists after the next `note`.
-4. Choose which layer to make honest. The issue lists three non-equivalent options (per-file identity, multiset heal, nap-reject overlap); they are not interchangeable.
+1. Fix [issue #77](https://github.com/Texarkanine/SumMem/issues/77) under the operator vote: `L` is a set of facts. Trigger 1 is intended.
+2. Trigger 2: napping two identical notes must not produce a pack whose grain disagrees with its leaf set.
+3. `note_digest` stays content-only. No migrate.
+4. `Saved.` stays. Do not add an “already remembered” message.
 
 ## Constraints
 
 1. Agents never write the store. The script remains the only writer.
-2. Do not invent a repair in CLI output. If a note is kept, the agent is not told a story; if a note cannot be kept, do not print `Saved.`
-3. The issue's three options are not equivalent: nap-reject alone does not stop trigger 1; per-file identity needs a `migrate.py` pass; multiset heal keeps content identity but leaves `leafset_id` and `leaf_digests` in disagreement unless that disagreement is also closed.
-4. Personal and machine facts stay out of the repository.
+2. Do not invent a repair in CLI output.
+3. Recency-by-renoting a packed fact is out of scope.
+4. Do not design around a broken third-party write rule that re-notes the same line.
+5. Personal and machine facts stay out of the repository.
 
 ## Acceptance Criteria
 
-1. After a normal fold, a later `note` whose text matches a packed leaf remains on disk and in the view after the next mutating command's heal.
-2. Grain and the pack's leaf membership tell the same story (either by changing identity so grain equals `|leaf set|`, or by counting multiplicity honestly everywhere overlap is decided).
-3. A test covers: a note written after its text was folded still exists after the next `note`.
+1. After a normal fold, a later `note` whose text matches a packed leaf is absent after heal; zoom of the pack still reaches the sentence; CLI prints `Saved.`
+2. Two loose identical notes, after heal, are one view node.
+3. `write_nap` of two identical-text notes raises overlap and writes no pack.
+4. Atlas and `docs/theory.md` describe trigger 1 as the shoebox, not as a leak.

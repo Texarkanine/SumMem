@@ -1,12 +1,12 @@
 # Active Context
 
 ## Current Task: heal-same-text
-**Phase:** PREFLIGHT - READY
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Classified Level 3.
-- Creative: per-file leaf identity (`memory-bank/active/creative/creative-leaf-identity.md`). Content-hash multisets do not fix trigger 1; nap-reject misses trigger 1 and can stick fold; heal-by-filename leaves two overlap rules.
-- Plan: four units (`note_digest` + call sites, heal/nap tests, `migrate.py`, atlas/theory). Trigger 1 test is required. Rematerialize-heal stays.
+- First creative picked per-file identity. Operator vote 2026-08-29: `L` is a set of facts; same sentence is one leaf regardless of when noted. Trigger 1 is the shoebox.
+- Revised creative: keep content identity; remove note/note skip; `write_nap` rejects any digest overlap; no migrate; `Saved.` stays.
+- Plan retargeted around that vote.
 
 ## Next Step
-- Preflight (subagent). On PASS, wait for `/niko-build`.
+- Preflight to validate the revised plan, then wait for `/niko-build`.

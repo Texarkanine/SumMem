@@ -1,1 +1,0 @@
-Full local tox is tox run-parallel; pytest --basetemp is TMPDIR/summem-{env} so outside-repo tests stay outside the clone; tests load summem via a session fixture.

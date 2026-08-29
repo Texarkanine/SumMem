@@ -1,0 +1,1 @@
+local tox: run-parallel, session fixture, no --basetemp; nap-variant-stems archived

@@ -1,1 +1,0 @@
-Full local tox is tox run-parallel; do not pass pytest --basetemp (default already isolates outside the clone). Tests cache summem in conftest._SUMMEM because migrate.py and surgery.py overwrite sys.modules['summem'].
