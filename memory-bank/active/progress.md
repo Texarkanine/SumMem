@@ -143,3 +143,13 @@ Retarget SumMem ingest membership so `note` is lore plus tree-affecting in-fligh
 * Insights
     - Literal `"work on this repository"` pins plus one interpolated constant split the two jobs correctly: the tests lock the agent-facing wording, the constant keeps the two surfaces from drifting
 
+## 2026-08-28 - REFLECT - COMPLETE
+
+* Work completed
+    - Reconciled the original and PR-feedback revisions in the task reflection
+    - Reviewed persistent product, system, and technology context files
+* Decisions made
+    - Keep persistent files unchanged: the revised membership wording and private constant do not alter product scope, architecture, or tooling
+* Insights
+    - A second concrete wording revision justified applying the repeated shared-probe advisory
+

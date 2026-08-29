@@ -8,35 +8,35 @@ complexity_level: 3
 
 ## Summary
 
-Retargeted shipped `note` membership to “work in this clone”: bootstrap probe plus a how-to genre list, denylist, and skip-if-nothing. Build copied the creative sentences; QA passed with no new findings.
+Retargeted shipped `note` membership to “work on this repository”: a concise bootstrap probe, plus the existing root-wake genre list, telemetry denylist, and skip condition. QA passed after the repository wording and shared probe constant closed the prior drift advisory.
 
 ## Requirements vs Outcome
 
-Delivered as specified. Both surfaces carry the probe; how-to carries genre and the PR/checks/archive denylist; OptMem unnamed and unedited; writer-only and wake-usage split untouched; eternal-currency phrase not restored; sentence counts unchanged (3 bootstrap, 4 how-to). No requirements dropped or added.
+Delivered as specified after PR feedback clarified that contributors use separate clones. Both surfaces carry the repository-work probe; how-to retains genre and PR/checks/archive denylist; writer-only and wake-usage split are untouched; no sibling product is named; the eternal-currency phrase is absent; sentence counts remain 3 bootstrap / 4 how-to. `MEMBERSHIP_PROBE` was added during the revised build as the preflight advisory recommended, without changing the user-facing contract.
 
 ## Plan Accuracy
 
-File list, TDD order, and scope were right. The only imprecision was “red on the new pin and lockstep”: tests-first went red on the new `work in this clone` pins only. Lockstep stays green until `prompt_text()` changes without `AGENTS.md`. Named challenges (denylist phrase tests, `(mandatory)` as emit-every-session, store rewrite) did not materialize because the plan already declined them.
+The file list, TDD order, and scope were right. PR feedback exposed an imprecise subject noun, so creative and plan ran again before the revised tests. The red run failed on precisely the two changed output pins; lockstep correctly stayed green until `prompt_text()` changed. Named risks around denylist change-detectors, `(mandatory)`, and store rewriting did not materialize.
 
 ## Creative Phase Review
 
-Option A held: the sentences landed verbatim. The `clone not in prompt_text` pin was the predicted test break, not a design surprise. Split surfaces kept the denylist off the always-loaded bootstrap. The accepted miss (agent notes without waking) was not revisited.
+The first creative decision held on placement: split surfaces still keep the denylist off the always-loaded bootstrap. The second decision corrected the probe to repository work, which accurately matches committed cross-clone context. The accepted miss for agents that note before waking remains unchanged.
 
 ## Build & QA Observations
 
-Build was transcription after preflight’s body-vs-assertion check. `tox -e py311 -- tests/test_init.py` then `tox run-parallel` (369 passed, 1 skipped) went green first try. QA confirmed the diff matches the plan, lockstep holds, and no stale phrasing remains in shipped docs. The shared-constant advisory was carried forward, not re-raised.
+The revised output-pin tests first failed twice as expected, then all three targeted tests passed. `tests/test_init.py` passed 11/11, and `tox run-parallel` passed on py311 and py314 while py312/py313 were skipped for missing interpreters. QA found no blockers or new advisories and confirmed that `MEMBERSHIP_PROBE` is the appropriate amount of sharing.
 
 ## Cross-Phase Analysis
 
-Preflight’s hand-check of proposed bodies against every surviving assertion made build a copy step — that gate earned its keep. The same preflight named the two-surface drift class that bit `wake-usage-prompt`, then “judge, do not fix” plus build-to-plan plus QA-carry-forward left two independent literals in the tree. Planning did not cause build problems; creative did not cause QA findings. The residual risk is the next wording pass editing one surface.
+Preflight's body-versus-assertion check made the wording change straightforward. Its repeated drift advisory became decisive once the PR-driven second wording revision demonstrated the same risk; build added one constant while retaining literal output assertions. Creative removed clone ambiguity before code changed, and QA confirmed the result without further rework.
 
 ## Insights
 
 ### Technical
 
-- `AGENTS.md` lockstep only binds bootstrap to the committed prefix. The how-to probe is a second copy of the same phrase; a pin on the retyped literal will not catch one surface drifting. A module constant both functions interpolate is the structural fix, still unapplied.
+- `MEMBERSHIP_PROBE` centralizes the phrase shared by `prompt_text()` and `how_to_text()`; the existing `AGENTS.md` lockstep assertion completes the three-surface consistency chain.
 
 ### Process
 
-- For prompt-copy tasks, preflight that reads the proposed bodies against every surviving assertion is the load-bearing gate; build will not discover what that check already proved.
-- An advisory that names a drift class this repo has already shipped through as a FAIL should be adopted in the plan, not carried across three phases as “not applied.”
+- For prompt-copy tasks, preflight that reads proposed bodies against surviving assertions is the load-bearing gate.
+- A repeated advisory backed by a second real change is evidence to incorporate a small structural fix, not carry forward again.
