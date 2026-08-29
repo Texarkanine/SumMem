@@ -75,9 +75,22 @@ No new technology - validation not required
 
 ## QA Findings
 
+### Round 1
+
 - **Blocking — incomplete root-wake recipe:** `how_to_text()` teaches `note`, `recall`, `zoom`, and catalog-pull argv, but never teaches the `nap` command line required by Project Brief requirement 3 and the creative component boundary. `fold_request()` emits an exact `nap` command only after compression is requested; that does not satisfy the requirement that root-wake Usage own `nap` invocation syntax, and it makes `init_text()`'s claim that command syntax comes from root wake incomplete.
 - **Coverage gap:** `tests/test_init.py` pins the other Usage commands but does not assert `nap` argv, so the semantic omission passed the mechanical suite.
 - **Disposition:** QA FAIL. Rerun Build using TDD: add the missing Usage contract assertion first, observe red, then add the root-wake `nap` recipe and rerun verification.
+
+### Round 2
+
+- Reviewed the reworked `summem` (`prompt_text`, `how_to_text`, `init_text`), `tests/test_init.py`, and the briefing files against `tasks.md`, `projectbrief.md`, the creative decision, and `systemPatterns.md`.
+- **Completeness:** All 8 test-plan behaviors verified present, all 6 Project Brief requirements and all 5 acceptance criteria mapped to passing assertions. Round 1's `nap`-argv gap is closed: `how_to_text()` now teaches `` `{AGENT_BIN} nap ID-A ID-B CAPTION}` ``, pinned by `test_how_to_text_is_the_usage_section`.
+- **Disjointness:** Write-rule phrases (genre list, denylist, skip-if-nothing-qualifies) are absent from `how_to_text()`; mechanical phrases (writer-only, `wake --path`, pack grammar) are absent from `prompt_text()` except the wake handoff. `test_prompt_and_how_to_are_disjoint` fences this.
+- **Preflight advisories:** All five applied in-step — `git`-forbid pin named, `{AGENT_BIN}` intro clause dropped, sovereignty added to `docs/architecture/index.md` activation definition, use case added to `productContext.md`, skip-rule paraphrase in `systemPatterns.md` restated without the Usage token.
+- **Requirement 6 (no change to what this repo remembers):** Confirmed byte-identical — the genre list/denylist/skip text moved verbatim from `how_to_text()` into `prompt_text()`; no duplication found elsewhere in `summem`.
+- **DRY/KISS/YAGNI:** No new abstractions, no reinvented utilities, no speculative code. Two direct f-string functions per the stored decision against a shared `MEMBERSHIP_PROBE` constant.
+- **Verification:** `tox -e py311`: 371 passed.
+- **Disposition:** QA PASS. No findings block acceptance.
 
 ## Status
 
@@ -88,4 +101,4 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [x] QA — FAIL; Build must rerun
+- [x] QA — PASS

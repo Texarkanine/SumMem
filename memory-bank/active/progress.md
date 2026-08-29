@@ -64,3 +64,15 @@ Split the agent write rule out of root-wake Usage and into the `init`-emitted `A
     - Usage shows the nap shape; `fold_request` still prints the exact `Run:` line with ids. No `Run:` in Usage (existing pin).
 * Insights
     - The pre-split how-to also omitted nap argv. The split made "command syntax comes from root wake" a claim the old Usage did not fully keep.
+
+## 2026-08-29 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Re-reviewed the reworked implementation against `tasks.md`, `projectbrief.md`, the creative decision, `systemPatterns.md`, and the full branch diff against `main`.
+    - Confirmed Round 1's `nap`-argv gap is closed and traced all 8 test-plan behaviors, 6 Brief requirements, and 5 acceptance criteria to passing assertions.
+    - Confirmed all five preflight advisories were applied in-step across the briefing files, and that the shipped default write rule moved verbatim (no duplicate copy left in `how_to_text()`).
+    - Ran `tox -e py311`: 371 passed.
+* Decisions made
+    - QA PASS. No plan or build rework required.
+* Insights
+    - The disjointness test is doing real work: it is the only assertion that would catch a future edit re-introducing membership language into `how_to_text()` or mechanics into `prompt_text()`.
