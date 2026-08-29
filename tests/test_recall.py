@@ -171,7 +171,10 @@ def test_recall_does_not_match_grain_day_or_prefix(tmp_path, summem):
 
 
 def test_recall_keeps_duplicate_note_dates(tmp_path, summem):
-    """Recall prints both dated lines when two nested notes share text but not a day."""
+    """Recall prints both dated lines when two nested notes share text but not a day.
+
+    Plants the children file: write_nap cannot build this pack; pre-change packs persist (no migrate).
+    """
     m = summem
     repo = init_repo(tmp_path / "r")
     tree = m.Tree(

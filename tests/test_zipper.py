@@ -266,8 +266,8 @@ def test_heal_view_returns_final_view(tmp_path, summem):
     ]
 
 
-def test_two_identical_notes_stay(tmp_path, summem):
-    """Two notes with the same text are not unlinked by leaf-set helpers."""
+def test_leaf_digests_shared_for_identical_notes(tmp_path, summem):
+    """Two notes with the same text share a leaf digest before heal runs."""
     m = summem
     repo = init_repo(tmp_path / "r")
     paths = _write_notes(m, repo, ["hello", "hello"])
@@ -858,7 +858,7 @@ def test_cli_invalid_nap_caption_does_not_heal(tmp_path, monkeypatch, summem):
     assert _payload_names(repo) == before
 
 
-def test_identical_notes_nappable_after_heal_view(tmp_path, summem):
+def test_identical_notes_collapse_after_heal_view(tmp_path, summem):
     """Two identical notes collapse on heal_view to one view node."""
     m = summem
     repo = init_repo(tmp_path / "r")

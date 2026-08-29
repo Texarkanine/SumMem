@@ -388,7 +388,7 @@ def test_ambiguous_prefix_is_error(tmp_path, monkeypatch, capsys, summem):
     assert list((repo / ".summem" / "naps").glob("*.summ")) == []
 
 
-def test_nap_accepts_prefix_of_identical_notes(tmp_path, monkeypatch, capsys, summem):
+def test_cli_nap_identical_notes_prefix_not_adjacent(tmp_path, monkeypatch, capsys, summem):
     """CLI nap of one id twice after heal fails; no pack is written."""
     m = summem
     repo = init_repo(tmp_path / "r")

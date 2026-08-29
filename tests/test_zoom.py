@@ -273,7 +273,10 @@ def test_zoom_unreadable_tree_is_unreadable_pack(tmp_path, capsys, summem):
 
 
 def test_zoom_keeps_duplicate_note_dates(tmp_path, summem):
-    """Zoom of a nap prints both dated lines when two children share text but not a day."""
+    """Zoom of a nap prints both dated lines when two children share text but not a day.
+
+    Plants the children file: write_nap cannot build this pack; pre-change packs persist (no migrate).
+    """
     m = summem
     repo = init_repo(tmp_path / "r")
     tree = m.Tree(

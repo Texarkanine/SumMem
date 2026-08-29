@@ -238,6 +238,6 @@ An agent that notes a sentence the store already holds still hears `Saved.` The 
 
 Folding the two copies is refused. A bundle must not claim grain 2 for one receipt.
 
-A hash of a list would count the same sentence twice. Overlap walks a set. Heal and that refuse make a duplicate list a path the view does not offer.
+A hash of a list would count the same sentence twice. Overlap walks a set. `leafset_id` hashes a sorted list and keeps repeats; `leaf_digests` returns a set. Heal and the nap refuse make a duplicate list a path the view does not offer.
 
 **The store converges over the set of remembered notes.** Multiplicity is not a fact.

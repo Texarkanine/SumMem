@@ -150,5 +150,5 @@ Advisories (non-blocking): `overlapping packs` wording for two loose notes is CL
 - [x] Preflight (PASS 2026-08-29)
 - [x] Build
 - [x] QA (FAIL 2026-08-29 — build rework: 3 blocking findings)
-- [ ] Build (rework)
+- [x] Build (rework: renamed 3 tests, scoped leaf_digests pin, theory sentence)
 - [ ] QA (re-run)

@@ -446,7 +446,7 @@ def test_write_nap_disjoint_adjacent_naps_still_concat(tmp_path, summem):
     assert all(isinstance(kid, m.NapChild) for kid in tree.kids)
 
 
-def test_write_nap_identical_text_notes_still_concat(tmp_path, summem):
+def test_write_nap_identical_text_notes_rejects_overlap(tmp_path, summem):
     """Direct write_nap of two identical-text notes raises; both notes remain."""
     m = summem
     repo = init_repo(tmp_path / "r")

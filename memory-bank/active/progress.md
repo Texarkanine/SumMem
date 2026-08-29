@@ -151,3 +151,15 @@ Fix [issue #77](https://github.com/Texarkanine/SumMem/issues/77) under the opera
     - Retargeting a test updated its docstring but left its name asserting the removed contract in three places; the name is what `-k` and failure output show, so it is the contract a reader trusts
     - `docs/architecture/index.md:161` already stated the general overlap rule, so this fix removed a contradiction between Zipper and Identity rather than introducing one
     - Dropping the `leafset_id`/`leaf_digests` citations from `docs/theory.md` cost the paragraph its referent; the list-vs-set asymmetry is still true of the code and is the reason the refuse exists
+
+## 2026-08-29 - BUILD - COMPLETE (QA rework)
+
+* Work completed
+    - Renamed three tests whose names still asserted the removed contract
+    - Scoped the pre-heal digest pin (`test_leaf_digests_shared_for_identical_notes`)
+    - Rewrote `docs/theory.md` Duplicate receipts closer; named `leafset_id` vs `leaf_digests`
+    - Docstrings on planted zoom/recall duplicate-date tests now say they cover pre-change packs
+* Decisions made
+    - Did not change the `overlapping packs` error string (advisory; plan permitted one family)
+* Insights
+    - A retargeted docstring is not enough: `-k` and failure output still index the old name
