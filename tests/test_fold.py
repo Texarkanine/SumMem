@@ -156,14 +156,15 @@ def test_equal_grain_pair_returns_two_1s_not_2_plus_1(tmp_path, summem):
 
 
 def test_equal_grain_pair_duplicate_ids_when_same_text(tmp_path, summem):
-    """Two identical notes are requested as (id, id)."""
+    """After heal, two identical notes are one view node; no (id, id) pair."""
     m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "same", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "same", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    m.heal_view(repo)
     nodes = m.list_view(repo)
-    assert nodes[0].id == nodes[1].id
-    assert _equal_grain_pair(nodes) == (nodes[0].id, nodes[1].id)
+    assert len(nodes) == 1
+    assert _equal_grain_pair(nodes) is None
 
 
 def test_over_budget_note_prints_saved_when_16_plus_1(tmp_path, monkeypatch, capsys, summem):
@@ -376,19 +377,22 @@ def test_fold_request_mentions_remaining(tmp_path, monkeypatch, summem):
 
 
 def test_fold_request_identical_notes_use_short_prefix(tmp_path, monkeypatch, summem):
-    """Two identical notes over budget emit 8-hex prefixes, not 64-hex ids."""
+    """After heal, two identical notes are one node; fold_request has no (prefix, prefix) Run line."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     monkeypatch.setattr(m, "WAKE_LINES", 1)
     m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
-    cid = m.list_view(repo)[0].id
+    m.heal_view(repo)
+    nodes = m.list_view(repo)
+    assert len(nodes) == 1
     out = m.fold_request(repo, 1)
-    assert cid not in out
-    prefix = m.short_id(cid, [cid, cid])
-    assert len(prefix) == 8
-    assert f"nap {prefix} {prefix} " in out
+    assert out == ""
+    assert "Run:" not in out
+    cid = nodes[0].id
+    prefix = m.short_id(cid, [cid])
+    assert f"nap {prefix} {prefix} " not in out
 
 
 def test_fold_request_uses_config_entry_chars(tmp_path, monkeypatch, summem):

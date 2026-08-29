@@ -91,7 +91,7 @@ graph TD
 3. Write tests and run red: the new reject case.
 4. Write code and run green: drop the `left.kind == "nap" or right.kind == "nap"` conjunct. Keep the existing overlap error string if tests already pin `"overlapping packs"`; if that string is a lie for two notes, use one truthful overlap error and update those tests in this unit — do not add a second error family.
 
-### 3. Fold listings and remaining same-id tests — executable
+### 3. Fold listings and remaining same-id tests — executable — done
 
 - Files: `tests/test_fold.py`, `tests/test_cli.py`
 - Creative ref: `memory-bank/active/creative/creative-leaf-identity.md`
@@ -101,7 +101,7 @@ graph TD
 3. Write tests and run red.
 4. Write code and run green: only if fold still requests the collapsed pair; otherwise tests-only.
 
-### 4. Atlas and theory — prose/policy
+### 4. Atlas and theory — prose/policy — done
 
 - Files: `docs/architecture/index.md`, `memory-bank/systemPatterns.md`, `docs/theory.md`
 - No tests: prose/policy artifact
@@ -138,5 +138,5 @@ No new technology - validation not required
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
 - [x] Preflight (PASS 2026-08-29)
-- [ ] Build ← in progress (unit 3)
+- [x] Build
 - [ ] QA

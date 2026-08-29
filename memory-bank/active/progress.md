@@ -123,3 +123,17 @@ Fix [issue #77](https://github.com/Texarkanine/SumMem/issues/77) under the opera
     - Build unblocked: the CLI `note` regression test gap is closed with all four required assertions in the right TDD order
 * Insights
     - Confirmed against `summem` that `note`'s CLI path always heals before printing and `fold_request` returns `""` for a single-node view, so the plan's "stdout is exactly `Saved.\n`" claim is technically sound, not just plausible
+
+## 2026-08-29 - BUILD - COMPLETE (PASS)
+
+* Work completed
+    - Removed the note/note skip in `_first_overlap`; heal keeps the later filename
+    - `write_nap` rejects any intersecting digest sets
+    - Retargeted same-id fold/CLI/nap tests; planted zoom/recall duplicate-date trees
+    - Atlas Identity and Zipper, `systemPatterns.md`, and `docs/theory.md` (Duplicate receipts) match `L` as a set
+    - py311 371 passed, 1 skipped; `tox run-parallel` py311+py314 OK, py312+py313 skipped
+* Decisions made
+    - Kept the existing `overlapping packs` error string (one family; tests already pinned it)
+    - `fold_request` unchanged: mutating commands heal first
+* Insights
+    - Zoom and recall still list two same-text nested children when a children file is planted; `write_nap` can no longer create that pack

@@ -230,14 +230,14 @@ Leaving it open is a judgement, not an oversight. Rebuilding one canonical group
 
 State it plainly: **strong eventual consistency on what is remembered, and none on how it is grouped or worded.**
 
-## Where the theory leaks
+## Duplicate receipts
 
-One assumption above is doing more work than it can bear.
+The shoebox already said this. A receipt loose and inside a bundle is one receipt: throw the loose copy away. Two loose copies of one sentence are one receipt: keep the later filename.
 
-"Two notes with the same text are the same note" follows from content addressing. It is what lets heal drop a loose note it finds inside a bundle. It is also wrong about the world: an agent that records a sentence today, and an agent that recorded the same sentence in March, wrote two things, not one.
+An agent that notes a sentence the store already holds still hears `Saved.` The fact is in `L`. The new file is gone. That is the design. `L` is a set. Noting a duplicate does not grow it.
 
-The code half-knows this. `leafset_id` ([`summem:99`](../summem)) hashes a sorted **list** and keeps repeats, so an item's identity counts duplicates. `leaf_digests` ([`summem:582`](../summem)) returns a **set**, so overlap does not. Identity is over a [multiset](https://en.wikipedia.org/wiki/Multiset); overlap is over a set. The two disagree, and heal trusts the second.
+Folding the two copies is refused. A bundle must not claim grain 2 for one receipt.
 
-The consequence is a live defect. A note written after its text was folded is created, then deleted by the heal that `note` itself runs, and the agent is still told the note was saved. See [#77](https://github.com/Texarkanine/SumMem/issues/77).
+A hash of a list would count the same sentence twice. Overlap walks a set. Heal and that refuse make a duplicate list a path the view does not offer.
 
-Until that is settled, the honest version of the claim on this page is: **the store converges over the *set* of remembered notes.** Multiplicity is not preserved, and the architecture's promise that duplicate notes stay two listed items holds only while neither has been folded.
+**The store converges over the set of remembered notes.** Multiplicity is not a fact.

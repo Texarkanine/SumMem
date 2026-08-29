@@ -276,10 +276,16 @@ def test_zoom_keeps_duplicate_note_dates(tmp_path, summem):
     """Zoom of a nap prints both dated lines when two children share text but not a day."""
     m = summem
     repo = init_repo(tmp_path / "r")
-    m.write_note(repo, "same-text", datetime(2026, 1, 1, tzinfo=UTC), Random(1))
-    m.write_note(repo, "same-text", datetime(2026, 1, 2, tzinfo=UTC), Random(2))
-    ids = [node.id for node in m.list_view(repo)]
-    m.write_nap(repo, ids[0], ids[1], "pair")
+    tree = m.Tree(
+        kids=[
+            m.NoteChild(name="20260101T000000Z-aaaaaaaaaaaaaaaa", text="same-text"),
+            m.NoteChild(name="20260102T000000Z-bbbbbbbbbbbbbbbb", text="same-text"),
+        ]
+    )
+    m.rematerialize_child(
+        repo,
+        m.NapChild(id=m.leafset_id(m._digests_of_tree(tree)), sum="pair", tree=tree),
+    )
     out = m.zoom_text(repo, m.list_view(repo)[0].id)
     assert out.splitlines() == [
         dated_leaf("20260101T000000Z", "same-text"),
