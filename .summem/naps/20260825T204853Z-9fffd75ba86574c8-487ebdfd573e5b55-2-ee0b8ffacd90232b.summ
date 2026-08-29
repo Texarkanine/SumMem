@@ -1,1 +1,0 @@
-drop-dataclasses archived: slots + lazy imports; py3.14 startup traces driver imports. perf-shards L4 archived: #49-52 merged via #54-57; #53 deferred (heal ~1ms, stem-hash cannot skip note).

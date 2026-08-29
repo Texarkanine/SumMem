@@ -1,1 +1,0 @@
-QA PASS nap-variant-stems (346 tests py311-314). surgery.plan_break_out duplicates rematerialize_child's child-stem block with no test pinning them equal. migrate.py loads sibling summem by __file__ and takes its store from cwd.

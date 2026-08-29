@@ -1,0 +1,1 @@
+Nap stems are five-part seq-leafset-grain-pair-digest; zipper keeps lex-greatest; migrate rewrites old stems. nap-variant-stems QA: 346 tests. surgery.plan_break_out duplicates child-stem logic; migrate loads sibling summem by __file__ from cwd.

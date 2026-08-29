@@ -1,1 +1,0 @@
-Same leaf-set id with different nested captions add/add-conflicts both .tree and .summ; never mismatch a stem; take every conflicting .summem path from one side (#59).

@@ -1182,7 +1182,7 @@ def how_to_text() -> str:
     return f"""\
 == SumMem Usage ==
 
-`{AGENT_BIN} note "…"` records one short line for a fact another contributor would still need: designs, decisions, invariants, and the like. It has to belong in this repository's shared history - even when cloned on another machine. Personal, machine-local, and user preference facts stay out. Do not register redundant memories.
+`{AGENT_BIN} note "…"` records one short line another contributor needs to work on this repository: gotchas, norms, failed approaches, unfinished work that occupies the tree. Not that a PR opened, checks passed, or a task archived. Personal, machine-local, and user preference facts stay out. Skip if nothing qualifies or it is already remembered.
 
 If `note` asks for a nap, the note is already stored; do not retry the same note. The nap is extra work on two older view nodes. Do that nap before your next action.
 
@@ -1205,7 +1205,7 @@ Run `{AGENT_BIN} wake` from the repository root. If you can see a prior project-
 
 ## While Working: Register Memories (mandatory)
 
-`{AGENT_BIN} note "…"` records one short line for a fact another contributor would still need. Personal, machine-local, and user preference facts stay out. `note` may sometimes print further instructions; always follow them.
+`{AGENT_BIN} note "…"` records one short line another contributor needs to work on this repository. Personal, machine-local, and user preference facts stay out. `note` may sometimes print further instructions; always follow them.
 
 Never invent filenames, rewrite note bytes, or delete memory files by hand. The script is the only writer. The files it writes are part of your work; do not leave them untracked.
 """
