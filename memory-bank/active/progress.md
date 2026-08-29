@@ -76,3 +76,13 @@ Split the agent write rule out of root-wake Usage and into the `init`-emitted `A
     - QA PASS. No plan or build rework required.
 * Insights
     - The disjointness test is doing real work: it is the only assertion that would catch a future edit re-introducing membership language into `how_to_text()` or mechanics into `prompt_text()`.
+
+## 2026-08-29 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-entry-gate-split.md`. Reconciled persistent files: all three already current from build.
+* Decisions made
+    - No further persistent edits.
+* Insights
+    - A role change makes holes in the inherited copy load-bearing. Pin every verb in the new claim.
+
