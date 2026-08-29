@@ -55,3 +55,23 @@ Fix [issue #77](https://github.com/Texarkanine/SumMem/issues/77) under the opera
     - Recency-by-renoting is out of scope
 * Insights
     - After heal, `(id, id)` nap of two copies is gone because only one view node remains
+
+## 2026-08-29 - PREFLIGHT - COMPLETE (FAIL (fixable))
+
+* Work completed
+    - Validated the revised Level 3 plan against the current driver, test suite, atlas, and theory document
+* Decisions made
+    - Build is gated until the direct `write_nap` duplicate-note regression test is explicitly retargeted
+* Insights
+    - `test_write_nap_identical_text_notes_still_concat` still asserts the behavior that the planned overlap guard removes
+    - The atlas contains duplicate-note behavior in both Identity and Zipper sections
+
+## 2026-08-29 - PLAN - COMPLETE
+
+* Work completed
+    - Named `test_write_nap_identical_text_notes_still_concat` in unit 2 with ValueError / no pack files / both notes remain
+    - Unit 4 now rewrites Identity and Zipper, not Identity alone
+* Decisions made
+    - Did not add an `assert_unique_leaf_sets` helper; `gitutil.assert_unique_cover` already exists
+* Insights
+    - Direct `write_nap` is the path that still sees two files; CLI heal runs first

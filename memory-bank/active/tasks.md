@@ -30,7 +30,7 @@ graph TD
 - `_first_overlap` (`summem`): stop skipping note/note pairs. Same digest set → unlink the older (left, filename order).
 - `write_nap`: reject any intersecting digest sets, not only when a nap is on one side.
 - Tests that pin two identical notes surviving heal and napping via a repeated id: retarget.
-- Atlas Identity, `memory-bank/systemPatterns.md` wake-dates sentence, `docs/theory.md` leak section: `L` is a set of facts; trigger 1 is the shoebox.
+- Atlas Identity **and** Zipper (`docs/architecture/index.md`), `memory-bank/systemPatterns.md` wake-dates sentence, `docs/theory.md` leak section: `L` is a set of facts; trigger 1 is the shoebox. Zipper today says two loose notes that share text are skipped; that sentence goes.
 
 ### Cross-Module Dependencies
 - CLI `note`/`nap` already call `heal_view` before fold. After the skip is gone, `fold_request` should not see two identical notes.
@@ -62,7 +62,7 @@ graph TD
 - Framework: pytest via `tox -e py311` (iterate); `tox run-parallel` at end-of-work.
 - Test location: `tests/`
 - Conventions: `tmp_path` + `init_repo`; session `summem` fixture.
-- New test files: none. Cases in `tests/test_zipper.py`, `tests/test_nap.py`, `tests/test_nap_reject.py` (or existing overlap tests in `tests/test_nap.py`). Retarget `test_nap_two_identical_notes_by_repeated_id`, `test_identical_notes_nappable_after_heal_view`, `test_equal_grain_pair_duplicate_ids_when_same_text`, `test_fold_request_identical_notes_use_short_prefix`, `test_nap_accepts_prefix_of_identical_notes`.
+- New test files: none. Cases in `tests/test_zipper.py`, `tests/test_nap.py`, `tests/test_nap_reject.py` (or existing overlap tests in `tests/test_nap.py`). Retarget `test_write_nap_identical_text_notes_still_concat`, `test_nap_two_identical_notes_by_repeated_id`, `test_identical_notes_nappable_after_heal_view`, `test_equal_grain_pair_duplicate_ids_when_same_text`, `test_fold_request_identical_notes_use_short_prefix`, `test_nap_accepts_prefix_of_identical_notes`.
 
 ### Integration Tests
 
@@ -86,7 +86,7 @@ graph TD
 - Files: `summem`, `tests/test_nap.py`, `tests/test_nap_reject.py`
 - Creative ref: `memory-bank/active/creative/creative-leaf-identity.md`
 
-1. Stub tests: `write_nap` of two same-text notes raises; no `.summ` written. Retarget `test_nap_two_identical_notes_by_repeated_id` and CLI `test_nap_accepts_prefix_of_identical_notes` (after heal there is one node; nap of one id twice still fails).
+1. Stub tests: retarget `tests/test_nap.py::test_write_nap_identical_text_notes_still_concat` so a direct `write_nap` of two identical-text notes (no prior heal) raises `ValueError` on overlapping leaves, writes no `.summ` and no `.tree`, and **both** loose note files remain. Retarget `test_nap_two_identical_notes_by_repeated_id` and CLI `test_nap_accepts_prefix_of_identical_notes` (after heal there is one node; nap of one id twice still fails).
 2. Stub interface: none.
 3. Write tests and run red: the new reject case.
 4. Write code and run green: drop the `left.kind == "nap" or right.kind == "nap"` conjunct. Keep the existing overlap error string if tests already pin `"overlapping packs"`; if that string is a lie for two notes, use one truthful overlap error and update those tests in this unit — do not add a second error family.
@@ -107,9 +107,10 @@ graph TD
 - No tests: prose/policy artifact
 - Creative ref: `memory-bank/active/creative/creative-leaf-identity.md`
 
-1. Identity: two notes with the same text share an id; heal keeps one. Packed coverage of a later copy is the shoebox.
-2. `systemPatterns.md`: drop “they remain two view nodes”; adjacency still needs two distinct ids when two nodes exist.
-3. `docs/theory.md` leak section: not a leak. `L` is a set of facts. Heal dropping a packed-text loose note is the design. `note` of a duplicate does not grow `L`. The remaining hole was napping two copies; that path is closed.
+1. Identity: replace “Two notes with the same text share an id; they remain two view nodes.” Two notes with the same text share an id; heal keeps one. Packed coverage of a later copy is the shoebox.
+2. Zipper: replace “Two loose notes that happen to share text are skipped.” They are not skipped; heal unlinks the older filename. Heal still runs before `nap` resolves ids; if that drop leaves a missing id, the command fails and does not fold.
+3. `systemPatterns.md`: drop “they remain two view nodes”; adjacency still needs two distinct ids when two nodes exist.
+4. `docs/theory.md` leak section: not a leak. `L` is a set of facts. Heal dropping a packed-text loose note is the design. `note` of a duplicate does not grow `L`. The remaining hole was napping two copies; that path is closed.
 
 ## Technology Validation
 
@@ -135,6 +136,6 @@ No new technology - validation not required
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
+- [ ] Preflight (re-run after 2026-08-29 FAIL (fixable))
 - [ ] Build
 - [ ] QA
