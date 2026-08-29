@@ -1,0 +1,1 @@
+Keep the short membership phrase direct in prompt_text and how_to_text; factoring it harms readability for negligible benefit.

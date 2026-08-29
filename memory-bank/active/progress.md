@@ -153,3 +153,13 @@ Retarget SumMem ingest membership so `note` is lore plus tree-affecting in-fligh
 * Insights
     - A second concrete wording revision justified applying the repeated shared-probe advisory
 
+## 2026-08-28 - POST-REFLECTION CORRECTION - COMPLETE
+
+* Work completed
+    - Removed `MEMBERSHIP_PROBE` and restored the repository-work phrase directly in both readable prompt functions
+    - Re-ran `tests/test_init.py` and the full supported tox matrix
+* Decisions made
+    - Direct repetition is clearer here; the maintenance and licensing-context cost of factoring one short phrase outweighs its drift protection
+* Insights
+    - A repeated phrase is not automatically an abstraction opportunity when its copies are short and local
+

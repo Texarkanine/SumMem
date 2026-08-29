@@ -8,11 +8,11 @@ complexity_level: 3
 
 ## Summary
 
-Retargeted shipped `note` membership to “work on this repository”: a concise bootstrap probe, plus the existing root-wake genre list, telemetry denylist, and skip condition. QA passed after the repository wording and shared probe constant closed the prior drift advisory.
+Retargeted shipped `note` membership to “work on this repository”: a concise bootstrap probe, plus the existing root-wake genre list, telemetry denylist, and skip condition. QA passed; the phrase remains deliberately direct on both readable prompt surfaces.
 
 ## Requirements vs Outcome
 
-Delivered as specified after PR feedback clarified that contributors use separate clones. Both surfaces carry the repository-work probe; how-to retains genre and PR/checks/archive denylist; writer-only and wake-usage split are untouched; no sibling product is named; the eternal-currency phrase is absent; sentence counts remain 3 bootstrap / 4 how-to. `MEMBERSHIP_PROBE` was added during the revised build as the preflight advisory recommended, without changing the user-facing contract.
+Delivered as specified after PR feedback clarified that contributors use separate clones. Both surfaces carry the repository-work probe; how-to retains genre and PR/checks/archive denylist; writer-only and wake-usage split are untouched; no sibling product is named; the eternal-currency phrase is absent; sentence counts remain 3 bootstrap / 4 how-to. The phrase is intentionally repeated rather than factored into a constant.
 
 ## Plan Accuracy
 
@@ -24,19 +24,19 @@ The first creative decision held on placement: split surfaces still keep the den
 
 ## Build & QA Observations
 
-The revised output-pin tests first failed twice as expected, then all three targeted tests passed. `tests/test_init.py` passed 11/11, and `tox run-parallel` passed on py311 and py314 while py312/py313 were skipped for missing interpreters. QA found no blockers or new advisories and confirmed that `MEMBERSHIP_PROBE` is the appropriate amount of sharing.
+The revised output-pin tests first failed twice as expected, then all three targeted tests passed. `tests/test_init.py` passed 11/11, and `tox run-parallel` passed on py311 and py314 while py312/py313 were skipped for missing interpreters. Removing the later constant preserved those results.
 
 ## Cross-Phase Analysis
 
-Preflight's body-versus-assertion check made the wording change straightforward. Its repeated drift advisory became decisive once the PR-driven second wording revision demonstrated the same risk; build added one constant while retaining literal output assertions. Creative removed clone ambiguity before code changed, and QA confirmed the result without further rework.
+Preflight's body-versus-assertion check made the wording change straightforward. The repeated drift advisory prompted a constant, but the operator rejected that indirection: two direct, adjacent copies are easier to read and have negligible maintenance cost. Creative removed clone ambiguity before code changed, and the final direct form preserved verified behavior.
 
 ## Insights
 
 ### Technical
 
-- `MEMBERSHIP_PROBE` centralizes the phrase shared by `prompt_text()` and `how_to_text()`; the existing `AGENTS.md` lockstep assertion completes the three-surface consistency chain.
+- The bootstrap and how-to deliberately repeat one short phrase; `AGENTS.md` lockstep still protects the separately generated bootstrap copy.
 
 ### Process
 
 - For prompt-copy tasks, preflight that reads proposed bodies against surviving assertions is the load-bearing gate.
-- A repeated advisory backed by a second real change is evidence to incorporate a small structural fix, not carry forward again.
+- A repeated advisory still requires a readability and ownership check; two short, adjacent prompt literals do not justify indirection.
