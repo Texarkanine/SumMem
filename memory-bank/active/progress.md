@@ -137,3 +137,17 @@ Fix [issue #77](https://github.com/Texarkanine/SumMem/issues/77) under the opera
     - `fold_request` unchanged: mutating commands heal first
 * Insights
     - Zoom and recall still list two same-text nested children when a children file is planted; `write_nap` can no longer create that pack
+
+## 2026-08-29 - QA - COMPLETE (FAIL)
+
+* Work completed
+    - Semantic review of the build diff (`a6ffe93..HEAD`) against the brief, plan, and creative decision
+    - Re-ran `tox -e py311` for context: 371 passed, 1 skipped, matching the build's claim
+    - Wrote `memory-bank/active/.qa-validation-status` and QA findings into `tasks.md`
+* Decisions made
+    - FAIL routed to Build rework, not Plan: all three blocking findings are test-name/docstring/prose local, and the plan and the 4-line production diff are sound
+    - `overlapping packs` for two loose notes accepted as advisory: the plan permitted one error family and the wording is unreachable from the CLI
+* Insights
+    - Retargeting a test updated its docstring but left its name asserting the removed contract in three places; the name is what `-k` and failure output show, so it is the contract a reader trusts
+    - `docs/architecture/index.md:161` already stated the general overlap rule, so this fix removed a contradiction between Zipper and Identity rather than introducing one
+    - Dropping the `leafset_id`/`leaf_digests` citations from `docs/theory.md` cost the paragraph its referent; the list-vs-set asymmetry is still true of the code and is the reason the refuse exists

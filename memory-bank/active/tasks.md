@@ -129,6 +129,16 @@ No new technology - validation not required
 - Left the note/note skip, only rejected `write_nap`, then `fold_request` stuck at budget on `(id, id)`: unit 1 removes the skip so heal runs first on `note`/`nap`.
 - Left `assert_unique_cover` skipping note/note so the shared helper stayed blind: unit 1 drops that skip.
 
+## QA Findings (2026-08-29 — FAIL, build rework)
+
+Production diff (4 lines) is clean: KISS/DRY/YAGNI, no debris, all four acceptance criteria pinned, `assert_unique_cover` now exercised post-heal, `tox -e py311` 371 passed / 1 skipped. Three blocking findings, all small and test/prose-local — no plan change required.
+
+1. **Three test names assert the opposite of their bodies.** `test_write_nap_identical_text_notes_still_concat` (raises, writes nothing), `test_nap_accepts_prefix_of_identical_notes` (exit 1, `not adjacent`), `test_identical_notes_nappable_after_heal_view` (collapses to one node). Docstrings were retargeted; names were not. Rename each.
+2. **`test_two_identical_notes_stay` docstring is now false.** "not unlinked by leaf-set helpers" — `_first_overlap` is a leaf-set helper and now unlinks one. Body is correct (no `heal_view`); scope the name and docstring to what it pins: `leaf_digests` reports the shared digest for both nodes.
+3. **`docs/theory.md:241` is broken prose.** "Heal and that refuse make a duplicate list a path the view does not offer." Rewrite; re-anchor "a hash of a list" to `leafset_id` vs `leaf_digests`, whose asymmetry is still true and is why the refuse exists.
+
+Advisories (non-blocking): `overlapping packs` wording for two loose notes is CLI-unreachable (both mutating commands heal first) and was a permitted plan choice; the planted-tree zoom/recall duplicate-date tests should say they cover pre-change packs. Full detail in `memory-bank/active/.qa-validation-status`.
+
 ## Status
 
 - [x] Component analysis complete
@@ -139,4 +149,6 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight (PASS 2026-08-29)
 - [x] Build
-- [ ] QA
+- [x] QA (FAIL 2026-08-29 — build rework: 3 blocking findings)
+- [ ] Build (rework)
+- [ ] QA (re-run)
