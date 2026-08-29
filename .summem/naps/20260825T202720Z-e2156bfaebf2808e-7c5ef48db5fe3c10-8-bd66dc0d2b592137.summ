@@ -1,0 +1,1 @@
+drop-dataclasses: slots + lazy imports; version/init/-h omit optional imports; 3.14 import tracing; perf-shards #49-52 shipped (#53 deferred); same-leaf-set conflicts keep one variant; wake never cuts over-budget views.

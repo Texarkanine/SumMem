@@ -94,3 +94,14 @@ Retarget SumMem ingest membership so `note` is lore plus tree-affecting in-fligh
 * Insights
     - SumMem shares committed repository context, not a physical working copy
     - A generic “needs to know” test would again admit process telemetry
+
+## 2026-08-28 - PLAN - COMPLETE
+
+* Work completed
+    - Revised the task brief, component analysis, test plan, implementation plan, challenges, and pre-mortem for repository-oriented wording
+    - Confirmed no new test files, dependencies, or store mechanics are needed
+* Decisions made
+    - The targeted `clone` assertion is removed rather than retaining the word solely to satisfy a stale test
+    - The earlier build and QA records remain historical; this revision must repeat Preflight, Build, and QA
+* Insights
+    - Two probe pins plus `AGENTS.md` lockstep cover both product surfaces and their committed bootstrap copy

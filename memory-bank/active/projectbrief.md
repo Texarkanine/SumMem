@@ -2,7 +2,7 @@
 
 ## User Story
 
-As an agent in a repository with SumMem, I want a short, meaning-dense membership test for `note` so the decaying view holds what another contributor working in this clone still needs — lore, and in-flight work that changes how they should use the tree — instead of a firehose of process telemetry.
+As an agent in a repository with SumMem, I want a short, meaning-dense membership test for `note` so the decaying view holds what another contributor working on this repository still needs — lore, and in-flight work that changes how they should use the tree — instead of a firehose of process telemetry.
 
 ## Use-Case(s)
 
@@ -12,7 +12,7 @@ An agent finishes a normal-sized change, opens a PR, and watches CI. It does not
 
 ### Use-Case 2
 
-An agent is twenty hours into a forty-hour refactor that occupies a real area of the tree. It does `note` that the work is in flight and roughly how far along it is, because another contributor starting work in this clone would step on it or duplicate it.
+An agent is twenty hours into a forty-hour refactor that occupies a real area of the tree. It does `note` that the work is in flight and roughly how far along it is, because another contributor starting work on the repository would step on it or duplicate it.
 
 ### Use-Case 3
 
@@ -20,7 +20,7 @@ An agent learns a gotcha, a team norm, a failed approach, or an invariant that h
 
 ## Requirements
 
-1. Retarget the baked membership language in `prompt_text()` (committed `AGENTS.md` bootstrap) and `how_to_text()` (root-wake Usage) so a `note` is something another contributor working in this clone would still need.
+1. Retarget the baked membership language in `prompt_text()` (committed `AGENTS.md` bootstrap) and `how_to_text()` (root-wake Usage) so a `note` is something another contributor working on this repository would still need.
 2. That set includes lore (gotchas, team norms, failed approaches, invariants not yet in docs) and in-flight work that actually changes how someone else should use the tree.
 3. Routine process telemetry stays out: opened a PR, still needs merge, QA PASS, archived to X.
 4. Personal, machine-local, and user-preference facts still stay out.

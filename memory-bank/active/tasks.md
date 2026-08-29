@@ -9,8 +9,8 @@ Retarget shipped `note` membership so agents record lore and tree-affecting in-f
 ## Component Analysis
 
 ### Affected Components
-- `prompt_text()` in `summem`: committed `AGENTS.md` bootstrap — note duty and stay-out. Must not grow into a lecture. Today: “a fact another contributor would still need.”
-- `how_to_text()` in `summem`: root-wake Usage — versioned membership. Today: “designs, decisions, invariants” plus clone-portability (“even when cloned on another machine”).
+- `prompt_text()` in `summem`: committed `AGENTS.md` bootstrap — note duty and stay-out. Retarget its short probe from clone work to repository work without growing into a lecture.
+- `how_to_text()` in `summem`: root-wake Usage — versioned membership. Retarget the same probe while preserving the genre list, telemetry denylist, and skip condition.
 - `AGENTS.md`: lockstep prefix with `prompt_text()`.
 - `tests/test_init.py`: bootstrap/how-to invariants. Bootstrap currently **forbids** `clone`; how-to currently **requires** `another machine`. Those pins encode the old split, not a store contract.
 - OptMem global rule (out of repo): constraint only — do not name it; change it only if SumMem cannot carry the test.
@@ -22,7 +22,7 @@ Retarget shipped `note` membership so agents record lore and tree-affecting in-f
 
 ### Boundary Changes
 - Agent-facing prompt contract only. No CLI verbs, store, or nap `fold_request` change.
-- Deliberate invariant retarget in `test_init.py` if the new probe uses “this clone” on the bootstrap.
+- Deliberate invariant retarget in `test_init.py` for the shared repository-work probe and removal of the obsolete how-to `clone` assertion.
 
 ### Invariants & Constraints
 - Must preserve writer-only + untracked clause.
@@ -34,17 +34,17 @@ Retarget shipped `note` membership so agents record lore and tree-affecting in-f
 
 ## Open Questions
 
-- [x] Membership wording and placement → Resolved: work-in-this-clone probe on both surfaces; how-to carries genre + denylist + skip-if-nothing; OptMem untouched (see `memory-bank/active/creative/creative-membership-wording.md`)
+- [x] Membership wording and placement → Resolved: repository-work probe on both surfaces; how-to carries genre + denylist + skip-if-nothing; OptMem untouched (see `memory-bank/active/creative/creative-membership-wording.md` and `memory-bank/active/creative/creative-membership-subject-wording.md`)
 - [x] Membership subject noun after PR feedback → Resolved: “work on this repository” names the committed shared object without implying contributors share a checkout; update both probes and the targeted tests (see `memory-bank/active/creative/creative-membership-subject-wording.md`)
 
 ## Test Plan (TDD)
 
 ### Behaviors to Verify
 
-- Bootstrap probe: `prompt_text()` → contains `work in this clone`
-- How-to probe: `how_to_text()` → contains `work in this clone`
+- Bootstrap probe: `prompt_text()` → contains `work on this repository`
+- How-to probe: `how_to_text()` → contains `work on this repository`
 - Bootstrap stays lecture-free: `prompt_text()` → no `another machine`, no `must still be true after a fresh clone`
-- How-to drops portability lecture: `how_to_text()` → still has `clone`, does not require `another machine`, still no `must still be true after a fresh clone`
+- How-to drops portability lecture: `how_to_text()` → does not require `clone` or `another machine`, still no `must still be true after a fresh clone`
 - Lockstep: this repo’s `AGENTS.md` starts with `prompt_text().strip()`
 - Writer-only unchanged: existing `test_prompt_text_notes_are_part_of_the_work` still passes
 
@@ -87,10 +87,10 @@ Retarget shipped `note` membership so agents record lore and tree-affecting in-f
 - Creative ref: `memory-bank/active/creative/creative-membership-subject-wording.md`
 - [ ] Planned
 
-1. Retarget the two `work in this clone` probes to `work on this repository`.
-2. Remove the how-to assertion that requires `clone`; the new phrasing should not retain the word merely for that test.
-3. Replace the phrase in both functions and copy `prompt_text()` into `AGENTS.md`.
-4. Run the affected init tests red before implementation, then green; complete the prescribed full suite after the build.
+1. Stub tests: no new cases. Leave `prompt_text()` / `how_to_text()` signatures unchanged.
+2. Stub interface: none.
+3. Write tests and run red: retarget both `work in this clone` probes to `work on this repository`; remove the how-to assertion requiring `clone`. Run the three affected init tests and confirm the two probe assertions fail before changing shipped text.
+4. Write code and run green: replace the phrase in both functions and copy `prompt_text()` into `AGENTS.md`; rerun the targeted init tests, then the prescribed full suite.
 
 ## Technology Validation
 
@@ -98,10 +98,11 @@ No new technology - validation not required
 
 ## Challenges & Mitigations
 
-- Phrase tests on denylist examples (PR / checks / archived) become change-detectors: do not add them; pin only `work in this clone`
+- Phrase tests on denylist examples (PR / checks / archived) become change-detectors: do not add them; pin only `work on this repository`
 - `(mandatory)` still read as “emit a note every session”: how-to line “Skip if nothing qualifies or it is already remembered” is the counterweight; do not drop the heading
 - Existing wake notes few-shot the old genre: out of scope — do not rewrite the store
 - Bootstrap without the denylist if an agent notes before wake: accepted; session-start wake is already mandatory
+- One surface retains clone language: retarget both probe pins and the how-to portability assertion before shipped text changes.
 
 ## Pre-Mortem
 
@@ -110,6 +111,7 @@ No new technology - validation not required
 - Write-time gotchas become illegal because we restored eternal currency: we did not; the denylist is events, not truth-over-time
 - Next wording tweak is blocked by pins on “PR opened”: already covered by Challenge 1
 - Products couple because we edited OptMem or named it: non-goal; SumMem carries the test alone
+- Repository work becomes generic need-to-know: retain the how-to genre list and telemetry denylist; the bootstrap remains intentionally short.
 
 ## Status
 
@@ -119,9 +121,9 @@ No new technology - validation not required
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [x] Preflight
-- [x] Build
-- [x] QA
+- [ ] Preflight
+- [ ] Build
+- [ ] QA
 
 ## QA Results
 
