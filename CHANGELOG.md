@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.11.0](https://github.com/Texarkanine/SumMem/compare/v0.10.1...v0.11.0) (2026-08-29)
+
+
+### Features
+
+* **prompt:** split write rule into AGENTS.md from wake Usage ([#75](https://github.com/Texarkanine/SumMem/issues/75)) ([84082dd](https://github.com/Texarkanine/SumMem/commit/84082dd0dde464a1984abed9e8d22ae7656e8491))
+
+
+### Bug Fixes
+
+* **cli:** quote note text in fold prompts [[#80](https://github.com/Texarkanine/SumMem/issues/80)] ([#81](https://github.com/Texarkanine/SumMem/issues/81)) ([7ca3998](https://github.com/Texarkanine/SumMem/commit/7ca39981f8d5f32397c1fd3806ab200f217228ab))
+* collapse same-text notes on heal and reject overlapping nap [[#77](https://github.com/Texarkanine/SumMem/issues/77)] ([#79](https://github.com/Texarkanine/SumMem/issues/79)) ([63291ca](https://github.com/Texarkanine/SumMem/commit/63291ca26d196d7a2d69486602923102f77b578c))
+* land heal-same-text archive omitted from [#79](https://github.com/Texarkanine/SumMem/issues/79) ([f5d5e94](https://github.com/Texarkanine/SumMem/commit/f5d5e941b76faeffab539a9891698a7192fb8fe4))
+
 ## [0.10.1](https://github.com/Texarkanine/SumMem/compare/v0.10.0...v0.10.1) (2026-08-29)
 
 
