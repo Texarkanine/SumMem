@@ -4,10 +4,6 @@ This page explains why many agents can write to one memory, on different machine
 
 The claim, once you have seen it: **the notes form a grow-only set, and that set converges. The files are a shrinking picture of that set. Compaction is invisible to the thing that converges.**
 
-It starts with a shoebox and ends with a homomorphism. Each section assumes only the ones above it. Terms link out the first time they appear.
-
-The [Architecture](architecture/index.md) page says what the pieces are. This page says why the arrangement is safe.
-
 ## Two writers, no lock
 
 Two agents learn something at the same moment, in two clones, on two machines. Both must be able to record it. Neither can wait for the other.
@@ -56,8 +52,6 @@ Those objects have names:
 - the children file (`.tree`), which holds the full text of every note underneath it.
 
 The word *summary* misleads here. The caption summarises. The nap does not. A nap carries every original sentence inside it, spelled out. It is a bundle, not a précis.
-
-You can check this in the code. `_digests_of_dict` ([`summem:558`](../summem)) rebuilds each note's identity from the text stored in the `.tree`, using the same encoding a loose note gets. A note inside a bundle and the same note loose are indistinguishable. The rest of this page uses that fact.
 
 ### The view and grain
 
@@ -133,7 +127,7 @@ flowchart LR
     After --> Same["L still A, B, C, D"]:::meaning
 ```
 
-This is why `nap` deletes files without danger. It is not deleting notes. It is re-describing the same notes more compactly, and the notes are still spelled out inside the bundle it just wrote. `write_nap` ([`summem:710`](../summem)) writes the bundle before it unlinks either child ([`summem:728-730`](../summem)), so no moment exists where a sentence lives nowhere.
+This is why `nap` deletes files without danger. It is not deleting notes. It is re-describing the same notes more compactly, and the notes are still spelled out inside the bundle it just wrote. SumMem writes the bundle before it unlinks either child so no moment exists where a sentence lives nowhere.
 
 Across the whole system there is exactly one operation that changes `L`, and it only ever adds: `note`.
 
@@ -174,12 +168,12 @@ A [partition](https://en.wikipedia.org/wiki/Partition_of_a_set) of a set is a wa
 
 After healing, the view is a partition of `L(S)`. Each listed item is one block. Its grain is the block's size. Its caption is a label on the block.
 
-`heal_view` ([`summem:635`](../summem)) is what forces this. It loops until no two items share a note:
+SumMem's "healing" is what forces this. It loops until no two items share a note:
 
 - if one block sits entirely inside another, drop the smaller;
 - otherwise open the smaller block into its children and drop it.
 
-Both moves preserve `L`, which is why heal is safe to run at any time, in any order, on any clone. `nap` runs it before it folds ([`summem:1365`](../summem)). `note` runs it after it writes ([`summem:1418`](../summem)). `wake` never does — reading must not block on repair.
+Both moves preserve `L`, which is why heal is safe to run at any time, in any order, on any clone. `nap` heals before it folds. `note` heals after it writes. `wake` never does — reading must not block on repair.
 
 Git merge is the only thing that breaks the partition. It can land a bundle beside the very notes that bundle contains. Heal puts it right.
 
@@ -192,13 +186,13 @@ flowchart TD
     Heal --> Part["View is a partition again"]:::ok
 ```
 
-Fold is: merge two adjacent blocks of equal size. Expand ([`summem:906`](../summem)) is: split a block, for display only, writing nothing back.
+Fold is: merge two adjacent blocks of equal size. Expand is: split a block, for display only, writing nothing back.
 
 ## A max-register for captions
 
-Two agents fold the same two notes and write different captions.
+Imagine: two agents fold the same two notes and each write different captions.
 
-Same notes means the same leaf-set field in the filename, the same leftmost child, the same grain. Only the variant tag differs — a hash of the bundle's bytes and the caption's bytes ([`summem:421`](../summem)). Two filenames. Git unions them. Both appear in the view, briefly, as two rows with one id.
+Same notes means the same leaf-set field in the filename, the same leftmost child, the same grain. Only the variant tag differs — a hash of the bundle's bytes and the caption's bytes. Two filenames. Git unions them. Both appear in the view, briefly, as two rows with one id.
 
 Heal settles it. The view is sorted by filename, and when two items cover the same notes, the earlier name loses. Since the names differ only in that trailing hash, the surviving caption is the one whose variant tag sorts highest.
 
@@ -212,7 +206,7 @@ Facts converge. Structure does not.
 
 Two clones that have seen the same notes always agree on `L`. They need not agree on the partition. One may hold `ABCD` beside `EF` where the other holds `AB`, `CD` and `EF`. Both are correct: same notes, different cuts.
 
-[Architecture](architecture/index.md) says this and rules the repair out of scope. [Notes](notes.md) records the design that would close it.
+[Architecture](architecture/index.md) says this and rules the "repair" out of scope.
 
 Leaving it open is a judgement, not an oversight. Rebuilding one canonical grouping after every merge would mean rewriting bundles that are already correct, and it would still not settle the captions — two agents wrote two English sentences about the same pair of notes, and no rule picks the better one. SumMem picks one by a fixed rule and keeps every original sentence reachable underneath it. The cut is cosmetic; the contents are not.
 
