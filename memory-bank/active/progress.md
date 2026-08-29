@@ -75,3 +75,24 @@ Fix [issue #77](https://github.com/Texarkanine/SumMem/issues/77) under the opera
     - Did not add an `assert_unique_leaf_sets` helper; `gitutil.assert_unique_cover` already exists
 * Insights
     - Direct `write_nap` is the path that still sees two files; CLI heal runs first
+
+## 2026-08-29 - PREFLIGHT - COMPLETE (FAIL (fixable))
+
+* Work completed
+    - Re-validated the amended Level 3 plan against `summem`, the test suite, the atlas, and `docs/theory.md`
+* Decisions made
+    - Build stays gated: `tests/gitutil.py::assert_unique_cover` still hard-codes the note/note overlap skip Unit 1 removes in production, and no unit's Files list touches it
+* Insights
+    - The "`assert_unique_cover` already exists" premise from the prior planning pass is false once Unit 1 lands — the helper still permits exactly the case being fixed
+    - Every existing call site of that helper runs after a `heal_view` on non-duplicate text, so nothing currently breaks; the gap is a blind regression-detector, not a red test
+
+## 2026-08-29 - PLAN - COMPLETE
+
+* Work completed
+    - Unit 1 Files now includes `tests/gitutil.py`; drop `assert_unique_cover`'s note/note skip and docstring
+    - Unit 2 Files includes `tests/test_cli.py`
+    - Unit 4 quotes the real `systemPatterns.md` sentence (“adjacency must keep both”)
+* Decisions made
+    - Do not make `assert_unique_cover` call `_first_overlap`; drop the skip in the helper instead
+* Insights
+    - `test_two_identical_notes_stay` never calls `heal_view`; leave it alone

@@ -29,7 +29,7 @@ graph TD
 ### Affected Components
 - `_first_overlap` (`summem`): stop skipping note/note pairs. Same digest set → unlink the older (left, filename order).
 - `write_nap`: reject any intersecting digest sets, not only when a nap is on one side.
-- Tests that pin two identical notes surviving heal and napping via a repeated id: retarget.
+- Tests that pin two identical notes surviving heal and napping via a repeated id: retarget. `tests/gitutil.py::assert_unique_cover` currently skips note/note; drop that skip in unit 1.
 - Atlas Identity **and** Zipper (`docs/architecture/index.md`), `memory-bank/systemPatterns.md` wake-dates sentence, `docs/theory.md` leak section: `L` is a set of facts; trigger 1 is the shoebox. Zipper today says two loose notes that share text are skipped; that sentence goes.
 
 ### Cross-Module Dependencies
@@ -73,17 +73,17 @@ graph TD
 
 ### 1. Heal note/note overlap — executable
 
-- Files: `summem`, `tests/test_zipper.py`
+- Files: `summem`, `tests/test_zipper.py`, `tests/gitutil.py`
 - Creative ref: `memory-bank/active/creative/creative-leaf-identity.md`
 
-1. Stub tests: add `test_heal_two_identical_notes_keeps_newer` (two files → heal → one file, later stamp). Change `test_identical_notes_nappable_after_heal_view` / `test_two_identical_notes_stay` so they no longer require both files after heal. Add `test_note_after_packed_text_is_healed_away` pinning trigger 1 as intended (file gone, zoom reaches, `Saved.` still printed if asserted at CLI).
-2. Stub interface: none; delete the skip in `_first_overlap` only in step 4.
+1. Stub tests: add `test_heal_two_identical_notes_keeps_newer` (two files → heal → one file, later stamp; then `assert_unique_cover`). Leave `test_two_identical_notes_stay` alone: it never calls `heal_view`. Change `test_identical_notes_nappable_after_heal_view` so it no longer requires both files after heal. Add `test_note_after_packed_text_is_healed_away` pinning trigger 1 as intended (file gone, zoom reaches, `Saved.` still printed if asserted at CLI).
+2. Stub interface: none; delete the skip in `_first_overlap` and in `assert_unique_cover` only in step 4.
 3. Write tests and run red: `tox -e py311 -- tests/test_zipper.py::test_heal_two_identical_notes_keeps_newer`.
-4. Write code and run green: remove the note/note skip in `_first_overlap`.
+4. Write code and run green: remove the note/note skip in `_first_overlap`. In `tests/gitutil.py::assert_unique_cover`, delete `if a.kind == "note" and b.kind == "note": continue` and replace the docstring claim “Two notes may share a digest” with: after heal, every pair of view nodes has disjoint leaf-sets, including two notes.
 
 ### 2. `write_nap` rejects digest overlap for notes — executable
 
-- Files: `summem`, `tests/test_nap.py`, `tests/test_nap_reject.py`
+- Files: `summem`, `tests/test_nap.py`, `tests/test_nap_reject.py`, `tests/test_cli.py`
 - Creative ref: `memory-bank/active/creative/creative-leaf-identity.md`
 
 1. Stub tests: retarget `tests/test_nap.py::test_write_nap_identical_text_notes_still_concat` so a direct `write_nap` of two identical-text notes (no prior heal) raises `ValueError` on overlapping leaves, writes no `.summ` and no `.tree`, and **both** loose note files remain. Retarget `test_nap_two_identical_notes_by_repeated_id` and CLI `test_nap_accepts_prefix_of_identical_notes` (after heal there is one node; nap of one id twice still fails).
@@ -109,7 +109,7 @@ graph TD
 
 1. Identity: replace “Two notes with the same text share an id; they remain two view nodes.” Two notes with the same text share an id; heal keeps one. Packed coverage of a later copy is the shoebox.
 2. Zipper: replace “Two loose notes that happen to share text are skipped.” They are not skipped; heal unlinks the older filename. Heal still runs before `nap` resolves ids; if that drop leaves a missing id, the command fails and does not fold.
-3. `systemPatterns.md`: drop “they remain two view nodes”; adjacency still needs two distinct ids when two nodes exist.
+3. `systemPatterns.md`: replace “two notes with the same text share an id, and adjacency must keep both.” After heal they are one view node; adjacency still needs two distinct ids when two nodes exist.
 4. `docs/theory.md` leak section: not a leak. `L` is a set of facts. Heal dropping a packed-text loose note is the design. `note` of a duplicate does not grow `L`. The remaining hole was napping two copies; that path is closed.
 
 ## Technology Validation
@@ -119,6 +119,7 @@ No new technology - validation not required
 ## Challenges & Mitigations
 
 - `test_heal_note_covered_by_nap_dropped` must stay: it is the same rule as trigger 1, with the packed child’s name. Do not special-case rematerialize.
+- `assert_unique_cover` in `tests/gitutil.py` currently skips note/note and would stay blind to this bug class. Unit 1 drops that skip. Do not share `_first_overlap` with the helper: tests should not import a private walk just to avoid a six-line loop.
 - Unlinking `left` of two grain-1 notes keeps the later filename only because `list_view` sorts by name. If a test plants names out of stamp order, “newer” is filename-newer, not clock-newer. Tests should use `write_note` stamps that match name order.
 - Existing overlap error says `overlapping packs`. Two notes are not packs. Mitigation: one overlap error; update pinned substrings in this task rather than teach a second phrase.
 
@@ -126,7 +127,7 @@ No new technology - validation not required
 
 - Shipped “keep the new file” tests from the issue’s write-up and fought the shoebox: the plan’s trigger-1 test pins deletion, not survival.
 - Left the note/note skip, only rejected `write_nap`, then `fold_request` stuck at budget on `(id, id)`: unit 1 removes the skip so heal runs first on `note`/`nap`.
-- Rewrote `note_digest` anyway “for honesty”: unit 1–2 forbid that; no migrate.
+- Left `assert_unique_cover` skipping note/note so the shared helper stayed blind: unit 1 drops that skip.
 
 ## Status
 
