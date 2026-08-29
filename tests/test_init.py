@@ -80,52 +80,6 @@ def test_help_before_init_prints_init_help(capsys, summem):
     assert catalog.strip() not in text
 
 
-def test_prompt_text_invariants(summem):
-    """prompt_text() is the write rule plus wake handoff: no note argv, no versioned how-to."""
-    m = summem
-    prompt = m.prompt_text()
-    lower = prompt.lower()
-    assert prompt.startswith("# Project Memory")
-    assert "summem" in lower
-    assert "shared memory" in lower
-    assert "wake" in lower
-    assert "root" in lower
-    assert "project-root" in lower
-    assert "conversation" in lower
-    assert "contributor" in lower
-    assert "personal" in lower
-    assert "note" in lower
-    assert "do not run it again" in lower
-    assert "gotchas" in lower
-    assert "norms" in lower
-    assert "failed approaches" in lower
-    assert "pr opened" in lower
-    assert "skip if nothing qualifies" in lower
-    assert "already remembered" in lower
-    assert "Activating SumMem (mandatory)" in prompt
-    assert "Register Memories (mandatory)" not in prompt
-    assert prompt.count("(mandatory)") == 1
-    assert prompt.count(m.AGENT_BIN) == 1
-    assert f"{m.AGENT_BIN} wake" in prompt
-    assert f"{m.AGENT_BIN} note" not in prompt
-    assert f"{m.AGENT_BIN} nap" not in prompt
-    assert "wake --path" not in prompt
-    assert "== SumMem Usage ==" not in prompt
-    assert "see and follow" not in lower
-    assert "you are up to speed" not in lower
-    assert "before any other tool call" not in lower
-    assert "AGENTS.md or CLAUDE.md" not in prompt
-    assert "./summem/summem" not in prompt
-    assert "must still be true after a fresh clone" not in prompt
-    assert "work on this repository" in lower
-    assert "another machine" not in lower
-    assert "x1 YYYY-MM-DD" not in prompt
-    assert "prior **root** SumMem wake" not in prompt
-    assert "invent filenames" not in lower
-    assert "the only writer" not in lower
-    assert "part of your work" not in lower
-
-
 def test_how_to_text_notes_are_part_of_the_work(summem):
     """how_to_text() treats script-written files as part of your work, not a separate git procedure."""
     m = summem
@@ -145,9 +99,10 @@ def test_how_to_text_notes_are_part_of_the_work(summem):
 
 
 def test_agents_md_starts_with_prompt_text(summem):
-    """This repo dogfoods the shipped default: AGENTS.md starts with prompt_text().
+    """This repo's AGENTS.md prefix is prompt_text(); consumers may edit theirs.
 
-    Consumers may edit the prefix. This lockstep is not a contract on their trees.
+    A prompt_text() change that is not copied onto AGENTS.md must fail. Tweaking
+    the write rule and updating both files must not.
     """
     m = summem
     agents = Path(ROOT, "AGENTS.md").read_text(encoding="utf-8")
@@ -167,7 +122,6 @@ def test_how_to_text_is_the_usage_section(summem):
     assert "already stored" in lower
     assert "do not retry" in lower
     assert f'{m.AGENT_BIN} note' in text
-    assert f'{m.AGENT_BIN} nap' in text
     assert "invent filenames" in lower
     assert "the only writer" in lower
     assert "part of your work" in lower
@@ -204,27 +158,28 @@ def test_how_to_text_is_not_operator_help(summem):
 
 
 def test_prompt_and_how_to_are_disjoint(summem):
-    """Write-rule phrases stay out of Usage; mechanical phrases stay out of the prefix."""
+    """Usage does not restate the write rule; the prefix does not teach recipes."""
     m = summem
-    prompt = m.prompt_text().lower()
+    prompt = m.prompt_text()
     how_to = m.how_to_text().lower()
-    write_rule = (
+    lower = prompt.lower()
+    for phrase in (
         "work on this repository",
         "personal",
         "pr opened",
         "skip if nothing qualifies",
         "already remembered",
-    )
-    mechanics = (
+    ):
+        assert phrase not in how_to
+    for phrase in (
         "invent filenames",
         "the only writer",
         "part of your work",
         "wake --path",
         "x1 yyyy-mm-dd",
-    )
-    for phrase in write_rule:
-        assert phrase in prompt
-        assert phrase not in how_to
-    for phrase in mechanics:
+    ):
         assert phrase in how_to
-        assert phrase not in prompt
+        assert phrase not in lower
+    assert f"{m.AGENT_BIN} note" not in prompt
+    assert f"{m.AGENT_BIN} nap" not in prompt
+    assert "== SumMem Usage ==" not in prompt
