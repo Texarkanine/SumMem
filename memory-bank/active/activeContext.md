@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: heal-same-text
-**Phase:** PLAN - COMPLETE
+**Phase:** PREFLIGHT - READY
 
 ## What Was Done
 - Classified Level 3.
@@ -9,4 +9,4 @@
 - Plan: four units (`note_digest` + call sites, heal/nap tests, `migrate.py`, atlas/theory). Trigger 1 test is required. Rematerialize-heal stays.
 
 ## Next Step
-- Preflight to validate the plan, then wait for `/niko-build`.
+- Preflight (subagent). On PASS, wait for `/niko-build`.
