@@ -1,16 +1,16 @@
 # Project Memory
 
-Shared memory for this repository is managed through SumMem, invoked as `.summem/summem`.
+Shared memory for this repository is managed through SumMem.
 
 ## At Session Start: Activating SumMem (mandatory)
 
 Run `.summem/summem wake` from the repository root. If you can see a prior project-root SumMem wake in this conversation's history, do not run it again.
 
-## While Working: Register Memories (mandatory)
+## While Working: Register Memories
 
-`.summem/summem note "…"` records one short line another contributor needs to work on this repository. Personal, machine-local, and user preference facts stay out. `note` may sometimes print further instructions; always follow them.
+When something matches the write rule below, record it with SumMem's `note`.
 
-Never invent filenames, rewrite note bytes, or delete memory files by hand. The script is the only writer. The files it writes are part of your work; do not leave them untracked.
+One short line another contributor needs to work on this repository: gotchas, norms, failed approaches, unfinished work that occupies the tree. Not that a PR opened, checks passed, or a task archived. Personal, machine-local, and user preference facts stay out. Skip if nothing qualifies or it is already remembered.
 
 # Agent context
 

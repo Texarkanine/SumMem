@@ -1182,7 +1182,9 @@ def how_to_text() -> str:
     return f"""\
 == SumMem Usage ==
 
-`{AGENT_BIN} note "…"` records one short line another contributor needs to work on this repository: gotchas, norms, failed approaches, unfinished work that occupies the tree. Not that a PR opened, checks passed, or a task archived. Personal, machine-local, and user preference facts stay out. Skip if nothing qualifies or it is already remembered.
+`{AGENT_BIN} note "…"` records one short line.
+
+Never invent filenames, rewrite note bytes, or delete memory files by hand. The script is the only writer. The files it writes are part of your work; do not leave them untracked.
 
 If `note` asks for a nap, the note is already stored; do not retry the same note. The nap is extra work on two older view nodes. Do that nap before your next action.
 
@@ -1197,24 +1199,26 @@ def prompt_text() -> str:
     return f"""\
 # Project Memory
 
-Shared memory for this repository is managed through SumMem, invoked as `{AGENT_BIN}`.
+Shared memory for this repository is managed through SumMem.
 
 ## At Session Start: Activating SumMem (mandatory)
 
 Run `{AGENT_BIN} wake` from the repository root. If you can see a prior project-root SumMem wake in this conversation's history, do not run it again.
 
-## While Working: Register Memories (mandatory)
+## While Working: Register Memories
 
-`{AGENT_BIN} note "…"` records one short line another contributor needs to work on this repository. Personal, machine-local, and user preference facts stay out. `note` may sometimes print further instructions; always follow them.
+When something matches the write rule below, record it with SumMem's `note`.
 
-Never invent filenames, rewrite note bytes, or delete memory files by hand. The script is the only writer. The files it writes are part of your work; do not leave them untracked.
+One short line another contributor needs to work on this repository: gotchas, norms, failed approaches, unfinished work that occupies the tree. Not that a PR opened, checks passed, or a task archived. Personal, machine-local, and user preference facts stay out. Skip if nothing qualifies or it is already remembered.
 """
 
 
 def init_text() -> str:
     """Return the full `init` print: insert recipe plus prompt_text()."""
     return (
-        "Insert the following at the top of AGENTS.md. "
+        "Insert the following at the top of AGENTS.md as a starting write rule. "
+        "You may edit what this repository remembers. "
+        "Command syntax comes from root wake; do not copy it into this prefix. "
         "If Claude Code should see it too,"
         "\n"
         "put @AGENTS.md at the top of CLAUDE.md.\n"

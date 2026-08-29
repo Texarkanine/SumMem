@@ -31,7 +31,7 @@ A **store** is the data: a directory of notes, naps, and settings under `.summem
 
 The **driver** is the script agents run. Creating a store creates the data directories and a default settings file. It does not place or overwrite the driver. This development repo keeps one script at the repository root and points each store’s script path at it.
 
-**Activation** is a block of instructions at the top of committed `AGENTS.md`. The `init` command prints that block. Presence of the driver is not activation.
+**Activation** is a block of instructions at the top of committed `AGENTS.md`. The `init` command prints that block as a starting write rule; after insert it is that repository's policy until someone edits it. The script does not reassert its default over an edited prefix. Presence of the driver is not activation. Command recipes live in root-wake Usage, not in this block.
 
 A command resolves one store by walking from the work path — `--path`, or the current directory — toward the git root and taking the first directory that already has a store. The git root gets a store on the first store command. Every other store is created with `start`.
 
@@ -335,7 +335,7 @@ These look optional and are not.
 - **Root pushes; other stores pull.** Root wake catalogs. A pull is a wake aimed at a path.
 - **Settings live in the store.** Not in the environment. Missing settings mean script defaults.
 - **Wake dates leaves only, never ranges.** A note is `x1 YYYY-MM-DD: text` from the filename stamp. A pack is `xN <prefix>: caption` with no day. Fold quotes pack captions without grain or prefix; ids live on the `Run:` line. Fold and zoom take a unique prefix of a content id.
-- **Personal and machine facts stay out.** This store is facts about this directory hierarchy.
+- **Personal and machine facts stay out.** This store is facts about this directory hierarchy. That is product intent and the shipped default write rule. The prefix is repo policy the script does not parse.
 
 Two branches whose naps do not overlap merge, then fold from the oldest neighbors. Overlapping merge is zipper, not that case.
 
@@ -355,7 +355,7 @@ SumMem is also not:
 
 | If you are changing | Read |
 |---|---|
-| What an agent is allowed to know or type | The README command table, the activation block, and root-wake Usage. Do not leak store paths into the agent interface. CLI output stays silent on git. The activation block treats the files the script wrote as part of your work, not a separate publish procedure. |
+| What an agent is allowed to know or type | The README command table, the activation block (write rule and wake handoff), and root-wake Usage (argv, grammar, writer-only). Do not leak store paths into the agent interface. CLI output stays silent on git. Usage treats the files the script wrote as part of your work, not a separate publish procedure. |
 | How notes land under concurrency | Notes. Recording a note must still commute. |
 | How summaries and originals survive squash | Naps. Fold. Zoom is a property of the current commit. |
 | How recall or zoom unique-prefix or walk children files | Zoom and recall. Parse each view `.tree` at most once. Prefix uniqueness is among distinct ids. |

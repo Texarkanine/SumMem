@@ -17,6 +17,7 @@ This product is not a single-actor local diary (that is OptMem, including its ma
 - When asked to compact, the agent supplies a summary for a sealed block the script already identified. The original sentences remain recoverable.
 - An agent searches remembered text word for word, or opens a summary back to its original sentences — including after a squash-merge, from a fresh clone of the branch tip.
 - An operator (or an agent only when asked) starts a memory in a chosen directory so later commands under that path resolve there instead of rolling up.
+- An operator sets what this repository remembers by editing the activation block. Copying a newer script updates Usage; it does not overwrite that choice.
 - Many writers record facts at the same time. A normal git merge keeps all of them.
 
 ## Key Benefits
@@ -38,6 +39,6 @@ The product succeeds when these process-level tests hold: concurrent notes merge
 - Personal and machine facts stay out of the repository.
 - SumMem is not Niko's `memory-bank/` and must not be folded into it.
 - Wake never refuses to print. "Cannot wake, go nap first" is a defect. Wake never drops view nodes to fit the budget; over-budget listings stay complete until `note`/`nap` fold them back.
-- CLI output does not mention store files, hashes as paths, or git. The activation block treats the files the script wrote as part of your work, not a separate publish procedure.
+- CLI output does not mention store files, hashes as paths, or git. Root-wake Usage treats the files the script wrote as part of your work, not a separate publish procedure.
 - A scope is not a package manifest. `start` is how a directory becomes a store.
 - The git root auto-creates on first `wake`, `note`, `nap`, `zoom`, or `recall`. Other stores appear only via `start`. Outside a repository, store commands fail. Help, `init`, and `version` still print.

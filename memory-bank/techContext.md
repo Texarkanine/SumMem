@@ -2,7 +2,7 @@
 
 The file backend is a Python 3 shebang script. A store is a `.summem/` directory (not `.mem/` — that name is already taken in this problem space). Nap captions are `.summ` (not `.sum` — that suffix is checksums). Agents invoke `.summem/summem`. This development repo’s record is repo-root `summem`; store-local `.summem/summem` is a symlink to it. `ensure_store` creates `notes/`, `naps/`, and default `config.toml` when missing. It does not copy the driver. Per-store settings live in `.summem/config.toml`, read with stdlib [`tomllib`](https://docs.python.org/3/library/tomllib.html) (added in 3.11; parse only). Default config is a commented template written as text, not a TOML dump. Agents talk to a stable CLI (`wake`, `note`, `nap`, `recall`, `zoom`, `start`, `init`, `version`). The on-disk format may later change, including to sqlite; the command table in the README must not.
 
-Activation is the SumMem block at the top of committed `AGENTS.md`. Presence of the driver is not. `init` prints that bootstrap (`prompt_text()`). Tests load repo-root `summem`. This repository commits `.summem/notes/` (and naps when written). `.gitignore` does not ignore them.
+Activation is the SumMem block at the top of committed `AGENTS.md`: the repository's write rule plus the wake handoff. Presence of the driver is not. `init` prints that bootstrap (`prompt_text()`) as a starting write rule the operator may edit. Tests load repo-root `summem`. This repository commits `.summem/notes/` (and naps when written). `.gitignore` does not ignore them.
 
 ## Environment Setup
 
