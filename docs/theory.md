@@ -232,12 +232,10 @@ State it plainly: **strong eventual consistency on what is remembered, and none 
 
 ## Duplicate receipts
 
-The shoebox already said this. A receipt loose and inside a bundle is one receipt: throw the loose copy away. Two loose copies of one sentence are one receipt: keep the later filename.
+A receipt loose and also inside a bundle is one receipt: throw the loose copy away. Two loose copies of one sentence are one receipt: keep the later filename.
 
-An agent that notes a sentence the store already holds still hears `Saved.` The fact is in `L`. The new file is gone. That is the design. `L` is a set. Noting a duplicate does not grow it.
+An agent that notes that sentence again still hears `Saved.` The fact is in `L`; the new file is gone.
 
-Folding the two copies is refused. A bundle must not claim grain 2 for one receipt.
-
-A hash of a list would count the same sentence twice. Overlap walks a set. `leafset_id` hashes a sorted list and keeps repeats; `leaf_digests` returns a set. Heal and the nap refuse make a duplicate list a path the view does not offer.
+Two copies of one sentence are one member of `L`. Their `leaves` overlap, so they are not two blocks of a partition. Grain is the block's size, which is 1. Folding the two files would write grain 2. That fold is refused.
 
 **The store converges over the set of remembered notes.** Multiplicity is not a fact.
