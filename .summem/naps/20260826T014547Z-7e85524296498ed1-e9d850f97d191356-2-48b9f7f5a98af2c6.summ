@@ -1,1 +1,0 @@
-tox: run-parallel locally, no --basetemp, session fixture; CI matrix on PR, coverage only on main
