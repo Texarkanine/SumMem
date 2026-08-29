@@ -1,11 +1,11 @@
 # Active Context
 
 ## Current Task: heal-same-text
-**Phase:** PLAN - COMPLETE
+**Phase:** PREFLIGHT - COMPLETE (PASS)
 
 ## What Was Done
-- Third preflight FAIL (fixable): no numbered CLI `note` test for packed duplicate text.
-- Plan amended: unit 1 retargets `test_cli_note_text_inside_nap_exits_0_no_loose_note` for exit 0, `Saved.\n`, no loose duplicate, zoom reachability.
+- Fourth preflight run: PASS. The CLI `note` regression test gap that caused three prior `FAIL (fixable)` results is closed and verified against the current codebase.
+- Two advisories recorded (non-blocking): a `view_is_consistent` proof helper for `assert_unique_cover`; a data-driven `OVERLAP_POLICY` table as a future structural improvement to `_first_overlap`.
 
 ## Next Step
-- Re-run preflight, then wait for `/niko-build` on PASS.
+- Proceed to `/niko-build`.

@@ -114,3 +114,12 @@ Fix [issue #77](https://github.com/Texarkanine/SumMem/issues/77) under the opera
     - Keep that test in `tests/test_zipper.py`; do not move it to `test_cli.py`
 * Insights
     - The CLI case already exists; it was missing `Saved.` and zoom, not a missing file
+
+## 2026-08-29 - PREFLIGHT - COMPLETE (PASS)
+
+* Work completed
+    - Fourth preflight run; re-validated the amended plan against `summem`, the full named test set, and documentation targets
+* Decisions made
+    - Build unblocked: the CLI `note` regression test gap is closed with all four required assertions in the right TDD order
+* Insights
+    - Confirmed against `summem` that `note`'s CLI path always heals before printing and `fold_request` returns `""` for a single-node view, so the plan's "stdout is exactly `Saved.\n`" claim is technically sound, not just plausible
