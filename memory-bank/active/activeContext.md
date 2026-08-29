@@ -1,11 +1,12 @@
 # Active Context
 
 ## Current Task: heal-same-text
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Intent confirmed: fix [issue #77](https://github.com/Texarkanine/SumMem/issues/77).
-- Complexity Level 3: bug sits on a load-bearing identity invariant; three non-equivalent fixes; cannot start coding without choosing which layer to make honest.
+- Classified Level 3.
+- Creative: per-file leaf identity (`memory-bank/active/creative/creative-leaf-identity.md`). Content-hash multisets do not fix trigger 1; nap-reject misses trigger 1 and can stick fold; heal-by-filename leaves two overlap rules.
+- Plan: four units (`note_digest` + call sites, heal/nap tests, `migrate.py`, atlas/theory). Trigger 1 test is required. Rematerialize-heal stays.
 
 ## Next Step
-- Load the Level 3 workflow and enter the plan phase.
+- Preflight to validate the plan, then wait for `/niko-build`.
