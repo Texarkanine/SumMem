@@ -21,3 +21,7 @@ Quote `node.caption` for every fold pair. Drop the kind/grain branch. `Run:` sti
 - `docs/architecture/index.md`
 - `memory-bank/systemPatterns.md`
 - `README.md` (example fold quotes)
+
+## QA Results
+
+✅ PASS — `left.caption`/`right.caption` replacement verified against all 6 projectbrief requirements and 5 acceptance criteria; no KISS/DRY/YAGNI/completeness/regression/integrity/documentation findings. `tox -e py311 -- tests/test_fold.py`: 27 passed (independently reran). See `memory-bank/active/.qa-validation-status` for the full finding list.

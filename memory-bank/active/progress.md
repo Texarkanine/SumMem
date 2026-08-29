@@ -25,3 +25,13 @@
     - One code path for notes and packs. Empty caption stays a blank quote because caption is empty, not because of a special case.
 * Insights
     - `format_wake_line` remains the listing grammar. Fold is not a listing.
+
+## 2026-08-29 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Reviewed `fold_request` diff against all 6 projectbrief requirements: KISS, DRY, YAGNI, completeness, regression, integrity, documentation.
+    - Independently reran `tox -e py311 -- tests/test_fold.py`: 27 passed.
+* Decisions made
+    - No findings block acceptance; PASS.
+* Insights
+    - Both call sites of `fold_request` always let it build fresh `ViewNode`s via `list_view`, so the removed `format_wake_line` branch was dead for every real caller — the fix is a true simplification, not a behavior trade-off.

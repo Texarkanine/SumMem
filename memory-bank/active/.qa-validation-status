@@ -1,0 +1,17 @@
+PASS
+
+- KISS: `fold_request` now assigns `left.caption` / `right.caption` directly, removing the `kind != "note" and leaves > 1` branch. Simpler than the branch it replaced; no new abstraction introduced.
+- DRY: No duplicated logic. `format_wake_line` remains the single listing-grammar function, untouched and still used by wake/recall/zoom (lines 739, 760, 775, 1060, 1132, 1145 of `summem`).
+- YAGNI: No speculative code, no unused parameters. `ids` (built at line 1099) is still needed for the `Run:` line's `short_id` calls.
+- Completeness: All projectbrief requirements verified:
+  1. Fold quotes are always `node.caption` (note text for leaves, since `ViewNode.caption == text` for kind="note"; caption for packs) - no `xN`, date, or prefix. Confirmed in code and by `test_fold_request_note_pair_quotes_text_only` / `test_fold_request_pack_pair_quotes_captions_only`.
+  2. Empty caption stays a blank quote - `test_fold_request_empty_pack_caption_is_blank_quote` still passes unmodified.
+  3. `Run:` line unchanged, still uses `short_id`/`_fold_path_flag`.
+  4. `format_wake_line` (wake/recall/zoom grammar) is untouched.
+  5. `test_fold_request_mentions_remaining` retargeted off dated leaf-pair quotes (now asserts `"  a\n"` / `"  b\n"`).
+  6. `docs/architecture/index.md`, `memory-bank/systemPatterns.md`, and `README.md` updated to say "fold quotes captions" generically, not "pack captions only".
+- Regression: No other call site of `fold_request` passes a pre-populated `nodes` list of `ProjectedNode`s that could have relied on the removed branch; both call sites (line 1364, 1413 area) let `fold_request` build fresh `ViewNode`s via `list_view`, so the removed branch was genuinely dead for all real inputs. `tox -e py311 -- tests/test_fold.py`: 27 passed (independently reran).
+- Integrity: No magic numbers, hardcoded shortcuts, or debug artifacts left behind.
+- Documentation: Atlas, `systemPatterns.md`, and README fold example all updated consistently with the new behavior.
+
+No findings block acceptance. Advisory only: archived precedent (`memory-bank/archive/enhancements/20260828-fold-pack-captions.md`) and `CHANGELOG.md` still describe the pre-#80 "pack captions only" behavior, but those are historical/generated records, not living docs, so leaving them as-is is correct - not a defect.

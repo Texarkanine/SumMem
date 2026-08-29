@@ -1,1 +1,0 @@
-pytest-xdist archived: each tox env is -n auto --maxprocesses=4; 0 serial markers; PR #66 closes #64.
