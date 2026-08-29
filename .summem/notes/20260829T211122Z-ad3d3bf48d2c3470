@@ -1,0 +1,1 @@
+Leaf identity is content-only: heal drops a loose note whose text already sits inside a pack, silently deleting a just-written note (#77). leafset_id keys on the multiset; leaf_digests keys on the set.

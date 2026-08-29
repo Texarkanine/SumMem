@@ -1,6 +1,6 @@
 # Architecture
 
-This page is the systems atlas: how SumMem’s algorithm and store fit together, and which constraints you must not remove without understanding them. How to run the commands lives in the [README](../../README.md). What this backend is not yet lives in [Notes](../notes.md).
+This page is the systems atlas: how SumMem’s algorithm and store fit together, and which constraints you must not remove without understanding them. How to run the commands lives in the [README](../../README.md). Why the arrangement converges under concurrent writers lives in [Theory](../theory.md). What this backend is not yet lives in [Notes](../notes.md).
 
 SumMem is a grow-only set of short facts in a git repository, plus a decaying listing of that set. Agents never edit the files. They run a script. The script owns every path, name, timestamp, and hash.
 
