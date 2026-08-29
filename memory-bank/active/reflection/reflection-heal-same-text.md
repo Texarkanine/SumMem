@@ -36,6 +36,7 @@ Treating the leak section as spec caused the first creative pass and a plan that
 
 - `leafset_id` hashes a list and keeps repeats; `leaf_digests` is a set. Heal trusts the set. `write_nap` must refuse any intersecting digest sets or a list-hash can still mint a grain-2 pack with one fact.
 - The shoebox is the spec: a loose copy of a packed sentence is thrown away. `Saved.` is true of `L`, not of the new file remaining.
+- `docs/theory.md` Duplicate receipts states that clash in `L` / `leaves` / partition language. Helper names stay out of the why-page.
 
 ### Process
 

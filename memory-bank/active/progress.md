@@ -186,3 +186,13 @@ Fix [issue #77](https://github.com/Texarkanine/SumMem/issues/77) under the opera
 * Insights
     - Retarget is not done until the test name matches the body
     - A why-page “leak” section is not spec until the operator says so
+
+## 2026-08-29 - PROSE - Duplicate receipts
+
+* Work completed
+    - Rewrote `docs/theory.md` Duplicate receipts in `L` / `leaves` / partition language
+    - Dropped helper names from that closer
+* Decisions made
+    - The why-page names the system in the notation it already reached; function names stay out
+* Insights
+    - Two copies of one sentence overlap in `leaves` and are one member of `L`; grain is that block's size
