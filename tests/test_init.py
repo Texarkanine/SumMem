@@ -17,6 +17,14 @@ def test_init_prints_recipe_and_prompt(capsys, summem):
     assert "docs/agents-prompt.md" not in out
     assert prompt
     assert prompt in out
+    recipe = out.split(prompt, 1)[0]
+    assert "starting write rule" in recipe.lower()
+    assert "you may edit" in recipe.lower()
+    assert "command syntax" in recipe.lower()
+    assert "you may edit" not in prompt.lower()
+    assert "---" in recipe
+    assert "---" not in prompt
+    assert recipe.rstrip().endswith("---")
     assert "paste" not in out.lower()
     assert "AGENTS.md or CLAUDE.md" not in out
 
@@ -72,54 +80,30 @@ def test_help_before_init_prints_init_help(capsys, summem):
     assert catalog.strip() not in text
 
 
-def test_prompt_text_invariants(summem):
-    """prompt_text() is the bootstrap: always-unless root wake, note, no versioned how-to."""
+def test_how_to_text_notes_are_part_of_the_work(summem):
+    """how_to_text() treats script-written files as part of your work, not a separate git procedure."""
     m = summem
-    prompt = m.prompt_text()
-    lower = prompt.lower()
-    assert prompt.startswith("# Project Memory")
-    assert "summem" in lower
-    assert "wake" in lower
-    assert "root" in lower
-    assert "project-root" in lower
-    assert "conversation" in lower
-    assert "contributor" in lower
-    assert "personal" in lower
-    assert "note" in lower
-    assert "do not run it again" in lower
-    assert "== SumMem Usage ==" not in prompt
-    assert "see and follow" not in lower
-    assert "you are up to speed" not in lower
-    assert "before any other tool call" not in lower
-    assert ".summem/summem" in prompt
-    assert "AGENTS.md or CLAUDE.md" not in prompt
-    assert "./summem/summem" not in prompt
-    assert "must still be true after a fresh clone" not in prompt
-    assert "work on this repository" in lower
-    assert "another machine" not in lower
-    assert "x1 YYYY-MM-DD" not in prompt
-    assert "prior **root** SumMem wake" not in prompt
-
-
-def test_prompt_text_notes_are_part_of_the_work(summem):
-    """prompt_text() treats script-written files as part of your work, not a separate git procedure."""
-    m = summem
-    prompt = m.prompt_text()
-    lower = prompt.lower()
+    text = m.how_to_text()
+    lower = text.lower()
     assert "part of your work" in lower
     assert "untracked" in lower
-    assert "git add" not in prompt
+    assert "git add" not in text
+    assert "git" not in lower
     assert "own commit" not in lower
-    assert "the tool manages them" not in prompt
+    assert "the tool manages them" not in text
     assert "invent filenames" in lower
     assert "rewrite" in lower
     assert "the only writer" in lower
-    assert "notes/" not in prompt
-    assert "naps/" not in prompt
+    assert "notes/" not in text
+    assert "naps/" not in text
 
 
 def test_agents_md_starts_with_prompt_text(summem):
-    """This repo's AGENTS.md starts with prompt_text() so the shipped prompt does not drift."""
+    """This repo's AGENTS.md prefix is prompt_text(); consumers may edit theirs.
+
+    A prompt_text() change that is not copied onto AGENTS.md must fail. Tweaking
+    the write rule and updating both files must not.
+    """
     m = summem
     agents = Path(ROOT, "AGENTS.md").read_text(encoding="utf-8")
     prompt = m.prompt_text().strip()
@@ -137,7 +121,15 @@ def test_how_to_text_is_the_usage_section(summem):
     assert "note" in lower
     assert "already stored" in lower
     assert "do not retry" in lower
-    assert "work on this repository" in lower
+    assert f'{m.AGENT_BIN} note' in text
+    assert "invent filenames" in lower
+    assert "the only writer" in lower
+    assert "part of your work" in lower
+    assert "work on this repository" not in lower
+    assert "personal" not in lower
+    assert "pr opened" not in lower
+    assert "skip if nothing qualifies" not in lower
+    assert "already remembered" not in lower
     assert "x1 YYYY-MM-DD" in text
     assert "zoom" in lower
     assert "zoom target" in lower
@@ -163,3 +155,31 @@ def test_how_to_text_is_not_operator_help(summem):
     assert ".summem/summem" in how_to
     assert "summem" in usage
     assert ".summem/summem" not in usage
+
+
+def test_prompt_and_how_to_are_disjoint(summem):
+    """Usage does not restate the write rule; the prefix does not teach recipes."""
+    m = summem
+    prompt = m.prompt_text()
+    how_to = m.how_to_text().lower()
+    lower = prompt.lower()
+    for phrase in (
+        "work on this repository",
+        "personal",
+        "pr opened",
+        "skip if nothing qualifies",
+        "already remembered",
+    ):
+        assert phrase not in how_to
+    for phrase in (
+        "invent filenames",
+        "the only writer",
+        "part of your work",
+        "wake --path",
+        "x1 yyyy-mm-dd",
+    ):
+        assert phrase in how_to
+        assert phrase not in lower
+    assert f"{m.AGENT_BIN} note" not in prompt
+    assert f"{m.AGENT_BIN} nap" not in prompt
+    assert "== SumMem Usage ==" not in prompt
