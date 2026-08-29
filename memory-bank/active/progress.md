@@ -82,3 +82,15 @@ Retarget SumMem ingest membership so `note` is lore plus tree-affecting in-fligh
 * Insights
     - Lockstep does not bind how-to to bootstrap; the two-surface probe can still drift
     - An advisory that names a drift class this repo has already failed should be adopted in the plan, not carried across three phases
+
+## 2026-08-28 - CREATIVE - COMPLETE
+
+* Work completed
+    - Re-evaluated the membership probe after PR #74 feedback that contributors have separate clones
+    - Compared repository, checkout, and generic need-to-know wording
+* Decisions made
+    - Use “another contributor needs to work on this repository” on both shipped surfaces
+    - Retarget both invariant probes and remove the obsolete how-to `clone` requirement
+* Insights
+    - SumMem shares committed repository context, not a physical working copy
+    - A generic “needs to know” test would again admit process telemetry

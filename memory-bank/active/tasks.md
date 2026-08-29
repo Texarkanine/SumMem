@@ -35,6 +35,7 @@ Retarget shipped `note` membership so agents record lore and tree-affecting in-f
 ## Open Questions
 
 - [x] Membership wording and placement → Resolved: work-in-this-clone probe on both surfaces; how-to carries genre + denylist + skip-if-nothing; OptMem untouched (see `memory-bank/active/creative/creative-membership-wording.md`)
+- [x] Membership subject noun after PR feedback → Resolved: “work on this repository” names the committed shared object without implying contributors share a checkout; update both probes and the targeted tests (see `memory-bank/active/creative/creative-membership-subject-wording.md`)
 
 ## Test Plan (TDD)
 
@@ -79,6 +80,17 @@ Retarget shipped `note` membership so agents record lore and tree-affecting in-f
 - [x] Complete (no-op)
 
 1. Do not edit `productContext.md`, `README.md`, or OptMem. The product picture is still “learned a fact”; the README already says gotchas. OptMem stays unnamed and unedited.
+
+### 3. Membership subject wording — executable
+
+- Files: `tests/test_init.py`, `summem` (`prompt_text`, `how_to_text`), `AGENTS.md`
+- Creative ref: `memory-bank/active/creative/creative-membership-subject-wording.md`
+- [ ] Planned
+
+1. Retarget the two `work in this clone` probes to `work on this repository`.
+2. Remove the how-to assertion that requires `clone`; the new phrasing should not retain the word merely for that test.
+3. Replace the phrase in both functions and copy `prompt_text()` into `AGENTS.md`.
+4. Run the affected init tests red before implementation, then green; complete the prescribed full suite after the build.
 
 ## Technology Validation
 
