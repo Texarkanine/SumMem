@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.1](https://github.com/Texarkanine/SumMem/compare/v0.10.0...v0.10.1) (2026-08-29)
+
+
+### Bug Fixes
+
+* **cli:** quote pack captions only in fold prompts ([#72](https://github.com/Texarkanine/SumMem/issues/72)) ([fa19d30](https://github.com/Texarkanine/SumMem/commit/fa19d300995a2ab2a5e75aa3a6a2932abc8707e1))
+* **prompt:** retarget note membership to work in this clone ([#74](https://github.com/Texarkanine/SumMem/issues/74)) ([2378de7](https://github.com/Texarkanine/SumMem/commit/2378de78cf3e3629ddd84585cd4347b3952387d4))
+
 ## [0.10.0](https://github.com/Texarkanine/SumMem/compare/v0.9.0...v0.10.0) (2026-08-28)
 
 
