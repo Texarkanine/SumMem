@@ -1,12 +1,11 @@
 # Active Context
 
 ## Current Task: heal-same-text
-**Phase:** QA - COMPLETE (PASS)
+**Phase:** REFLECT - COMPLETE
 
 ## What Was Done
-- Re-reviewed the QA rework; all earlier blocking test-name, docstring, and theory-prose findings are resolved.
-- Confirmed the implementation remains aligned with `L` as a set of facts and the shoebox decision.
-- Full available tox matrix passed: py311 and py314; py312 and py313 skipped because their interpreters are unavailable.
+- Wrote `memory-bank/active/reflection/reflection-heal-same-text.md`.
+- Persistent files: no further edits; systemPatterns Identity sentence already landed in build.
 
 ## Next Step
-- Run `/niko-reflect`.
+- Run `/niko-archive` to create the archive document and finalize the current project.

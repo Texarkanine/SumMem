@@ -156,3 +156,4 @@ The QA rework resolved all three blockers. Test names and docstrings now match t
 - [x] QA (FAIL 2026-08-29 — build rework: 3 blocking findings)
 - [x] Build (rework: renamed 3 tests, scoped leaf_digests pin, theory sentence)
 - [x] QA (PASS 2026-08-29)
+- [x] Reflect
