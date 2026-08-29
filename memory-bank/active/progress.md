@@ -86,3 +86,13 @@ Split the agent write rule out of root-wake Usage and into the `init`-emitted `A
 * Insights
     - A role change makes holes in the inherited copy load-bearing. Pin every verb in the new claim.
 
+## 2026-08-29 - POST-REFLECT RECONCILE - COMPLETE
+
+* Work completed
+    - Operator wording: prefix intro names the invoke path; Usage no longer lists nap argv (`fold_request` still prints `Run:`). Tests: deleted `test_prompt_text_invariants`; lockstep and disjointness remain.
+    - Second persistent reconcile after Cursor review on PR #75: `systemPatterns.md` “wake line only” was false; `techContext.md` now states lockstep-not-wording.
+* Decisions made
+    - Tweaking write-rule copy must not require test edits if `AGENTS.md` is updated. Prefix may say `invoked as {AGENT_BIN}`; that is not a command recipe.
+* Insights
+    - A briefing sentence that forbids intro interpolation will fight the lockstep test the next time the intro is restored.
+
