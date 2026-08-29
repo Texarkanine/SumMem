@@ -1,0 +1,1 @@
+write_nap rejects any intersecting digest sets; two identical loose notes collapse on heal to the later filename (#77)

@@ -388,26 +388,25 @@ def test_ambiguous_prefix_is_error(tmp_path, monkeypatch, capsys, summem):
     assert list((repo / ".summem" / "naps").glob("*.summ")) == []
 
 
-def test_nap_accepts_prefix_of_identical_notes(tmp_path, monkeypatch, capsys, summem):
-    """Two identical notes nap via the same unique prefix; the prompt is not 64-hex."""
+def test_cli_nap_identical_notes_prefix_not_adjacent(tmp_path, monkeypatch, capsys, summem):
+    """CLI nap of one id twice after heal fails; no pack is written."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
-    monkeypatch.setattr(m, "WAKE_LINES", 1)
     m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 1, tzinfo=timezone.utc), Random(1))
     m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 2, tzinfo=timezone.utc), Random(2))
     ids = [node.id for node in m.list_view(repo)]
     assert ids[0] == ids[1]
     prefix = m.short_id(ids[0], ids)
     assert len(prefix) == 8
-    prompt = m.fold_request(repo, 1)
-    assert ids[0] not in prompt
-    assert f"nap {prefix} {prefix} " in prompt
-    assert m.main(["nap", prefix, prefix, "twins"]) == 0
-    capsys.readouterr()
+    assert m.main(["nap", prefix, prefix, "twins"]) == 1
+    err = capsys.readouterr().err
+    assert "not adjacent" in err
     view = m.list_view(repo)
     assert len(view) == 1
-    assert view[0].kind == "nap"
+    assert view[0].kind == "note"
+    assert list((repo / ".summem" / "naps").glob("*.summ")) == []
+    assert list((repo / ".summem" / "naps").glob("*.tree")) == []
 
 
 def test_bare_invocation_prints_command_catalog(capsys, summem):

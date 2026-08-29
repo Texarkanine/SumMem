@@ -94,7 +94,7 @@ The children file is a JSON document: a list of exactly two children. A child is
 
 That document is deterministic for one tree: same child order, nested captions, and grouping produce the same bytes. Two agents who nap the same two loose notes with different pair bytes write different complete paths; git unions them. Wake may print two same-id rows until the next `note` or `nap`. The same leaf-set id folded in a different grouping, or with different nested captions, is the same id and different children-file bytes.
 
-Wake, recall, and zoom print a unique prefix of the id, long enough to be unambiguous in that listing. Stored leaf-set ids are 16 hex; display is that unique prefix (floor 8). Two notes with the same text share an id; they remain two view nodes. A command that looks like a positional range is rejected.
+Wake, recall, and zoom print a unique prefix of the id, long enough to be unambiguous in that listing. Stored leaf-set ids are 16 hex; display is that unique prefix (floor 8). Two notes with the same text share an id; heal keeps one (the later filename). A later note whose text already sits inside a pack is the same receipt: heal drops the loose file. A command that looks like a positional range is rejected.
 
 ## Fold
 
@@ -182,7 +182,7 @@ flowchart TD
     Kids --> Unlink["Drop the smaller nap"]
 ```
 
-Two loose notes that happen to share text are skipped. Heal runs before `nap` resolves the ids the agent passed. If heal drops one of those ids, the command fails and does not fold; the original notes still live in the survivor. Later adjacent naps whose leaf sets do not overlap still fold as usual.
+Two loose notes that share text are not skipped. Heal unlinks the older filename. Heal runs before `nap` resolves the ids the agent passed. If heal drops one of those ids, the command fails and does not fold; the original notes still live in the survivor. A fold of two view nodes with intersecting leaf sets is refused, so a pack cannot claim grain 2 for one receipt. Later adjacent naps whose leaf sets do not overlap still fold as usual.
 
 The same eight-note alphabet, two writers. Both start from the shared base `A B C D`. Writer 1 continues with letters `E F`. Writer 2 continues with numbers `1 2`.
 

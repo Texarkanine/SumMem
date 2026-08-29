@@ -266,8 +266,8 @@ def test_heal_view_returns_final_view(tmp_path, summem):
     ]
 
 
-def test_two_identical_notes_stay(tmp_path, summem):
-    """Two notes with the same text are not unlinked by leaf-set helpers."""
+def test_leaf_digests_shared_for_identical_notes(tmp_path, summem):
+    """Two notes with the same text share a leaf digest before heal runs."""
     m = summem
     repo = init_repo(tmp_path / "r")
     paths = _write_notes(m, repo, ["hello", "hello"])
@@ -276,6 +276,21 @@ def test_two_identical_notes_stay(tmp_path, summem):
     assert m.leaf_digests(nodes[0]) == {digest}
     assert m.leaf_digests(nodes[1]) == {digest}
     assert paths[0].is_file() and paths[1].is_file()
+
+
+def test_heal_two_identical_notes_keeps_newer(tmp_path, summem):
+    """Two loose notes with the same text collapse on heal; the later filename remains."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    paths = _write_notes(m, repo, ["hello", "hello"], start=1)
+    m.heal_view(repo)
+    remaining = [p for p in paths if p.is_file()]
+    assert remaining == [paths[1]]
+    nodes = m.list_view(repo)
+    assert len(nodes) == 1
+    assert nodes[0].kind == "note"
+    assert nodes[0].path == paths[1]
+    assert_unique_cover(m, repo)
 
 
 def test_rematerialize_note_writes_name_and_bytes(tmp_path, summem):
@@ -573,6 +588,27 @@ def test_heal_note_covered_by_nap_dropped(tmp_path, summem):
     zoom_reaches(repo, nap.id, "A")
 
 
+def test_note_after_packed_text_is_healed_away(tmp_path, summem):
+    """A write_note of packed text is gone after heal_view; zoom still reaches the pack."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    _write_notes(m, repo, ["A", "B"], start=1)
+    ids = [n.id for n in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "ab")
+    nap = m.list_view(repo)[0]
+    later = m.write_note(
+        repo, "A", datetime(2026, 1, 1, 0, 0, 10, tzinfo=UTC), Random(10)
+    )
+    assert later.is_file()
+    m.heal_view(repo)
+    assert not later.is_file()
+    nodes = m.list_view(repo)
+    assert len(nodes) == 1
+    assert nodes[0].kind == "nap"
+    assert nodes[0].id == nap.id
+    zoom_reaches(repo, nap.id, "A")
+
+
 def test_heal_disjoint_is_noop(tmp_path, summem):
     """Disjoint packs are left unchanged."""
     m = summem
@@ -784,7 +820,7 @@ def test_cli_nap_overlapping_ids_exits_1_without_concat(tmp_path, monkeypatch, s
     assert_unique_cover(m, repo)
 
 
-def test_cli_note_text_inside_nap_exits_0_no_loose_note(tmp_path, monkeypatch, summem):
+def test_cli_note_text_inside_nap_exits_0_no_loose_note(tmp_path, monkeypatch, capsys, summem):
     """note of text already in a nap exits 0; that note does not remain in the view."""
     m = summem
     repo = init_repo(tmp_path / "r")
@@ -792,10 +828,13 @@ def test_cli_note_text_inside_nap_exits_0_no_loose_note(tmp_path, monkeypatch, s
     _write_notes(m, repo, ["A", "B"], start=1)
     ids = [n.id for n in m.list_view(repo)]
     m.write_nap(repo, ids[0], ids[1], "ab")
+    nap_id = m.list_view(repo)[0].id
     assert m.main(["note", "A"]) == 0
+    assert capsys.readouterr().out == "Saved.\n"
     nodes = m.list_view(repo)
     assert all(n.kind == "nap" for n in nodes)
     assert not any(n.kind == "note" and n.caption == "A" for n in nodes)
+    zoom_reaches(repo, nap_id, "A")
 
 
 def test_cli_invalid_nap_caption_does_not_heal(tmp_path, monkeypatch, summem):
@@ -819,16 +858,17 @@ def test_cli_invalid_nap_caption_does_not_heal(tmp_path, monkeypatch, summem):
     assert _payload_names(repo) == before
 
 
-def test_identical_notes_nappable_after_heal_view(tmp_path, summem):
-    """Two identical notes stay through heal_view and can still be napped via write_nap."""
+def test_identical_notes_collapse_after_heal_view(tmp_path, summem):
+    """Two identical notes collapse on heal_view to one view node."""
     m = summem
     repo = init_repo(tmp_path / "r")
-    _write_notes(m, repo, ["hello", "hello"], start=1)
+    paths = _write_notes(m, repo, ["hello", "hello"], start=1)
     m.heal_view(repo)
-    ids = [n.id for n in m.list_view(repo)]
-    assert len(ids) == 2
-    m.write_nap(repo, ids[0], ids[1], "twins")
-    assert all(n.kind == "nap" for n in m.list_view(repo))
+    nodes = m.list_view(repo)
+    assert len(nodes) == 1
+    assert nodes[0].kind == "note"
+    assert nodes[0].path == paths[1]
+    assert_unique_cover(m, repo)
 
 
 def test_with_store_lock_blocks_and_writes_no_lock_file(tmp_path, summem):

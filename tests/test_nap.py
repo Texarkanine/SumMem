@@ -345,23 +345,22 @@ def test_napchild_sum_empty_when_child_sum_conflict(tmp_path, summem):
     assert "a1" in out and "a2" in out
 
 
-def test_nap_two_identical_notes_by_repeated_id(tmp_path, monkeypatch, summem):
-    """Two adjacent notes with the same text share an id and can still be napped."""
+def test_nap_two_identical_notes_by_repeated_id(tmp_path, summem):
+    """After heal, one identical-text note remains; napping that id twice fails."""
     m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    m.heal_view(repo)
     ids = _ids(m, repo)
-    assert ids[0] == ids[1]
-    m.write_nap(repo, ids[0], ids[1], "twins")
+    assert len(ids) == 1
+    with pytest.raises(ValueError, match="not adjacent") as caught:
+        m.write_nap(repo, ids[0], ids[0], "twins")
+    _agent_err(str(caught.value))
     notes = [p for p in (repo / ".summem" / "notes").iterdir() if not p.name.startswith(".")]
-    assert notes == []
-    monkeypatch.setattr(m, "WAKE_LINES", 1)
-    lines = m.wake_text(repo).splitlines()
-    assert len(lines) == 1
-    assert lines[0].endswith("twins")
-    assert lines[0].startswith("x2 ")
-    assert "2026-" not in lines[0]
+    assert len(notes) == 1
+    assert list((repo / ".summem" / "naps").glob("*.tree")) == []
+    assert list((repo / ".summem" / "naps").glob("*.summ")) == []
 
 
 def _agent_err(err: str) -> None:
@@ -447,18 +446,19 @@ def test_write_nap_disjoint_adjacent_naps_still_concat(tmp_path, summem):
     assert all(isinstance(kid, m.NapChild) for kid in tree.kids)
 
 
-def test_write_nap_identical_text_notes_still_concat(tmp_path, summem):
-    """Two identical-text notes still concat; the overlap guard requires a nap."""
+def test_write_nap_identical_text_notes_rejects_overlap(tmp_path, summem):
+    """Direct write_nap of two identical-text notes raises; both notes remain."""
     m = summem
     repo = init_repo(tmp_path / "r")
-    m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
-    m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    pa = m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    pb = m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
     ids = _ids(m, repo)
-    m.write_nap(repo, ids[0], ids[1], "twins")
-    notes = [p for p in (repo / ".summem" / "notes").iterdir() if not p.name.startswith(".")]
-    assert notes == []
-    trees = list((repo / ".summem" / "naps").glob("*.tree"))
-    assert len(trees) == 1
+    with pytest.raises(ValueError, match="overlapping packs") as caught:
+        m.write_nap(repo, ids[0], ids[1], "twins")
+    _agent_err(str(caught.value))
+    assert pa.is_file() and pb.is_file()
+    assert list((repo / ".summem" / "naps").glob("*.summ")) == []
+    assert list((repo / ".summem" / "naps").glob("*.tree")) == []
 
 
 def test_write_nap_malformed_tree_raises_unreadable_pack(tmp_path, summem):

@@ -230,14 +230,12 @@ Leaving it open is a judgement, not an oversight. Rebuilding one canonical group
 
 State it plainly: **strong eventual consistency on what is remembered, and none on how it is grouped or worded.**
 
-## Where the theory leaks
+## Duplicate receipts
 
-One assumption above is doing more work than it can bear.
+A receipt loose and also inside a bundle is one receipt: throw the loose copy away. Two loose copies of one sentence are one receipt: keep the later filename.
 
-"Two notes with the same text are the same note" follows from content addressing. It is what lets heal drop a loose note it finds inside a bundle. It is also wrong about the world: an agent that records a sentence today, and an agent that recorded the same sentence in March, wrote two things, not one.
+An agent that notes that sentence again still hears `Saved.` The fact is in `L`; the new file is gone.
 
-The code half-knows this. `leafset_id` ([`summem:99`](../summem)) hashes a sorted **list** and keeps repeats, so an item's identity counts duplicates. `leaf_digests` ([`summem:582`](../summem)) returns a **set**, so overlap does not. Identity is over a [multiset](https://en.wikipedia.org/wiki/Multiset); overlap is over a set. The two disagree, and heal trusts the second.
+Two copies of one sentence are one member of `L`. Their `leaves` overlap, so they are not two blocks of a partition. Grain is the block's size, which is 1. Folding the two files would write grain 2. That fold is refused.
 
-The consequence is a live defect. A note written after its text was folded is created, then deleted by the heal that `note` itself runs, and the agent is still told the note was saved. See [#77](https://github.com/Texarkanine/SumMem/issues/77).
-
-Until that is settled, the honest version of the claim on this page is: **the store converges over the *set* of remembered notes.** Multiplicity is not preserved, and the architecture's promise that duplicate notes stay two listed items holds only while neither has been folded.
+**The store converges over the set of remembered notes.** Multiplicity is not a fact.
