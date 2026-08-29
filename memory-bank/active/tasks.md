@@ -12,7 +12,7 @@ Retarget shipped `note` membership so agents record lore and tree-affecting in-f
 - `prompt_text()` in `summem`: committed `AGENTS.md` bootstrap — note duty and stay-out. Retarget its short probe from clone work to repository work without growing into a lecture.
 - `how_to_text()` in `summem`: root-wake Usage — versioned membership. Retarget the same probe while preserving the genre list, telemetry denylist, and skip condition.
 - `AGENTS.md`: lockstep prefix with `prompt_text()`.
-- `tests/test_init.py`: bootstrap/how-to invariants. Bootstrap currently **forbids** `clone`; how-to currently **requires** `another machine`. Those pins encode the old split, not a store contract.
+- `tests/test_init.py`: bootstrap/how-to invariants. The legacy portability requirements are removed; both surfaces pin the repository-work probe. Those pins encode the agent-facing contract, not a store mechanism.
 - OptMem global rule (out of repo): constraint only — do not name it; change it only if SumMem cannot carry the test.
 
 ### Cross-Module Dependencies

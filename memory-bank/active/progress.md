@@ -105,3 +105,18 @@ Retarget SumMem ingest membership so `note` is lore plus tree-affecting in-fligh
     - The earlier build and QA records remain historical; this revision must repeat Preflight, Build, and QA
 * Insights
     - Two probe pins plus `AGENTS.md` lockstep cover both product surfaces and their committed bootstrap copy
+
+## 2026-08-28 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Preflighted Implementation Plan unit 3 (repository-wording revision); units 1-2 already shipped and QA-passed
+    - Grepped the tree for the membership phrase: exactly three shipped occurrences (`summem` x2, `AGENTS.md`), all named by the plan
+    - Hand-checked the proposed strings against every surviving assertion in `tests/test_init.py:75-167`; all hold, sentence count unchanged (3 bootstrap, 4 how-to)
+    - Confirmed the how-to `clone` assertion must be removed: after rewording, `how_to_text()` has no other occurrence of "clone"
+* Decisions made
+    - `.preflight-status` first line: `PASS WITH ADVISORY`
+    - Corrected the Component Analysis's stale description of the already-retargeted how-to assertion; TDD order needs no change
+* Insights
+    - Unit 3's red-step prediction is precise this time (two probe pins only, not lockstep) - the reflection's complaint is fixed in the revised plan
+    - The stale Component Analysis assertion description was corrected; the older store note remains stale by design because constraint 7 forbids rewriting it
+    - Radical (advisory, third appearance): this is the second wording pass hand-editing the same sentence in two f-strings, which is the drift evidence for hoisting `MEMBERSHIP_PROBE` into one constant both surfaces interpolate

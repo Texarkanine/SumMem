@@ -1,13 +1,14 @@
 # Active Context
 
 ## Current Task: note-membership
-**Phase:** PLAN - COMPLETE
+**Phase:** PREFLIGHT - COMPLETE
 
 ## What Was Done
 - Built Option A membership wording; QA PASS
 - Reflected: preflight body-check made build a copy step; two-surface probe is still two literals (advisory carried, not applied)
 - Reopened after PR feedback: “this clone” ambiguously implies a shared checkout; creative selected “work on this repository”
 - Revised the plan for the wording-only change: both functions, `AGENTS.md`, and targeted init invariants change; no store behavior changes
+- Preflight passed with a shared-constant advisory; corrected one stale Component Analysis sentence
 
 ## Next Step
-- Preflight the repository-wording revision
+- Invoke `/niko-build` to implement the preflighted revision
