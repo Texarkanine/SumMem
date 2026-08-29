@@ -1,11 +1,12 @@
 # Active Context
 
 ## Current Task: entry-gate-split
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Intent restated and approved: implement the disjoint split in `memory-bank/active/creative/creative-entry-gate-split.md` on `who-gates-entry`.
-- Classified Level 2: self-contained enhancement of the existing agent prompt contract. Design already decided in standalone creative. No store, CLI, or algorithm change. Two prompt functions, init wrapper, tests, lockstep prefix, briefing.
+- Intent approved; classified Level 2.
+- Plan: TDD on `tests/test_init.py` (retarget invariants, move writer-only pins onto how-to, add disjointness, extend init recipe); then rewrite `prompt_text` / `how_to_text` / `init_text` and the `AGENTS.md` prefix; then briefing (`systemPatterns.md`, architecture change-surface + invariant honesty, `productContext.md`, README Quick Start).
+- Creative already resolved; no open question for `/niko-creative`.
 
 ## Next Step
-- Load the Level 2 workflow and execute Plan.
+- Preflight validation.
