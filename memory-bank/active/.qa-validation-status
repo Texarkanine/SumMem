@@ -1,0 +1,15 @@
+# QA Validation Status
+
+✅ PASS — 2026-08-29
+
+## Findings
+
+- The three retargeted tests now have names and docstrings that state their asserted behavior: duplicate notes collapse after heal, direct duplicate napping is rejected, and a repeated id is not adjacent.
+- `test_leaf_digests_shared_for_identical_notes` now explicitly pins only the pre-heal digest property.
+- The Duplicate receipts section is coherent and accurately connects `leafset_id`'s list-based hash with `leaf_digests`' set-based overlap detection.
+- The planted duplicate-child zoom and recall tests identify their compatibility purpose: old packs remain readable even though new duplicate packs are refused.
+- No blocking KISS, DRY, YAGNI, completeness, regression, integrity, or documentation issues remain.
+
+## Verification
+
+- `uvx --with tox tox run-parallel`: py311 and py314 passed; py312 and py313 skipped because their interpreters are unavailable.

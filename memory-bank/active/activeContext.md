@@ -1,13 +1,12 @@
 # Active Context
 
 ## Current Task: heal-same-text
-**Phase:** BUILD - COMPLETE (QA rework)
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
-- Renamed `test_write_nap_identical_text_notes_rejects_overlap`, `test_cli_nap_identical_notes_prefix_not_adjacent`, `test_identical_notes_collapse_after_heal_view`.
-- Renamed `test_leaf_digests_shared_for_identical_notes` and scoped its docstring to `leaf_digests` before heal.
-- Rewrote the Duplicate receipts closer in `docs/theory.md` to name `leafset_id` vs `leaf_digests`.
-- Planted zoom/recall duplicate-date tests now say they cover pre-change packs.
+- Re-reviewed the QA rework; all earlier blocking test-name, docstring, and theory-prose findings are resolved.
+- Confirmed the implementation remains aligned with `L` as a set of facts and the shoebox decision.
+- Full available tox matrix passed: py311 and py314; py312 and py313 skipped because their interpreters are unavailable.
 
 ## Next Step
-- QA re-run.
+- Run `/niko-reflect`.

@@ -139,6 +139,10 @@ Production diff (4 lines) is clean: KISS/DRY/YAGNI, no debris, all four acceptan
 
 Advisories (non-blocking): `overlapping packs` wording for two loose notes is CLI-unreachable (both mutating commands heal first) and was a permitted plan choice; the planted-tree zoom/recall duplicate-date tests should say they cover pre-change packs. Full detail in `memory-bank/active/.qa-validation-status`.
 
+## QA Findings (2026-08-29 — PASS)
+
+The QA rework resolved all three blockers. Test names and docstrings now match their assertions, `docs/theory.md` coherently names the list-vs-set asymmetry between `leafset_id` and `leaf_digests`, and compatibility tests explicitly plant pre-change duplicate-child packs. No blocking semantic findings remain. `uvx --with tox tox run-parallel` passed on py311 and py314; py312 and py313 skipped because those interpreters are unavailable.
+
 ## Status
 
 - [x] Component analysis complete
@@ -151,4 +155,4 @@ Advisories (non-blocking): `overlapping packs` wording for two loose notes is CL
 - [x] Build
 - [x] QA (FAIL 2026-08-29 — build rework: 3 blocking findings)
 - [x] Build (rework: renamed 3 tests, scoped leaf_digests pin, theory sentence)
-- [ ] QA (re-run)
+- [x] QA (PASS 2026-08-29)
