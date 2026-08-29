@@ -1,1 +1,0 @@
-PR checks are .github/workflows/pr.yaml (tox py311-py314). Main CI is .github/workflows/ci.yaml (same matrix plus coverage upload).

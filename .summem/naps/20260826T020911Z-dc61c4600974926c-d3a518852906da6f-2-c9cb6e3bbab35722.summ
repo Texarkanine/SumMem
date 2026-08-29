@@ -1,0 +1,1 @@
+Local tox: run-parallel, session fixture. PR CI is .github/workflows/pr.yaml (py311–py314); main is ci.yaml plus coverage. tox-speedup archived; PR #65 closed #63.
