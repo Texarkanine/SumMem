@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: note-membership
-**Phase:** PREFLIGHT - COMPLETE
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
 - Built Option A membership wording; QA PASS
@@ -9,6 +9,7 @@
 - Reopened after PR feedback: “this clone” ambiguously implies a shared checkout; creative selected “work on this repository”
 - Revised the plan for the wording-only change: both functions, `AGENTS.md`, and targeted init invariants change; no store behavior changes
 - Preflight passed with a shared-constant advisory; corrected one stale Component Analysis sentence
+- Applied `MEMBERSHIP_PROBE` to both prompt functions, updated `AGENTS.md` lockstep and init invariants, and passed the full supported matrix
 
 ## Next Step
-- Invoke `/niko-build` to implement the preflighted revision
+- QA review

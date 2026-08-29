@@ -257,6 +257,7 @@ ENTRY_CHARS = 280
 WAKE_LINES = 32
 CLI_NAME = "summem"
 AGENT_BIN = ".summem/summem"
+MEMBERSHIP_PROBE = "another contributor needs to work on this repository"
 __version__ = "0.10.0"  # x-release-please-version
 
 CONFIG_TEMPLATE = """\
@@ -1182,7 +1183,7 @@ def how_to_text() -> str:
     return f"""\
 == SumMem Usage ==
 
-`{AGENT_BIN} note "…"` records one short line another contributor needs in order to work in this clone: gotchas, norms, failed approaches, unfinished work that occupies the tree. Not that a PR opened, checks passed, or a task archived. Personal, machine-local, and user preference facts stay out. Skip if nothing qualifies or it is already remembered.
+`{AGENT_BIN} note "…"` records one short line {MEMBERSHIP_PROBE}: gotchas, norms, failed approaches, unfinished work that occupies the tree. Not that a PR opened, checks passed, or a task archived. Personal, machine-local, and user preference facts stay out. Skip if nothing qualifies or it is already remembered.
 
 If `note` asks for a nap, the note is already stored; do not retry the same note. The nap is extra work on two older view nodes. Do that nap before your next action.
 
@@ -1205,7 +1206,7 @@ Run `{AGENT_BIN} wake` from the repository root. If you can see a prior project-
 
 ## While Working: Register Memories (mandatory)
 
-`{AGENT_BIN} note "…"` records one short line another contributor needs in order to work in this clone. Personal, machine-local, and user preference facts stay out. `note` may sometimes print further instructions; always follow them.
+`{AGENT_BIN} note "…"` records one short line {MEMBERSHIP_PROBE}. Personal, machine-local, and user preference facts stay out. `note` may sometimes print further instructions; always follow them.
 
 Never invent filenames, rewrite note bytes, or delete memory files by hand. The script is the only writer. The files it writes are part of your work; do not leave them untracked.
 """

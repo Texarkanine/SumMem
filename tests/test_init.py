@@ -95,7 +95,7 @@ def test_prompt_text_invariants(summem):
     assert "AGENTS.md or CLAUDE.md" not in prompt
     assert "./summem/summem" not in prompt
     assert "must still be true after a fresh clone" not in prompt
-    assert "work in this clone" in lower
+    assert "work on this repository" in lower
     assert "another machine" not in lower
     assert "x1 YYYY-MM-DD" not in prompt
     assert "prior **root** SumMem wake" not in prompt
@@ -137,8 +137,7 @@ def test_how_to_text_is_the_usage_section(summem):
     assert "note" in lower
     assert "already stored" in lower
     assert "do not retry" in lower
-    assert "clone" in lower
-    assert "work in this clone" in lower
+    assert "work on this repository" in lower
     assert "x1 YYYY-MM-DD" in text
     assert "zoom" in lower
     assert "zoom target" in lower

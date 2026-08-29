@@ -120,3 +120,15 @@ Retarget SumMem ingest membership so `note` is lore plus tree-affecting in-fligh
     - Unit 3's red-step prediction is precise this time (two probe pins only, not lockstep) - the reflection's complaint is fixed in the revised plan
     - The stale Component Analysis assertion description was corrected; the older store note remains stale by design because constraint 7 forbids rewriting it
     - Radical (advisory, third appearance): this is the second wording pass hand-editing the same sentence in two f-strings, which is the drift evidence for hoisting `MEMBERSHIP_PROBE` into one constant both surfaces interpolate
+
+## 2026-08-28 - BUILD - COMPLETE
+
+* Work completed
+    - Retargeted both membership pins to “work on this repository” and removed the obsolete how-to `clone` requirement
+    - Added `MEMBERSHIP_PROBE` and interpolated it in `prompt_text()` and `how_to_text()`; refreshed the `AGENTS.md` bootstrap
+    - Ran the targeted red/green tests, all `tests/test_init.py` tests, and the full supported tox matrix
+* Decisions made
+    - Applied the preflight shared-constant advisory because a second wording revision demonstrated the predicted drift risk
+    - Kept literal output assertions so the agent-facing membership wording remains explicitly tested
+* Insights
+    - `MEMBERSHIP_PROBE` structurally keeps the two prompt surfaces aligned; the existing `AGENTS.md` lockstep test covers the bootstrap copy

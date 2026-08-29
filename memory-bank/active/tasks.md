@@ -85,12 +85,12 @@ Retarget shipped `note` membership so agents record lore and tree-affecting in-f
 
 - Files: `tests/test_init.py`, `summem` (`prompt_text`, `how_to_text`), `AGENTS.md`
 - Creative ref: `memory-bank/active/creative/creative-membership-subject-wording.md`
-- [ ] Planned
+- [x] Complete
 
 1. Stub tests: no new cases. Leave `prompt_text()` / `how_to_text()` signatures unchanged.
 2. Stub interface: none.
 3. Write tests and run red: retarget both `work in this clone` probes to `work on this repository`; remove the how-to assertion requiring `clone`. Run the three affected init tests and confirm the two probe assertions fail before changing shipped text.
-4. Write code and run green: replace the phrase in both functions and copy `prompt_text()` into `AGENTS.md`; rerun the targeted init tests, then the prescribed full suite.
+4. Write code and run green: define a private `MEMBERSHIP_PROBE` constant with the repository-work phrase and interpolate it in both functions; copy `prompt_text()` into `AGENTS.md`; retain literal output assertions for the agent-facing wording. Rerun the targeted init tests, then the prescribed full suite.
 
 ## Technology Validation
 
@@ -121,8 +121,8 @@ No new technology - validation not required
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
-- [ ] Build
+- [x] Preflight
+- [x] Build
 - [ ] QA
 
 ## QA Results
