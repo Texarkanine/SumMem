@@ -45,8 +45,8 @@ Saved.
 Compress these two into one line of at most 280 characters.
 Keep what has lasting effect, drop what does not. Invent nothing.
 
-  x1 2026-08-19: g
-  x1 2026-08-19: h
+  g
+  h
 
 Run: .summem/summem nap --path dogfood 3fc87382 fa6da6a9 "<your line>"
 ```
