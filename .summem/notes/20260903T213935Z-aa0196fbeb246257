@@ -1,0 +1,1 @@
+Root wake omits catalog how-to when no nested stores exist; operator -h still documents --path.

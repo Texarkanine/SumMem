@@ -1166,14 +1166,15 @@ def require_python(version_info: tuple[int, ...] = sys.version_info) -> None:
         raise SystemExit(1)
 
 
-def how_to_text() -> str:
+def how_to_text(*, catalog: bool = False) -> str:
     """Return the versioned agent how-to section printed on root wake.
 
     The section includes its ``== SumMem Usage ==`` header and a trailing
     newline, matching ``catalog_text()``. It is not the operator ``-h``
-    catalog from ``usage_text()``.
+    catalog from ``usage_text()``. When *catalog* is true, append how to
+    read catalog lines and pull with ``wake --path``.
     """
-    return f"""\
+    text = f"""\
 == SumMem Usage ==
 
 `{AGENT_BIN} note "…"` records one short line.
@@ -1183,9 +1184,14 @@ Never invent filenames, rewrite note bytes, or delete memory files by hand. The 
 If `note` asks for a nap, the note is already stored; do not retry the same note. The nap is extra work on two older view nodes. Do that nap before your next action.
 
 `{AGENT_BIN} recall <regex>` searches remembered text word for word. `{AGENT_BIN} zoom <id>` opens a pack: a line with an `x<N> <hash>:` prefix is a nap that can be zoomed in on. A leaf is `x1 YYYY-MM-DD:` and is not a zoom target.
-
-Listed catalog lines are paths that name other stores; they are not commands. When you work under a cataloged path, run `{AGENT_BIN} wake --path <path>` if that store's wake is not already in this conversation. Ignore `--path` if the root wake had no catalog.
 """
+    if catalog:
+        text += (
+            "\nListed catalog lines are paths that name other stores; they are not commands. "
+            f"When you work under a cataloged path, run `{AGENT_BIN} wake --path <path>` "
+            "if that store's wake is not already in this conversation.\n"
+        )
+    return text
 
 
 def prompt_text() -> str:
@@ -1331,7 +1337,7 @@ def main(argv: list[str] | None = None) -> int:
         footer = "You are up to speed.\n"
         body = ""
         if is_root:
-            body += how_to_text()
+            body += how_to_text(catalog=bool(cat))
         if cat:
             if body:
                 body += "\n"
