@@ -1,1 +1,0 @@
-Each tox env is pytest -n auto --maxprocesses=4; coverage stays serial; 0 serial markers; PR #66 closes #64.

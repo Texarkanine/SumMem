@@ -1,0 +1,12 @@
+PASS
+QA - wake-omit-empty-catalog - 2026-09-03
+
+Scope reviewed: commits a69169a..fc6a783, files `summem`, `tests/test_init.py`, `tests/test_scopes.py`.
+
+Requirements: all three met. Empty-catalog root wake prints no catalog text (`how_to_text()` default); cataloged root wake still teaches catalog lines and `wake --path` (`how_to_text(catalog=True)`); `usage_text()` and `prompt_text()` untouched, so operator help and `AGENTS.md` still document `--path`.
+
+Advisories (non-blocking):
+1. `memory-bank/systemPatterns.md` line 5 still lists "catalog pull" as unconditional content of `how_to_text`. Now conditional. Surgical fix belongs to the Level 1 wrap-up `reconcile-persistent` step.
+2. `tests/test_init.py::test_prompt_and_how_to_are_disjoint` gained catalog/`wake --path` negative assertions already pinned by `test_how_to_text_is_the_usage_section` and `test_how_to_text_catalog_is_opt_in`. Off-topic for a disjointness test; harmless.
+
+Verification: `tox -e py311 -- tests/test_init.py tests/test_scopes.py -n0` — 43 passed.
