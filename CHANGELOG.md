@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.1](https://github.com/Texarkanine/SumMem/compare/v0.11.0...v0.11.1) (2026-09-03)
+
+
+### Bug Fixes
+
+* **cli:** omit catalog how-to from empty-catalog wake ([#82](https://github.com/Texarkanine/SumMem/issues/82)) ([a1d703a](https://github.com/Texarkanine/SumMem/commit/a1d703a23e7c0cb687817a09e3d88393d9308437))
+
 ## [0.11.0](https://github.com/Texarkanine/SumMem/compare/v0.10.1...v0.11.0) (2026-08-29)
 
 
