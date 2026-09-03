@@ -134,8 +134,8 @@ def test_how_to_text_is_the_usage_section(summem):
     assert "zoom" in lower
     assert "zoom target" in lower
     assert "recall" in lower
-    assert "wake --path" in text
-    assert "catalog" in lower
+    assert "wake --path" not in text
+    assert "catalog" not in lower
     assert "git" not in lower
     assert "notes/" not in text
     assert "naps/" not in text
@@ -175,11 +175,26 @@ def test_prompt_and_how_to_are_disjoint(summem):
         "invent filenames",
         "the only writer",
         "part of your work",
-        "wake --path",
         "x1 yyyy-mm-dd",
     ):
         assert phrase in how_to
         assert phrase not in lower
+    assert "wake --path" not in how_to
+    assert "wake --path" not in lower
+    assert "catalog" not in how_to
     assert f"{m.AGENT_BIN} note" not in prompt
     assert f"{m.AGENT_BIN} nap" not in prompt
     assert "== SumMem Usage ==" not in prompt
+
+
+def test_how_to_text_catalog_is_opt_in(summem):
+    """Default Usage omits catalog how-to; catalog=True appends the pull recipe."""
+    m = summem
+    base = m.how_to_text()
+    cataloged = m.how_to_text(catalog=True)
+    assert "catalog" not in base.lower()
+    assert "wake --path" not in base
+    assert "Listed catalog lines" in cataloged
+    assert f"{m.AGENT_BIN} wake --path <path>" in cataloged
+    assert cataloged.startswith(base)
+    assert "had no catalog" not in cataloged

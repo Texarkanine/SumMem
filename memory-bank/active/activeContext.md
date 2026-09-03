@@ -1,11 +1,13 @@
 # Active Context
 
 ## Current Task: wake-omit-empty-catalog
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Intent confirmed: omit catalog how-to from root wake when the catalog is empty; keep it when catalogs exist; leave operator help unchanged.
-- Complexity: Level 1. Misleading/wasteful wake output on a single surface (`how_to_text` + catalog assembly). Operator help is out of scope. No architectural choice.
+- Root wake with no other stores no longer mentions catalogs or `wake --path`.
+- Root wake with catalogs still teaches catalog lines and `wake --path` via `how_to_text(catalog=True)`.
+- Dropped “Ignore `--path` if the root wake had no catalog.”
+- `tox -e py311`: 373 passed, 1 skipped.
 
 ## Next Step
-- Load the Level 1 workflow and go to Build.
+- QA phase (`/niko-qa`).

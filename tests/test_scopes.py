@@ -306,8 +306,10 @@ def test_empty_root_omits_project_root_header(tmp_path, monkeypatch, capsys, sum
     capsys.readouterr()
     assert m.main(["wake"]) == 0
     out = capsys.readouterr().out
-    assert out == m.how_to_text() + "\n" + m.catalog_text(repo, repo) + "You are up to speed.\n"
+    assert out == m.how_to_text(catalog=True) + "\n" + m.catalog_text(repo, repo) + "You are up to speed.\n"
     assert "== Project-root Memories ==" not in out
+    assert "Listed catalog lines" in out
+    assert f"{m.AGENT_BIN} wake --path <path>" in out
 
 
 def test_root_wake_starts_with_usage(tmp_path, monkeypatch, capsys, summem):
@@ -321,6 +323,8 @@ def test_root_wake_starts_with_usage(tmp_path, monkeypatch, capsys, summem):
     assert out.startswith("== SumMem Usage ==")
     assert "== Project-root Memories ==" not in out
     assert "== Additional SumMem Catalogs ==" not in out
+    assert "catalog" not in out.lower()
+    assert "wake --path" not in out
 
 
 def test_pull_wake_omits_usage(tmp_path, monkeypatch, capsys, summem):
@@ -353,6 +357,8 @@ def test_root_wake_catalogs_other_store(tmp_path, monkeypatch, capsys, summem):
     assert "./pkg" in out
     assert "== Additional SumMem Catalogs ==" in out
     assert "== Project-root Memories ==" in out
+    assert "Listed catalog lines" in out
+    assert f"{m.AGENT_BIN} wake --path <path>" in out
     catalog = _catalog_section(out)
     assert "summem wake --path pkg" not in catalog
     assert "notes/" not in out
@@ -500,6 +506,8 @@ def test_root_only_wake_labels_nonempty_document(tmp_path, monkeypatch, capsys, 
         + "You are up to speed.\n"
     )
     assert "== Additional SumMem Catalogs ==" not in out
+    assert "catalog" not in out.lower()
+    assert "wake --path" not in out
 
 
 def test_started_stores_includes_root_and_other_parents(tmp_path, summem):
