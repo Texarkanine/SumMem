@@ -64,3 +64,13 @@ Rework of PR #84: `init` always says `python .summem/summem wake`; wake Usage/`R
     - Windows Usage/`Run:` use unquoted `python .summem/summem`, not `sys.executable`.
 * Insights
     - `python .summem/summem note` contains `.summem/summem note`; Windows tests cannot forbid that substring.
+
+## 2026-09-10 - PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+
+* Work completed
+    - Verified TDD ordering, convention compliance, dependency impact (checked `test_scopes.py`, `test_surgery.py`, `test_fold.py`, README for hidden touchpoints beyond the plan's file list), conflict detection, and completeness against `projectbrief.md`.
+* Decisions made
+    - No plan edits required beyond the already-scheduled TDD ordering; no change-detector strikes needed.
+* Insights
+    - Requirement 4 (push the branch) has no scheduled step; tracked as advisory, not a blocking gap.
+    - Radical-innovation advisory: a `cmd`/POSIX polyglot launcher would remove the need for `agent_invoke()`'s host branch entirely; recorded, not applied.
