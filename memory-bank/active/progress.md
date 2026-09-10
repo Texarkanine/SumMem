@@ -36,3 +36,18 @@ Audit SumMem for native Windows incompatibilities. List each finding with a reco
     - Preserve the no-store-lock-file contract in any later Windows port
 * Insights
     - Native Windows risk is concentrated in `fcntl` directory locking, Unix-style direct invocation, symlink setup, and POSIX-specific test assumptions; the plan schedules code evidence and CMD probes before drawing conclusions about other APIs
+
+## 2026-09-09 - BUILD - COMPLETE
+
+* Work completed
+    - Probed native CPython 3.13.3: `version`/`wake`/`start`/`recall` OK; `note` traceback on `import fcntl`; directory `os.open` PermissionError; `msvcrt.locking` OK; shebang exec WinError 193; `python` + no-suffix path OK including `.summem/summem` and `C:\…\summem`
+    - Wrote `memory-bank/active/windows-compat-findings.md`; `docs/notes.md` “Not this host”
+* Decisions made
+    - Lock file for Windows lives in an OS runtime dir, not `.summem/`
+    - `AGENTS.md` stays clone-portable; Usage/`Run:` may print `sys.executable` on Windows
+    - Path resolution is not the hole: pathlib and `--path` accept `C:\` and both slash styles
+* Insights
+    - OptMem’s `msvcrt` + `"a"` lock is the right mechanism; their lock *location* is not
+    - Git for Windows `ls-files` already uses `/`; `as_posix()` on fold `--path` is fine
+    - No `.gitattributes` is a digest-corruption risk under `core.autocrlf=true` even though this machine has `false`
+

@@ -22,7 +22,10 @@ No new executable behavior.
 
 ## Implementation Plan
 
-### 1. Inventory POSIX surfaces — prose/policy
+### 1. Inventory POSIX surfaces — prose/policy — done
+
+- Files: `summem`, `surgery.py`, `migrate.py`, `tests/`, `README.md`, `AGENTS.md`, `memory-bank/techContext.md`
+- No tests: prose/policy artifact
 
 - Files: `summem`, `surgery.py`, `migrate.py`, `tests/`, `README.md`, `AGENTS.md`, `memory-bank/techContext.md`
 - No tests: prose/policy artifact
@@ -31,7 +34,7 @@ No new executable behavior.
 2. Classify each hit as product-command failure, test-only failure, or docs/invocation-only.
 3. Record candidates in `memory-bank/active/windows-compat-findings.md` as an inventory draft (severity only; resolutions come in unit 4).
 
-### 2. Probe native Windows CMD — prose/policy
+### 2. Probe native Windows CMD — prose/policy — done
 
 - Files: none in-repo (read-only probes from WSL)
 - No tests: prose/policy artifact
@@ -41,7 +44,7 @@ No new executable behavior.
 3. If the Windows interpreter can see this checkout (for example `\\wsl$\…`), run `python summem version` and one mutating command against a throwaway git repo; if it cannot, record that limit and do not treat WSL success as Windows success.
 4. Append probe evidence to the findings draft. Distinguish proven-on-this-machine from code-certain.
 
-### 3. Compare OptMem fallbacks — prose/policy
+### 3. Compare OptMem fallbacks — prose/policy — done
 
 - Files: OptMem `WINDOWS.md` and `locked()` (already fetched); SumMem `with_store_lock` and `test_with_store_lock_blocks_and_writes_no_lock_file`
 - No tests: prose/policy artifact
@@ -49,7 +52,7 @@ No new executable behavior.
 1. Map OptMem’s Windows path (`fcntl` optional, `msvcrt` on a `.lock` file opened `"a"`, spin/backoff) onto SumMem’s contract: same-machine flock of `naps/` is not a committed object; tests assert no lock file appears.
 2. Note where a naive copy would violate that contract (committed or leftover `.lock`) and where the mechanism (advisory lock + spin) is still the right idea.
 
-### 4. Write findings with resolutions — prose/policy
+### 4. Write findings with resolutions — prose/policy — done
 
 - Files: `memory-bank/active/windows-compat-findings.md`, `docs/notes.md`
 - No tests: prose/policy artifact
@@ -88,6 +91,6 @@ No new technology - validation not required
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
-- [ ] Build
+- [x] Preflight
+- [x] Build
 - [ ] QA

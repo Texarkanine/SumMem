@@ -7,6 +7,10 @@ Things that are not true of the tree yet, and that we did not replace with a dif
 - A second on-disk backend (sqlite or otherwise). The agent commands stay the same if that happens. Store roles in [Architecture](architecture/index.md) must still exist.
 - Harness hooks as the way memory loads. They may nag. Session start is still the `AGENTS.md` bootstrap and a root `wake`.
 
+## Not this host
+
+- Native Windows. Python runs the no-suffix driver; `note` / `nap` / surgery still take a POSIX directory flock. Committed `AGENTS.md` stays clone-portable (no `C:\…`, no `python` vs shebang). Runtime Usage may print a host-specific invoke. Resolutions: the windows-compat-audit findings (archived with that task).
+
 ## Not this fold
 
 - OptMem’s aligned `cover(T)` after merge: tile the sorted leaf sequence with aligned power-of-two blocks and rebuild `[0, 8192)` over interleaved pasts. This backend requests equal-grain adjacent **view nodes** and may expand a nap in memory when the view is short. After a long-lived merge it does not re-cover. [Theory](theory.md) argues why leaving the cut unconverged is safe.

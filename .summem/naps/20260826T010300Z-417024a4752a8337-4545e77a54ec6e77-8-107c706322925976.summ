@@ -1,0 +1,1 @@
+Local tox: run-parallel, session fixture, no --basetemp; env pytest -n auto --maxprocesses=4; coverage serial. PR CI is pr.yaml py311–py314; main is ci.yaml plus coverage. #65/#66 closed #63/#64.
