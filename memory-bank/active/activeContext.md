@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: windows-compat-review
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
 - Item 1: `_with_runtime_lock` uses `time.monotonic() + 30` and clamps sleep to remaining; backoff still `min(0.01 + waited * 0.2, 0.25)`.
@@ -10,4 +10,4 @@
 - `tox -e py311`: 388 passed.
 
 ## Next Step
-- Level 1 QA subagent.
+- QA accepted the rework. Stop after this phase.

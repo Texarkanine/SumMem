@@ -25,3 +25,13 @@ Rework of PR #84: monotonic 30s `msvcrt` lock deadline, host-pinned invoke tests
     - Pin the host check, not `os.name`.
 * Insights
     - The red test saw `sum(sleeps) == 735.48` before the deadline fix.
+
+## 2026-09-10 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Reviewed the lock-deadline fix and host-pinned output assertions against the project brief.
+    - Verified `uvx --with tox tox -e py311`: 388 passed.
+* Decisions made
+    - Accepted the rework as-is; no Build or Plan rerun is required.
+* Insights
+    - The fake monotonic-clock test exercises the exact elapsed-time boundary without relying on a Windows host.
