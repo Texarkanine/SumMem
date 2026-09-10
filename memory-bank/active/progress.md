@@ -62,3 +62,14 @@ Audit SumMem for native Windows incompatibilities. List each finding with a reco
 * Insights
     - All five acceptance criteria in `projectbrief.md` map to a specific findings section or table; none are left implicit
 
+## 2026-09-09 - REFLECT - COMPLETE
+
+* Work completed
+    - Reflection at `memory-bank/active/reflection/reflection-windows-compat-audit.md`
+    - Reconciled persistent files: no edits
+* Decisions made
+    - Standalone task: next is `/niko-archive`
+* Insights
+    - Pathlib path resolution was a false lead; lock target vs OptMem mechanism is the design that a later port must not mix up
+
+
