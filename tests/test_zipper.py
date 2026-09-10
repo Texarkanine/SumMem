@@ -1039,7 +1039,7 @@ def test_with_store_lock_msvcrt_retry_deadline_is_elapsed(tmp_path, monkeypatch,
         m.with_store_lock(repo, lambda: None)
     assert sleeps
     assert all(d <= 0.25 for d in sleeps)
-    assert sum(sleeps) <= 30.0
+    assert sum(sleeps) <= 30.0 + 1e-9
 
 
 def test_cli_note_lock_fallback_has_no_traceback(tmp_path, monkeypatch, capsys, summem):
