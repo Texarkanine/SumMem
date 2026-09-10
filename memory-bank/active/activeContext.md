@@ -1,11 +1,10 @@
 # Active Context
 
 ## Current Task: windows-compat-review
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Rework initiated from native Windows PowerShell/CMD feedback.
-- Complexity Level 2: init always prints a portable `python .summem/summem wake`; wake Usage/`Run:` stay host-specific (`python ` prefix on Windows, bare on *nix). Revises the windows-compat bootstrap contract (`sys.executable`, Unix-only AGENTS.md wake).
+- Planned: portable `python .summem/summem wake` in `prompt_text`/`init`; host-specific `agent_invoke()` (`python ` prefix on Windows); drop `sys.executable` and the Windows init warning; lockstep `AGENTS.md`.
 
 ## Next Step
-- Load the Level 2 workflow and enter Plan.
+- Preflight, then Build.

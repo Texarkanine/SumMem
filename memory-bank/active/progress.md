@@ -53,3 +53,14 @@ Rework of PR #84: `init` always says `python .summem/summem wake`; wake Usage/`R
     - Enhancement tree, self-contained: `prompt_text` / `init_text` / `agent_invoke` / lockstep `AGENTS.md`. Not a bug fix.
 * Insights
     - Operator specified both recipes; remaining work is lockstep and dropping `sys.executable`, not exploring hosts.
+
+## 2026-09-10 - PLAN - COMPLETE
+
+* Work completed
+    - Test plan: bootstrap wake, host-agnostic init, POSIX vs Windows `agent_invoke`, fold `Run:`, AGENTS.md lockstep.
+    - Implementation: retarget `tests/test_init.py` / `tests/test_fold.py`, then `summem` + `AGENTS.md`, then briefing/notes.
+* Decisions made
+    - Wake handoff in `prompt_text` is always `python .summem/summem wake`. Intro may still name `{AGENT_BIN}`.
+    - Windows Usage/`Run:` use unquoted `python .summem/summem`, not `sys.executable`.
+* Insights
+    - `python .summem/summem note` contains `.summem/summem note`; Windows tests cannot forbid that substring.
