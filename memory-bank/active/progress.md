@@ -51,3 +51,14 @@ Audit SumMem for native Windows incompatibilities. List each finding with a reco
     - Git for Windows `ls-files` already uses `/`; `as_posix()` on fold `--path` is fine
     - No `.gitattributes` is a digest-corruption risk under `core.autocrlf=true` even though this machine has `false`
 
+## 2026-09-09 - QA - COMPLETE
+
+* Work completed
+    - Semantic review of `windows-compat-findings.md`, `docs/notes.md`, and the memory-bank tracking files against `projectbrief.md` and the Pre-Mortem
+    - Confirmed via `git diff` that no product file (`summem`, `surgery.py`, `migrate.py`, `tests/`, `README.md`, `AGENTS.md`, `memory-bank/techContext.md`) changed during Build
+* Decisions made
+    - QA status: PASS
+    - One advisory: unit 1 in `tasks.md` has a duplicated "Files:"/"No tests:" block from the "— done" edit; cosmetic, non-blocking, left for archive or a trivial fix
+* Insights
+    - All five acceptance criteria in `projectbrief.md` map to a specific findings section or table; none are left implicit
+

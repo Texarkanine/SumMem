@@ -27,9 +27,6 @@ No new executable behavior.
 - Files: `summem`, `surgery.py`, `migrate.py`, `tests/`, `README.md`, `AGENTS.md`, `memory-bank/techContext.md`
 - No tests: prose/policy artifact
 
-- Files: `summem`, `surgery.py`, `migrate.py`, `tests/`, `README.md`, `AGENTS.md`, `memory-bank/techContext.md`
-- No tests: prose/policy artifact
-
 1. Scan the driver and helpers for POSIX-only APIs and invocation: `fcntl` / `with_store_lock`, `os.open` on `naps/`, shebang, `AGENT_BIN`, `git` subprocess, `Path.as_posix` vs git output, `.git` detection, `os.replace`, symlink driver, executable bit.
 2. Classify each hit as product-command failure, test-only failure, or docs/invocation-only.
 3. Record candidates in `memory-bank/active/windows-compat-findings.md` as an inventory draft (severity only; resolutions come in unit 4).
@@ -93,4 +90,12 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
+
+## QA Results
+
+**Status:** PASS
+
+- Deliverable (`memory-bank/active/windows-compat-findings.md`, `docs/notes.md` "Not this host" bullet) satisfies all five acceptance criteria in `projectbrief.md`: exhaustive product/test/docs-only breakdown, a resolution plus optimality argument per finding, OptMem used as evidence rather than transplanted (locking *mechanism* endorsed, *target* rejected), native-CMD probes distinguished from code-certain claims, and no product code touched.
+- Pre-Mortem traps avoided: WSL is never treated as Windows (probes used `C:\Python313\python.exe`, not the WSL interpreter); no OptMem-style `.lock` is proposed inside the store; invocation/docs surfaces are inventoried, not just `flock`; no Windows port shipped.
+- Advisory (non-blocking): unit 1's "Files:"/"No tests:" lines were accidentally duplicated when `— done` was appended to the section header. Fixed before reflect.
