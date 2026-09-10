@@ -1,0 +1,28 @@
+PASS
+
+## KISS
+PASS. `agent_invoke()`'s nt branch collapsed from a quoted `sys.executable` interpolation to a plain `f"python {AGENT_BIN}"`; `init_text()` dropped its conditional Windows-warning branch entirely, returning one unconditional string. Both changes reduce branching, not add it.
+
+## DRY
+PASS. No new helper or duplicated logic. `prompt_text()`'s wake line and `agent_invoke()`'s Windows prefix are both hardcoded to `python`, matching the projectbrief's explicit choice to skip `_host_needs_interpreter()` in the bootstrap.
+Advisory: `tests/test_init.py::test_init_text_posix_has_no_windows_warning` is now fully subsumed by the new `test_init_text_is_host_agnostic` (which proves `windows == posix`, so every assertion the older POSIX-only test makes was already established). This predates the rework and the plan explicitly said "keep POSIX pins," so it's a pre-existing, non-blocking redundancy rather than a defect introduced here.
+
+## YAGNI
+PASS. No speculative parameters or unused branches added.
+
+## Completeness
+PASS against `tasks.md`'s Unit 1 and Unit 2. Verified against the projectbrief's final Rework requirements:
+1. `init`/`prompt_text` always teach `python .summem/summem wake` — done (`prompt_text()` line 1297).
+2. Root-wake Usage/`Run:` stay host-specific via `agent_invoke()` — done, unchanged branch logic, only the nt-side string changed.
+3. Clone-with-python-3.11 first-wake — `AGENTS.md` prefix is in lockstep with `prompt_text()` (verified `test_agents_md_starts_with_prompt_text` and a direct diff read).
+4. "Push windows-support when the refinement is on the branch" — not yet done (branch is 5 commits ahead of `origin/windows-support`), but this is a post-QA delivery action, not a code/test gap; already flagged as non-blocking in the Preflight report.
+Ran `tox -e py311 tests/test_init.py tests/test_fold.py -n0`: 45 passed. Ran the full `tox -e py311`: 389 passed, matching the Build phase's recorded count.
+
+## Regression
+PASS. Repo-wide search for stale `sys.executable` / `only work on Windows` references outside `.tox/` found none in `summem`, tests, or docs — only historical mentions in the already-archived `20260909-windows-compat*.md` files (correctly untouched; superseded, not deleted) and unrelated `sys.executable` subprocess-spawning calls in the test harness (spawning a real Python process to run the driver, not the invoke-recipe feature under test).
+
+## Integrity
+PASS. No hardcoded shortcuts or debug artifacts. `agent_invoke()`'s Windows branch and `prompt_text()`'s wake line both hardcode the literal `python`, which is the intended, plan-specified contract (not a magic-string shortcut).
+
+## Documentation
+PASS. `systemPatterns.md`, `techContext.md`, and `docs/notes.md` were all updated in this commit range to match the new behavior (`prompt_text` wake line, `agent_invoke()`'s two return shapes, host-specific Usage). `docs/notes.md` also explicitly marks the prior `windows-compat-audit` Unix-only stance as superseded, keeping the historical record legible.

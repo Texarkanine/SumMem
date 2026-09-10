@@ -86,3 +86,15 @@ Rework of PR #84: `init` always says `python .summem/summem wake`; wake Usage/`R
     - Windows tests forbid backtick-bare recipes, not the substring `.summem/summem note`.
 * Insights
     - Quoted `sys.executable` is gone from agent-facing output.
+
+## 2026-09-10 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Reviewed the invoke-recipe rework against `projectbrief.md`'s final Rework requirements and `tasks.md`'s plan.
+    - Re-ran `tox -e py311 tests/test_init.py tests/test_fold.py -n0` (45 passed) and the full `tox -e py311` (389 passed).
+    - Repo-wide search confirmed no stale `sys.executable` / Windows-warning references outside the correctly-untouched archive files.
+* Decisions made
+    - Accepted the rework as-is; no Build or Plan rerun required.
+* Insights
+    - `test_init_text_posix_has_no_windows_warning` is now fully subsumed by `test_init_text_is_host_agnostic` (which proves `windows == posix`); flagged as a non-blocking, pre-existing DRY advisory rather than a defect.
+    - Requirement 4 (push `windows-support`) is still open — a delivery action, not a code gap.
