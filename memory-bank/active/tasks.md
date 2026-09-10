@@ -121,6 +121,6 @@ No new technology - validation not required. `fcntl` / `msvcrt` / `tempfile` are
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
+- [x] Preflight
 - [ ] Build
 - [ ] QA

@@ -44,3 +44,13 @@ Make SumMem able to launch and run on native Windows with the smallest capabilit
     - Empty runtime lock file gets exactly one `b"\0"` before `LK_NBLCK`
 * Insights
     - Directory-flock miss with `fcntl` still present is a different backend than `fcntl` missing (`msvcrt`)
+
+## 2026-09-09 - PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+
+* Work completed
+    - Re-validated the re-planned Level 2 plan; confirmed the prior FAIL's `msvcrt` coverage gap is closed
+    - Traced every raw content-addressed read site in the driver against the plan's canonicalization points; traced every `with_store_lock` and `AGENT_BIN` consumer
+* Decisions made
+    - Plan proceeds to Build; three non-blocking advisories recorded (dead `import fcntl` in `test_zipper.py` after the wake-test rewrite, a docstring update on `with_store_lock`, and a radical-innovation idea for a single read choke-point)
+* Insights
+    - `leaf_digests` bypasses `loads_tree` and parses `.tree` JSON directly; the plan already names this as a required canonicalization site, matching the Pre-Mortem's stated risk
