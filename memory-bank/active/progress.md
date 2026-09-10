@@ -1,8 +1,8 @@
 # Progress
 
-Rework of PR #84: monotonic 30s `msvcrt` lock deadline, host-pinned invoke tests, timeout regression test.
+Rework of PR #84: `init` always says `python .summem/summem wake`; wake Usage/`Run:` are host-specific (`python ` on Windows, bare on *nix).
 
-**Complexity:** Level 1
+**Complexity:** Level 2
 
 ## 2026-09-10 - COMPLEXITY-ANALYSIS - COMPLETE
 
@@ -44,3 +44,12 @@ Rework of PR #84: monotonic 30s `msvcrt` lock deadline, host-pinned invoke tests
     - `init` always tells agents to run `python .summem/summem wake` (python on PATH; Windows and *nix).
     - Root `wake` Usage/`Run:` stay host-specific: bare `.summem/summem` on *nix, `python ` prefixed on Windows.
     - Drop the Windows-only `init` warning and quoted `sys.executable` recipes.
+
+## 2026-09-10 - COMPLEXITY-ANALYSIS - COMPLETE
+
+* Work completed
+    - Classified this rework as Level 2 (invoke-recipe enhancement; bootstrap contract change).
+* Decisions made
+    - Enhancement tree, self-contained: `prompt_text` / `init_text` / `agent_invoke` / lockstep `AGENTS.md`. Not a bug fix.
+* Insights
+    - Operator specified both recipes; remaining work is lockstep and dropping `sys.executable`, not exploring hosts.
