@@ -6,7 +6,7 @@ Activation is the SumMem block at the top of committed `AGENTS.md`: the reposito
 
 ## Environment Setup
 
-The intended floor is Python 3.11 so `tomllib` is available without a backport. The script checks `sys.version_info` immediately after `import sys` and before any `import tomllib`, so Python 3.10 prints `SumMem needs Python 3.11 or newer` instead of dying on the import. `tomllib`, `fcntl`, `subprocess`, and `random` load inside the functions that need them; `version`, `init`, and bare help do not import them. View types are `__slots__` classes, not dataclasses. There is no project manifest and no hatchling package. Invoke the driver as `summem`. Tests must not use this machine's bare `python3` (3.10). Run tests as in Testing Process below.
+The intended floor is Python 3.11 so `tomllib` is available without a backport. The script checks `sys.version_info` immediately after `import sys` and before any `import tomllib`, so Python 3.10 prints `SumMem needs Python 3.11 or newer` instead of dying on the import. `tomllib`, `fcntl`, `msvcrt`, `subprocess`, and `random` load inside the functions that need them; `version`, `init`, and bare help do not import them. Content-addressed reads canonicalize CR LF to LF before digest, JSON parse, and caption. View types are `__slots__` classes, not dataclasses. There is no project manifest and no hatchling package. Invoke the driver as `summem`. Tests must not use this machine's bare `python3` (3.10). Run tests as in Testing Process below.
 
 Hashing is SHA-256 from the language standard library (`hashlib` in Python 3). Do not call `sha256sum` or `openssl`. Do not use `git hash-object`.
 

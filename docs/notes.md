@@ -9,7 +9,7 @@ Things that are not true of the tree yet, and that we did not replace with a dif
 
 ## Not this host
 
-- Native Windows as a supported host. There is no clone-portable argv0 that both `cmd.exe` and a Unix shell will execute. Default `AGENTS.md` stays Unix. Runtime Usage/`Run:` may still print this host’s interpreter; only a shop that patched the bootstrap will see that. Script-internal POSIX holes (directory flock, CRLF-as-identity, `fcntl` traceback) are still present. Spec: [windows-compat-audit](../memory-bank/archive/enhancements/20260909-windows-compat-audit.md).
+- Native Windows as a supported host. There is no clone-portable argv0 that both `cmd.exe` and a Unix shell will execute. Default `AGENTS.md` stays Unix. Runtime Usage/`Run:` and the `init` wrapper above `---` may print this host’s interpreter; only a shop that patched the bootstrap will see that. Spec: [windows-compat-audit](../memory-bank/archive/enhancements/20260909-windows-compat-audit.md).
 
 ## Not this fold
 

@@ -6,7 +6,7 @@ These sections are the business context of SumMem: who it is for, what it is for
 
 - Coding agents that work in a git repository and need a shared, decaying memory of what that tree has learned
 - Operators who decide which directories get their own memory, especially in a monorepo
-- Concurrent writers who do not share a process or a cross-clone lock: several agents on one machine, several jobs on one PR, several worktrees. A same-machine flock of `naps/` on one mutating invocation is not a committed object and is not an actor.
+- Concurrent writers who do not share a process or a cross-clone lock: several agents on one machine, several jobs on one PR, several worktrees. A same-machine lock on one mutating invocation is not a committed object and is not an actor.
 
 This product is not a single-actor local diary (that is OptMem, including its machine-global store). It is not task-scoped working documentation that is archived when a task ends (that is Niko's `memory-bank/`).
 
@@ -35,7 +35,7 @@ The product succeeds when these process-level tests hold: concurrent notes merge
 ## Key Constraints
 
 - Agents never write the store. They run a script. The script owns every file.
-- There is no actor, lease, or cross-clone lock. A scope is a directory that opted in. Same-machine flock of `naps/` on one mutating invocation is not a committed object.
+- There is no actor, lease, or cross-clone lock. A scope is a directory that opted in. A same-machine lock on one mutating invocation is not a committed object.
 - Personal and machine facts stay out of the repository.
 - SumMem is not Niko's `memory-bank/` and must not be folded into it.
 - Wake never refuses to print. "Cannot wake, go nap first" is a defect. Wake never drops view nodes to fit the budget; over-budget listings stay complete until `note`/`nap` fold them back.

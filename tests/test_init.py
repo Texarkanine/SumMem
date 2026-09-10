@@ -198,3 +198,50 @@ def test_how_to_text_catalog_is_opt_in(summem):
     assert f"{m.AGENT_BIN} wake --path <path>" in cataloged
     assert cataloged.startswith(base)
     assert "had no catalog" not in cataloged
+
+
+def test_agent_invoke_uses_interpreter_on_nt(monkeypatch, summem):
+    """When the host cannot exec AGENT_BIN, agent_invoke quotes interpreter plus AGENT_BIN."""
+    m = summem
+    assert m.agent_invoke() == m.AGENT_BIN
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: True)
+    assert m.agent_invoke() == f'"{m.sys.executable}" "{m.AGENT_BIN}"'
+
+
+def test_how_to_text_uses_agent_invoke(monkeypatch, summem):
+    """On a host that needs an interpreter prefix, Usage recipes use agent_invoke()."""
+    m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: True)
+    invoke = m.agent_invoke()
+    text = m.how_to_text()
+    assert f"`{invoke} note" in text
+    assert f"{m.AGENT_BIN} note" not in text
+    prompt = m.prompt_text()
+    assert f"`{m.AGENT_BIN}`" in prompt
+    assert m.sys.executable not in prompt
+
+
+def test_init_text_windows_warning_above_fold(monkeypatch, capsys, summem):
+    """When the host needs an interpreter prefix, init warns above ---; prompt_text stays below."""
+    m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: True)
+    invoke = m.agent_invoke()
+    text = m.init_text()
+    recipe, _, rest = text.partition("---")
+    assert "only work on Windows" in recipe
+    assert invoke in recipe
+    assert "only work on Windows" not in rest
+    assert rest.lstrip() == m.prompt_text()
+    assert m.main(["init"]) == 0
+    out = capsys.readouterr().out
+    assert out == text
+
+
+def test_init_text_posix_has_no_windows_warning(summem):
+    """POSIX init_text has no Windows-only warning and still ends the recipe at ---."""
+    m = summem
+    text = m.init_text()
+    recipe, _, rest = text.partition("---")
+    assert "only work on Windows" not in text
+    assert "starting write rule" in recipe.lower()
+    assert rest.lstrip() == m.prompt_text()

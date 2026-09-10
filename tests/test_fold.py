@@ -443,6 +443,21 @@ def test_fold_request_omits_path_when_cwd_selects_store(tmp_path, monkeypatch, s
     assert "Run: .summem/summem nap " in out
 
 
+def test_fold_request_run_uses_agent_invoke(tmp_path, monkeypatch, summem):
+    """On nt, fold_request Run: uses agent_invoke(), not a bare AGENT_BIN command."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    monkeypatch.setattr(m, "WAKE_LINES", 1)
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: True)
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    out = m.fold_request(repo, 1)
+    invoke = m.agent_invoke()
+    assert f"Run: {invoke} nap " in out
+    assert "Run: .summem/summem nap " not in out
+
+
 def test_fold_request_note_pair_quotes_text_only(tmp_path, monkeypatch, summem):
     """Two notes over budget: fold quotes note text; wake still has x1 and the day."""
     m = summem

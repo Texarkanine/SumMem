@@ -310,10 +310,11 @@ def test_help_skips_command_only_imports():
 
 
 def test_shebang_and_executable_bit():
-    """The driver starts with the python3 shebang and is executable."""
+    """The driver starts with the python3 shebang; execute bit is POSIX-only."""
     first = SCRIPT.read_text(encoding="utf-8").splitlines()[0]
     assert first == "#!/usr/bin/env python3"
-    assert SCRIPT.stat().st_mode & stat.S_IXUSR
+    if os.name != "nt":
+        assert SCRIPT.stat().st_mode & stat.S_IXUSR
 
 
 def test_cli_malformed_tree_returns_1_without_traceback(tmp_path, monkeypatch, capsys, summem):

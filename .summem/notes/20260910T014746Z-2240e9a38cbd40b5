@@ -1,0 +1,1 @@
+Windows: CRLF canonicalize on read; lock is naps/ flock else runtime-dir file (fcntl then msvcrt); do not monkeypatch os.name to nt on Linux (pathlib WindowsPath crash).

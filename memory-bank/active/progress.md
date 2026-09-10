@@ -54,3 +54,15 @@ Make SumMem able to launch and run on native Windows with the smallest capabilit
     - Plan proceeds to Build; three non-blocking advisories recorded (dead `import fcntl` in `test_zipper.py` after the wake-test rewrite, a docstring update on `with_store_lock`, and a radical-innovation idea for a single read choke-point)
 * Insights
     - `leaf_digests` bypasses `loads_tree` and parses `.tree` JSON directly; the plan already names this as a required canonicalization site, matching the Pre-Mortem's stated risk
+
+## 2026-09-09 - BUILD - COMPLETE
+
+* Work completed
+    - Implemented CRLF canonicalize-on-read, capability lock, host invoke + init warning, shebang gate, and stance/docs updates
+    - tox -e py311: 387 passed
+    - Native Windows Python: version, init warning above ---, note Saved.
+* Decisions made
+    - Patch `_host_needs_interpreter` in tests, not `os.name`
+    - Runtime lock file `"ab+"` with one `b"\0"` byte
+* Insights
+    - `os.name = "nt"` on Linux makes pathlib raise `cannot instantiate 'WindowsPath'`

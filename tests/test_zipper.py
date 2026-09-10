@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-import fcntl
+import os
 import subprocess
 import sys
+import types
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from random import Random
@@ -783,22 +784,22 @@ def test_cli_note_and_nap_call_heal(tmp_path, monkeypatch, capsys, summem):
 
 
 def test_cli_wake_on_overlapping_head_writes_nothing(tmp_path, monkeypatch, summem):
-    """CLI wake on overlapping HEAD prints and adds no file; wake must not flock."""
+    """CLI wake on overlapping HEAD prints and adds no file; wake must not lock."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     _plant_abd_abe(m, repo)
     before = _payload_names(repo)
-    flocks = {"n": 0}
-    real = fcntl.flock
+    locks = {"n": 0}
+    real = m.with_store_lock
 
-    def wrapped(fd, op):
-        flocks["n"] += 1
-        return real(fd, op)
+    def wrapped(parent, fn):
+        locks["n"] += 1
+        return real(parent, fn)
 
-    monkeypatch.setattr(fcntl, "flock", wrapped)
+    monkeypatch.setattr(m, "with_store_lock", wrapped)
     assert m.main(["wake"]) == 0
-    assert flocks["n"] == 0
+    assert locks["n"] == 0
     assert _payload_names(repo) == before
 
 
@@ -889,13 +890,134 @@ def test_with_store_lock_blocks_and_writes_no_lock_file(tmp_path, summem):
     seen = {}
 
     def held():
+        seen["names"] = [p.name for p in (repo / ".summem").rglob("*") if p.is_file()]
+        if m._try_fcntl() is None:
+            seen["code"] = None
+            return
         result = subprocess.run(
             [sys.executable, "-c", probe, str(naps)],
             capture_output=True,
         )
         seen["code"] = result.returncode
-        seen["names"] = [p.name for p in (repo / ".summem").rglob("*") if p.is_file()]
 
     m.with_store_lock(repo, held)
-    assert seen["code"] == 2
     assert "lock" not in seen["names"]
+    if seen["code"] is not None:
+        assert seen["code"] == 2
+
+
+def _block_naps_dir_open(monkeypatch, m, naps: Path) -> None:
+    real = m.os.open
+
+    def wrapped(path, flags, *args, **kwargs):
+        if os.fspath(path) == os.fspath(naps) and flags == os.O_RDONLY:
+            raise OSError(13, "blocked")
+        return real(path, flags, *args, **kwargs)
+
+    monkeypatch.setattr(m.os, "open", wrapped)
+
+
+def test_with_store_lock_fallback_lock_is_outside_store(tmp_path, monkeypatch, summem):
+    """When naps/ cannot be flocked, the lock file lives under the runtime dir."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    m.ensure_store(repo)
+    naps = repo / ".summem" / "naps"
+    lock_dir = tmp_path / "locks"
+    monkeypatch.setattr(m, "_runtime_lock_path", lambda store: lock_dir / "store.lock")
+    _block_naps_dir_open(monkeypatch, m, naps)
+    ran = {"n": 0}
+
+    def held():
+        ran["n"] += 1
+        ran["store"] = [p.name for p in (repo / ".summem").rglob("*") if p.is_file()]
+        ran["runtime"] = list(lock_dir.rglob("*")) if lock_dir.exists() else []
+
+    m.with_store_lock(repo, held)
+    assert ran["n"] == 1
+    assert "lock" not in ran["store"]
+    assert ran["runtime"]
+
+
+def test_with_store_lock_msvcrt_locks_one_byte_and_unlocks(tmp_path, monkeypatch, summem):
+    """msvcrt backend: append-open, one-byte range, LK_NBLCK then LK_UNLCK after fn."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    m.ensure_store(repo)
+    lock_path = tmp_path / "locks" / "store.lock"
+    monkeypatch.setattr(m, "_try_fcntl", lambda: None)
+    monkeypatch.setattr(m, "_runtime_lock_path", lambda store: lock_path)
+    fake = types.SimpleNamespace(LK_NBLCK=1, LK_UNLCK=2, calls=[])
+
+    def locking(fd, mode, n):
+        fake.calls.append((mode, n, os.fstat(fd).st_size))
+
+    fake.locking = locking
+    monkeypatch.setitem(sys.modules, "msvcrt", fake)
+    opens = []
+    real_open = open
+
+    def wrapped_open(path, mode="r", *args, **kwargs):
+        opens.append((os.fspath(path), mode))
+        return real_open(path, mode, *args, **kwargs)
+
+    monkeypatch.setattr("builtins.open", wrapped_open)
+    ran = {"n": 0}
+
+    def held():
+        ran["n"] += 1
+
+    m.with_store_lock(repo, held)
+    assert ran["n"] == 1
+    lock_opens = [mode for path, mode in opens if os.fspath(path) == os.fspath(lock_path)]
+    assert lock_opens
+    assert lock_opens[0].startswith("a")
+    assert not lock_opens[0].startswith("w")
+    assert fake.calls[0] == (fake.LK_NBLCK, 1, 1)
+    assert fake.calls[-1][0] == fake.LK_UNLCK
+    assert fake.calls[-1][1] == 1
+    assert "lock" not in [p.name for p in (repo / ".summem").rglob("*") if p.is_file()]
+
+
+def test_with_store_lock_msvcrt_retries_then_acquires(tmp_path, monkeypatch, summem):
+    """msvcrt LK_NBLCK OSError retries with a bounded sleep, then acquires."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    m.ensure_store(repo)
+    lock_path = tmp_path / "locks" / "store.lock"
+    monkeypatch.setattr(m, "_try_fcntl", lambda: None)
+    monkeypatch.setattr(m, "_runtime_lock_path", lambda store: lock_path)
+    fake = types.SimpleNamespace(LK_NBLCK=1, LK_UNLCK=2, n=0)
+    sleeps = []
+
+    def locking(fd, mode, n):
+        if mode == fake.LK_NBLCK and fake.n == 0:
+            fake.n += 1
+            raise OSError("busy")
+        fake.n += 1
+
+    fake.locking = locking
+    monkeypatch.setitem(sys.modules, "msvcrt", fake)
+    import time as time_mod
+
+    monkeypatch.setattr(time_mod, "sleep", sleeps.append)
+    m.with_store_lock(repo, lambda: None)
+    assert sleeps
+    assert all(d <= 0.25 for d in sleeps)
+
+
+def test_cli_note_lock_fallback_has_no_traceback(tmp_path, monkeypatch, capsys, summem):
+    """CLI note with directory flock blocked still saves; no traceback or fcntl on stderr."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    m.ensure_store(repo)
+    monkeypatch.setattr(m, "_runtime_lock_path", lambda store: tmp_path / "locks" / "store.lock")
+    _block_naps_dir_open(monkeypatch, m, repo / ".summem" / "naps")
+    capsys.readouterr()
+    assert m.main(["note", "hello"]) == 0
+    captured = capsys.readouterr()
+    assert "Saved." in captured.out
+    assert "Traceback" not in captured.err
+    assert "fcntl" not in captured.err
+
