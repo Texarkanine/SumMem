@@ -35,3 +35,12 @@ Rework of PR #84: monotonic 30s `msvcrt` lock deadline, host-pinned invoke tests
     - Accepted the rework as-is; no Build or Plan rerun is required.
 * Insights
     - The fake monotonic-clock test exercises the exact elapsed-time boundary without relying on a Windows host.
+
+## 2026-09-10 - REWORK - INITIATED
+
+* Work completed
+    - Operator feedback from native Windows PowerShell and CMD: the driver technically works; refine invoke recipes.
+* Decisions made
+    - `init` always tells agents to run `python .summem/summem wake` (python on PATH; Windows and *nix).
+    - Root `wake` Usage/`Run:` stay host-specific: bare `.summem/summem` on *nix, `python ` prefixed on Windows.
+    - Drop the Windows-only `init` warning and quoted `sys.executable` recipes.

@@ -34,3 +34,12 @@ The pytest suite is run on a host where `_host_needs_interpreter()` is true. POS
 ## Rework
 
 Operator asked to apply PR #84 judge items 1–3 as a rework of windows-compat (archived). Head: `36c7375345f8c5a8091d5dbfa912a6bb3ff9aadc`.
+
+## Rework
+
+Native Windows PowerShell/CMD: it technically works. Refine invoke recipes:
+
+1. `summem init` always says to run `python .summem/summem wake` (python on PATH; Windows and *nix).
+2. `summem wake` prints host-specific recipes: bare `.summem/summem` on *nix, `python ` prefixed on Windows.
+3. A clone with python 3.11+ on PATH can first-wake from the bootstrap; wake then prints the rest of the commands for that host.
+4. Push `windows-support` when the refinement is on the branch.
