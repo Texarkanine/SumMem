@@ -98,3 +98,12 @@ Rework of PR #84: `init` always says `python .summem/summem wake`; wake Usage/`R
 * Insights
     - `test_init_text_posix_has_no_windows_warning` is now fully subsumed by `test_init_text_is_host_agnostic` (which proves `windows == posix`); flagged as a non-blocking, pre-existing DRY advisory rather than a defect.
     - Requirement 4 (push `windows-support`) is still open — a delivery action, not a code gap.
+
+## 2026-09-10 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-windows-compat-review.md`.
+* Decisions made
+    - Persistent files were already reconciled in Build; no further briefing edits.
+* Insights
+    - `python` on PATH is clone-portable; `sys.executable` is not.
