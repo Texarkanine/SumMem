@@ -25,3 +25,14 @@ Audit SumMem for native Windows incompatibilities. List each finding with a reco
     - Findings live in `memory-bank/active/windows-compat-findings.md`; product docs get one “Not this host” bullet only
 * Insights
     - `with_store_lock` opens `naps/` as a directory fd; OptMem’s Windows path needs a *file* for `msvcrt.locking`. A naive `.lock` in the store would fail the existing no-lock-file test.
+
+## 2026-09-09 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Validated the four-unit audit plan against the driver, affected tests, invocation paths, and documentation placement
+    - Confirmed the task remains prose/policy work with no TDD-governed executable unit
+* Decisions made
+    - Preflight status: PASS WITH ADVISORY
+    - Preserve the no-store-lock-file contract in any later Windows port
+* Insights
+    - Native Windows risk is concentrated in `fcntl` directory locking, Unix-style direct invocation, symlink setup, and POSIX-specific test assumptions; the plan schedules code evidence and CMD probes before drawing conclusions about other APIs
