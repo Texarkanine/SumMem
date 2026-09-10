@@ -1,0 +1,13 @@
+FAIL (fixable)
+
+TDD Plan Encoding: FAIL (fixable). Implementation unit 2 adds the Windows `msvcrt` locking backend, but its planned tests only force the fallback and assert that `fn` runs and no in-store lock file exists. They never exercise the `msvcrt` backend or prove mutual exclusion. In particular, `msvcrt.locking()` locks a byte range, so the runtime file needs a defined locked byte before attempting a one-byte lock; the plan does not specify or test that initialization. Add a test with a fake `msvcrt` module/backend that asserts the runtime lock file is opened append-mode, made lockable, locked with a bounded retry/backoff path, and unlocked after `fn`; retain a native Windows runner as an optional final probe.
+
+Convention compliance: PASS. The plan preserves the one-file driver, lazy command-only imports, standard-library-only policy, repo-root driver tests, and the existing POSIX `naps/` directory flock where supported. Prose changes target the canonical notes, atlas, and persistent memory-bank files.
+
+Dependency impact: PASS after the unit-2 test addition. All mutating entry points (`note`, `nap`, and `surgery.py`) already converge on `with_store_lock`; wake remains outside that path. CRLF read paths are identified, including direct tree parsing in `leaf_digests`.
+
+Conflict detection: PASS. `with_store_lock` is the existing shared primitive; no duplicate lock abstraction or dependency is proposed. The stock bootstrap remains Unix and the repository symlink is explicitly out of scope.
+
+Completeness: FAIL (fixable) only for coverage of the new `msvcrt` branch. The remaining brief requirements map to concrete files, functions, and test locations.
+
+Advisory: Treat the runtime lock file as an ephemeral coordination resource and write/retain exactly one byte before `msvcrt.locking(..., 1)`. This makes the fallback's lock range explicit without adding a committed store artifact or a platform branch at every call site.

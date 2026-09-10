@@ -24,3 +24,13 @@ Make SumMem able to launch and run on native Windows with the smallest capabilit
     - CRLF: always canonicalize on read; no platform branch
 * Insights
     - `init` cannot import `fcntl` to decide the warning; `os.name` is the allowed host check
+
+## 2026-09-09 - PREFLIGHT - COMPLETE (FAIL (fixable))
+
+* Work completed
+    - Validated the Level 2 plan against the driver, test suite, audit specification, and documented architecture
+    - Confirmed conventions, downstream lock consumers, CRLF read surfaces, and non-advertisement constraints are otherwise covered
+* Decisions made
+    - Return the plan to planning before build so the new `msvcrt` branch has executable coverage
+* Insights
+    - A fallback-success test does not prove the `msvcrt` byte-range lock works; the runtime file must contain a defined byte before locking, and the lock/unlock path needs a fake-backend test
