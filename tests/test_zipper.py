@@ -10,6 +10,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from random import Random
 
+import pytest
+
 from gitutil import assert_unique_cover, init_repo, reaches, zoom_reaches
 
 UTC = timezone.utc
@@ -1004,6 +1006,40 @@ def test_with_store_lock_msvcrt_retries_then_acquires(tmp_path, monkeypatch, sum
     m.with_store_lock(repo, lambda: None)
     assert sleeps
     assert all(d <= 0.25 for d in sleeps)
+
+
+def test_with_store_lock_msvcrt_retry_deadline_is_elapsed(tmp_path, monkeypatch, summem):
+    """A busy msvcrt lock raises cannot lock within 30s of elapsed retry time."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    m.ensure_store(repo)
+    lock_path = tmp_path / "locks" / "store.lock"
+    monkeypatch.setattr(m, "_try_fcntl", lambda: None)
+    monkeypatch.setattr(m, "_runtime_lock_path", lambda store: lock_path)
+    fake = types.SimpleNamespace(LK_NBLCK=1, LK_UNLCK=2)
+
+    def locking(fd, mode, n):
+        if mode == fake.LK_NBLCK:
+            raise OSError("busy")
+
+    fake.locking = locking
+    monkeypatch.setitem(sys.modules, "msvcrt", fake)
+    import time as time_mod
+
+    sleeps = []
+    now = [0.0]
+
+    def fake_sleep(d):
+        sleeps.append(d)
+        now[0] += d
+
+    monkeypatch.setattr(time_mod, "sleep", fake_sleep)
+    monkeypatch.setattr(time_mod, "monotonic", lambda: now[0])
+    with pytest.raises(ValueError, match="cannot lock"):
+        m.with_store_lock(repo, lambda: None)
+    assert sleeps
+    assert all(d <= 0.25 for d in sleeps)
+    assert sum(sleeps) <= 30.0
 
 
 def test_cli_note_lock_fallback_has_no_traceback(tmp_path, monkeypatch, capsys, summem):

@@ -394,6 +394,7 @@ def test_main_prints_fold_request_when_over_budget(tmp_path, monkeypatch, capsys
     """After excision, stdout includes fold_request so an agent can start the nap cascade."""
     s = load_surgery()
     m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
     repo = init_repo(tmp_path / "r")
     secret = "sentinel-fold-secret-kk11"
     paths = _write_notes(m, repo, [secret, "keep-b", "keep-c", "keep-d"])

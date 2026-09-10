@@ -712,15 +712,18 @@ def _with_runtime_lock(store, fn, fcntl):
             raise ValueError("cannot lock") from None
         import time as _t
 
+        deadline = _t.monotonic() + 30.0
         waited = 0.0
         while True:
             try:
                 _ms.locking(lock.fileno(), _ms.LK_NBLCK, 1)
                 break
             except OSError:
-                if waited > 30.0:
+                remaining = deadline - _t.monotonic()
+                if remaining <= 0:
                     raise ValueError("cannot lock") from None
-                _t.sleep(min(0.01 + waited * 0.2, 0.25))
+                delay = min(0.01 + waited * 0.2, 0.25, remaining)
+                _t.sleep(delay)
                 waited += 0.01
         try:
             return fn()

@@ -110,9 +110,10 @@ def test_agents_md_starts_with_prompt_text(summem):
     assert agents.startswith(prompt)
 
 
-def test_how_to_text_is_the_usage_section(summem):
+def test_how_to_text_is_the_usage_section(monkeypatch, summem):
     """how_to_text() is the root-wake Usage section: header, taught verbs, no runbook."""
     m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
     text = m.how_to_text()
     lower = text.lower()
     assert text.startswith("== SumMem Usage ==")
@@ -187,9 +188,10 @@ def test_prompt_and_how_to_are_disjoint(summem):
     assert "== SumMem Usage ==" not in prompt
 
 
-def test_how_to_text_catalog_is_opt_in(summem):
+def test_how_to_text_catalog_is_opt_in(monkeypatch, summem):
     """Default Usage omits catalog how-to; catalog=True appends the pull recipe."""
     m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
     base = m.how_to_text()
     cataloged = m.how_to_text(catalog=True)
     assert "catalog" not in base.lower()
@@ -203,6 +205,7 @@ def test_how_to_text_catalog_is_opt_in(summem):
 def test_agent_invoke_uses_interpreter_on_nt(monkeypatch, summem):
     """When the host cannot exec AGENT_BIN, agent_invoke quotes interpreter plus AGENT_BIN."""
     m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
     assert m.agent_invoke() == m.AGENT_BIN
     monkeypatch.setattr(m, "_host_needs_interpreter", lambda: True)
     assert m.agent_invoke() == f'"{m.sys.executable}" "{m.AGENT_BIN}"'
@@ -237,9 +240,10 @@ def test_init_text_windows_warning_above_fold(monkeypatch, capsys, summem):
     assert out == text
 
 
-def test_init_text_posix_has_no_windows_warning(summem):
+def test_init_text_posix_has_no_windows_warning(monkeypatch, summem):
     """POSIX init_text has no Windows-only warning and still ends the recipe at ---."""
     m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
     text = m.init_text()
     recipe, _, rest = text.partition("---")
     assert "only work on Windows" not in text
