@@ -269,7 +269,7 @@ def agent_invoke() -> str:
     """Return the command prefix agents can run on this host."""
     if not _host_needs_interpreter():
         return AGENT_BIN
-    return f'"{sys.executable}" "{AGENT_BIN}"'
+    return f"python {AGENT_BIN}"
 
 
 def _host_needs_interpreter() -> bool:
@@ -1294,7 +1294,7 @@ Shared memory for this repository is managed through SumMem, invoked as `{AGENT_
 
 ## At Session Start: Activating SumMem (mandatory)
 
-Run `{AGENT_BIN} wake` from the repository root. If you can see a prior project-root SumMem wake in this conversation's history, do not run it again.
+Run `python {AGENT_BIN} wake` from the repository root. If you can see a prior project-root SumMem wake in this conversation's history, do not run it again.
 
 ## While Working: Register Memories
 
@@ -1306,7 +1306,7 @@ One short line another contributor needs to work on this repository: gotchas, no
 
 def init_text() -> str:
     """Return the full `init` print: insert recipe plus prompt_text()."""
-    body = (
+    return (
         "Insert the following at the top of AGENTS.md as a starting write rule. "
         "You may edit what this repository remembers. "
         "Command syntax comes from root wake; do not copy it into this prefix. "
@@ -1317,16 +1317,6 @@ def init_text() -> str:
         "---\n"
         "\n"
         f"{prompt_text()}"
-    )
-    if not _host_needs_interpreter():
-        return body
-    invoke = agent_invoke()
-    return (
-        "The invoke lines below are for this host and only work on Windows.\n"
-        "\n"
-        f"  {invoke} wake\n"
-        "\n"
-        f"{body}"
     )
 
 

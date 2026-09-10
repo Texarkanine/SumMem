@@ -202,13 +202,14 @@ def test_how_to_text_catalog_is_opt_in(monkeypatch, summem):
     assert "had no catalog" not in cataloged
 
 
-def test_agent_invoke_uses_interpreter_on_nt(monkeypatch, summem):
-    """When the host cannot exec AGENT_BIN, agent_invoke quotes interpreter plus AGENT_BIN."""
+def test_agent_invoke_uses_python_on_nt(monkeypatch, summem):
+    """When the host cannot exec AGENT_BIN, agent_invoke prefixes python plus AGENT_BIN."""
     m = summem
     monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
     assert m.agent_invoke() == m.AGENT_BIN
     monkeypatch.setattr(m, "_host_needs_interpreter", lambda: True)
-    assert m.agent_invoke() == f'"{m.sys.executable}" "{m.AGENT_BIN}"'
+    assert m.agent_invoke() == f"python {m.AGENT_BIN}"
+    assert m.sys.executable not in m.agent_invoke()
 
 
 def test_how_to_text_uses_agent_invoke(monkeypatch, summem):
@@ -218,26 +219,40 @@ def test_how_to_text_uses_agent_invoke(monkeypatch, summem):
     invoke = m.agent_invoke()
     text = m.how_to_text()
     assert f"`{invoke} note" in text
-    assert f"{m.AGENT_BIN} note" not in text
+    assert f"`{m.AGENT_BIN} note" not in text
     prompt = m.prompt_text()
     assert f"`{m.AGENT_BIN}`" in prompt
     assert m.sys.executable not in prompt
+    assert m.sys.executable not in text
 
 
-def test_init_text_windows_warning_above_fold(monkeypatch, capsys, summem):
-    """When the host needs an interpreter prefix, init warns above ---; prompt_text stays below."""
+def test_prompt_text_bootstrap_wake_is_python(monkeypatch, summem):
+    """prompt_text wake is python AGENT_BIN wake on every host; no sys.executable."""
+    m = summem
+    for needs in (True, False):
+        monkeypatch.setattr(m, "_host_needs_interpreter", lambda n=needs: n)
+        prompt = m.prompt_text()
+        assert f"`python {m.AGENT_BIN} wake`" in prompt
+        assert m.sys.executable not in prompt
+        assert "only work on Windows" not in prompt
+
+
+def test_init_text_is_host_agnostic(monkeypatch, capsys, summem):
+    """init_text is the same on both hosts: no Windows warning, body is prompt_text()."""
     m = summem
     monkeypatch.setattr(m, "_host_needs_interpreter", lambda: True)
-    invoke = m.agent_invoke()
-    text = m.init_text()
-    recipe, _, rest = text.partition("---")
-    assert "only work on Windows" in recipe
-    assert invoke in recipe
-    assert "only work on Windows" not in rest
+    windows = m.init_text()
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
+    posix = m.init_text()
+    assert windows == posix
+    assert "only work on Windows" not in windows
+    assert m.sys.executable not in windows
+    recipe, _, rest = windows.partition("---")
+    assert "starting write rule" in recipe.lower()
     assert rest.lstrip() == m.prompt_text()
+    assert f"`python {m.AGENT_BIN} wake`" in windows
     assert m.main(["init"]) == 0
-    out = capsys.readouterr().out
-    assert out == text
+    assert capsys.readouterr().out == windows
 
 
 def test_init_text_posix_has_no_windows_warning(monkeypatch, summem):

@@ -459,8 +459,10 @@ def test_fold_request_run_uses_agent_invoke(tmp_path, monkeypatch, summem):
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
     out = m.fold_request(repo, 1)
     invoke = m.agent_invoke()
+    assert invoke == f"python {m.AGENT_BIN}"
     assert f"Run: {invoke} nap " in out
     assert "Run: .summem/summem nap " not in out
+    assert m.sys.executable not in out
 
 
 def test_fold_request_note_pair_quotes_text_only(tmp_path, monkeypatch, summem):

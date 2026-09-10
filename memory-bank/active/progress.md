@@ -74,3 +74,15 @@ Rework of PR #84: `init` always says `python .summem/summem wake`; wake Usage/`R
 * Insights
     - Requirement 4 (push the branch) has no scheduled step; tracked as advisory, not a blocking gap.
     - Radical-innovation advisory: a `cmd`/POSIX polyglot launcher would remove the need for `agent_invoke()`'s host branch entirely; recorded, not applied.
+
+## 2026-09-10 - BUILD - COMPLETE
+
+* Work completed
+    - `agent_invoke()`: `python {AGENT_BIN}` on nt; `prompt_text` wake always that command; `init_text` host-agnostic.
+    - Retargeted init/fold tests; lockstep `AGENTS.md`; briefing and `docs/notes.md`.
+    - `tox -e py311`: 389 passed.
+* Decisions made
+    - Intro still names `{AGENT_BIN}`; only the wake line is `python …`.
+    - Windows tests forbid backtick-bare recipes, not the substring `.summem/summem note`.
+* Insights
+    - Quoted `sys.executable` is gone from agent-facing output.

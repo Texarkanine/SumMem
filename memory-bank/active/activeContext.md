@@ -1,11 +1,13 @@
 # Active Context
 
 ## Current Task: windows-compat-review
-**Phase:** PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Planned: portable `python .summem/summem wake` in `prompt_text`/`init`; host-specific `agent_invoke()` (`python ` prefix on Windows); drop `sys.executable` and the Windows init warning; lockstep `AGENTS.md`.
-- Preflighted: TDD ordering, convention compliance, dependency impact, conflict detection, and completeness all checked against the plan; no plan edits needed. Advisories: requirement 4 (push branch) unmapped to a step; polyglot-launcher idea recorded as non-blocking innovation.
+- `agent_invoke()` on nt is `python .summem/summem`; POSIX stays bare `AGENT_BIN`.
+- `prompt_text()` wake is `python .summem/summem wake`; `init_text()` has no host wrapper.
+- `AGENTS.md` prefix lockstep. Briefing: `systemPatterns.md`, `docs/notes.md`, `techContext.md`.
+- `tox -e py311`: 389 passed.
 
 ## Next Step
-- Build.
+- QA subagent, then push `windows-support`.
