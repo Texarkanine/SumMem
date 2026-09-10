@@ -1,11 +1,11 @@
 # Active Context
 
 ## Current Task: windows-compat-audit
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Intent restated and approved: audit native Windows breakage with recommended resolutions; do not implement the port.
-- Complexity: Level 2. Self-contained investigation and findings report. Not a bug fix, not a multi-component Windows-support feature, not an architectural rewrite. Per-finding recommendations belong in the L2 plan; if planning shows cross-cutting design that needs a creative phase, re-level to L3.
+- Level 2 plan: four prose/policy units (inventory, Windows CMD probe, OptMem comparison, findings + `docs/notes.md` gap pointer). No executable behavior, no product port.
+- Known surfaces already in view: `with_store_lock` imports `fcntl` and flocks an `os.open` of `naps/`; OptMem locks a `.lock` file with `msvcrt`; tests pin “no lock file”; `AGENT_BIN` is `.summem/summem`; shebang + executable-bit test; `git ls-files` catalog.
 
 ## Next Step
-- Load the Level 2 workflow and enter plan.
+- Preflight validation of the plan.

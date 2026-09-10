@@ -14,3 +14,14 @@ Audit SumMem for native Windows incompatibilities. List each finding with a reco
     - If plan shows lock/path/git/test recommendations need a creative phase, re-level to L3 instead of stretching L2
 * Insights
     - Product context already treats same-machine flock of `naps/` as not a committed object; OptMem’s `.lock` file is a different model and must not be copied unexamined
+
+## 2026-09-09 - PLAN - COMPLETE
+
+* Work completed
+    - Four prose/policy units: inventory, Windows CMD probe, OptMem comparison, findings plus a `docs/notes.md` gap pointer
+    - No executable behavior; no Windows port in this task
+* Decisions made
+    - Stay Level 2: recommendations are the deliverable, not a lock-architecture creative
+    - Findings live in `memory-bank/active/windows-compat-findings.md`; product docs get one “Not this host” bullet only
+* Insights
+    - `with_store_lock` opens `naps/` as a directory fd; OptMem’s Windows path needs a *file* for `msvcrt.locking`. A naive `.lock` in the store would fail the existing no-lock-file test.
