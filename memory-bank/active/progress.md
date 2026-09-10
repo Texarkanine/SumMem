@@ -34,3 +34,13 @@ Make SumMem able to launch and run on native Windows with the smallest capabilit
     - Return the plan to planning before build so the new `msvcrt` branch has executable coverage
 * Insights
     - A fallback-success test does not prove the `msvcrt` byte-range lock works; the runtime file must contain a defined byte before locking, and the lock/unlock path needs a fake-backend test
+
+## 2026-09-09 - PLAN - COMPLETE
+
+* Work completed
+    - Added `msvcrt` oracle tests to unit 2 (append, one byte, lock/unlock, retry) and split `fcntl`-on-file fallback from the `msvcrt` path
+* Decisions made
+    - Fake `msvcrt` is the required test; native Windows CMD probe stays optional skip
+    - Empty runtime lock file gets exactly one `b"\0"` before `LK_NBLCK`
+* Insights
+    - Directory-flock miss with `fcntl` still present is a different backend than `fcntl` missing (`msvcrt`)
