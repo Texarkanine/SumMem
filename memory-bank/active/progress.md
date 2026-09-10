@@ -66,3 +66,15 @@ Make SumMem able to launch and run on native Windows with the smallest capabilit
     - Runtime lock file `"ab+"` with one `b"\0"` byte
 * Insights
     - `os.name = "nt"` on Linux makes pathlib raise `cannot instantiate 'WindowsPath'`
+
+## 2026-09-09 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Semantic review of the build against the plan: all four executable units and both prose units verified in the diff; every raw store read traced to a canonicalization point; lock consumers (`note`, `nap`, `surgery.py`) confirmed to catch `ValueError("cannot lock")` without a traceback
+    - Reran `tox -e py311`: 387 passed
+    - Wrote `.qa-validation-status` (PASS, two advisories) and QA results in `tasks.md`
+* Decisions made
+    - Both plan deviations (patch `_host_needs_interpreter`, `"ab+"` lock file) accepted as justified and recorded
+    - `msvcrt` retry-cap arithmetic (counter, not wall time; ~12 min effective bound) judged faithful to the plan's cited OptMem oracle — advisory, not a build defect
+* Insights
+    - The plan's "30s cap" language overstates the oracle's wall-clock bound; fixing it would be a plan-level change that also applies to OptMem upstream

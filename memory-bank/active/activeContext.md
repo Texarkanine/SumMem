@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: windows-compat
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
 - Unit 1: `store_bytes` on digest, tree parse, caption, variant tag, list_view, leaf_digests.

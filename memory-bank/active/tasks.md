@@ -123,4 +123,8 @@ No new technology - validation not required. `fcntl` / `msvcrt` / `tempfile` are
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
+
+## QA Results
+
+PASS. Semantic review against this plan found all four executable units and both prose units implemented as specified; `tox -e py311` rerun during review: 387 passed. Two non-blocking advisories recorded in `.qa-validation-status`: the `msvcrt` retry loop's `waited > 30.0` guard is a retry counter, not wall time (effective bound ~12 minutes under sustained contention — verbatim from the OptMem oracle the plan cites, so faithful to spec; a true 30s wall-clock cap would be a plan-level change), and `_COMMAND_ONLY` does not list `msvcrt` (probe would miss an accidental import on a Windows host; imports are lazy today).
