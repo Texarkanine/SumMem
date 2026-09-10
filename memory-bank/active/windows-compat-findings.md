@@ -6,18 +6,19 @@ Audit for native Windows (not WSL-as-Linux). No port in this task.
 
 **Operator constraint:** committed `AGENTS.md` must not contain a host-specific argv0 or drive path (unknown clone OS). Runtime prints (`how_to_text`, `fold_request` `Run:`) may.
 
+**Product stance:** Do not advertise native Windows. There is no clone-portable command that `cmd.exe` and a Unix shell will both execute. The ceiling is removing script-internal POSIX holes so a Windows-only shop can patch *their* bootstrap and declare they do not support Unix. Default `prompt_text` stays Unix. Runtime Usage and `Run:` **may** print a host-specific invoke (`sys.executable` on Windows): nobody on Windows sees those lines unless they already doctored the bootstrap, and that is fine.
+
 ```mermaid
 flowchart TD
     classDef ok fill:#e8f5e9,stroke:#2e7d32;
     classDef bad fill:#ffebee,stroke:#c62828;
     classDef print fill:#fff3e0,stroke:#ef6c00;
 
-    AgentsMd["AGENTS.md clone-portable"]:::ok --> Wake["wake"]
-    Wake --> Usage["Usage and Run: lines"]:::print
-    Usage -->|"posix"| Shebang[".summem/summem"]:::ok
-    Usage -->|"win32"| Py["sys.executable plus script path"]:::print
-    Direct["cmd.exe runs C:\\…\\.summem\\summem"]:::bad
-    PyArg["python C:\\…\\.summem\\summem"]:::ok
+    Advertise["Advertise Windows"]:::bad --> OneString["one argv0 in AGENTS.md"]
+    OneString --> Cmd["cmd.exe plus bash"]:::bad
+    Internals["lock CRLF traceback"]:::ok --> Shop["Windows shop patches AGENTS.md"]:::ok
+    Shop --> Wake["wake"]
+    Wake --> Host["Usage and Run: use sys.executable"]:::print
 ```
 
 ## Already fine
@@ -53,29 +54,26 @@ These are not findings. Listed so a later port does not “fix” them.
 
 ### 2. The driver is not a Win32 executable
 
-**What breaks:** `cmd.exe` / Explorer / an agent that runs `.summem/summem` or `C:\Users\Foo\repo\.summem\summem` as a command: `OSError: [WinError 193] %1 is not a valid Win32 application`. Shebang is ignored. `os.access(..., X_OK)` is a lie on Windows (it was True in the probe).
+**What breaks:** `cmd.exe` running `.summem/summem` or `C:\Users\Foo\repo\.summem\summem` is `WinError 193`. Shebang is ignored. The same relative path **as an argument to Python** works.
 
-**What works:** `python C:\Users\Foo\repo\.summem\summem` (and the relative forms above) when that path is a **regular file**.
+**What the solution is:** two printers, because one string cannot be both clone-portable and pasteable.
 
-**Recommended resolution:** Keep the no-suffix driver. Do not add `.py`, a `.cmd` inside the store, or py2exe. Runtime Usage and `fold_request` `Run:` on `win32` print `{sys.executable}` plus the script path (quoted). POSIX keeps `{AGENT_BIN}` as today. Committed `AGENTS.md` / `prompt_text()` must **not** choose `python` vs shebang or `C:\…` (clone OS unknown). It may name the **file** `.summem/summem` (forward slashes, relative) and say to run `wake`; recipes live on wake.
+- **After the script is already running** (`how_to_text`, `fold_request` `Run:`): on Windows print this process’s interpreter plus the driver file, quoted. Example: `"C:\Python313\python.exe" .summem/summem nap 45cf7d8a ac119d66 "<your line>"`. On POSIX keep `.summem/summem nap …`. That is a command the same agent can paste into the same host. `sys.executable` is used because `python` / `python3` are not reliable names (Windows has `python`, this Unix seat’s `python3` is 3.10).
+- **`AGENTS.md` / `prompt_text()`:** cannot contain that `Run:` line. `sys.executable` is this machine; `python` vs shebang is this OS. The committed block names the driver *file* `.summem/summem` (forward slashes, relative) and says to run `wake`. It is not a POSIX exec and not `C:\Users\…`.
 
-**Why that is optimal:** `python <no-suffix>` already works (probe). Prefixing `python` in `AGENTS.md` is wrong on Unix (this seat’s `/usr/bin/python3` is 3.10; `python` may be absent). `sys.executable` is the interpreter that actually loaded the script, so the `Run:` line pastes. Renaming to `summem.py` churns SourceFileLoader, tests, and the “one shebang file” identity for no Windows gain.
+**First wake is not our problem:** Usage cannot help until something has already started the script. Windows users who have not patched `AGENTS.md` never get here. Operator: that is fine. Do not add `.py`, a store `.cmd`, or py2exe.
 
-### 3. This repo’s `.summem/summem` is a git symlink
+### 3. Git symlink checkout — punt
 
-**What breaks:** Git for Windows here has `core.symlinks=false` (system). Mode `120000` checks out as a text file `../summem`, not a link. `python .summem/summem` then parses that text as Python. Creating a real symlink without Developer Mode: `WinError 1314`. Via UNC, Windows Python could not even open this checkout’s `.summem\summem` (`Errno 2`); repo-root `summem` via UNC **did** run `version`.
-
-**Recommended resolution:** Consumers already **copy** the driver (README). Leave that. Do not teach `ensure_store` to copy (existing contract). For this development repo, Windows contributors run `python summem` at the root (the real file). Do not require `core.symlinks=true` as the product install. A later port may add a contributor note, not a committed `.cmd` in `.summem/`.
-
-**Why that is optimal:** The store must not gain a Windows launcher the script does not own. Copy-vs-symlink is already the consumer vs dogfood split.
+This development repo’s `.summem/summem` is a git symlink; Git for Windows `core.symlinks=false` checks it out as the text `../summem`. **Out of scope.** We will develop on Windows against repo-root `summem`. Consumers already copy the driver. Do not spend a port on `core.symlinks` or a `.cmd` wrapper.
 
 ### 4. Content-addressed files vs `core.autocrlf`
 
-**What breaks:** There is no `.gitattributes`. This machine’s Git for Windows has `core.autocrlf=false`, so it did not bite here. The common installer choice `true` would check out notes / `.tree` / `.summ` as CRLF. Digests and nap stems are SHA-256 of exact bytes (`note_file_bytes` is `\n` only). Zipper identity would lie; zoom would disagree with `HEAD`.
+**What breaks:** Notes, `.tree`, and `.summ` are SHA-256 of exact bytes, written as LF. A consumer’s Git may check those files out as CRLF (`core.autocrlf=true` is a common Windows installer default). Then digest, nap stem, and zipper disagree with the Unix `HEAD` that wrote them.
 
-**Recommended resolution:** `.gitattributes` marking `.summem/notes/**` and `.summem/naps/**` as `-text` (binary). Optionally `summem text eol=lf`.
+**Recommended resolution:** SumMem itself. On every read of those files, canonicalize `\r\n` (and lone `\r`) to `\n` *before* digest, JSON parse, and caption. Writes stay LF (`note_file_bytes` already). Do not rewrite the working tree just to strip CR. Do not require `.gitattributes` or `git config` in the consumer repo.
 
-**Why that is optimal:** `eol=lf` still lets a tool convert; `-text` matches “these bytes are the id.” OptMem has no git-tree store, so it never hit this. This is the one Windows-adjacent hole that can corrupt a POSIX clone’s history if a Windows contributor commits through autocrlf.
+**Why that is optimal:** We do not own the consumer’s Git. Hashing the raw checkout bytes is the bug. Canonical LF on read matches the committed object under the usual autocrlf “LF in repo, CRLF in the Windows worktree” setup. Rewriting every note to LF would dirty a Windows clone for no identity gain.
 
 ### 5. Uncaught lock import is a traceback, not a ratchet
 
@@ -98,7 +96,7 @@ These are not findings. Listed so a later port does not “fix” them.
 
 | Surface | What breaks | Recommended resolution | Why |
 | --- | --- | --- | --- |
-| `prompt_text` / `AGENTS.md` | `Run \`.summem/summem wake\`` is a POSIX exec. A Windows clone of the same file cannot run it. | Keep the bootstrap clone-portable: name the driver path with forward slashes; do not make the wake line a host argv0. Recipes on root wake. | Operator constraint: you do not know the clone OS. `init` already says command syntax comes from wake. |
+| `prompt_text` / `AGENTS.md` | `Run \`.summem/summem wake\`` is a POSIX exec. A Windows clone of the same file cannot run it. | Name the driver file; do not pick `python` vs shebang or a drive path. Pasteable argv lives in Usage/`Run:` via `sys.executable` on Windows. | Committed prompt is cloned; OptMem’s installer prompt is not. |
 | `how_to_text` / `fold_request` | Same `AGENT_BIN` baked at compile time | Branch on `sys.platform` (or `os.name`) when **printing**, using `sys.executable` on Windows | Runtime may be host-specific; the committed prefix may not. |
 | README quickstart | `$ .summem/summem wake` | POSIX examples stay; a one-line Windows note: prefix with the Python 3.11+ interpreter. Do not put `C:\Users\…` in README. | Absolute Windows paths are user-specific. |
 
@@ -108,8 +106,9 @@ These are not findings. Listed so a later port does not “fix” them.
 
 ## Later implementation order
 
-1. `.gitattributes` `-text` for notes/naps (protects identity before anyone notes from Windows).
-2. `with_store_lock` Windows branch (finding 1 + 5) — unblocks `note`/`nap`/surgery.
-3. Runtime invoke strings (finding 2) — unblocks agents after the lock works.
+1. `with_store_lock` Windows branch (finding 1 + 5) — unblocks `note`/`nap`/surgery.
+2. Canonical CRLF on read (finding 4) — identity under consumer autocrlf.
+3. Runtime invoke strings (finding 2) — pasteable `Run:` / Usage on Windows.
 4. Tests follow the lock helper; shebang bit gated.
-5. `AGENTS.md` / `prompt_text` only if the wake line is still an argv0 (finding, docs).
+5. `prompt_text` only as far as the wake line is still a POSIX exec (finding 2, docs).
+6. Finding 3 (symlink): won’t-do.

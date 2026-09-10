@@ -1,0 +1,1 @@
+16-hex (#67): SHA-256[:16] in leafset_id, stems, nested NapChild.id; migrate.py is the only 4-part and 5-part-64 reader; first birthday is a widen PR. README walkthrough still shows a 64-hex pair name; atlas Identity is the real line.
