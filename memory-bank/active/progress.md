@@ -67,6 +67,16 @@ Make SumMem able to launch and run on native Windows with the smallest capabilit
 * Insights
     - `os.name = "nt"` on Linux makes pathlib raise `cannot instantiate 'WindowsPath'`
 
+## 2026-09-09 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-windows-compat.md`
+    - Reconciled persistent files (already updated in build)
+* Decisions made
+    - No further persistent-file edits at reflect
+* Insights
+    - Preflight's demand for a fake `msvcrt` oracle was the load-bearing catch
+
 ## 2026-09-09 - QA - COMPLETE (PASS)
 
 * Work completed
