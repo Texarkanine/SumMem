@@ -1,11 +1,10 @@
 # Active Context
 
 ## Current Task: windows-compat-review
-**Phase:** REFLECT COMPLETE
+**Phase:** ARCHIVE - ENTERING
 
 ## What Was Done
-- Reflected on the python-on-PATH bootstrap vs host-specific Usage split.
-- QA PASS; push of `windows-support` still the delivery step.
+- Native Windows confirmed working. Intro drop pushed. GHA green.
 
 ## Next Step
-- Push `windows-support`. Then `/niko-archive`.
+- Archive and clear ephemeral memory bank.

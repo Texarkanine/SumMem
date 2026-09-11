@@ -116,3 +116,11 @@ Rework of PR #84: `init` always says `python .summem/summem wake`; wake Usage/`R
     - `tox -e py311`: 389 passed.
 * Decisions made
     - The prefix does not name an invoke path. Recipes stay on root wake.
+
+## 2026-09-11 - ARCHIVE - ENTERING
+
+* Work completed
+    - Operator confirmed native Windows: driver and `python .summem/summem` recipes work. Cursor auto-approve (dumb model) blocked the `python` call; the command itself is fine.
+    - Pushed `windows-support` including the intro drop. GHA py311–py314 green.
+* Next
+    - Archive `windows-compat-review` and clear ephemeral memory bank.
