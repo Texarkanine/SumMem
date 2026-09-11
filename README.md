@@ -189,3 +189,5 @@ Summarized,
 > Invoking the script does not make the caller or the containing repo a covered work. Using the script inside your org doesn't require making any source available.
 >
 > Making a modified version available outside your organization — by distributing it, or by offering remote interaction with it — remains AGPL.
+>
+> Use it to make your agents better, whether those agents serve you or your customers - just don't Tivoize me!
