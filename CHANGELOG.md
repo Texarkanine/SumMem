@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.1](https://github.com/Texarkanine/SumMem/compare/v0.11.0...v0.11.1) (2026-09-11)
+
+
+### Bug Fixes
+
+* **cli:** omit catalog how-to from empty-catalog wake ([#82](https://github.com/Texarkanine/SumMem/issues/82)) ([a1d703a](https://github.com/Texarkanine/SumMem/commit/a1d703a23e7c0cb687817a09e3d88393d9308437))
+* run the driver on native Windows ([#84](https://github.com/Texarkanine/SumMem/issues/84)) ([cc019ed](https://github.com/Texarkanine/SumMem/commit/cc019eda86c21588adc6363465e679f77b276bec))
+
 ## [0.11.0](https://github.com/Texarkanine/SumMem/compare/v0.10.1...v0.11.0) (2026-08-29)
 
 
