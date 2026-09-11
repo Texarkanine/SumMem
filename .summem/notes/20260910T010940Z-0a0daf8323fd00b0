@@ -1,0 +1,1 @@
+Windows port: no consumer .gitattributes — canonicalize CRLF on read for digest/JSON; punt this-repo git symlink; AGENTS.md is not a pasteable argv0.

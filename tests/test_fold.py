@@ -238,6 +238,7 @@ def test_sixteen_leaf_pack_tree_depth_is_log(tmp_path, summem):
 def test_nap_prints_remaining_ones_not_parent_plus_one(tmp_path, monkeypatch, capsys, summem):
     """After napping two of four 1s at budget 2, stdout is Saved. then the remaining two 1s."""
     m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     monkeypatch.setattr(m, "WAKE_LINES", 2)
@@ -288,6 +289,7 @@ def test_nap_prints_remaining_count_after_saved(tmp_path, monkeypatch, capsys, s
 def test_over_budget_note_requests_equal_grain_ones(tmp_path, monkeypatch, capsys, summem):
     """With WAKE_LINES=3, a fourth note prints the two oldest ids and writes no nap."""
     m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     monkeypatch.setattr(m, "WAKE_LINES", 3)
@@ -325,6 +327,7 @@ def test_default_wake_lines_is_32(summem):
 def test_config_toml_wake_lines_is_read(tmp_path, monkeypatch, capsys, summem):
     """A committed config.toml WAKE_LINES value is the store's budget."""
     m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     m.ensure_store(repo)
@@ -363,6 +366,7 @@ def test_fold_request_reuses_nodes_and_entry_chars(tmp_path, monkeypatch, summem
 def test_fold_request_mentions_remaining(tmp_path, monkeypatch, summem):
     """Five notes at budget 3: fold_request says compressions remain after this one."""
     m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     monkeypatch.setattr(m, "WAKE_LINES", 3)
@@ -428,6 +432,7 @@ def test_fold_request_includes_path_when_cwd_misses_store(tmp_path, monkeypatch,
 def test_fold_request_omits_path_when_cwd_selects_store(tmp_path, monkeypatch, summem):
     """Walk-up from $PWD already finds the folded store: Run: has no --path."""
     m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
     repo = init_repo(tmp_path / "r")
     pkg = repo / "pkg"
     pkg.mkdir()
@@ -441,6 +446,23 @@ def test_fold_request_omits_path_when_cwd_selects_store(tmp_path, monkeypatch, s
     out = m.fold_request(pkg, 1)
     assert " --path " not in out
     assert "Run: .summem/summem nap " in out
+
+
+def test_fold_request_run_uses_agent_invoke(tmp_path, monkeypatch, summem):
+    """On nt, fold_request Run: uses agent_invoke(), not a bare AGENT_BIN command."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    monkeypatch.setattr(m, "WAKE_LINES", 1)
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: True)
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    out = m.fold_request(repo, 1)
+    invoke = m.agent_invoke()
+    assert invoke == f"python {m.AGENT_BIN}"
+    assert f"Run: {invoke} nap " in out
+    assert "Run: .summem/summem nap " not in out
+    assert m.sys.executable not in out
 
 
 def test_fold_request_note_pair_quotes_text_only(tmp_path, monkeypatch, summem):

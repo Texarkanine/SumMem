@@ -21,6 +21,49 @@ def test_note_digest_is_sha256_of_file_bytes(summem):
     assert m.note_digest(raw) == hashlib.sha256(raw).hexdigest()
 
 
+def test_note_digest_canonicalizes_crlf(summem):
+    """CRLF and lone CR hash as the LF file bytes; LF is unchanged."""
+    m = summem
+    lf = b"hello\n"
+    digest = hashlib.sha256(lf).hexdigest()
+    assert m.note_digest(lf) == digest
+    assert m.note_digest(b"hello\r\n") == digest
+    assert m.note_digest(b"hello\r") == digest
+
+
+def test_loads_tree_canonicalizes_crlf(summem):
+    """CRLF line endings in tree JSON parse to the same Tree as LF."""
+    m = summem
+    tree = m.Tree(kids=[m.NoteChild(name="n1", text="hello")])
+    lf = m.dumps_tree(tree)
+    assert m.loads_tree(lf) == tree
+    assert m.loads_tree(lf.replace(b"\n", b"\r\n")) == tree
+
+
+def test_nap_caption_canonicalizes_crlf(tmp_path, summem):
+    """A CRLF .summ or note file yields an LF caption and LF digest."""
+    m = summem
+    summ = tmp_path / "x.summ"
+    summ.write_bytes(b"hello\r\n")
+    assert m._nap_caption(summ) == "hello"
+    notes = tmp_path / ".summem" / "notes"
+    notes.mkdir(parents=True)
+    (tmp_path / ".summem" / "naps").mkdir()
+    (notes / "20260101T000000Z-aaaaaaaaaaaaaaaa").write_bytes(b"hello\r\n")
+    nodes = m.list_view(tmp_path)
+    assert len(nodes) == 1
+    assert nodes[0].caption == "hello"
+    assert nodes[0].id == m.leafset_id([hashlib.sha256(b"hello\n").hexdigest()])
+
+
+def test_variant_tag_canonicalizes_crlf(summem):
+    """variant_tag of CRLF pair bytes matches the LF pair."""
+    m = summem
+    tree = m.dumps_tree(m.Tree(kids=[m.NoteChild(name="n1", text="hello")]))
+    cap = b"pair\n"
+    assert m.variant_tag(tree.replace(b"\n", b"\r\n"), b"pair\r\n") == m.variant_tag(tree, cap)
+
+
 def test_leafset_id_singleton_hashes_hex_ascii(summem):
     """A singleton leaf-set id is the first 16 hex of SHA-256 of that digest's hex as ASCII."""
     m = summem

@@ -1,0 +1,1 @@
+Do not advertise native Windows: no argv0 is a command in both cmd.exe and a Unix shell. Ceiling is internals (lock, CRLF) so a Windows-only shop can patch their bootstrap.

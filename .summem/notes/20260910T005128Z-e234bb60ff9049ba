@@ -1,0 +1,1 @@
+Windows: AGENTS.md stays clone-portable (no C:\ argv0); Usage/Run: may print host invoke. note/nap crash on import fcntl; pathlib --path and python .summem/summem work; do not flock a store lock file.

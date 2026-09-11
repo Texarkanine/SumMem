@@ -110,9 +110,10 @@ def test_agents_md_starts_with_prompt_text(summem):
     assert agents.startswith(prompt)
 
 
-def test_how_to_text_is_the_usage_section(summem):
+def test_how_to_text_is_the_usage_section(monkeypatch, summem):
     """how_to_text() is the root-wake Usage section: header, taught verbs, no runbook."""
     m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
     text = m.how_to_text()
     lower = text.lower()
     assert text.startswith("== SumMem Usage ==")
@@ -187,9 +188,10 @@ def test_prompt_and_how_to_are_disjoint(summem):
     assert "== SumMem Usage ==" not in prompt
 
 
-def test_how_to_text_catalog_is_opt_in(summem):
+def test_how_to_text_catalog_is_opt_in(monkeypatch, summem):
     """Default Usage omits catalog how-to; catalog=True appends the pull recipe."""
     m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
     base = m.how_to_text()
     cataloged = m.how_to_text(catalog=True)
     assert "catalog" not in base.lower()
@@ -198,3 +200,69 @@ def test_how_to_text_catalog_is_opt_in(summem):
     assert f"{m.AGENT_BIN} wake --path <path>" in cataloged
     assert cataloged.startswith(base)
     assert "had no catalog" not in cataloged
+
+
+def test_agent_invoke_uses_python_on_nt(monkeypatch, summem):
+    """When the host cannot exec AGENT_BIN, agent_invoke prefixes python plus AGENT_BIN."""
+    m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
+    assert m.agent_invoke() == m.AGENT_BIN
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: True)
+    assert m.agent_invoke() == f"python {m.AGENT_BIN}"
+    assert m.sys.executable not in m.agent_invoke()
+
+
+def test_how_to_text_uses_agent_invoke(monkeypatch, summem):
+    """On a host that needs an interpreter prefix, Usage recipes use agent_invoke()."""
+    m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: True)
+    invoke = m.agent_invoke()
+    text = m.how_to_text()
+    assert f"`{invoke} note" in text
+    assert f"`{m.AGENT_BIN} note" not in text
+    prompt = m.prompt_text()
+    assert f"`{m.AGENT_BIN}`" not in prompt
+    assert m.sys.executable not in prompt
+    assert m.sys.executable not in text
+
+
+def test_prompt_text_bootstrap_wake_is_python(monkeypatch, summem):
+    """prompt_text names SumMem, then python AGENT_BIN wake; no invoke-path intro."""
+    m = summem
+    for needs in (True, False):
+        monkeypatch.setattr(m, "_host_needs_interpreter", lambda n=needs: n)
+        prompt = m.prompt_text()
+        assert "invoked as" not in prompt
+        assert f"`{m.AGENT_BIN}`" not in prompt
+        assert f"`python {m.AGENT_BIN} wake`" in prompt
+        assert m.sys.executable not in prompt
+        assert "only work on Windows" not in prompt
+
+
+def test_init_text_is_host_agnostic(monkeypatch, capsys, summem):
+    """init_text is the same on both hosts: no Windows warning, body is prompt_text()."""
+    m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: True)
+    windows = m.init_text()
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
+    posix = m.init_text()
+    assert windows == posix
+    assert "only work on Windows" not in windows
+    assert m.sys.executable not in windows
+    recipe, _, rest = windows.partition("---")
+    assert "starting write rule" in recipe.lower()
+    assert rest.lstrip() == m.prompt_text()
+    assert f"`python {m.AGENT_BIN} wake`" in windows
+    assert m.main(["init"]) == 0
+    assert capsys.readouterr().out == windows
+
+
+def test_init_text_posix_has_no_windows_warning(monkeypatch, summem):
+    """POSIX init_text has no Windows-only warning and still ends the recipe at ---."""
+    m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
+    text = m.init_text()
+    recipe, _, rest = text.partition("---")
+    assert "only work on Windows" not in text
+    assert "starting write rule" in recipe.lower()
+    assert rest.lstrip() == m.prompt_text()

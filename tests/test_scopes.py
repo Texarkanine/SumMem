@@ -300,6 +300,7 @@ def test_root_wake_catalog_is_labeled_paths_not_commands(tmp_path, monkeypatch, 
 def test_empty_root_omits_project_root_header(tmp_path, monkeypatch, capsys, summem):
     """A cataloged repo with no root notes omits == Project-root Memories ==."""
     m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     assert m.main(["start", "pkg"]) == 0
@@ -345,6 +346,7 @@ def test_pull_wake_omits_usage(tmp_path, monkeypatch, capsys, summem):
 def test_root_wake_catalogs_other_store(tmp_path, monkeypatch, capsys, summem):
     """Root wake lists another started store under a catalog header."""
     m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     assert m.main(["start", "pkg"]) == 0
