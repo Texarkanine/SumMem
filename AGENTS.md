@@ -1,6 +1,6 @@
 # Project Memory
 
-Shared memory for this repository is managed through SumMem, invoked as `.summem/summem`.
+Shared memory for this repository is managed through SumMem.
 
 ## At Session Start: Activating SumMem (mandatory)
 

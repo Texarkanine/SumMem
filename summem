@@ -1290,7 +1290,7 @@ def prompt_text() -> str:
     return f"""\
 # Project Memory
 
-Shared memory for this repository is managed through SumMem, invoked as `{AGENT_BIN}`.
+Shared memory for this repository is managed through SumMem.
 
 ## At Session Start: Activating SumMem (mandatory)
 
@@ -1309,7 +1309,7 @@ def init_text() -> str:
     return (
         "Insert the following at the top of AGENTS.md as a starting write rule. "
         "You may edit what this repository remembers. "
-        "Command syntax comes from root wake; do not copy it into this prefix. "
+        "Command syntax comes from root wake; do not copy it into these guidelines. "
         "If Claude Code should see it too,"
         "\n"
         "put @AGENTS.md at the top of CLAUDE.md.\n"

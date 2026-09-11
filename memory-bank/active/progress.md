@@ -107,3 +107,12 @@ Rework of PR #84: `init` always says `python .summem/summem wake`; wake Usage/`R
     - Persistent files were already reconciled in Build; no further briefing edits.
 * Insights
     - `python` on PATH is clone-portable; `sys.executable` is not.
+
+## 2026-09-10 - POST-REFLECT - DROP INVOKE INTRO
+
+* Work completed
+    - Dropped `invoked as {AGENT_BIN}` from `prompt_text()` / lockstep `AGENTS.md`. Intro is "managed through SumMem"; first-wake stays `python .summem/summem wake`.
+    - Retargeted `tests/test_init.py`; `systemPatterns.md` briefing.
+    - `tox -e py311`: 389 passed.
+* Decisions made
+    - The prefix does not name an invoke path. Recipes stay on root wake.

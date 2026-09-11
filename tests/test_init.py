@@ -221,17 +221,19 @@ def test_how_to_text_uses_agent_invoke(monkeypatch, summem):
     assert f"`{invoke} note" in text
     assert f"`{m.AGENT_BIN} note" not in text
     prompt = m.prompt_text()
-    assert f"`{m.AGENT_BIN}`" in prompt
+    assert f"`{m.AGENT_BIN}`" not in prompt
     assert m.sys.executable not in prompt
     assert m.sys.executable not in text
 
 
 def test_prompt_text_bootstrap_wake_is_python(monkeypatch, summem):
-    """prompt_text wake is python AGENT_BIN wake on every host; no sys.executable."""
+    """prompt_text names SumMem, then python AGENT_BIN wake; no invoke-path intro."""
     m = summem
     for needs in (True, False):
         monkeypatch.setattr(m, "_host_needs_interpreter", lambda n=needs: n)
         prompt = m.prompt_text()
+        assert "invoked as" not in prompt
+        assert f"`{m.AGENT_BIN}`" not in prompt
         assert f"`python {m.AGENT_BIN} wake`" in prompt
         assert m.sys.executable not in prompt
         assert "only work on Windows" not in prompt

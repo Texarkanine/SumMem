@@ -1,0 +1,1 @@
+msvcrt lock-deadline test must allow 1e-9 slack on sum(sleeps); 3.12+ can land at 30.000000000000007
