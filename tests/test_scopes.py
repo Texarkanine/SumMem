@@ -369,7 +369,7 @@ def test_root_wake_catalogs_other_store(tmp_path, monkeypatch, capsys, summem):
     assert "git" not in out
 
 
-def test_catalog_empty_store_prints_zero_grain(tmp_path, monkeypatch, capsys, summem):
+def test_catalog_empty_store_prints_zero(tmp_path, monkeypatch, capsys, summem):
     """An empty started child store catalogs as 0: ./pkg."""
     m = summem
     repo = init_repo(tmp_path / "r")
@@ -381,7 +381,7 @@ def test_catalog_empty_store_prints_zero_grain(tmp_path, monkeypatch, capsys, su
     assert "0: ./pkg" in lines
 
 
-def test_catalog_one_note_prints_one_grain(tmp_path, monkeypatch, capsys, summem):
+def test_catalog_one_note_prints_one(tmp_path, monkeypatch, capsys, summem):
     """One loose note in a child store catalogs as 1: ./pkg without the note text."""
     m = summem
     repo = init_repo(tmp_path / "r")
@@ -396,8 +396,8 @@ def test_catalog_one_note_prints_one_grain(tmp_path, monkeypatch, capsys, summem
     assert "pkg-note" not in out
 
 
-def test_catalog_does_not_pad_grain_width(tmp_path, monkeypatch, capsys, summem):
-    """Catalog grain prefixes are not digit-padded: 0: ./a next to 10: ./b."""
+def test_catalog_does_not_pad_count_width(tmp_path, monkeypatch, capsys, summem):
+    """Catalog count prefixes are not digit-padded: 0: ./a next to 10: ./b."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
@@ -414,7 +414,7 @@ def test_catalog_does_not_pad_grain_width(tmp_path, monkeypatch, capsys, summem)
 
 
 def test_catalog_text_does_not_list_view(tmp_path, monkeypatch, summem):
-    """catalog_text does not call list_view or heal_view to count grain."""
+    """catalog_text does not call list_view or heal_view to count."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
@@ -430,8 +430,8 @@ def test_catalog_text_does_not_list_view(tmp_path, monkeypatch, summem):
     assert "1: ./pkg" in text.splitlines()
 
 
-def test_catalog_count_preserves_folded_note_grain(tmp_path, monkeypatch, capsys, summem):
-    """Catalog note count keeps encoded nap grain after a fold."""
+def test_catalog_folded_pair_counts_as_two(tmp_path, monkeypatch, capsys, summem):
+    """A folded pair catalogs as 2: ./pkg, not 0: (lost) or 4: (both suffixes)."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
