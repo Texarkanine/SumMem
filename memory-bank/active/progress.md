@@ -58,3 +58,14 @@ Root-wake catalog lines show leaf grain as `N: ./path` from the existing `git ls
     - QA result: PASS. No KISS/DRY/YAGNI/completeness/regression/integrity/documentation findings block acceptance.
 * Insights
     - `started_stores()` delegating to `_listed_store_grains` removed the prior duplicated scan without changing its `list[Path]` contract, satisfying both the DRY and migrate-compatibility constraints in one move.
+
+## 2026-09-15 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-catalog-grain-count.md`.
+    - Reconciled persistent files (systemPatterns already updated in build).
+* Decisions made
+    - No further persistent-file edits.
+* Insights
+    - Nested discovery is `/.summem/`; root-relative `.summem/` is a different shape.
+
