@@ -8,7 +8,7 @@ The view matches [OptMem](https://github.com/VictorTaelin/OptMem): short notes, 
 
 Ingest is wait-free union: one immutable file per note. Integrate is cooperative: the script may fold a sealed block into a one-line caption plus a self-contained payload, then drop the children from the view. Wake is wait-free: it prints whatever captions exist and never blocks on a missing nap.
 
-A command resolves one store by walking from `--path` or `$PWD` toward the git root and taking the first started directory. Outside a repository, store commands fail; `init`, `version`, and help still print. Root wake prints `== SumMem Usage ==` (`how_to_text`), then a labeled catalog (`== Additional SumMem Catalogs ==` and `./path` lines, not pull commands) when other stores exist, then that store's decaying document under `== Project-root Memories ==` when the document is non-empty. A pull (`wake --path`) prints only the nearest store: no Usage, no catalog, no Project-root header. Child memory in context is advertised, not enforced.
+A command resolves one store by walking from `--path` or `$PWD` toward the git root and taking the first started directory. Outside a repository, store commands fail; `init`, `version`, and help still print. Root wake prints `== SumMem Usage ==` (`how_to_text`), then a labeled catalog (`== Additional SumMem Catalogs ==` and `N: ./path` lines, not pull commands) when other stores exist, then that store's decaying document under `== Project-root Memories ==` when the document is non-empty. A pull (`wake --path`) prints only the nearest store: no Usage, no catalog, no Project-root header. Child memory in context is advertised, not enforced.
 
 This file is the briefing. The atlas is [`docs/architecture/index.md`](../docs/architecture/index.md). What this backend is not yet lives in [`docs/notes.md`](../docs/notes.md).
 
@@ -61,7 +61,7 @@ A missing or conflict-marked caption degrades to grain and unique prefix with no
 
 ## Root pushes; other stores pull
 
-Session start wakes the true root once, because of the `AGENTS.md` block, not a harness hook. Skip if a prior project-root wake is still readable in the conversation. That print includes Usage, then the catalog: walk the tree, honor git ignore (including `.git/info/exclude`), do not keep a committed index. The pull recipe lives in Usage when other stores exist, not in the bootstrap. Catalog lines are paths. `wake --path` does not reprint Usage, root, or the full catalog. Do not load every started store in the root wake.
+Session start wakes the true root once, because of the `AGENTS.md` block, not a harness hook. Skip if a prior project-root wake is still readable in the conversation. That print includes Usage, then the catalog: walk the tree, honor git ignore (including `.git/info/exclude`), do not keep a committed index. The pull recipe lives in Usage when other stores exist, not in the bootstrap. Catalog lines are `N: ./path` (filename leaf grain, then the path token). `wake --path` does not reprint Usage, root, or the full catalog. Do not load every started store in the root wake.
 
 ## Settings live in the store
 

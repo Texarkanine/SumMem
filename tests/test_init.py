@@ -197,7 +197,11 @@ def test_how_to_text_catalog_is_opt_in(monkeypatch, summem):
     assert "catalog" not in base.lower()
     assert "wake --path" not in base
     assert "Listed catalog lines" in cataloged
+    assert "`N:`" in cataloged
+    assert "the `./` token" in cataloged
+    assert "not commands" in cataloged
     assert f"{m.AGENT_BIN} wake --path <path>" in cataloged
+    assert "note --path" not in cataloged
     assert cataloged.startswith(base)
     assert "had no catalog" not in cataloged
 

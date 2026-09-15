@@ -361,46 +361,98 @@ def knobs(parent):
         return defaults
 
 
-def started_stores(git_root) -> list[Path]:
-    """Return git-root (if a store) plus parents of other git-visible `/.summem/` trees."""
+def _store_file_parts(root: Path, posix: str) -> tuple[Path, str] | None:
+    """Return ``(store parent, path under .summem/)`` for a nested git-relative path.
+
+    Root-relative ``.summem/…`` is ignored here: the git root is a store only
+    when ``.summem`` is a directory (``is_store``), matching ``started_stores``.
+    """
+    marker = "/.summem/"
+    idx = posix.find(marker)
+    if idx < 0:
+        return None
+    return root / posix[:idx], posix[idx + len(marker) :]
+
+
+def _listed_store_grains(git_root) -> dict[Path, int]:
+    """Return git-visible store parents mapped to filename leaf grain.
+
+    One ``git ls-files`` pass. Does not ``iterdir`` stores, open payloads, or
+    build a view. Nap ``.tree``/``.summ`` pairs count once. The git root is
+    included when it is a store even if root-relative ``.summem/`` paths do
+    not match ``/.summem/``.
+    """
     import subprocess
 
     root = Path(git_root).resolve()
-    found: set[Path] = set()
+    grains: dict[Path, int] = {}
+    nap_stems: set[tuple[Path, str]] = set()
     if is_store(root):
-        found.add(root)
+        grains[root] = 0
     result = subprocess.run(
         ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
         cwd=root,
         capture_output=True,
     )
     if result.returncode != 0:
-        return sorted(found)
+        return grains
     for raw in result.stdout.split(b"\0"):
         if not raw:
             continue
         rel = raw.decode("utf-8", "surrogateescape")
         posix = Path(rel).as_posix()
-        marker = "/.summem/"
-        idx = posix.find(marker)
-        if idx < 0:
+        parts = _store_file_parts(root, posix)
+        if parts is None:
             continue
-        found.add(root / posix[:idx])
-    return sorted(found)
+        parent, rest = parts
+        grains.setdefault(parent, 0)
+        if rest.startswith("notes/"):
+            name = rest[len("notes/") :]
+            if name and "/" not in name and not name.startswith("."):
+                grains[parent] += 1
+            continue
+        if not rest.startswith("naps/"):
+            continue
+        name = rest[len("naps/") :]
+        if not name or "/" in name or name.startswith("."):
+            continue
+        suffix_path = Path(name)
+        if suffix_path.suffix not in (".summ", ".tree"):
+            continue
+        stem = suffix_path.stem
+        key = (parent, stem)
+        if key in nap_stems:
+            continue
+        parsed = _parse_nap_stem(stem)
+        if parsed is None:
+            continue
+        nap_stems.add(key)
+        grains[parent] += parsed[3]
+    return grains
+
+
+def started_stores(git_root) -> list[Path]:
+    """Return git-root (if a store) plus parents of other git-visible `/.summem/` trees."""
+    return sorted(_listed_store_grains(git_root))
 
 
 def catalog_text(git_root, resolved_parent) -> str:
-    """Return root-wake catalog of other started stores, or empty."""
+    """Return root-wake catalog of other started stores, or empty.
+
+    Each line after the header is ``N: ./path``: filename leaf grain, then the
+    store path. Pulls pass a non-root *resolved_parent* and get empty.
+    """
     root = Path(git_root).resolve()
     if Path(resolved_parent).resolve() != root:
         return ""
-    others = [parent for parent in started_stores(root) if parent != root]
+    grains = _listed_store_grains(root)
+    others = [(parent, count) for parent, count in sorted(grains.items()) if parent != root]
     if not others:
         return ""
     lines = ["== Additional SumMem Catalogs =="]
-    for parent in others:
+    for parent, count in others:
         rel = parent.relative_to(root).as_posix()
-        lines.append(f"./{rel}")
+        lines.append(f"{count}: ./{rel}")
     return "\n".join(lines) + "\n"
 
 
@@ -1262,7 +1314,7 @@ def how_to_text(*, catalog: bool = False) -> str:
     The section includes its ``== SumMem Usage ==`` header and a trailing
     newline, matching ``catalog_text()``. It is not the operator ``-h``
     catalog from ``usage_text()``. When *catalog* is true, append how to
-    read catalog lines and pull with ``wake --path``.
+    read ``N: ./path`` catalog lines and pull with ``wake --path``.
     """
     invoke = agent_invoke()
     text = f"""\
@@ -1278,7 +1330,8 @@ If `note` asks for a nap, the note is already stored; do not retry the same note
 """
     if catalog:
         text += (
-            "\nListed catalog lines are paths that name other stores; they are not commands. "
+            "\nListed catalog lines are `N: ./path`: `N:` is leaf grain, then the path. "
+            "They are not commands. The path is the `./` token. "
             f"When you work under a cataloged path, run `{invoke} wake --path <path>` "
             "if that store's wake is not already in this conversation.\n"
         )

@@ -36,3 +36,15 @@ Root-wake catalog lines show leaf grain as `N: ./path` from the existing `git ls
     - Preserve the explicit removal of the uncommitted out-of-scope `note --path <catalog>` Usage draft during the planned wording change.
 * Insights
     - The plan's single-scan helper keeps `started_stores()` compatible with migrate while preventing root `catalog_text()` from invoking `git ls-files` twice.
+
+## 2026-09-15 - BUILD - COMPLETE
+
+* Work completed
+    - Catalog lines are `N: ./path` from filename grain on the existing ls-files pass.
+    - How-to teaches the `./` token; `note --path` draft removed.
+    - Briefing updated; full matrix 393 passed py311–py314.
+* Decisions made
+    - Root membership stays `is_store` only, not indexed `.summem/` paths.
+    - Exact-line catalog tests pin `N: ./rel`, not a bare `./rel` line.
+* Insights
+    - `in lines` is not a suffix check; `./pkg` as a whole line disappeared once the prefix landed.
