@@ -48,3 +48,13 @@ Root-wake catalog lines show leaf grain as `N: ./path` from the existing `git ls
     - Exact-line catalog tests pin `N: ./rel`, not a bare `./rel` line.
 * Insights
     - `in lines` is not a suffix check; `./pkg` as a whole line disappeared once the prefix landed.
+
+## 2026-09-15 - QA - COMPLETE
+
+* Work completed
+    - Semantic review of build diff (`summem`, tests, docs, systemPatterns) against plan and project brief.
+    - Spot-reran `tests/test_scopes.py` and `tests/test_init.py` under py311: 52 passed.
+* Decisions made
+    - QA result: PASS. No KISS/DRY/YAGNI/completeness/regression/integrity/documentation findings block acceptance.
+* Insights
+    - `started_stores()` delegating to `_listed_store_grains` removed the prior duplicated scan without changing its `list[Path]` contract, satisfying both the DRY and migrate-compatibility constraints in one move.

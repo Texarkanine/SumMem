@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: catalog-grain-count
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
 - `_listed_store_grains` parses one `git ls-files` pass: loose notes +1, nap stems add encoded grain once. `catalog_text` prints `N: ./path`. `started_stores` is still `list[Path]`.
