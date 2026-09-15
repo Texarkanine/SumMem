@@ -26,3 +26,13 @@ Root-wake catalog lines show leaf grain as `N: ./path` from the existing `git ls
     - Out-of-scope `note --path <catalog>` draft is dropped, not shipped.
 * Insights
     - Root `.summem/…` paths do not contain `/.summem/`; root still enters `started_stores` via `is_store`.
+
+## 2026-09-15 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Validated the Level 2 plan against the current catalog implementation, test suites, dependency use by `migrate.py`, and catalog documentation.
+* Decisions made
+    - Preflight result: PASS WITH ADVISORY.
+    - Preserve the explicit removal of the uncommitted out-of-scope `note --path <catalog>` Usage draft during the planned wording change.
+* Insights
+    - The plan's single-scan helper keeps `started_stores()` compatible with migrate while preventing root `catalog_text()` from invoking `git ls-files` twice.

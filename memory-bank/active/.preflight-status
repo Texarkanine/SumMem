@@ -1,0 +1,11 @@
+PASS WITH ADVISORY
+
+The two executable units encode TDD in the required order: test stubs and interfaces precede implemented tests and a red run, which precede production code and green runs. The prose-only briefing unit correctly omits tests.
+
+The plan matches the current `started_stores()`/`catalog_text()` boundary: a dedicated `_listed_store_grains()` preserves `started_stores()` as a list API for migrate while allowing root catalog rendering to consume one `git ls-files` result. It accounts for the root `.summem` path, gitignore behavior, empty started stores, paired nap suffixes, legacy stems, pull behavior, and the no-view-loading constraint.
+
+The plan maps every brief requirement to concrete files and tests. Existing documentation statements that catalog lines are paths-only are found in `memory-bank/systemPatterns.md` and `docs/architecture/index.md`; the planned surgical documentation update covers them. No relevant README statement currently exists.
+
+The working tree already has the out-of-scope `note --path <catalog>` Usage draft. The plan explicitly removes it while updating the catalog wording; retain that scope boundary during build.
+
+Advisory: after this change stabilizes, consider an opt-in `wake --catalog-by-grain` view that reorders only the catalog by descending grain while retaining the existing path-sorted default. That would turn the new count into an explicit prioritization tool without loading child stores or changing normal session-start output.
