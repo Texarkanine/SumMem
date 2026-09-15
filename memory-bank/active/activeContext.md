@@ -8,3 +8,4 @@
 
 ## Next Step
 - Run `/niko-archive` to create the archive document and finalize the current project.
+- Post-reflect: how-to calls `N` a count, drops the `./` token sentence, and teaches `note --path` walk-up so catalogs can receive writes.

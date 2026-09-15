@@ -69,3 +69,13 @@ Root-wake catalog lines show leaf grain as `N: ./path` from the existing `git ls
 * Insights
     - Nested discovery is `/.summem/`; root-relative `.summem/` is a different shape.
 
+## 2026-09-15 - POST-REFLECT HOW-TO - COMPLETE
+
+* Work completed
+    - How-to: `N:` is a count; dropped `./` token sentence; `note --path <file>` walk-up so catalogs can receive writes.
+* Decisions made
+    - File-walk, not `note --path <catalog>` topic filing.
+* Insights
+    - A catalog that is only a pull list stays empty if agents always `note` from the git root.
+
+

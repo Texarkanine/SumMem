@@ -1314,7 +1314,8 @@ def how_to_text(*, catalog: bool = False) -> str:
     The section includes its ``== SumMem Usage ==`` header and a trailing
     newline, matching ``catalog_text()``. It is not the operator ``-h``
     catalog from ``usage_text()``. When *catalog* is true, append how to
-    read ``N: ./path`` catalog lines and pull with ``wake --path``.
+    read ``N: ./path`` catalog lines, pull with ``wake --path``, and record
+    with ``note --path`` (walk-up).
     """
     invoke = agent_invoke()
     text = f"""\
@@ -1330,10 +1331,12 @@ If `note` asks for a nap, the note is already stored; do not retry the same note
 """
     if catalog:
         text += (
-            "\nListed catalog lines are `N: ./path`: `N:` is leaf grain, then the path. "
-            "They are not commands. The path is the `./` token. "
+            "\nListed catalog lines are `N: ./path`: `N:` is a count, then the path. "
+            "They are not commands. "
             f"When you work under a cataloged path, run `{invoke} wake --path <path>` "
-            "if that store's wake is not already in this conversation.\n"
+            "if that store's wake is not already in this conversation. "
+            f"`{invoke} note --path <file> \"…\"` records in the nearest store for that file. "
+            "The same `--path` on nap, recall, and zoom walks up the same way.\n"
         )
     return text
 
