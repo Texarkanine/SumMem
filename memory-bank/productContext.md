@@ -30,15 +30,31 @@ This product is not a single-actor local diary (that is OptMem, including its ma
 
 ## Success Criteria
 
-The product succeeds when these process-level tests hold: concurrent notes merge cleanly; same-block naps with different pair bytes merge as distinct paths and zipper-collapse on the next `note` or `nap`; originals survive squash onto `main`; positional ids are rejected; long-lived branches union then fold lazily; a path flag resolves to the nearest started store; root wake catalogs other stores and a pull prints only that store.
+The product succeeds when these process-level tests hold:
+
+- Concurrent notes merge cleanly.
+- Same-block naps with different pair bytes merge as distinct paths and zipper-collapse on the next `note` or `nap`.
+- Originals survive squash onto `main`.
+- Positional ids are rejected.
+- Long-lived branches union then fold lazily.
+- A path flag resolves to the nearest started store.
+- Root wake catalogs other stores and a pull prints only that store.
 
 ## Key Constraints
+
+Writer and identity:
 
 - Agents never write the store. They run a script. The script owns every file.
 - There is no actor, lease, or cross-clone lock. A scope is a directory that opted in. A same-machine lock on one mutating invocation is not a committed object.
 - Personal and machine facts stay out of the repository.
 - SumMem is not Niko's `memory-bank/` and must not be folded into it.
+
+Wake:
+
 - Wake never refuses to print. "Cannot wake, go nap first" is a defect. Wake never drops view nodes to fit the budget; over-budget listings stay complete until `note`/`nap` fold them back.
+
+CLI and scopes:
+
 - CLI output does not mention store files, hashes as paths, or git. Root-wake Usage treats the files the script wrote as part of your work, not a separate publish procedure.
 - A scope is not a package manifest. `start` is how a directory becomes a store.
 - The git root auto-creates on first `wake`, `note`, `nap`, `zoom`, or `recall`. Other stores appear only via `start`. Outside a repository, store commands fail. Help, `init`, and `version` still print.
