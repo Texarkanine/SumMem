@@ -7,7 +7,7 @@ import shutil
 import subprocess
 import tomllib
 
-from gitutil import init_repo
+from gitutil import git, init_repo
 
 
 def test_resolve_subdir_without_store_is_git_root(tmp_path, summem):
@@ -452,6 +452,25 @@ def test_catalog_folded_pair_counts_as_two(tmp_path, monkeypatch, capsys, summem
         if p.is_file() and not p.name.startswith(".")
     ]
     assert loose == []
+
+
+def test_catalog_skips_cached_notes_nap_unlinked(tmp_path, monkeypatch, capsys, summem):
+    """Committed notes nap unlinked do not add to N before deletions are staged."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["start", "pkg"]) == 0
+    assert m.main(["note", "--path", "pkg", "alpha"]) == 0
+    assert m.main(["note", "--path", "pkg", "beta"]) == 0
+    git(["add", "-A"], repo)
+    git(["commit", "-m", "two notes"], repo)
+    ids = [node.id for node in m.list_view(repo / "pkg")]
+    assert m.main(["nap", "--path", "pkg", ids[0], ids[1], "pair"]) == 0
+    capsys.readouterr()
+    assert m.main(["wake"]) == 0
+    lines = capsys.readouterr().out.splitlines()
+    assert "2: ./pkg" in lines
+    assert "4: ./pkg" not in lines
 
 
 def test_pull_wake_omits_catalog_and_root_notes(tmp_path, monkeypatch, capsys, summem):

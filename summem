@@ -379,9 +379,9 @@ def _listed_store_counts(git_root) -> dict[Path, int]:
 
     One ``git ls-files`` pass. Does not ``iterdir`` stores, open payloads, or
     build a view. A loose note is +1. A nap stem adds its leaf count once
-    (``.tree`` and ``.summ`` share a stem). The git root is included when it
-    is a store even if root-relative ``.summem/`` paths do not match
-    ``/.summem/``.
+    (``.tree`` and ``.summ`` share a stem). Listed paths gone from the
+    worktree do not add. The git root is included when it is a store even if
+    root-relative ``.summem/`` paths do not match ``/.summem/``.
     """
     import subprocess
 
@@ -407,6 +407,8 @@ def _listed_store_counts(git_root) -> dict[Path, int]:
             continue
         parent, rest = parts
         counts.setdefault(parent, 0)
+        if not (root / rel).is_file():
+            continue
         directory, sep, name = rest.partition("/")
         if not sep or not name or "/" in name or name.startswith("."):
             continue
