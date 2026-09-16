@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/Texarkanine/SumMem/compare/v0.11.1...v0.12.0) (2026-09-16)
+
+
+### Features
+
+* **cli:** print catalog grain as N: ./path ([#85](https://github.com/Texarkanine/SumMem/issues/85)) ([2722589](https://github.com/Texarkanine/SumMem/commit/27225890e12bfa834601d765a49b05d9f7aec2c0))
+
 ## [0.11.1](https://github.com/Texarkanine/SumMem/compare/v0.11.0...v0.11.1) (2026-09-11)
 
 
