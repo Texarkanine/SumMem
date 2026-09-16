@@ -1,1 +1,0 @@
-{"c":[{"name":"20260829T001244Z-53dde24650751d3f","text":"prompt_text and how_to_text share MEMBERSHIP_PROBE; AGENTS.md lockstep covers the bootstrap copy.","type":"note"},{"name":"20260829T002301Z-2fe1954978d4b4e4","text":"Keep the short membership phrase direct in prompt_text and how_to_text; factoring it harms readability for negligible benefit.","type":"note"}]}
