@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: catalog-grain-count
-**Phase:** REFLECT COMPLETE
+**Phase:** ARCHIVE
 
 ## What Was Done
 - Reflected: filename grain on the existing ls-files pass; do not treat root-relative `.summem/` as nested-store discovery; `in lines` is exact.

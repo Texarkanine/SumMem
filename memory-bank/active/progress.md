@@ -78,4 +78,11 @@ Root-wake catalog lines show leaf grain as `N: ./path` from the existing `git ls
 * Insights
     - A catalog that is only a pull list stays empty if agents always `note` from the git root.
 
+## 2026-09-16 - ARCHIVE - IN PROGRESS
+
+* Work completed
+    - Operator invoked `/niko-archive` after post-reflect how-to, Usage nap sequencing, count naming, briefing sections, and worktree skip.
+* Decisions made
+    - Archive includes post-reflect work; grain-sorted catalog stays a preflight advisory, not this task.
+
 
