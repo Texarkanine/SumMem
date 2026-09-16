@@ -1,0 +1,1 @@
+Root catalog lines are N: ./path; N is filename leaf grain from the same ls-files pass (loose note +1, nap stem once). Path is the ./ token.

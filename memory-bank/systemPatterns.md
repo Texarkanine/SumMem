@@ -1,16 +1,16 @@
 # System Patterns
 
+This file is the briefing. The atlas is [`docs/architecture/index.md`](../docs/architecture/index.md). What this backend is not yet lives in [`docs/notes.md`](../docs/notes.md).
+
 ## How This System Works
 
-SumMem is a script that owns a grow-only set of facts in the git tree, and a decaying view of that set. Agents never touch the store. They run `wake`, `note`, `nap`, `recall`, `zoom`, `start`, `init`, and `version` via `.summem/summem`. Bare invocation and `-h` print a handwritten catalog (`usage_text`); a command registered only with argparse will not appear there. `usage_text` uses `CLI_NAME` (`summem`). `prompt_text` names SumMem, then the wake command `python .summem/summem wake`; it does not name `{AGENT_BIN}` as an invoke. `how_to_text` and `fold_request`'s `Run:` line use `agent_invoke()`: `AGENT_BIN` when this host can exec that path, otherwise `python {AGENT_BIN}`. That `Run:` line includes `--path REL` when walk-up from `$PWD` would not select the store that produced the ids. `fold_request` quotes captions without grain or prefix; those ids live on the `Run:` line. Successful `note` prints `Saved.` then maybe that fold request; successful `nap` prints `Saved.` then maybe that fold request or `Nothing left to compress.` Do not put the ACK or the idle line inside `fold_request`. `prompt_text` is the committed bootstrap: the write rule (what to remember, and when) plus the wake handoff. The intro does not name an invoke path; wake prints recipes. `how_to_text` is the versioned how-to on root wake: argv, grammar, writer-only, fold follow-ups, and catalog pull only when other stores exist. Usage must not repeat the write rule. `init` prints the bootstrap as a starting write rule the operator may edit; that block at the top of committed `AGENTS.md` is how a repository opts in. The script does not reassert its default over an edited prefix. The script assigns names, times, and hashes. This development repo’s record is repo-root `summem`; `.summem/summem` (and dogfood’s) is a symlink to it. `ensure_store` creates `notes/`, `naps/`, and default config when missing. It does not place the driver.
+SumMem is a script that owns a grow-only set of facts in the git tree, and a decaying view of that set. Agents never touch the store. They run `wake`, `note`, `nap`, `recall`, `zoom`, `start`, `init`, and `version` via `.summem/summem`.
 
 The view matches [OptMem](https://github.com/VictorTaelin/OptMem): short notes, a merge tree of summaries, a bounded wake. The store does not. OptMem's one append-only log and position-as-identity cannot survive squash-merge, uninterested conflict resolution, or many writers at once. SumMem keeps the view and replaces the single log with a directory of immutable files.
 
 Ingest is wait-free union: one immutable file per note. Integrate is cooperative: the script may fold a sealed block into a one-line caption plus a self-contained payload, then drop the children from the view. Wake is wait-free: it prints whatever captions exist and never blocks on a missing nap.
 
-A command resolves one store by walking from `--path` or `$PWD` toward the git root and taking the first started directory. Outside a repository, store commands fail; `init`, `version`, and help still print. Root wake prints `== SumMem Usage ==` (`how_to_text`), then a labeled catalog (`== Additional SumMem Catalogs ==` and `./path` lines, not pull commands) when other stores exist, then that store's decaying document under `== Project-root Memories ==` when the document is non-empty. A pull (`wake --path`) prints only the nearest store: no Usage, no catalog, no Project-root header. Child memory in context is advertised, not enforced.
-
-This file is the briefing. The atlas is [`docs/architecture/index.md`](../docs/architecture/index.md). What this backend is not yet lives in [`docs/notes.md`](../docs/notes.md).
+A command resolves one store. This development repo’s record is repo-root `summem`; `.summem/summem` (and dogfood’s) is a symlink to it. `ensure_store` creates `notes/`, `naps/`, and default config when missing. It does not place the driver.
 
 ```mermaid
 graph TD
@@ -26,6 +26,22 @@ graph TD
     Root --> Usage["Usage how-to"]:::script
     Root --> Catalog["Catalog of other started stores"]:::script
 ```
+
+## Operator help is handwritten; agent invoke is host-specific
+
+Bare invocation and `-h` print a handwritten catalog (`usage_text`); a command registered only with argparse will not appear there. `usage_text` uses `CLI_NAME` (`summem`).
+
+`prompt_text` names SumMem, then the wake command `python .summem/summem wake`; it does not name `{AGENT_BIN}` as an invoke. `how_to_text` and `fold_request`'s `Run:` line use `agent_invoke()`: `AGENT_BIN` when this host can exec that path, otherwise `python {AGENT_BIN}`. That `Run:` line includes `--path REL` when walk-up from `$PWD` would not select the store that produced the ids.
+
+## Write rule lives in the prefix; recipes live on root wake
+
+`prompt_text` is the committed bootstrap: the write rule (what to remember, and when) plus the wake handoff. The intro does not name an invoke path; wake prints recipes. `how_to_text` is the versioned how-to on root wake: argv, grammar, writer-only, fold follow-ups, and catalog how-to (pull and `--path` walk-up) only when other stores exist. Usage must not repeat the write rule.
+
+`init` prints the bootstrap as a starting write rule the operator may edit; that block at the top of committed `AGENTS.md` is how a repository opts in. The script does not reassert its default over an edited prefix. The script assigns names, times, and hashes.
+
+## Saved. is the ACK; fold_request is the next fold
+
+`fold_request` quotes captions without grain or prefix; those ids live on the `Run:` line. Successful `note` prints `Saved.` then maybe that fold request; successful `nap` prints `Saved.` then maybe that fold request or `Nothing left to compress.` Do not put the ACK or the idle line inside `fold_request`.
 
 ## Agent-facing errors are ratchets
 
@@ -49,19 +65,31 @@ Note names carry writer time in UTC. Nap names carry the leftmost child's `{stam
 
 ## Wake dates leaves only, never positional ranges
 
-A range such as `#16-31` is a picture of one listing and a lie after the next merge. Wake prints `x1 YYYY-MM-DD: text` for a note. The day is the UTC calendar date of the filename stamp, not note prose. Packs print `xN <prefix>: caption` with no date. `nap` and `zoom` accept the unique prefix of a content id they can already name; a leaf line is not a zoom target. A command that looks like a range is rejected. Filenames and `.tree` nap identity stay 16 hex. Display is a unique prefix of that field (floor 8). Wake, recall hits, and zoom children share that grammar. Recall searches the sentence (note text / nap caption), not the formatted line. Proofs walk `Tree.kids` for nested pack ids; they do not parse zoom stdout. A content id names leaves, not a unique view row: two notes with the same text share an id; after heal they are one view node. Adjacency still needs two distinct ids when two nodes exist. Prefix uniqueness is among distinct ids, not view-row count; a repeated id is still that one prefix. Recall and zoom unique-prefix against `named_ids`, which can print a longer prefix than wake for the same view pack.
+A range such as `#16-31` is a picture of one listing and a lie after the next merge. Wake prints `x1 YYYY-MM-DD: text` for a note. The day is the UTC calendar date of the filename stamp, not note prose. Packs print `xN <prefix>: caption` with no date. `nap` and `zoom` accept the unique prefix of a content id they can already name; a leaf line is not a zoom target. A command that looks like a range is rejected.
+
+Filenames and `.tree` nap identity stay 16 hex. Display is a unique prefix of that field (floor 8). Wake, recall hits, and zoom children share that grammar. Recall searches the sentence (note text / nap caption), not the formatted line. Proofs walk `Tree.kids` for nested pack ids; they do not parse zoom stdout.
+
+A content id names leaves, not a unique view row: two notes with the same text share an id; after heal they are one view node. Adjacency still needs two distinct ids when two nodes exist. Prefix uniqueness is among distinct ids, not view-row count; a repeated id is still that one prefix. Recall and zoom unique-prefix against `named_ids`, which can print a longer prefix than wake for the same view pack.
 
 ## Payloads are write-once; same-block naps union then zipper
 
-Fold writes a new pair. Children leave the view only after the parent payload exists on disk. Zoom is a property of `HEAD`: every sentence still owed lives in a file at the tip. Different pair bytes are different paths; git unions them. Wake may print two same-id rows until the next `note` or `nap`. Equal leaf-sets collapse to the lexicographically greatest complete stem. `.tree` and `.summ` stay one atomic variant pair. Conflict markers in a caption mean skip that caption. Conflict markers in a payload are the failure the canonical dump exists to avoid.
+Fold writes a new pair. Children leave the view only after the parent payload exists on disk. Zoom is a property of `HEAD`: every sentence still owed lives in a file at the tip.
+
+Different pair bytes are different paths; git unions them. Wake may print two same-id rows until the next `note` or `nap`. Equal leaf-sets collapse to the lexicographically greatest complete stem. `.tree` and `.summ` stay one atomic variant pair. Conflict markers in a caption mean skip that caption. Conflict markers in a payload are the failure the canonical dump exists to avoid.
 
 ## Wake is wait-free
 
-A missing or conflict-marked caption degrades to grain and unique prefix with no caption. Wake does not open `.tree` to list an at-or-over-budget view. It does not drop oldest view nodes to fit `WAKE_LINES`. It may open `.tree` to expand an under-budget view. Wake does not open `.tree` to heal overlapping packs; mutating `note` and `nap` may. Writers must not serialize on "cannot wake." Fold requests are equal-grain adjacent view nodes and still unlink; wake may expand in memory when the view is short.
+A missing or conflict-marked caption degrades to grain and unique prefix with no caption. Wake does not open `.tree` to list an at-or-over-budget view. It does not drop oldest view nodes to fit `WAKE_LINES`. It may open `.tree` to expand an under-budget view.
+
+Wake does not open `.tree` to heal overlapping packs; mutating `note` and `nap` may. Writers must not serialize on "cannot wake." Fold requests are equal-grain adjacent view nodes and still unlink; wake may expand in memory when the view is short.
 
 ## Root pushes; other stores pull
 
-Session start wakes the true root once, because of the `AGENTS.md` block, not a harness hook. Skip if a prior project-root wake is still readable in the conversation. That print includes Usage, then the catalog: walk the tree, honor git ignore (including `.git/info/exclude`), do not keep a committed index. The pull recipe lives in Usage when other stores exist, not in the bootstrap. Catalog lines are paths. `wake --path` does not reprint Usage, root, or the full catalog. Do not load every started store in the root wake.
+Session start wakes the true root once, because of the `AGENTS.md` block, not a harness hook. Skip if a prior project-root wake is still readable in the conversation.
+
+Root wake prints `== SumMem Usage ==` (`how_to_text`), then a labeled catalog (`== Additional SumMem Catalogs ==` and `N: ./path` lines, not pull commands) when other stores exist, then that store's decaying document under `== Project-root Memories ==` when the document is non-empty. Walk the tree, honor git ignore (including `.git/info/exclude`), do not keep a committed index. The pull recipe lives in Usage when other stores exist, not in the bootstrap.
+
+`wake --path` prints only the nearest store: no Usage, no catalog, no Project-root header. Do not load every started store in the root wake. Child memory in context is advertised, not enforced. Outside a repository, store commands fail; `init`, `version`, and help still print.
 
 ## Settings live in the store
 

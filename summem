@@ -361,47 +361,100 @@ def knobs(parent):
         return defaults
 
 
-def started_stores(git_root) -> list[Path]:
-    """Return git-root (if a store) plus parents of other git-visible `/.summem/` trees."""
+def _store_file_parts(root: Path, posix: str) -> tuple[Path, str] | None:
+    """Return ``(store parent, path under .summem/)`` for a nested git-relative path.
+
+    Root-relative ``.summem/…`` is ignored here: the git root is a store only
+    when ``.summem`` is a directory (``is_store``), matching ``started_stores``.
+    """
+    marker = "/.summem/"
+    idx = posix.find(marker)
+    if idx < 0:
+        return None
+    return root / posix[:idx], posix[idx + len(marker) :]
+
+
+def _listed_store_counts(git_root) -> dict[Path, int]:
+    """Return git-visible store parents mapped to a filename note count.
+
+    One ``git ls-files`` pass. Does not ``iterdir`` stores, open payloads, or
+    build a view. A loose note is +1. A nap stem adds its leaf count once
+    (``.tree`` and ``.summ`` share a stem). Listed paths gone from the
+    worktree do not add. The git root is included when it is a store even if
+    root-relative ``.summem/`` paths do not match ``/.summem/``.
+    """
     import subprocess
 
     root = Path(git_root).resolve()
-    found: set[Path] = set()
+    counts: dict[Path, int] = {}
+    nap_stems: set[tuple[Path, str]] = set()
     if is_store(root):
-        found.add(root)
+        counts[root] = 0
     result = subprocess.run(
         ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
         cwd=root,
         capture_output=True,
     )
     if result.returncode != 0:
-        return sorted(found)
+        return counts
     for raw in result.stdout.split(b"\0"):
         if not raw:
             continue
         rel = raw.decode("utf-8", "surrogateescape")
         posix = Path(rel).as_posix()
-        marker = "/.summem/"
-        idx = posix.find(marker)
-        if idx < 0:
+        parts = _store_file_parts(root, posix)
+        if parts is None:
             continue
-        found.add(root / posix[:idx])
-    return sorted(found)
+        parent, rest = parts
+        counts.setdefault(parent, 0)
+        if not (root / rel).is_file():
+            continue
+        directory, sep, name = rest.partition("/")
+        if not sep or not name or "/" in name or name.startswith("."):
+            continue
+        if directory == "notes":
+            counts[parent] += 1
+            continue
+        if directory != "naps":
+            continue
+        path = Path(name)
+        if path.suffix not in (".summ", ".tree"):
+            continue
+        key = (parent, path.stem)
+        if key in nap_stems:
+            continue
+        nap_stems.add(key)
+        parsed = _parse_nap_stem(path.stem)
+        if parsed is None:
+            continue
+        leaves = parsed[3]
+        counts[parent] += leaves
+    return counts
+
+
+def started_stores(git_root) -> list[Path]:
+    """Return git-root (if a store) plus parents of other git-visible `/.summem/` trees."""
+    return sorted(_listed_store_counts(git_root))
 
 
 def catalog_text(git_root, resolved_parent) -> str:
-    """Return root-wake catalog of other started stores, or empty."""
+    """Return root-wake catalog of other started stores, or empty.
+
+    Each line after the header is ``N: ./path``: note count from filenames,
+    then the store path. Pulls pass a non-root *resolved_parent* and get empty.
+    """
     root = Path(git_root).resolve()
     if Path(resolved_parent).resolve() != root:
         return ""
-    others = [parent for parent in started_stores(root) if parent != root]
-    if not others:
+    counts = _listed_store_counts(root)
+    rows = [
+        f"{count}: ./{parent.relative_to(root).as_posix()}"
+        for parent, count in sorted(counts.items())
+        if parent != root
+    ]
+    if not rows:
         return ""
-    lines = ["== Additional SumMem Catalogs =="]
-    for parent in others:
-        rel = parent.relative_to(root).as_posix()
-        lines.append(f"./{rel}")
-    return "\n".join(lines) + "\n"
+    return "== Additional SumMem Catalogs ==\n" + "\n".join(rows) + "\n"
 
 
 def require_entry(text: str, entry_chars: int | None = None) -> None:
@@ -1262,7 +1315,8 @@ def how_to_text(*, catalog: bool = False) -> str:
     The section includes its ``== SumMem Usage ==`` header and a trailing
     newline, matching ``catalog_text()``. It is not the operator ``-h``
     catalog from ``usage_text()``. When *catalog* is true, append how to
-    read catalog lines and pull with ``wake --path``.
+    read ``N: ./path`` catalog lines, pull with ``wake --path``, and record
+    with ``note --path`` (walk-up).
     """
     invoke = agent_invoke()
     text = f"""\
@@ -1272,15 +1326,18 @@ def how_to_text(*, catalog: bool = False) -> str:
 
 Never invent filenames, rewrite note bytes, or delete memory files by hand. The script is the only writer. The files it writes are part of your work; do not leave them untracked.
 
-If `note` asks for a nap, the note is already stored; do not retry the same note. The nap is extra work on two older view nodes. Do that nap before your next action.
+If `note` asks for a nap, do that nap before your next action.
 
 `{invoke} recall <regex>` searches remembered text word for word. `{invoke} zoom <id>` opens a pack: a line with an `x<N> <hash>:` prefix is a nap that can be zoomed in on. A leaf is `x1 YYYY-MM-DD:` and is not a zoom target.
 """
     if catalog:
         text += (
-            "\nListed catalog lines are paths that name other stores; they are not commands. "
+            "\nListed catalog lines are `N: ./path`: `N:` is a count, then the path. "
+            "They are not commands. "
             f"When you work under a cataloged path, run `{invoke} wake --path <path>` "
-            "if that store's wake is not already in this conversation.\n"
+            "if that store's wake is not already in this conversation. "
+            f"`{invoke} note --path <file> \"…\"` records in the nearest store for that file. "
+            "The same `--path` on nap, recall, and zoom walks up the same way.\n"
         )
     return text
 

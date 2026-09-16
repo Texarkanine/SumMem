@@ -1,1 +1,0 @@
-Local tox run-parallel, session fixture, no --basetemp; env pytest -n auto --maxprocesses=4; coverage serial; PR CI pr.yaml 311–314, main ci.yaml+coverage; 16-hex leafset, migrate.py only 4/5-part-64 reader; nap-ack Saved. then fold or idle

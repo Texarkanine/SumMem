@@ -7,7 +7,7 @@ import shutil
 import subprocess
 import tomllib
 
-from gitutil import init_repo
+from gitutil import git, init_repo
 
 
 def test_resolve_subdir_without_store_is_git_root(tmp_path, summem):
@@ -289,7 +289,8 @@ def test_root_wake_catalog_is_labeled_paths_not_commands(tmp_path, monkeypatch, 
     lines = out.splitlines()
     assert lines[0] == "== SumMem Usage =="
     catalog = _catalog_section(out)
-    assert "./pkg" in lines
+    assert "1: ./pkg" in lines
+    assert "./pkg" in catalog
     assert "summem wake --path pkg" not in catalog
     assert "wake --path" not in catalog
     assert "== Project-root Memories ==" not in out
@@ -368,8 +369,69 @@ def test_root_wake_catalogs_other_store(tmp_path, monkeypatch, capsys, summem):
     assert "git" not in out
 
 
-def test_catalog_count_preserves_folded_note_grain(tmp_path, monkeypatch, capsys, summem):
-    """Catalog note count keeps encoded nap grain after a fold."""
+def test_catalog_empty_store_prints_zero(tmp_path, monkeypatch, capsys, summem):
+    """An empty started child store catalogs as 0: ./pkg."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["start", "pkg"]) == 0
+    capsys.readouterr()
+    assert m.main(["wake"]) == 0
+    lines = capsys.readouterr().out.splitlines()
+    assert "0: ./pkg" in lines
+
+
+def test_catalog_one_note_prints_one(tmp_path, monkeypatch, capsys, summem):
+    """One loose note in a child store catalogs as 1: ./pkg without the note text."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["start", "pkg"]) == 0
+    assert m.main(["note", "--path", "pkg", "pkg-note"]) == 0
+    capsys.readouterr()
+    assert m.main(["wake"]) == 0
+    out = capsys.readouterr().out
+    lines = out.splitlines()
+    assert "1: ./pkg" in lines
+    assert "pkg-note" not in out
+
+
+def test_catalog_does_not_pad_count_width(tmp_path, monkeypatch, capsys, summem):
+    """Catalog count prefixes are not digit-padded: 0: ./a next to 10: ./b."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["start", "a"]) == 0
+    assert m.main(["start", "b"]) == 0
+    for i in range(10):
+        assert m.main(["note", "--path", "b", f"n{i}"]) == 0
+    capsys.readouterr()
+    assert m.main(["wake"]) == 0
+    lines = capsys.readouterr().out.splitlines()
+    assert "0: ./a" in lines
+    assert "10: ./b" in lines
+    assert "0:  ./a" not in lines
+
+
+def test_catalog_text_does_not_list_view(tmp_path, monkeypatch, summem):
+    """catalog_text does not call list_view or heal_view to count."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["start", "pkg"]) == 0
+    assert m.main(["note", "--path", "pkg", "pkg-note"]) == 0
+
+    def boom(*_a, **_k):
+        raise AssertionError("view")
+
+    monkeypatch.setattr(m, "list_view", boom)
+    monkeypatch.setattr(m, "heal_view", boom)
+    text = m.catalog_text(repo, repo)
+    assert "1: ./pkg" in text.splitlines()
+
+
+def test_catalog_folded_pair_counts_as_two(tmp_path, monkeypatch, capsys, summem):
+    """A folded pair catalogs as 2: ./pkg, not 0: (lost) or 4: (both suffixes)."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
@@ -380,15 +442,35 @@ def test_catalog_count_preserves_folded_note_grain(tmp_path, monkeypatch, capsys
     assert m.main(["nap", "--path", "pkg", ids[0], ids[1], "pair"]) == 0
     capsys.readouterr()
     assert m.main(["wake"]) == 0
-    out = capsys.readouterr().out
-    assert "./pkg" in out
-    assert "(2 notes" not in out
+    lines = capsys.readouterr().out.splitlines()
+    assert "2: ./pkg" in lines
+    assert "0: ./pkg" not in lines
+    assert "4: ./pkg" not in lines
     loose = [
         p
         for p in (repo / "pkg" / ".summem" / "notes").iterdir()
         if p.is_file() and not p.name.startswith(".")
     ]
     assert loose == []
+
+
+def test_catalog_skips_cached_notes_nap_unlinked(tmp_path, monkeypatch, capsys, summem):
+    """Committed notes nap unlinked do not add to N before deletions are staged."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["start", "pkg"]) == 0
+    assert m.main(["note", "--path", "pkg", "alpha"]) == 0
+    assert m.main(["note", "--path", "pkg", "beta"]) == 0
+    git(["add", "-A"], repo)
+    git(["commit", "-m", "two notes"], repo)
+    ids = [node.id for node in m.list_view(repo / "pkg")]
+    assert m.main(["nap", "--path", "pkg", ids[0], ids[1], "pair"]) == 0
+    capsys.readouterr()
+    assert m.main(["wake"]) == 0
+    lines = capsys.readouterr().out.splitlines()
+    assert "2: ./pkg" in lines
+    assert "4: ./pkg" not in lines
 
 
 def test_pull_wake_omits_catalog_and_root_notes(tmp_path, monkeypatch, capsys, summem):
@@ -408,6 +490,7 @@ def test_pull_wake_omits_catalog_and_root_notes(tmp_path, monkeypatch, capsys, s
     assert "== Additional SumMem Catalogs ==" not in out
     assert "== Project-root Memories ==" not in out
     assert "== SumMem Usage ==" not in out
+    assert "1: ./pkg" not in out.splitlines()
 
 
 def test_ignored_store_omitted_from_catalog(tmp_path, monkeypatch, capsys, summem):

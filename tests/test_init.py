@@ -120,8 +120,11 @@ def test_how_to_text_is_the_usage_section(monkeypatch, summem):
     assert text.endswith("\n")
     assert m.AGENT_BIN in text
     assert "note" in lower
-    assert "already stored" in lower
-    assert "do not retry" in lower
+    assert "asks for a nap" in lower
+    assert "before your next action" in lower
+    assert "already stored" not in lower
+    assert "do not retry" not in lower
+    assert "two older view nodes" not in lower
     assert f'{m.AGENT_BIN} note' in text
     assert "invent filenames" in lower
     assert "the only writer" in lower
@@ -197,7 +200,14 @@ def test_how_to_text_catalog_is_opt_in(monkeypatch, summem):
     assert "catalog" not in base.lower()
     assert "wake --path" not in base
     assert "Listed catalog lines" in cataloged
+    assert "`N:`" in cataloged
+    assert "count" in cataloged
+    assert "leaf grain" not in cataloged
+    assert "the `./` token" not in cataloged
+    assert "not commands" in cataloged
     assert f"{m.AGENT_BIN} wake --path <path>" in cataloged
+    assert f"{m.AGENT_BIN} note --path" in cataloged
+    assert "walks up" in cataloged
     assert cataloged.startswith(base)
     assert "had no catalog" not in cataloged
 
