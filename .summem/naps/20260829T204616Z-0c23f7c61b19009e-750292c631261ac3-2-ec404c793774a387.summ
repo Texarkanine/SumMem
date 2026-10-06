@@ -1,0 +1,1 @@
+prompt_text and write-rule wording are not pinned; only AGENTS.md prefix lockstep and init identity are. Prefix must not teach note/nap argv or Usage recipes; fold_request prints the exact Run: line; invoked as {AGENT_BIN} is not a recipe.
