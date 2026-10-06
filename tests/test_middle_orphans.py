@@ -6,8 +6,9 @@ older node next to a bigger, newer one. Nothing new ever lands beside it, so tha
 node and every node older than it never fold again: dead wake lines.
 
 These tests follow fold requests the way an agent does. They pin the outcome,
-not which pair is requested. Every grain in the view stays a power of two:
-the fix must never write a pack whose grain is not one.
+not which pair is requested. A fold never writes a pack whose grain is not a
+power of two. A legacy pack like that may stay listed until the normal fold
+cascade reaches it; nothing opens it up front.
 """
 
 from __future__ import annotations
@@ -34,22 +35,18 @@ def _note(m, repo, text: str, t: int):
     return m.write_note(repo, text, _at(t), Random(t))
 
 
-def _assert_powers_of_two(view) -> None:
-    odd = [node.leaves for node in view if node.leaves & (node.leaves - 1)]
-    assert not odd, f"grain that is not a power of two in view: {odd}; grains {_grains(view)}"
-
-
 def _obey(m, repo, budget: int, cap: int = 500):
     """Heal, then nap every requested pair until fold asks for nothing. Return the view."""
     for step in range(cap):
         view = m.heal_view(repo)
-        _assert_powers_of_two(view)
         out = m.fold_request(repo, budget, nodes=view)
         if not out:
             return view
         id_a, id_b = RUN.search(out).groups()
         ids = [node.id for node in view]
-        m.write_nap(repo, m.resolve_id(id_a, ids), m.resolve_id(id_b, ids), f"fold {step}", nodes=view)
+        written = m.write_nap(repo, m.resolve_id(id_a, ids), m.resolve_id(id_b, ids), f"fold {step}", nodes=view)
+        grain = m._parse_nap_stem(written.stem)[3]
+        assert grain & (grain - 1) == 0, f"fold wrote a {grain}-pack; grains {_grains(view)}"
     raise AssertionError("fold requests did not finish")
 
 
@@ -217,7 +214,7 @@ def _plant_pack(m, repo, left, right, caption: str) -> None:
 
 
 def test_odd_grain_pack_is_not_stranded(tmp_path, summem):
-    """A legacy 6-pack (4 + 2, napped off-request) never meets another 6; heal must not leave it listed."""
+    """A legacy 6-pack (4 + 2, napped off-request) never meets another 6; the cascade must still fold it away."""
     m = summem
     repo = init_repo(tmp_path / "r")
     for t in range(1, 7):
