@@ -28,3 +28,16 @@ Fix middle orphans: replace the neighbors-only equal-grain fold picker with olde
     - Classified as Level 3.
 * Decisions made
     - Level 3, not Level 2. The change is in the core fold contract described in `docs/architecture/index.md`. It spans the fold picker, the `nap` pair rule, wake expansion, test fixtures, and five docs. It needed a design exploration (six algorithms) before planning. Comparable earlier changes (equal-grain #1, zipper-heal #3) were Level 3.
+
+## 2026-10-06 - CREATIVE - COMPLETE
+
+* Work completed
+    - Recorded four resolved creative decisions in `memory-bank/active/creative/`: fold picker, nap pair rule, wake expand order, legacy odd packs.
+    - Saved the research harness, prototype patch, raw results, and the visual review under `memory-bank/active/creative/fold-research/`.
+* Decisions made
+    - Fold picker: skip fold, oldest pair first (high confidence; simulation evidence).
+    - Nap pair rule: same grain, nearest; grain and nearest checks run after child loading and the overlap check (operator decision 2).
+    - Wake expand order: sort rows by oldest note's `{stamp}-{rand}` after each split (operator decision 3).
+    - Legacy odd packs: never opened; picker skips them (operator decision 4).
+* Insights
+    - Checking grain before loading children would flip four error-order tests (`unknown id`, `unreadable pack`, `overlapping packs`).
