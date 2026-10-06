@@ -20,7 +20,7 @@ A single writer must see exactly today's behavior: the same pair requested at ev
 
 ## Requirements
 
-1. **Fold picker.** When the view is over budget, `fold_request` names the oldest row that has a row of the same grain anywhere below it, paired with the nearest such row. It returns no request only when no two rows share a grain.
+1. **Fold picker.** When the view is over budget, `fold_request` names the oldest row that has a row of the same grain anywhere below it, paired with the nearest such row. It returns no request only when no two power-of-two rows share a grain. Rows whose grain is not a power of two are never named.
 2. **`nap` pair rule.** `nap` accepts two view rows of the same grain with no row of that grain between them, even when they are not neighbors. It refuses unequal grains. It refuses a same-grain pair with a nearer same-grain row between them. It keeps today's earlier refusals and their order: range token, unknown id, unreadable pack, overlapping packs.
 3. **No new non-power-of-two packs.** No code path writes a pack whose grain is not a power of two.
 4. **Wake order.** When wake opens packs in memory (view shorter than budget), the printed rows are sorted by each row's oldest note, so an opened pack's newer child lands at its own date.

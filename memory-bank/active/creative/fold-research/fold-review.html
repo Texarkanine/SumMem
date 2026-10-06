@@ -418,7 +418,7 @@
       <li>Bound: rows with all-distinct grains ≤ ⌊log₂N⌋+1, so the picker always finds a pair over budget.</li>
       <li>"Nearest" blocks the one move that only adds misordering: pairing across a closer partner.</li>
       <li>Error order: check grain <em>after</em> loading children, so <code>unknown id</code> / <code>unreadable pack</code> still win (4 tests depend on it).</li>
-      <li>16 tests build unequal packs today: 12 through <code>gitutil.fold_ids</code> (7 calls in 4 files), which folds left-to-right into 3-, 5-, 7-packs; 4 zipper tests through the ABD/ABE shape, a 2-pack napped with a note on purpose.</li>
+      <li>16 tests build unequal packs today: 11 through <code>gitutil.fold_ids</code> (7 calls in 4 files), which folds left-to-right into 3-, 5-, 7-packs; 1 in <code>test_branch_pack_merge.py</code> and 4 zipper tests through the ABD/ABE shape, a 2-pack napped with a note on purpose (preflight found the branch-merge one).</li>
     </ul>
   </div>
 </div>

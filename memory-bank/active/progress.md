@@ -53,3 +53,34 @@ Fix middle orphans: replace the neighbors-only equal-grain fold picker with olde
     - Seeded multi-writer property test (B18) as the ratchet for "no row strands forever".
 * Insights
     - Two legacy packs of the same odd grain would satisfy "same grain"; the power-of-two guard has to live in both the picker and `nap`.
+
+## 2026-10-06 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Checked the plan against the code. Ran a scratch prototype of Units 1–4 (outside the worktree) through the full suite, plus a model of B18 and a check of the B5 legacy-pack cases.
+    - `.preflight-status` first line: `FAIL (fixable)`.
+* Decisions made
+    - FAIL (fixable): `tests/test_branch_pack_merge.py::test_two_branch_overlapping_packs_heal_on_next_mutate` naps a 2-pack with a note at lines 74 and 84. Unit 2 breaks it, and the plan does not name it. Fix: use `plant_pack` there in Unit 1 and list the file.
+    - The TDD plan encoding passes. No step swaps or change-detector strikes were needed.
+* Insights
+    - Baseline is 7 red and 395 green. With Units 1–4 applied, every stranding test and the unequal-nap test pass. The only failures outside the plan's named retargets come from that one fixture.
+    - B18 needs "doubled grain" to count only grains ≥ 2 (as `sim4.py` does). B5's "returns to budget" holds only at note counts whose power-of-two remainder fits in the rows left over (32 works).
+
+## 2026-10-06 - PLAN (rework after Preflight FAIL (fixable)) - COMPLETE
+
+* Work completed
+    - Unit 1 now also replaces the two direct 2-pack + note naps in `tests/test_branch_pack_merge.py::test_two_branch_overlapping_packs_heal_on_next_mutate` (lines 74, 84) with `plant_pack`.
+    - Adopted advisories:
+        - B5 asserts the budget at 32 notes.
+        - B18 counts doubled grains ≥ 2 only, and merges every writer before checking that no note is lost.
+        - The docs sweep is case-insensitive (`adjacen|neighbo`) and names `systemPatterns.md:72` and `architecture/index.md:185`.
+        - Brief Requirement 1 now says "no two power-of-two rows".
+        - Test counts are stated consistently.
+    - Partly adopted the advisory "one shared pure pair function":
+        - pure `_fold_pair(grains)` drives `fold_request`;
+        - `_nearest_twin` and `_is_pow2` are shared by the picker and `write_nap`, so the requested pair is accepted by construction;
+        - new pure tests: B19 (one writer: `_fold_pair` equals the old neighbors-only oracle `_equal_grain_pair` for budgets 1–32) and B20 (non-power-of-two rows are skipped).
+* Decisions made
+    - `nap` keeps decision 2: any nearest same-grain power-of-two pair. It is not narrowed to the picker's single pair; that would override the operator's decision.
+* Insights
+    - My earlier fallout count lumped the branch-merge test in with the `fold_ids` failures. The real breakdown is 11 through `fold_ids`, 1 direct nap in `test_branch_pack_merge.py`, and 4 zipper tests.
