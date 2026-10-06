@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
+from random import Random
 
 from conftest import SCRIPT
 from gitutil import init_repo
@@ -85,3 +87,19 @@ def test_nap_unknown_ids_rejected_without_writing(tmp_path):
     assert "unknown id" in err
     assert "Copy an id from wake" in err
     assert _payload_files(repo) == []
+
+
+def test_nap_of_unequal_grains_rejected_without_writing(tmp_path, summem):
+    """Napping a 2-pack with a note would write a 3-pack: refused, store unchanged."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    for i, text in enumerate(("a", "b", "c"), start=1):
+        m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=timezone.utc), Random(i))
+    ids = [node.id for node in m.list_view(repo)]
+    m.write_nap(repo, ids[0], ids[1], "a b")
+    view = m.list_view(repo)
+    assert [node.leaves for node in view] == [2, 1]
+    before = sorted(_payload_files(repo))
+    result = _run_nap(repo, [view[0].id, view[1].id, "a b c"])
+    assert result.returncode != 0
+    assert sorted(_payload_files(repo)) == before

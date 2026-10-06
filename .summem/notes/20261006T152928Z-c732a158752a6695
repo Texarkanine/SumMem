@@ -1,0 +1,1 @@
+Middle-orphan fix direction: fold may skip to a same-grain partner, but never write a pack whose grain is not a power of two (operator). Keep oldest pair first: smallest-grain-first wiped the verbatim tail in simulation (26 recent notes to 0).
