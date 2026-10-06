@@ -8,7 +8,7 @@
 - **Output**: the ordered pair (older first) or a refusal with an agent-safe message (no store paths, no git).
 - **Invariants**:
   - Every pair the picker requests is accepted.
-  - No pack whose grain is not a power of two is ever written.
+  - No pack whose grain is not a power of two is ever written — including two equal legacy odd packs.
   - Earlier refusals keep their order and words: range token (CLI), `unknown id. Copy an id from wake.`, `unknown id` for a pack missing its `.tree`, `unreadable pack`, `overlapping packs`.
 
 ## Options Evaluated
@@ -47,7 +47,8 @@ Key insights:
 - Refusal meanings (exact wording is the build's choice; keep it agent-safe and in today's style, problem first, then a next step only when known):
   - same row named twice → not two rows (today: `not adjacent`);
   - unequal grains → not the same grain;
+  - equal grains that are not a power of two (two legacy 6-packs) → refused too: the result would be a non-power-of-two pack;
   - a same-grain row between them → a nearer row of that grain sits between them.
 - Retarget pins: `test_nap.py:233–234` (`not adjacent`, `sit next to each other in wake`), `test_nap.py:357` (`match="not adjacent"`), `test_cli.py:405` (`not adjacent`).
-- Fixtures that nap unequal grains today must stop: `tests/gitutil.py::fold_ids` (a left fold that makes 3-, 5-, 7-packs; 11 call sites in 4 files) and `tests/test_zipper.py::_plant_abd_abe` plus `test_heal_abd_vs_abe_unique_cover` (a 2-pack napped with a note on purpose). A balanced `fold_ids` breaks only `test_wake_expand.py::test_zoom_expanded_child_id`, which assumes the left-spine tree (prototype, 393 passed).
+- Fixtures that nap unequal grains today must stop: `tests/gitutil.py::fold_ids` (a left fold that makes 3-, 5-, 7-packs; 7 calls in 4 files) and `tests/test_zipper.py::_plant_abd_abe` plus `test_heal_abd_vs_abe_unique_cover` (a 2-pack napped with a note on purpose). A balanced `fold_ids` breaks only `test_wake_expand.py::test_zoom_expanded_child_id`, which assumes the left-spine tree (prototype, 393 passed).
 - Commit type: a narrowing of a CLI command on a 0.x product. Use `fix:` for the stall, and state the `nap` change in the body.

@@ -58,7 +58,7 @@ Key insights:
 ## Implementation Notes
 
 - Replace only the pair loop in `fold_request`. For each `i`, take the first `j > i` with `nodes[j].leaves == nodes[i].leaves`, and stop at the first `i` that has one. Keep the remaining-count text, the `Run:` line, and the empty return.
-- No special case for legacy non-power-of-two rows: they have no same-grain partner, so the loop skips them (see `creative-legacy-odd-packs.md`).
+- Skip any row whose grain is not a power of two, both as the older row and as a partner. One legacy odd row has no twin, so it is skipped anyway. Two legacy rows of the same odd grain (say two 6-packs) would otherwise be requested and folded into a 12-pack (see `creative-legacy-odd-packs.md`).
 - `nap` must accept exactly the pairs this picker names (see `creative-nap-pair-rule.md`).
 - `surgery.py:246` prints `fold_request` after excision, so surgery's stranded rows get requested with no surgery change.
 - Pre-existing, out of scope: if the picked pack's `.tree` is missing, `nap` fails with `unknown id` and the same request repeats. Today's rule has the same behavior.

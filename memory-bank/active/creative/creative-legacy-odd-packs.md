@@ -37,10 +37,12 @@ Key insights:
 
 ## Implementation Notes
 
-- No production code. The V1 picker skips rows with no same-grain partner, and `heal_view` (`summem:706`) stays as it is. Drop the eager open used in an earlier scratch prototype.
+- No opening code. `heal_view` (`summem:706`) stays as it is; drop the eager open used in an earlier scratch prototype.
+- Guard, not opener: one legacy odd row has no twin and is skipped anyway, but two legacy rows of the same odd grain (two 6-packs) do share a grain. Without a guard the picker would request them and `nap` would write a 12-pack. So the picker skips rows whose grain is not a power of two, and `nap` refuses a pair whose grain is not a power of two, even when the grains are equal. Today's rule would also pair two neighboring 6-packs, so a test with two legacy 6-packs goes red today.
 - Rewrite `tests/test_middle_orphans.py::test_odd_grain_pack_is_not_stranded` to the decided behavior:
   - plant a legacy 6-pack with `_plant_pack` (moving to `tests/gitutil.py`);
   - record notes and obey fold requests;
   - assert the 6-pack is still listed and is never named in a fold request;
+  - add a second case with two legacy 6-packs: they are never paired, and `nap` refuses them if asked;
   - assert other rows keep folding, so the view returns to budget.
 - Keep `_obey`'s check that every pack it writes has a power-of-two grain.

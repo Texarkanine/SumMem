@@ -41,3 +41,15 @@ Fix middle orphans: replace the neighbors-only equal-grain fold picker with olde
     - Legacy odd packs: never opened; picker skips them (operator decision 4).
 * Insights
     - Checking grain before loading children would flip four error-order tests (`unknown id`, `unreadable pack`, `overlapping packs`).
+
+## 2026-10-06 - PLAN - COMPLETE
+
+* Work completed
+    - Wrote the Level 3 plan in `tasks.md`: component analysis, invariants, 18 behaviors (B1–B18) mapped to test files, five ordered units with always-tdd substeps, challenges, and pre-mortem.
+    - Checked the plan against the code. A balanced `fold_ids` breaks only `test_zoom_expanded_child_id`. `ProjectedNode` constructions in tests use keywords, so a defaulted `seq` slot is safe. `surgery.py` only consumes `fold_request`.
+* Decisions made
+    - Unit order: fixtures, then `nap`, then picker, then wake, then docs. `nap` must accept skip pairs before the picker requests them.
+    - `nap` check order: resolve → load children → overlap → equal grain → power of two → nearest.
+    - Seeded multi-writer property test (B18) as the ratchet for "no row strands forever".
+* Insights
+    - Two legacy packs of the same odd grain would satisfy "same grain"; the power-of-two guard has to live in both the picker and `nap`.

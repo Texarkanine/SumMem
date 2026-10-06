@@ -1,11 +1,19 @@
 # Active Context
 
 ## Current Task: middle-orphans
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Level 3 determined: core fold contract change across picker, `nap`, wake expand, fixtures, and docs, with a design exploration behind it.
-- Operator decisions recorded in `projectbrief.md` Constraint 7 and `progress.md`.
+- Level 3 plan written to `tasks.md`: five units (fixtures → `nap` pair rule → fold picker → wake expand order → docs), 18 behaviors, pinned check-order diagram.
+- Four creative decisions recorded in `creative/` (fold picker, nap pair rule, wake expand order, legacy odd packs); research harness and visual review in `creative/fold-research/`.
+- Operator decisions (2026-10-06):
+  - never write a non-power-of-two pack;
+  - skip fold with oldest pair first;
+  - `nap` takes same grain and nearest (decision 2 = yes);
+  - wake sorts opened rows by date (decision 3 = yes);
+  - legacy non-power-of-two packs are not opened (decision 4 = no);
+  - captions only through the fold cascade.
+- Found during planning: two equal legacy odd packs (two 6-packs) would pair into a 12-pack. The picker skips non-power-of-two rows and `nap` refuses them.
 
 ## Next Step
-- Load the Level 3 workflow and run the Plan phase.
+- Preflight (sub-agent) validates the plan. On PASS / PASS WITH ADVISORY the operator runs `/niko-build`.
