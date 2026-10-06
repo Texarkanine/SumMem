@@ -1,48 +1,67 @@
-FAIL (fixable)
+PASS WITH ADVISORY
 
-Preflight run 2026-10-06. I checked the plan against the code and tested it in a scratch copy of the repository (not this worktree):
+Preflight run 2, 2026-10-06. I checked the reworked plan against the code. I also built Units 1–4 exactly as written in scratch copies of the repository (outside this worktree) and ran the full suite under py311.
 
-- Baseline on unchanged code: 7 failed and 395 passed. The 7 are the known red tests.
-- Unit 1 fixtures alone: only `test_zoom_expanded_child_id` changes, as the plan says.
-- Units 1–4 applied as written, with the check order in the pinned diagram: all six middle-orphan stranding tests and `test_nap_of_unequal_grains_rejected_without_writing` pass. The six tests that still fail are the five retargets the plan names, plus one it does not name (below).
+What the runs showed:
 
-## Blocking for build (fixable)
+- Unchanged code: 7 failed, 395 passed. The 7 are the known red tests: the five stranding tests, `test_odd_grain_pack_is_not_stranded`, and `test_nap_of_unequal_grains_rejected_without_writing`.
+- Unit 1 alone (balanced `fold_ids`, `plant_pack` in `test_zipper.py` and `test_branch_pack_merge.py`, `test_zoom_expanded_child_id` retargeted): 7 failed, 395 passed. These are the same 7 tests. Nothing else moved.
+- Units 1–4 applied, with `write_nap` checks in the pinned order: 5 failed, 397 passed. All five failures are retargets the plan names: `test_nap_rejects_non_adjacent_ids` (B10), `test_nap_two_identical_notes_by_repeated_id` and `test_cli_nap_identical_notes_prefix_not_adjacent` (B11), `test_odd_grain_pack_is_not_stranded` (replaced by B5), and `test_zoom_expanded_child_id` (Unit 1 step 4, which the Units 1–4 copy did not include). All five stranding tests, the unequal-nap test, and the four error-order tests (B13) pass.
+- Run 1's blocking finding is fixed. With Unit 1's `plant_pack` change, `test_branch_pack_merge.py` stays green under the new `nap` rule.
 
-1. **An unlisted fixture naps unequal grains (Dependency Impact).** `tests/test_branch_pack_merge.py::test_two_branch_overlapping_packs_heal_on_next_mutate` deliberately naps a 2-pack with a note at lines 74 (`"abd"`) and 84 (`"abe"`), to build overlapping 3-packs. After Unit 2, `write_nap` raises `not the same grain` there. The prototype run confirmed this: it was the only failure outside the plan's named retargets. The plan says its fixture list is complete (Unit 1, the Component Analysis test list, and `creative-nap-pair-rule.md`), and acceptance criterion 5 limits retargets to the ones named. A builder would therefore hit this in Unit 2 step 4 with nothing in the plan to cover it.
-   - Fix: in Unit 1 step 3, replace those two naps with `plant_pack(m, repo, ab_node, d_node, "abd")` / `"abe"`, the same treatment as `_plant_abd_abe` in `test_zipper.py`. Add `tests/test_branch_pack_merge.py` to Unit 1's Files list and to the Component Analysis test list.
+## Checks
 
-## Checks that passed
+- **TDD plan encoding: PASS.** Units 2, 3, and 4 each run stub tests, then stub interface, then write tests and run red, then write code. Unit 1 changes only test fixtures. Unit 5 is prose and help text, and no test pins that wording. No step is a change-detector. Unit 5 step 9's grep is labeled a review step. I did not swap or strike any step.
+- **Convention compliance: PASS.** These follow existing practice: the private helpers (`_is_pow2`, `_nearest_twin`, `_fold_pair`, `_pair_nodes`), a defaulted `seq` slot on a `__slots__` view type, shared test helpers in `tests/gitutil.py`, the new `tests/test_fold_many_writers.py`, and agent-safe refusals that state the problem first.
+- **Dependency impact: PASS.** Callers of `fold_ids`: 7 calls in 4 files, all with power-of-two id counts (4, 8, 16, 32, 64). `surgery.py:246` only calls `fold_request`. `migrate.py` does not touch these functions. `ProjectedNode` constructions in `tests/test_wake.py` use keywords. The only other code that names `_adjacent_nodes` is the research scripts under `creative/fold-research/`, which are not product code.
+- **Conflict detection: PASS.** No existing utility duplicates the new helpers. The on-disk format, stems, `Run:` grammar, and Usage argv stay the same. The narrowing of `nap` is intended, and the Release challenge names it.
+- **Completeness: PASS.** Each of requirements 1–7 maps to a unit and to behaviors. Every cited line number matches the code and docs. I checked these behaviors on the prototype:
+  - B2, B3, B4, and B20 give the pairs the plan states.
+  - B19: for one writer, the new picker chose the same pair as the neighbors-only rule at all 6,404 fold steps, for budgets 1–32 and up to 200 notes.
+  - B5 at 32 notes and budget 4: one legacy 6-pack ends at `[6, 16, 8, 8]` and two end at `[6, 6, 16, 16]`. No fold request named a 6-pack.
+  - B14 and B15 print in date order after Unit 4, and are red without it.
+  - B18 model: 3 writers, budget 6, 200 notes, merge rates 8%, 25%, and 50%, six seeds:
+    - it never stalled while a pair was available;
+    - it lost no notes;
+    - every listing had the one-writer shape at 64 quiet notes;
+    - each run took 1.5–2.6 s.
 
-- **TDD plan encoding: PASS.** Units 2–4 each go stub tests → stub interface → write tests and run red → write code. Unit 1 is test-only. Unit 5 is prose and help text, so it owes no tests. No test pins the `usage_text` wording, and none of the scheduled steps is a change-detector. No step swaps or strikes were needed.
-- **Convention compliance: PASS.** These follow existing practice:
-  - the helper names `_is_pow2` and `_pair_nodes`;
-  - the `seq` slot on a `__slots__` class, with a default;
-  - shared helpers in `tests/gitutil.py`;
-  - the new file `tests/test_fold_many_writers.py`;
-  - refusal messages that state the problem first and are safe for agents;
-  - the `fix:` commit type.
-- **Conflict detection: PASS.** No existing utility duplicates the new code. `surgery.py` only calls `fold_request` (line 246), and `migrate.py` does not touch these functions. The other public contracts stay unchanged: on-disk format, stems, `Run:` grammar, and the Usage argv. The `nap` narrowing is intended and is named in the Release challenge.
-- **Completeness: PASS, apart from finding 1.** Requirements 1–7 each map to a unit and to the behaviors B1–B18. The cited line numbers match the code.
-  - The prototype supports these behaviors: B2, B3, B8, B10–B12, B14–B16.
-  - The B18 model (3 writers, budget 6, three-way file-set merges, 200–300 notes, merge rates 8–50%) never stalled with a pair available and lost no notes. Main reached the one-writer shape within 1–3 quiet notes and held it at 64. Each run took 2.3–3.8 s in one process. The 5 s per seed target looks safe.
+    On the unchanged driver, the same model stalls with a pair available, so B18's red step works.
 
 ## Advisory (not blocking)
 
-2. **B18 wording: "at most one doubled grain".** Count only grains of 2 or more, as the research does (`sim4.py` `check()` uses `Counter(x for x in g if x > 1)`). If grain 1 counts, a healthy one-writer listing such as `[16, 8, 4, 4, 1, 1]` fails at some note counts. That would trip the circuit breaker for no real defect.
-3. **B18 "no note is lost".** State that every writer merges into `main` before the 64 quiet notes. Otherwise notes still held by a writer that never merged look lost.
-4. **B5 "returns to budget" depends on the note count.** With legacy odd rows, a within-budget listing is only reachable when the power-of-two leaf count has few enough 1-bits to fit in the rows left over. Measured at budget 4:
-   - one 6-pack: over budget with no pair after 15, 23, 27, 29–31 … notes;
-   - two 6-packs: over budget after 7, 11, 13–15 … notes.
-   At 32 notes both cases end within budget (`[6, 16, 8, 8]` and `[6, 6, 16, 16]`). Assert at a count like that, or assert "no request only when every power-of-two grain is distinct". Do not assert within budget after every note.
-5. **The docs sweep misses one sentence.** `memory-bank/systemPatterns.md:72` says "Adjacency still needs two distinct ids when two nodes exist." Unit 5 does not list it, and Unit 5 step 9's case-sensitive grep for `adjacent` cannot match "Adjacency". Grep for `-i adjacen` instead. `docs/architecture/index.md:185` ("Later adjacent naps …") is also outside the listed line ranges, but the step 9 grep would catch it.
-6. **Requirement 1 in `projectbrief.md` is worded too broadly.** It says the picker "returns no request only when no two rows share a grain". Two legacy 6-packs share a grain and get no request (decision 4). The plan's own rule (B4/B5, Invariants) is right; the brief's sentence should say "no two power-of-two rows".
-7. **Test counts disagree in places.** `test_middle_orphans.py` has seven tests: five stranding tests, the odd-grain test, and the guard. `tasks.md` line 18 says "6 stranding tests, the odd-grain test, and the oldest-pair guard". B6 says "5 existing red stranding tests plus `test_merged_branch_naps_fold_back_to_budget`", but that test is one of the five. This is harmless, but QA will count against it.
-8. **A test helper still copies the old rule.** `tests/test_fold.py::_equal_grain_pair` and its four `test_equal_grain_pair_*` tests check that test-local copy of today's neighbors-only rule, not `fold_request`. They stay green, but nothing in the plan revisits them.
+1. **The stranding-test count is still wrong.** `tests/test_middle_orphans.py` has five stranding tests, not six:
+   - `test_merged_branch_naps_fold_back_to_budget`;
+   - `test_merged_branch_naps_do_not_strand_older_nodes`;
+   - `test_late_note_between_packs_is_not_stranded`;
+   - `test_zipper_reopen_orphan_is_not_stranded`;
+   - `test_surgery_orphan_is_not_stranded`.
 
-## Radical innovation (advisory only; the plan is unchanged)
+   Places that say "six" or "6": `tasks.md` line 20, B6, Unit 3 step 3, and `projectbrief.md` Acceptance Criterion 1. B6 says "the 5 existing red stranding tests plus `test_merged_branch_naps_fold_back_to_budget`", but that test is one of the five, so a builder may look for a sixth test that does not exist. Run 1 flagged this, and the rework did not fully fix it. Use "five" everywhere.
+2. **`_pair_nodes` returns rows, but the nearest check needs their positions.** Unit 2 step 2 gives `_pair_nodes(...) -> tuple[ViewNode, ViewNode]`. Step 4.6 needs `lo` and `hi`. Return the indices (or both indices and rows) so `write_nap` does not have to look the rows up again. No planned test covers the "closest pair among duplicate-id hits" preference. Duplicate ids only reach `write_nap` without heal (in-process calls), so either add one small test or drop the preference.
+3. **Name which grain `write_nap` compares.** The picker uses each row's stem grain (`node.leaves`). The new pack's grain is `len(digests)`. If a stem's grain field ever disagrees with its tree, the two equal stem grains could still produce a pack whose grain is not a power of two, which breaks Requirement 3. Compare `node.leaves` (to match the picker), and also refuse unless `len(digs_l) == len(digs_r)` and the total is a power of two. The check stays after `_as_child` and the overlap check, so the error order is unchanged.
+4. **Adapting the B19 oracle can touch tests the plan does not name.** `tests/test_fold.py::_equal_grain_pair(nodes)` returns ids and has six callers: the four `test_equal_grain_pair_*` tests and two fold loops. If it changes to take a grain list, those callers change too, which runs against Acceptance Criterion 5. Instead, add a grain-list form and have the node form call it, or wrap it inside B19.
+5. **The baseline number in Unit 1 step 5 is out of date.** The scratch run of Unit 1 gives 395 passed and 7 failed, not "393 passed". The gate ("green except the 7 known red tests") is correct.
+6. **Requirement 5's wording is ambiguous.** "Never opened automatically" reads as including wake's in-memory expansion. Wake still splits a legacy 6-pack for display when the view is under budget. That expansion already exists, writes nothing, and is fine. Say "never opened on disk" so QA does not flag it.
 
-9. **Make the picker a pure function over grains and use it in both places.** Extract `_partner(grains: list[int], i: int) -> int | None`. It returns the nearest later index with the same power-of-two grain. Then:
-   - `fold_request` takes the first `i` that has a partner;
-   - `write_nap`'s grain and nearest checks become `_partner(grains, lo) == hi`, still after `_as_child` and the overlap check.
+## Radical innovation (advisory only; I did not change the plan)
 
-   This makes "every pair the picker names is accepted by `nap`" true by construction instead of by two code paths that must agree. It also allows a cheap, I/O-free test of Use-Case 3: for every note count up to about 2,000 and budgets 1–32, the new picker's listing equals a reference model of today's rule. That pins "one writer unchanged" exhaustively, where today only B1 checks it. Cost: about 10 lines in `summem` and one small test. B18 stays as the real-driver ratchet.
+7. **Add a bounded, exhaustive model check of the fold rule next to B18.** B18 samples two seeds. The creative decision admits that "no row strands forever" is "argued and simulated, not proven". A pure in-memory model can check every history up to a small size instead.
+   - New test-only file `tests/test_fold_model.py`, with no I/O:
+     - a row is a nested tuple tree of note numbers;
+     - its sort key is its smallest leaf, and its grain is its leaf count.
+   - `fold` calls the driver's own `m._fold_pair` on the grains, puts the merged row at the older row's position, and re-sorts.
+   - `heal` copies `heal_view`'s rules on leaf sets:
+     - take the first overlapping pair;
+     - if one is a subset of the other, drop it;
+     - otherwise split the smaller row into its two children.
+   - Enumerate every history of 2 writers over N ≤ 8 notes (65,536 histories):
+     - each note goes to writer A or B;
+     - after each note, the writer either merges into `main` or does not;
+     - use budget 2 or 3, so that folds happen even with few notes.
+   - At every step, assert:
+     - no stall while two power-of-two rows share a grain;
+     - every grain is a power of two;
+     - no leaf is lost.
+
+   This turns the main correctness claim into a check of every case up to N. It uses the real picker, so the model cannot drift on the rule under test. The main risk is drift in the copied zipper; cross-check a few histories against the real driver. Cost: about 100 lines of test code and a few seconds of run time. B18 stays as the ratchet on the real driver.

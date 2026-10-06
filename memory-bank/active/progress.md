@@ -84,3 +84,25 @@ Fix middle orphans: replace the neighbors-only equal-grain fold picker with olde
     - `nap` keeps decision 2: any nearest same-grain power-of-two pair. It is not narrowed to the picker's single pair; that would override the operator's decision.
 * Insights
     - My earlier fallout count lumped the branch-merge test in with the `fold_ids` failures. The real breakdown is 11 through `fold_ids`, 1 direct nap in `test_branch_pack_merge.py`, and 4 zipper tests.
+
+## 2026-10-06 - PREFLIGHT (run 2) - COMPLETE
+
+* Work completed
+    - Checked the reworked plan against the code. Built Units 1–4 exactly as written in scratch copies outside the worktree and ran the full suite.
+    - Also checked B2–B5, B14, B15, B19, and B20 on the prototype, and ran a B18 model: 3 writers, budget 6, six seeds, three merge rates.
+    - `.preflight-status` first line: `PASS WITH ADVISORY`.
+* Decisions made
+    - PASS WITH ADVISORY. Run 1's blocking finding is fixed. With Unit 1's `plant_pack` change, `test_branch_pack_merge.py` stays green under the new `nap` rule.
+    - TDD plan encoding passes. No step swaps or change-detector strikes were needed.
+    - Advisories:
+        - the stranding-test count is still "six"; it is five;
+        - `_pair_nodes` should return indices;
+        - name which grain `write_nap` compares, and check that the digest count is a power of two;
+        - keep the node form of `_equal_grain_pair` for its six callers;
+        - Unit 1's "393 passed" is out of date (395 is correct);
+        - Requirement 5 should say "never opened on disk".
+    - Radical innovation (advisory): a bounded, exhaustive pure-model check of the fold rule next to B18.
+* Insights
+    - Unchanged code: 7 failed, 395 passed. Unit 1 alone: the same 7 failed and 395 passed. Units 1–4: 5 failed, 397 passed, and every failure is a retarget the plan names.
+    - For one writer, the new picker chose the same pair as the neighbors-only rule at all 6,404 fold steps (budgets 1–32, up to 200 notes).
+    - B18 model: no stall while a pair was available, no notes lost, and the one-writer shape at 64 quiet notes, in 1.5–2.6 s per run. On the unchanged driver the same model stalls, so B18's red step works.
