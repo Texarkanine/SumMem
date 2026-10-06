@@ -1,0 +1,27 @@
+
+== Operator scenario, equal ==
+main before merge    [8, 4, 2, 1]
+after merge          [8, 4, 2, 1, 2, 1, 1]
+after catch-up (budget 4) [8, 4, 2, 1, 4] over budget, no pair
+after 32 more notes  [8, 4, 2, 1, 32, 4] naps 44 max depth 5
+
+== Operator scenario, r2 ==
+main before merge    [8, 4, 2, 1]
+after merge          [8, 4, 2, 1, 2, 1, 1]
+after catch-up (budget 4) [8, 9, 1, 1] 
+after 32 more notes  [33, 16, 1, 1] naps 46 max depth 6
+
+equal  budget  8 writers 4: final view 112 nodes (over budget by 104); syncs left over budget 105/113; worst overage 102; naps 1709; max depth 6; notes lost 0
+       final grains [2, 8, 4, 1, 16, 4, 2, 1, 32, 2, 1, 16, 2, 4, 64, 16, 1, 4, 32, 2, 8, 1, 4, 16, 1, 8, 1, 2, 32, 1, 2, 8, 2, 8, 16, 8, 16, 4, 8, 32, 4, 2, 32, 2, 8, 4, 64, 16, 2, 16, 32, 1, 2, 64, 1, 4, 64, 2, 16, 8, 1, 4, 16, 64, 16, 1, 8, 64, 32, 1, 4, 8, 4, 8, 64, 8, 32, 8, 16, 4, 32, 8, 1, 8, 2, 64, 2, 4, 16, 2, 16, 8, 2, 32, 8, 32, 8, 32, 1, 2, 8, 32, 2, 16, 4, 32, 1, 4, 1, 16, 4, 1]
+r2     budget  8 writers 4: final view   8 nodes (over budget by   0); syncs left over budget 0/113; worst overage 0; naps 2427; max depth 14; notes lost 0
+       final grains [1270, 163, 32, 16, 16, 1, 1, 1]
+equal  budget 32 writers 4: final view 123 nodes (over budget by  91); syncs left over budget 76/113; worst overage 87; naps 2211; max depth 6; notes lost 0
+       final grains [64, 1, 16, 1, 32, 8, 1, 64, 1, 4, 1, 2, 8, 4, 16, 8, 1, 64, 1, 8, 4, 2, 1, 4, 1, 32, 16, 2, 8, 4, 1, 8, 1, 2, 32, 1, 4, 1, 2, 1, 16, 8, 1, 32, 1, 8, 2, 16, 4, 2, 64, 1, 2, 64, 16, 2, 16, 4, 1, 8, 4, 64, 2, 16, 8, 1, 4, 8, 64, 32, 8, 64, 16, 1, 2, 8, 1, 2, 1, 32, 4, 16, 2, 4, 32, 8, 1, 2, 16, 8, 16, 1, 2, 64, 4, 8, 16, 2, 32, 2, 4, 2, 4, 16, 1, 4, 64, 8, 4, 16, 4, 16, 2, 4, 32, 8, 2, 1, 16, 4, 1, 8, 1]
+r2     budget 32 writers 4: final view  32 nodes (over budget by   0); syncs left over budget 0/113; worst overage 0; naps 3671; max depth 14; notes lost 0
+       final grains [1371, 70, 16, 8, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+
+real	2m47.611s
+user	1m58.749s
+sys	0m48.611s
+
+[exited with code 0]

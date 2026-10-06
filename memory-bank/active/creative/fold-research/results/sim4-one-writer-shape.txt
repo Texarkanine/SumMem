@@ -1,0 +1,32 @@
+### out4-equal-10-11
+equal budget 10 seed 11: main after 119 merges -> keeps one-writer shape 2%, same grains as one writer 2%, within budget 8%; worst copies of one grain 28, worst doubled grains 6, mean walls 34.5; loose notes vs one writer (mean) 0.8 vs 5.0
+      writers after each note -> keep one-writer shape 3%; notes to recover after a merge broke it: median -, max - (0 recoveries)
+
+### out4-equal-10-7
+equal budget 10 seed 7: main after 113 merges -> keeps one-writer shape 5%, same grains as one writer 5%, within budget 9%; worst copies of one grain 28, worst doubled grains 6, mean walls 29.0; loose notes vs one writer (mean) 0.8 vs 4.7
+      writers after each note -> keep one-writer shape 4%; notes to recover after a merge broke it: median -, max - (0 recoveries)
+
+### out4-equal-32-11
+equal budget 32 seed 11: main after 119 merges -> keeps one-writer shape 8%, same grains as one writer 8%, within budget 15%; worst copies of one grain 23, worst doubled grains 6, mean walls 33.3; loose notes vs one writer (mean) 3.0 vs 26.5
+      writers after each note -> keep one-writer shape 13%; notes to recover after a merge broke it: median -, max - (0 recoveries)
+
+### out4-equal-32-7
+equal budget 32 seed 7: main after 113 merges -> keeps one-writer shape 11%, same grains as one writer 11%, within budget 33%; worst copies of one grain 20, worst doubled grains 6, mean walls 25.0; loose notes vs one writer (mean) 5.9 vs 25.9
+      writers after each note -> keep one-writer shape 12%; notes to recover after a merge broke it: median -, max - (0 recoveries)
+
+### out4-v1-10-11
+v1    budget 10 seed 11: main after 119 merges -> keeps one-writer shape 97%, same grains as one writer 97%, within budget 100%; worst copies of one grain 2, worst doubled grains 1, mean walls 0.0; loose notes vs one writer (mean) 5.0 vs 5.0
+      writers after each note -> keep one-writer shape 98%; notes to recover after a merge broke it: median 7, max 19 (3 recoveries)
+
+### out4-v1-10-7
+v1    budget 10 seed 7: main after 113 merges -> keeps one-writer shape 87%, same grains as one writer 85%, within budget 100%; worst copies of one grain 2, worst doubled grains 1, mean walls 0.2; loose notes vs one writer (mean) 4.7 vs 4.8
+      writers after each note -> keep one-writer shape 96%; notes to recover after a merge broke it: median 2, max 16 (9 recoveries)
+
+### out4-v1-32-11
+v1    budget 32 seed 11: main after 119 merges -> keeps one-writer shape 97%, same grains as one writer 97%, within budget 100%; worst copies of one grain 2, worst doubled grains 1, mean walls 0.0; loose notes vs one writer (mean) 26.5 vs 26.5
+      writers after each note -> keep one-writer shape 99%; notes to recover after a merge broke it: median 4, max 9 (3 recoveries)
+
+### out4-v1-32-7
+v1    budget 32 seed 7: main after 113 merges -> keeps one-writer shape 96%, same grains as one writer 96%, within budget 100%; worst copies of one grain 2, worst doubled grains 1, mean walls 0.0; loose notes vs one writer (mean) 25.9 vs 25.9
+      writers after each note -> keep one-writer shape 97%; notes to recover after a merge broke it: median 8, max 23 (3 recoveries)
+
