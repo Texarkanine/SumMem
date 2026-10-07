@@ -145,3 +145,10 @@ Fix middle orphans: replace the neighbors-only equal-grain fold picker with olde
 * Insights
     - Identical text shares a digest, so closest-pair is not observable through a successful nap.
     - The many-writers test's cost was the per-note walk, not the fold rule.
+
+## 2026-10-07 - HANDOFF
+
+* Work completed
+    - Pushed `middle-orphans` and opened draft PR https://github.com/Texarkanine/SumMem/pull/87 (`fix: fold the oldest same-grain pair across a wall`).
+* Decisions made
+    - Archive waits. The operator is smoke-testing first.

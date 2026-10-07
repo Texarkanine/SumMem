@@ -33,4 +33,5 @@
 - No linter or packaging target in `tox.ini`.
 
 ## Next Step
-- REFLECT COMPLETE. Run `/niko-archive` to archive this task.
+- REFLECT COMPLETE. Draft PR: https://github.com/Texarkanine/SumMem/pull/87. The operator is smoke-testing by hand.
+- If that holds, run `/niko-archive`. A new strand means re-enter the plan, not a special case in the picker.
