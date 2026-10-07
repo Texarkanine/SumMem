@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import re
 import subprocess
 import sys
 from importlib.machinery import SourceFileLoader
@@ -93,17 +94,71 @@ def git(args, cwd, check=True):
 
 
 def fold_ids(m, repo, ids, caption: str) -> str:
-    """Pairwise-fold the oldest two ids in *ids* until one nap id remains."""
+    """Balanced pairwise fold of *ids* until one nap id remains.
+
+    *ids* must be a power-of-two count. Each level naps disjoint pairs, so
+    every pack written has a power-of-two grain.
+    """
     remaining = list(ids)
+    count = len(remaining)
+    if count < 2 or count & (count - 1) != 0:
+        raise ValueError(f"fold_ids needs a power-of-two id count, got {count}")
     step = 0
     while len(remaining) > 1:
-        before = {node.id for node in m.list_view(repo)}
-        m.write_nap(repo, remaining[0], remaining[1], f"{caption}-{step}")
-        after = [node.id for node in m.list_view(repo)]
-        created = [cid for cid in after if cid not in before]
-        remaining = created + remaining[2:]
-        step += 1
+        nxt = []
+        for i in range(0, len(remaining), 2):
+            before = {node.id for node in m.list_view(repo)}
+            m.write_nap(repo, remaining[i], remaining[i + 1], f"{caption}-{step}")
+            after = [node.id for node in m.list_view(repo)]
+            created = [cid for cid in after if cid not in before]
+            if len(created) != 1:
+                raise AssertionError(f"fold_ids expected one new nap, got {created}")
+            nxt.append(created[0])
+            step += 1
+        remaining = nxt
     return remaining[0]
+
+
+_FOLD_RUN = re.compile(r' nap(?: --path \S+)? (\S+) (\S+) "')
+
+
+def plant_pack(m, repo, left, right, caption: str) -> None:
+    """Write a nap of two view rows with no pairing policy.
+
+    This builds a shape a legacy store can already hold. It does not apply
+    the nap pair rule, and it unlinks both rows.
+    """
+    child_l, digs_l = m._as_child(left)
+    child_r, digs_r = m._as_child(right)
+    tree_bytes = m.dumps_tree(m.Tree(kids=[child_l, child_r]))
+    caption_bytes = m.note_file_bytes(caption)
+    digests = digs_l + digs_r
+    stem = m.nap_stem(m._seq_prefix(left.name), m.leafset_id(digests), len(digests), tree_bytes, caption_bytes)
+    m._write_pair(m.ensure_store(repo) / "naps", stem, tree_bytes, caption_bytes)
+    m._unlink_node(left)
+    m._unlink_node(right)
+
+
+def obey_folds(m, repo, budget: int, cap: int = 500):
+    """Heal, then nap every requested pair until fold asks for nothing.
+
+    Every pack this writes has a power-of-two grain. Return the view.
+    """
+    for step in range(cap):
+        view = m.heal_view(repo)
+        out = m.fold_request(repo, budget, nodes=view)
+        if not out:
+            return view
+        match = _FOLD_RUN.search(out)
+        if match is None:
+            raise AssertionError(f"fold request had no Run line: {out!r}")
+        id_a, id_b = match.groups()
+        ids = [node.id for node in view]
+        written = m.write_nap(repo, m.resolve_id(id_a, ids), m.resolve_id(id_b, ids), f"fold {step}", nodes=view)
+        grain = m._parse_nap_stem(written.stem)[3]
+        grains = [node.leaves for node in view]
+        assert grain & (grain - 1) == 0, f"fold wrote a {grain}-pack; grains {grains}"
+    raise AssertionError("fold requests did not finish")
 
 
 def zoom_reaches(cwd: Path, start_id: str, sentence: str, bound: int = 200) -> None:

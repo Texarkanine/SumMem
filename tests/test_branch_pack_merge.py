@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from random import Random
 
-from gitutil import assert_unique_cover, fold_ids, git, init_repo, reaches, zoom_reaches
+from gitutil import assert_unique_cover, fold_ids, git, init_repo, plant_pack, reaches, zoom_reaches
 
 UTC = timezone.utc
 
@@ -71,7 +71,7 @@ def test_two_branch_overlapping_packs_heal_on_next_mutate(tmp_path, monkeypatch,
     notes = [n for n in m.list_view(repo) if n.kind == "note"]
     m.write_nap(repo, notes[0].id, notes[1].id, "ab")
     nodes = m.list_view(repo)
-    m.write_nap(repo, nodes[0].id, nodes[1].id, "abd")
+    plant_pack(m, repo, nodes[0], nodes[1], "abd")
     git(["add", "-A"], repo)
     git(["commit", "-m", "pack abd"], repo)
 
@@ -81,7 +81,7 @@ def test_two_branch_overlapping_packs_heal_on_next_mutate(tmp_path, monkeypatch,
     notes = [n for n in m.list_view(repo) if n.kind == "note"]
     m.write_nap(repo, notes[0].id, notes[1].id, "ab")
     nodes = m.list_view(repo)
-    m.write_nap(repo, nodes[0].id, nodes[1].id, "abe")
+    plant_pack(m, repo, nodes[0], nodes[1], "abe")
     git(["add", "-A"], repo)
     git(["commit", "-m", "pack abe"], repo)
 

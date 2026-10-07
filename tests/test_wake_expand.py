@@ -241,9 +241,10 @@ def test_zoom_expanded_child_id(tmp_path, monkeypatch, summem):
     child = next(row for row in frontier if row.id not in file_ids)
     out = m.zoom_text(repo, child.id)
     assert child.kind == "nap"
+    assert child.leaves == 4
     ids = m.named_ids(repo)
-    pack, leaf = child.tree.kids
+    left, right = child.tree.kids
     assert out.splitlines() == [
-        f"x5 {m.short_id(pack.id, ids)}: eight-b-3",
-        dated_leaf(leaf.name.split("-")[0], "b5"),
+        f"x2 {m.short_id(left.id, ids)}: eight-b-0",
+        f"x2 {m.short_id(right.id, ids)}: eight-b-1",
     ]

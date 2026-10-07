@@ -24,7 +24,7 @@ A single writer must see exactly today's behavior: the same pair requested at ev
 2. **`nap` pair rule.** `nap` accepts two view rows of the same grain with no row of that grain between them, even when they are not neighbors. It refuses unequal grains. It refuses a same-grain pair with a nearer same-grain row between them. It keeps today's earlier refusals and their order: range token, unknown id, unreadable pack, overlapping packs.
 3. **No new non-power-of-two packs.** No code path writes a pack whose grain is not a power of two.
 4. **Wake order.** When wake opens packs in memory (view shorter than budget), the printed rows are sorted by each row's oldest note, so an opened pack's newer child lands at its own date.
-5. **Legacy packs.** A pack already on disk whose grain is not a power of two is never opened automatically, never requested, and does not stop other rows from folding.
+5. **Legacy packs.** A pack already on disk whose grain is not a power of two is never opened on disk, never requested, and does not stop other rows from folding. Wake may still split it in memory for display when the view is under budget.
 6. **Self-heal.** Stores that already have walls heal through the normal fold requests. No migration script.
 7. **Docs.** Help text, README, architecture, theory, and `memory-bank/systemPatterns.md` describe the new rule instead of "adjacent".
 
@@ -40,7 +40,7 @@ A single writer must see exactly today's behavior: the same pair requested at ev
 
 ## Acceptance Criteria
 
-1. The six middle-orphan tests in `tests/test_middle_orphans.py` that pin stranding pass. `test_odd_grain_pack_is_not_stranded` is rewritten to decision 4 and passes.
+1. The five middle-orphan stranding tests in `tests/test_middle_orphans.py` pass. `test_odd_grain_pack_is_not_stranded` is rewritten to decision 4 and passes.
 2. `tests/test_nap_reject.py::test_nap_of_unequal_grains_rejected_without_writing` passes.
 3. `test_oldest_same_grain_pair_folds_before_newer_notes` still passes (oldest pair first on a healthy listing).
 4. New tests cover the `nap` pair rule, wake's expanded row order, and a seeded multi-writer property test (no stall with a pair available, every written pack a power of two, no note lost, one-writer shape restored after merges stop).

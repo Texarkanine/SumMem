@@ -17,7 +17,7 @@ No on-disk change, no migration: existing stores heal through normal fold reques
 
 Tests already on this branch:
 
-- in `tests/test_middle_orphans.py`, six red stranding tests (B6), the red odd-grain test (replaced in Unit 3), and the green oldest-pair guard (B1);
+- in `tests/test_middle_orphans.py`, five red stranding tests (B6), the red odd-grain test (replaced in Unit 3), and the green oldest-pair guard (B1);
 - the red `tests/test_nap_reject.py::test_nap_of_unequal_grains_rejected_without_writing` (B9).
 
 Research, simulations, prototype patch, and visual review: `memory-bank/active/creative/fold-research/` (start with its `README.md`; open `fold-review.html` in a browser).
@@ -50,7 +50,7 @@ flowchart TD
 ### Affected Components
 
 - **`summem` · `fold_request` (1225–1261)**: today it picks the oldest equal-grain neighbors when over budget. Change: oldest row, with a power-of-two grain, that has a same-grain row anywhere below it, paired with the nearest one. Remaining-count text, the `Run:` line, `--path`, and the empty return stay the same.
-- **`summem` · `_adjacent_nodes` (836–848) → `_pair_nodes`**: today it resolves ids to two neighbor rows, any grain. Change: resolve ids to two distinct rows, nearest pair among duplicate-id hits, older first. It refuses the same row twice. The grain and nearest checks move into `write_nap`, after child loading.
+- **`summem` · `_adjacent_nodes` (836–848) → `_pair_nodes`**: today it resolves ids to two neighbor rows, any grain. Change: return the indices `(lo, hi)` of two distinct rows, nearest pair among duplicate-id hits, older first. It refuses the same row twice. The grain and nearest checks move into `write_nap`, after child loading.
 - **`summem` · `write_nap` (851–872)**: today it loads children, refuses overlap, and writes. Change: after the overlap check, refuse unequal grains, refuse grains that aren't a power of two, and refuse a pair with a row of that grain between them. Update the docstring.
 - **`summem` · new `_is_pow2(n)` and `_nearest_twin(grains, i)`**: pure helpers. `_nearest_twin` returns the first row below `i` with the same grain. Both are shared by the picker and `write_nap`, so the picker's pair is accepted by construction.
 - **`summem` · new `_fold_pair(grains)`**: pure. It returns the index pair the picker requests, or `None`. `fold_request` maps it back to view rows.
@@ -108,7 +108,7 @@ Picker (`fold_request`):
   - two legacy 6-packs side by side are never paired, are both still listed, and the view is within budget.
 
   Assert the budget at 32 notes, not after every note: with a 6-pack, some note counts (15, 23, 27, 29–31; with two 6-packs 7, 11, 13–15) leave the view over budget with nothing foldable, which is correct.
-- B6: the operator scenario, late note, zipper reopen, and surgery: obey fold requests → the view returns to budget and stranded rows fold. These are the 5 existing red stranding tests plus `test_merged_branch_naps_fold_back_to_budget`.
+- B6: the operator scenario, late note, zipper reopen, and surgery: obey fold requests → the view returns to budget and stranded rows fold. These are the five existing red stranding tests in `tests/test_middle_orphans.py`, including `test_merged_branch_naps_fold_back_to_budget`.
 - B7: the `Run:` line for a skip pair, pasted into `main(["nap", …])` → exit 0, `Saved.`.
 
 `nap` (`write_nap` via `_pair_nodes`):
@@ -134,7 +134,7 @@ Property (integration):
   - every pack written is a power of two;
   - no note is lost: after every writer merges into `main`, every note text any writer wrote is reachable on `main`;
   - after those final merges and 64 more notes on `main`, the listing has no walls, at most two rows of any grain ≥ 2, and at most one grain ≥ 2 appearing twice. Loose notes don't count toward the doubled-grain limit.
-- B19: one writer, pure grains, every budget 1–32, up to 200 notes. At every fold step, `_fold_pair` returns exactly the pair of the old neighbors-only rule (`tests/test_fold.py::_equal_grain_pair`, the test-only oracle).
+- B19: one writer, pure grains, every budget 1–32, up to 200 notes. At every fold step, `_fold_pair` returns exactly the pair of the old neighbors-only rule. The node form of `tests/test_fold.py::_equal_grain_pair` keeps its six callers. A grain-list form sits under it and is the B19 oracle.
 - B20: pure `_fold_pair` skips non-power-of-two rows: `[6, 6, 2, 1, 1]` gives `(3, 4)`, `[6, 6]` gives `None`, and `[8, 1, 4, 1]` gives `(1, 3)`.
 
 ### Test Infrastructure
@@ -157,7 +157,7 @@ Property (integration):
 
 ## Implementation Plan
 
-### 1. Fixtures that stop writing unequal packs — executable (test-only, no production change)
+### 1. Fixtures that stop writing unequal packs — executable (test-only, no production change) — done
 
 - Files: `tests/gitutil.py`, `tests/test_middle_orphans.py`, `tests/test_zipper.py`, `tests/test_branch_pack_merge.py`, `tests/test_wake_expand.py`
 - Creative ref: `creative-nap-pair-rule.md` (Implementation Notes: fixtures)
@@ -169,7 +169,7 @@ Property (integration):
    - `tests/test_branch_pack_merge.py::test_two_branch_overlapping_packs_heal_on_next_mutate`: replace the naps named `"abd"` (line 74) and `"abe"` (line 84) with `plant_pack`.
    - Preflight confirmed these are the only direct unequal naps in the suite.
 4. Retarget `tests/test_wake_expand.py::test_zoom_expanded_child_id` (232) to the balanced 8-pack: the opened child is a 4-pack, and its zoom prints two 2-pack lines. Today it expects the left spine's `x5 …: eight-b-3` plus a leaf.
-5. Run the full suite on unchanged `summem`. It must be green except the 7 known red tests. A scratch prototype of steps 2 and 4 gave 393 passed, with only `test_zoom_expanded_child_id` changed.
+5. Run the full suite on unchanged `summem`. It must be green except the 7 known red tests: 395 passed, 7 failed.
 
 ### 2. `nap` pair rule — executable
 
@@ -180,12 +180,13 @@ Property (integration):
    - add `test_nap_accepts_nearest_same_grain_rows_across_a_bigger_row` (B8);
    - add `test_write_nap_refuses_unequal_grains_without_writing` (B9);
    - add `test_nap_refuses_two_legacy_odd_packs_of_equal_grain` (B12; plant two 6-packs with `plant_pack`);
+   - add `test_write_nap_prefers_closest_pair_among_duplicate_ids`: three notes that share one id, with a different note between the oldest and the later two; `write_nap` of that id with itself folds the closest two and leaves the oldest;
    - rename `test_nap_rejects_non_adjacent_ids` to `test_nap_rejects_pair_across_a_nearer_same_grain_row` (B10);
    - mark the `"not adjacent"` pins in `test_nap_two_identical_notes_by_repeated_id` (`test_nap.py:357`) and `test_cli_nap_identical_notes_prefix_not_adjacent` (`test_cli.py:405`) for retarget (B11).
 2. Stub interface:
    - `_is_pow2(n: int) -> bool`;
    - `_nearest_twin(grains: list[int], i: int) -> int | None`, the first index after `i` with `grains[i]`'s grain;
-   - `_pair_nodes(nodes: list[ViewNode], id_a: str, id_b: str) -> tuple[ViewNode, ViewNode]`, which resolves ids to two distinct rows, older first, preferring the closest pair among duplicate-id hits.
+   - `_pair_nodes(nodes: list[ViewNode], id_a: str, id_b: str) -> tuple[int, int]`, which returns `(lo, hi)` for two distinct rows, older first, preferring the closest pair among duplicate-id hits.
    Both get docstrings in the file's style. Leave `write_nap` calling `_adjacent_nodes` until step 4.
 3. Write tests and run red: `tox -e py311 -- tests/test_nap.py tests/test_cli.py tests/test_nap_reject.py -n0`.
    - Red: B8 (today `not adjacent`), B9 (today writes a 3-pack), B12 (today writes a 12-pack), B10/B11 (new meanings), and the existing unequal CLI test.
@@ -195,8 +196,8 @@ Property (integration):
      1. `_pair_nodes`;
      2. `_as_child` for both rows;
      3. overlap check;
-     4. refuse unequal grains;
-     5. refuse a grain that is not a power of two;
+     4. refuse when `node.leaves` differ;
+     5. refuse unless `len(digs_l) == len(digs_r)` and that total is a power of two;
      6. refuse when `hi != _nearest_twin(grains, lo)`, meaning a row of that grain sits between them;
      7. write at the older row's seq;
      8. unlink both rows.
@@ -212,11 +213,11 @@ Property (integration):
 1. Stub tests:
    - in `tests/test_fold.py`, add `test_fold_request_skips_to_nearest_same_grain_row_across_a_wall` (B2), `test_fold_request_takes_oldest_row_with_a_twin_first` (B3), and `test_run_line_for_a_skip_pair_is_accepted_by_nap` (B7);
    - in `tests/test_middle_orphans.py`, replace `test_odd_grain_pack_is_not_stranded` with `test_legacy_odd_pack_stays_listed_and_is_never_requested` and `test_two_equal_legacy_odd_packs_are_never_paired` (B5), and update the module docstring's legacy sentence;
-   - in `tests/test_fold.py`, add pure tests `test_fold_pair_matches_neighbors_rule_for_one_writer` (B19) and `test_fold_pair_skips_non_power_of_two_rows` (B20). B19 reuses `_equal_grain_pair` as the old-rule oracle, adapted to take a grain list;
+   - in `tests/test_fold.py`, add pure tests `test_fold_pair_matches_neighbors_rule_for_one_writer` (B19) and `test_fold_pair_skips_non_power_of_two_rows` (B20). B19 compares `_fold_pair` to a grain-list form of the old rule. The node form of `_equal_grain_pair` calls that form and keeps its six callers;
    - create `tests/test_fold_many_writers.py` with `test_many_writers_never_strand_and_keep_powers_of_two`, parametrized over two seeds (B18). It uses in-process stores under `tmp_path` (no git), a three-way merge of file sets (keep what both sides have, plus what either side added since the base), and `obey_folds`.
 2. Stub interface: `_fold_pair(grains: list[int]) -> tuple[int, int] | None`, with a docstring stating the rule. `fold_request`'s signature is unchanged; `_is_pow2` and `_nearest_twin` exist from Unit 2.
 3. Write tests and run red: `tox -e py311 -- tests/test_fold.py tests/test_middle_orphans.py tests/test_fold_many_writers.py -n0`.
-   - Red: B2, B3, B7 (today names nothing across a wall); B5's two-6-packs case (today pairs the neighbors into a 12-pack, caught by `obey_folds`); the 6 stranding tests; B18 (today stalls); B19 and B20 (`_fold_pair` is a stub).
+   - Red: B2, B3, B7 (today names nothing across a wall); B5's two-6-packs case (today pairs the neighbors into a 12-pack, caught by `obey_folds`); the five stranding tests; B18 (today stalls); B19 and B20 (`_fold_pair` is a stub).
    - Green: B1 and B4.
 4. Write code and run green.
    - Implement `_fold_pair`: oldest first, skip any row whose grain is not a power of two, and return `(i, _nearest_twin(grains, i))` for the first `i` that has one.
@@ -286,7 +287,7 @@ No new technology - validation not required.
 
 ## Pre-Mortem
 
-- **The picker strands rows in a pattern the scenarios and seeds didn't cover**: B18 plus the six scenario tests are the ratchet. If build or QA finds a new strand, re-enter plan rather than special-casing.
+- **The picker strands rows in a pattern the scenarios and seeds didn't cover**: B18 plus the five scenario tests are the ratchet. If build or QA finds a new strand, re-enter plan rather than special-casing.
 - **Readers lose trust because recent notes hide in older packs**: Unit 4 fixes opened views. Closed skip packs remain by the operator's accepted tradeoff (≤ 0.2× own pack at budget 32).
 - **The premise is wrong and positions should change instead**: out of scope by constraint (no on-disk change). The research shows equal-grain skip folds restore the one-writer shape without it.
 - **A consumer relies on `nap` folding unequal neighbors**: 0.x product, Usage tells agents to do the requested nap, and the commit body names the change. Already covered by the Release challenge.
