@@ -171,7 +171,7 @@ Property (integration):
 4. Retarget `tests/test_wake_expand.py::test_zoom_expanded_child_id` (232) to the balanced 8-pack: the opened child is a 4-pack, and its zoom prints two 2-pack lines. Today it expects the left spine's `x5 …: eight-b-3` plus a leaf.
 5. Run the full suite on unchanged `summem`. It must be green except the 7 known red tests: 395 passed, 7 failed.
 
-### 2. `nap` pair rule — executable
+### 2. `nap` pair rule — executable — done
 
 - Files: `summem` (`_is_pow2`, `_pair_nodes` replacing `_adjacent_nodes`, `write_nap`), `tests/test_nap.py`, `tests/test_cli.py`, `tests/test_nap_reject.py`
 - Creative ref: `creative-nap-pair-rule.md`, `creative-legacy-odd-packs.md`
@@ -180,7 +180,7 @@ Property (integration):
    - add `test_nap_accepts_nearest_same_grain_rows_across_a_bigger_row` (B8);
    - add `test_write_nap_refuses_unequal_grains_without_writing` (B9);
    - add `test_nap_refuses_two_legacy_odd_packs_of_equal_grain` (B12; plant two 6-packs with `plant_pack`);
-   - add `test_write_nap_prefers_closest_pair_among_duplicate_ids`: three notes that share one id, with a different note between the oldest and the later two; `write_nap` of that id with itself folds the closest two and leaves the oldest;
+   - add `test_pair_nodes_prefers_closest_duplicate_id_hits`: one id on three rows, and `_pair_nodes` returns the closest pair `(2, 3)`, not the first pair. A store nap of that id with itself still dies at the overlap check, because those rows share a digest.
    - rename `test_nap_rejects_non_adjacent_ids` to `test_nap_rejects_pair_across_a_nearer_same_grain_row` (B10);
    - mark the `"not adjacent"` pins in `test_nap_two_identical_notes_by_repeated_id` (`test_nap.py:357`) and `test_cli_nap_identical_notes_prefix_not_adjacent` (`test_cli.py:405`) for retarget (B11).
 2. Stub interface:

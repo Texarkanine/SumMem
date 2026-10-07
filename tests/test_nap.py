@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from random import Random
 
 import pytest
 
 from conftest import dated_leaf
-from gitutil import init_repo
+from gitutil import init_repo, plant_pack
 
 UTC = timezone.utc
 
@@ -218,8 +218,8 @@ def test_nap_rejects_newline_caption(tmp_path, summem):
     assert _payload_names(repo) == before
 
 
-def test_nap_rejects_non_adjacent_ids(tmp_path, summem):
-    """Non-adjacent ids are rejected without mentioning store paths or git."""
+def test_nap_rejects_pair_across_a_nearer_same_grain_row(tmp_path, summem):
+    """A nearer row of the same grain between the two ids is rejected; nothing is written."""
     m = summem
     repo = init_repo(tmp_path / "r")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
@@ -230,12 +230,109 @@ def test_nap_rejects_non_adjacent_ids(tmp_path, summem):
     with pytest.raises(ValueError) as caught:
         m.write_nap(repo, ids[0], ids[2], "skip")
     err = str(caught.value)
-    assert "not adjacent" in err
-    assert "sit next to each other in wake" in err
+    assert "a nearer row of that grain sits between them" in err
     assert "notes/" not in err
     assert "naps/" not in err
     assert "git" not in err
     assert _payload_names(repo) == before
+
+
+def test_nap_accepts_nearest_same_grain_rows_across_a_bigger_row(tmp_path, summem):
+    """Two notes with a 2-pack between them nap into a 2-pack at the older note's position."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    base = datetime(2026, 1, 1, tzinfo=UTC)
+    m.write_note(repo, "a", base + timedelta(seconds=1), Random(1))
+    m.write_note(repo, "b", base + timedelta(seconds=2), Random(2))
+    m.write_note(repo, "c", base + timedelta(seconds=3), Random(3))
+    ids = _ids(m, repo)
+    m.write_nap(repo, ids[1], ids[2], "bc")
+    m.write_note(repo, "d", base + timedelta(seconds=4), Random(4))
+    view = m.list_view(repo)
+    assert [node.leaves for node in view] == [1, 2, 1]
+    older, middle, newer = view
+    m.write_nap(repo, older.id, newer.id, "ad")
+    view = m.list_view(repo)
+    assert [node.leaves for node in view] == [2, 2]
+    assert view[0].name.startswith(m._seq_prefix(older.name))
+    assert middle.id in {node.id for node in view}
+
+
+def test_write_nap_refuses_unequal_grains_without_writing(tmp_path, summem):
+    """A 2-pack and a note are not the same grain; nothing is written."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    for i, text in enumerate(("a", "b", "c"), start=1):
+        m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
+    ids = _ids(m, repo)
+    m.write_nap(repo, ids[0], ids[1], "ab")
+    view = m.list_view(repo)
+    assert [node.leaves for node in view] == [2, 1]
+    before = _payload_names(repo)
+    with pytest.raises(ValueError) as caught:
+        m.write_nap(repo, view[0].id, view[1].id, "abc")
+    assert "not the same grain" in str(caught.value)
+    _agent_err(str(caught.value))
+    assert _payload_names(repo) == before
+
+
+def _legacy_six(m, repo, start: int, caption: str):
+    """Plant one 6-pack from six notes beginning at second *start*."""
+    base = datetime(2026, 1, 1, tzinfo=UTC)
+    for i in range(6):
+        m.write_note(repo, f"{caption}-{i}", base + timedelta(seconds=start + i), Random(start + i))
+    notes = [node for node in m.list_view(repo) if node.kind == "note" and node.caption.startswith(caption)]
+    m.write_nap(repo, notes[0].id, notes[1].id, f"{caption}-p0")
+    m.write_nap(repo, notes[2].id, notes[3].id, f"{caption}-p1")
+    packs = [node for node in m.list_view(repo) if node.kind == "nap" and node.caption.startswith(f"{caption}-p")]
+    m.write_nap(repo, packs[0].id, packs[1].id, f"{caption}-four")
+    notes = [node for node in m.list_view(repo) if node.kind == "note" and node.caption.startswith(caption)]
+    m.write_nap(repo, notes[0].id, notes[1].id, f"{caption}-two")
+    four = next(node for node in m.list_view(repo) if node.caption == f"{caption}-four")
+    two = next(node for node in m.list_view(repo) if node.caption == f"{caption}-two")
+    plant_pack(m, repo, four, two, caption)
+
+
+def test_nap_refuses_two_legacy_odd_packs_of_equal_grain(tmp_path, summem):
+    """Two legacy 6-packs are the same grain and are still refused; nothing is written."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    _legacy_six(m, repo, 1, "left")
+    _legacy_six(m, repo, 10, "right")
+    view = m.list_view(repo)
+    assert [node.leaves for node in view] == [6, 6]
+    before = _payload_names(repo)
+    with pytest.raises(ValueError) as caught:
+        m.write_nap(repo, view[0].id, view[1].id, "twelve")
+    assert "not a power of two" in str(caught.value)
+    _agent_err(str(caught.value))
+    assert _payload_names(repo) == before
+
+
+def test_pair_nodes_prefers_closest_duplicate_id_hits(summem):
+    """When one id hits several rows, the closest distinct pair wins."""
+    m = summem
+    shared = "a" * 16
+    other = "b" * 16
+
+    def row(cid: str, name: str):
+        return m.ViewNode(
+            id=cid,
+            name=name,
+            kind="note",
+            caption="x",
+            leaves=1,
+            stamp=name.split("-")[0],
+            path=Path(name),
+        )
+
+    nodes = [
+        row(shared, "20260101T000001Z-aa"),
+        row(other, "20260101T000002Z-bb"),
+        row(shared, "20260101T000003Z-cc"),
+        row(shared, "20260101T000004Z-dd"),
+    ]
+    assert m._pair_nodes(nodes, shared, shared) == (2, 3)
 
 
 def test_nap_rejects_unknown_id(tmp_path, summem):
@@ -354,7 +451,7 @@ def test_nap_two_identical_notes_by_repeated_id(tmp_path, summem):
     m.heal_view(repo)
     ids = _ids(m, repo)
     assert len(ids) == 1
-    with pytest.raises(ValueError, match="not adjacent") as caught:
+    with pytest.raises(ValueError, match="not two rows") as caught:
         m.write_nap(repo, ids[0], ids[0], "twins")
     _agent_err(str(caught.value))
     notes = [p for p in (repo / ".summem" / "notes").iterdir() if not p.name.startswith(".")]

@@ -833,31 +833,66 @@ def _unlink_node(node: ViewNode) -> None:
         node.tree_path.unlink()
 
 
-def _adjacent_nodes(nodes: list[ViewNode], id_a: str, id_b: str) -> tuple[ViewNode, ViewNode]:
+def _is_pow2(n: int) -> bool:
+    """Return True when *n* is a positive power of two."""
+    return n > 0 and n & (n - 1) == 0
+
+
+def _nearest_twin(grains: list[int], i: int) -> int | None:
+    """Return the first index after *i* whose grain equals ``grains[i]``, or None."""
+    grain = grains[i]
+    for j in range(i + 1, len(grains)):
+        if grains[j] == grain:
+            return j
+    return None
+
+
+def _pair_nodes(nodes: list[ViewNode], id_a: str, id_b: str) -> tuple[int, int]:
+    """Return ``(lo, hi)`` for two distinct view rows, older first.
+
+    When several rows share an id, the closest pair wins. Ties keep the older
+    pair. Naming the same row twice is refused.
+    """
     hits_a = [i for i, node in enumerate(nodes) if node.id == id_a]
     hits_b = [i for i, node in enumerate(nodes) if node.id == id_b]
     if not hits_a or not hits_b:
         raise ValueError("unknown id. Copy an id from wake.")
+    best: tuple[int, int, int] | None = None
     for ia in hits_a:
         for ib in hits_b:
             if ia == ib:
                 continue
-            if abs(ia - ib) == 1:
-                lo, hi = (ia, ib) if ia < ib else (ib, ia)
-                return nodes[lo], nodes[hi]
-    raise ValueError("not adjacent. Nap two ids that sit next to each other in wake.")
+            lo, hi = (ia, ib) if ia < ib else (ib, ia)
+            gap = hi - lo
+            if best is None or (gap, lo) < (best[0], best[1]):
+                best = (gap, lo, hi)
+    if best is None:
+        raise ValueError("not two rows")
+    return best[1], best[2]
 
 
 def write_nap(parent, id_a, id_b, caption, entry_chars: int | None = None, nodes=None):
-    """Fold two adjacent view nodes into a nap pair. Return the .summ path."""
+    """Fold two same-grain view rows into a nap pair. Return the .summ path.
+
+    The rows need not be neighbors. They must share a power-of-two grain, and
+    no row of that grain may sit between them.
+    """
     require_entry(caption, entry_chars)
     if nodes is None:
         nodes = list_view(parent)
-    left, right = _adjacent_nodes(nodes, id_a, id_b)
+    lo, hi = _pair_nodes(nodes, id_a, id_b)
+    left, right = nodes[lo], nodes[hi]
     child_l, digs_l = _as_child(left)
     child_r, digs_r = _as_child(right)
     if set(digs_l) & set(digs_r):
         raise ValueError("overlapping packs")
+    if left.leaves != right.leaves:
+        raise ValueError("not the same grain")
+    total = len(digs_l) + len(digs_r)
+    if len(digs_l) != len(digs_r) or not _is_pow2(total):
+        raise ValueError("not a power of two")
+    if hi != _nearest_twin([node.leaves for node in nodes], lo):
+        raise ValueError("a nearer row of that grain sits between them")
     tree = Tree(kids=[child_l, child_r])
     digests = digs_l + digs_r
     leafset = leafset_id(digests)

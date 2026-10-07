@@ -402,7 +402,7 @@ def test_cli_nap_identical_notes_prefix_not_adjacent(tmp_path, monkeypatch, caps
     assert len(prefix) == 8
     assert m.main(["nap", prefix, prefix, "twins"]) == 1
     err = capsys.readouterr().err
-    assert "not adjacent" in err
+    assert "not two rows" in err
     view = m.list_view(repo)
     assert len(view) == 1
     assert view[0].kind == "note"
