@@ -205,7 +205,7 @@ Property (integration):
    - Update `write_nap`'s docstring and delete `_adjacent_nodes`.
    - Run the step-3 files, then `tests/test_zipper.py`, `tests/test_branch_pack_merge.py`, then the full suite. The stranding tests stay red until Unit 3.
 
-### 3. Fold picker — executable
+### 3. Fold picker — executable — done
 
 - Files: `summem` (`fold_request`), `tests/test_fold.py`, `tests/test_middle_orphans.py`, `tests/test_fold_many_writers.py` (new)
 - Creative ref: `creative-fold-picker.md`, `creative-legacy-odd-packs.md`
@@ -225,7 +225,7 @@ Property (integration):
    - Run the step-3 files, `tests/test_surgery.py`, and `tests/test_zipper.py`, then the full suite.
    - Measure B18's runtime: under 5 s per seed with xdist. If slower, cut notes, but keep at least 200 and keep every assertion.
 
-### 4. Wake expand order — executable
+### 4. Wake expand order — executable — done
 
 - Files: `summem` (`ProjectedNode`, `_projected_child`, `expand_frontier`), `tests/test_wake_expand.py`
 - Creative ref: `creative-wake-expand-order.md`

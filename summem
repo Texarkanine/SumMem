@@ -183,9 +183,12 @@ class ViewNode:
 
 
 class ProjectedNode:
-    """One printed wake row: a view file or an in-memory expanded child."""
+    """One printed wake row: a view file or an in-memory expanded child.
 
-    __slots__ = ("id", "kind", "caption", "leaves", "stamp", "tree", "tree_path", "tree_attempted")
+    ``seq`` is the oldest note's ``{stamp}-{rand}``. Opened rows sort by it.
+    """
+
+    __slots__ = ("id", "kind", "caption", "leaves", "stamp", "tree", "tree_path", "tree_attempted", "seq")
     __eq__ = _eq_by_slots
 
     def __init__(
@@ -198,6 +201,7 @@ class ProjectedNode:
         tree: Tree | None = None,
         tree_path: Path | None = None,
         tree_attempted: bool = False,
+        seq: str = "",
     ) -> None:
         self.id = id
         self.kind = kind
@@ -207,6 +211,7 @@ class ProjectedNode:
         self.tree = tree
         self.tree_path = tree_path
         self.tree_attempted = tree_attempted
+        self.seq = seq
 
 
 def _tree_dict(tree: Tree) -> dict:
@@ -847,6 +852,21 @@ def _nearest_twin(grains: list[int], i: int) -> int | None:
     return None
 
 
+def _fold_pair(grains: list[int]) -> tuple[int, int] | None:
+    """Return the oldest power-of-two row that has a same-grain row below it, with that nearest row.
+
+    Rows whose grain is not a power of two are skipped. None means every
+    power-of-two grain appears once.
+    """
+    for i, grain in enumerate(grains):
+        if not _is_pow2(grain):
+            continue
+        twin = _nearest_twin(grains, i)
+        if twin is not None:
+            return i, twin
+    return None
+
+
 def _pair_nodes(nodes: list[ViewNode], id_a: str, id_b: str) -> tuple[int, int]:
     """Return ``(lo, hi)`` for two distinct view rows, older first.
 
@@ -1089,6 +1109,7 @@ def expand_frontier(nodes: list[ViewNode], budget: int) -> list[ProjectedNode]:
             leaves=node.leaves,
             stamp=node.stamp,
             tree_path=node.tree_path,
+            seq=_seq_prefix(node.name),
         )
         for node in nodes
     ]
@@ -1106,6 +1127,7 @@ def expand_frontier(nodes: list[ViewNode], budget: int) -> list[ProjectedNode]:
         if kids is None:
             break
         frontier = [*frontier[:idx], *kids, *frontier[idx + 1 :]]
+        frontier.sort(key=lambda row: row.seq)
     return frontier
 
 
@@ -1143,6 +1165,7 @@ def _projected_child(child: NoteChild | NapChild) -> ProjectedNode | None:
             caption=child.text,
             leaves=1,
             stamp=child.name.split("-")[0],
+            seq=child.name,
         )
     notes = list(_note_children(child.tree))
     if not notes:
@@ -1154,6 +1177,7 @@ def _projected_child(child: NoteChild | NapChild) -> ProjectedNode | None:
         leaves=len(notes),
         stamp=min(note.name.split("-")[0] for note in notes),
         tree=child.tree,
+        seq=min(note.name for note in notes),
     )
 
 
@@ -1258,7 +1282,7 @@ def _fold_path_flag(parent) -> str:
 
 
 def fold_request(parent, wake_lines: int | None = None, nodes=None, entry_chars: int | None = None) -> str:
-    """Return an OptMem-style nap prompt for the oldest equal-grain pair when over *wake_lines*."""
+    """Return a nap prompt for the oldest same-grain power-of-two pair when over *wake_lines*."""
     if wake_lines is None:
         wake_lines = WAKE_LINES
     if entry_chars is None:
@@ -1267,13 +1291,10 @@ def fold_request(parent, wake_lines: int | None = None, nodes=None, entry_chars:
         nodes = list_view(parent)
     if len(nodes) <= wake_lines:
         return ""
-    left = right = None
-    for i in range(len(nodes) - 1):
-        if nodes[i].leaves == nodes[i + 1].leaves:
-            left, right = nodes[i], nodes[i + 1]
-            break
-    if left is None:
+    pair = _fold_pair([node.leaves for node in nodes])
+    if pair is None:
         return ""
+    left, right = nodes[pair[0]], nodes[pair[1]]
     ids = [node.id for node in nodes]
     remain = len(nodes) - 1 - wake_lines
     extra = ""
