@@ -303,4 +303,4 @@ No new technology - validation not required.
 - [x] Pre-Mortem complete
 - [x] Preflight (run 2: PASS WITH ADVISORY; advisories in `.preflight-status`)
 - [x] Build
-- [ ] QA
+- [x] QA (PASS; advisories in `.qa-validation-status`)

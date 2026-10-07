@@ -1,0 +1,9 @@
+PASS
+
+Semantic review of the middle-orphans build against `tasks.md` and `projectbrief.md`. `tox -e py311` re-run during QA: 417 passed.
+
+Advisories, none blocking:
+
+- Stale names in tests: `test_cli.py::test_cli_nap_identical_notes_prefix_not_adjacent` still says "not_adjacent" though it now pins `not two rows`; several `test_nap.py` names and docstrings (`test_nap_two_adjacent_notes_...`, `test_write_nap_*_adjacent_naps_*`) still say "adjacent" for what are now same-grain rows. Cosmetic.
+- New refusals (`not two rows`, `not the same grain`, `not a power of two`, `a nearer row of that grain sits between them`) state the problem only. The older refusals (`unknown id. Copy an id from wake.`) also tell the agent what to do. The plan allows problem-only text.
+- In `write_nap`, `left.leaves != right.leaves` and `len(digs_l) != len(digs_r)` overlap. They only differ for a pack whose grain label disagrees with its tree, and that case reports `not a power of two`, which is a loose description. The plan prescribed both checks.

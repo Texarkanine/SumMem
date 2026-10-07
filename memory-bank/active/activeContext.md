@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: middle-orphans
-**Phase:** BUILD - COMPLETE
+**Phase:** REFLECT COMPLETE
 
 ## What Was Done
 - Level 3 plan written to `tasks.md`: five units (fixtures → `nap` pair rule → fold picker → wake expand order → docs), 20 behaviors, pinned check-order diagram.
@@ -33,4 +33,4 @@
 - No linter or packaging target in `tox.ini`.
 
 ## Next Step
-- QA.
+- REFLECT COMPLETE. Run `/niko-archive` to archive this task.

@@ -122,3 +122,26 @@ Fix middle orphans: replace the neighbors-only equal-grain fold picker with olde
 * Insights
     - `tox run-parallel`: py311, py312, py313, and py314 all OK. py311 reported 417 passed in 19.27 s.
     - Seed 7 of the many-writers test was 3.17 s after reachability became one walk of the view.
+
+## 2026-10-07 - QA - COMPLETE
+
+* Work completed
+    - Reviewed the `main...HEAD` diff of `summem`, tests, and docs against the plan and brief for KISS, DRY, YAGNI, completeness, regression, integrity, and documentation.
+    - Confirmed every planned test (B2, B3, B5, B7–B10, B12, B14–B16, B18–B20) exists. Re-ran `tox -e py311`: 417 passed.
+    - Searched docs, README, help text, and `systemPatterns.md` for "adjacent" and "neighbor": the remaining hits are the single-writer walk, the wall definition, and the retained test oracle.
+* Decisions made
+    - PASS with three non-blocking advisories (stale "adjacent" test names, problem-only refusal text, overlapping leaves and digest-count checks in `write_nap`). Details in `.qa-validation-status`.
+* Insights
+    - No debris, TODOs, or print statements in the diff. `surgery.py` and `migrate.py` are untouched, as planned.
+
+## 2026-10-07 - REFLECT - COMPLETE
+
+* Work completed
+    - Compared the brief's seven requirements to the build. All shipped. Advisory 7 stayed out, as left for the operator.
+    - Wrote `memory-bank/active/reflection/reflection-middle-orphans.md`.
+    - Persistent files: productContext, systemPatterns, and techContext needed no further edit. systemPatterns already states the fold and wake-sort contract from the docs unit.
+* Decisions made
+    - The "stranded forever" claim stays a tested rule, not a proof.
+* Insights
+    - Identical text shares a digest, so closest-pair is not observable through a successful nap.
+    - The many-writers test's cost was the per-note walk, not the fold rule.
