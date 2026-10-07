@@ -1,4 +1,4 @@
-"""Binary nap writer: two adjacent notes, parent files, then unlink children."""
+"""Binary nap writer: two same-grain rows, parent files, then unlink children."""
 
 from __future__ import annotations
 

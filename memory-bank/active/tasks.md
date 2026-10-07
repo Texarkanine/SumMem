@@ -242,7 +242,7 @@ Property (integration):
    - After each splice, `frontier.sort(key=lambda row: row.seq)` (stable).
    - Run `tests/test_wake_expand.py`, `tests/test_wake.py`, `tests/test_recall.py`, and `tests/test_zoom.py`, then the full suite. A scratch prototype of the sort changed no existing test.
 
-### 5. Docs and help text — prose/policy
+### 5. Docs and help text — prose/policy — done
 
 - Files: `summem` (`usage_text` line 1387), `README.md` (152, 160), `docs/architecture/index.md` (58, 61, 99–171, 205, 252–299, 340), `docs/theory.md` (189), `docs/notes.md` (16), `memory-bank/systemPatterns.md` (84), `tests/test_nap.py` (module docstring, line 1)
 - No tests: prose/policy artifact
@@ -302,5 +302,5 @@ No new technology - validation not required.
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
 - [x] Preflight (run 2: PASS WITH ADVISORY; advisories in `.preflight-status`)
-- [ ] Build
+- [x] Build
 - [ ] QA

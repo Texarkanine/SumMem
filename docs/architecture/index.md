@@ -55,10 +55,10 @@ A single note is written to a temp path and renamed into place.
 
 ## Naps
 
-A **nap** is a summary of two neighbors in the listing. It is two files that share a name:
+A **nap** is a summary of two view rows of the same grain. They need not be neighbors in the listing. It is two files that share a name:
 
 - The **caption** (`.summ`) is one line, the same length limit as a note. Wake prints it.
-- The **children file** (`.tree`) is a dump of those two neighbors. Zoom and deep recall need it after squash.
+- The **children file** (`.tree`) is a dump of those two rows. Zoom and deep recall need it after squash.
 
 The shared name starts with the left child’s time and random suffix so the nap sorts where that child sorted, not at “now.” After that come the 16-hex leaf-set id, the grain, and a 16-hex variant tag of the pair bytes. Agents never see or type the tag. The public id is still the leaf-set field. Four-part names and five-part names whose leaf-set field is 64 hex are not view nodes; `migrate.py` rewrites both and nested JSON ids.
 
@@ -109,13 +109,17 @@ flowchart TD
     Count -->|"under"| Expand["Expand the newest nap in memory"]
     Note --> Over{"View still over budget?"}
     Nap --> Over
-    Over -->|yes| Pair["Request the oldest same-grain neighbors"]
+    Over -->|yes| Pair["Request the oldest same-grain pair"]
     Over -->|no| Done["No fold request"]
 ```
 
-The pair is the oldest two **adjacent** view nodes with the **same grain**. Adjacent means neighbors in the sorted listing. Same grain means they stand for the same number of original notes.
+The pair is the oldest view node whose grain is a power of two and that has another row of that grain anywhere later in the listing, paired with the nearest such row. The two rows need not be neighbors. Same grain means they stand for the same number of original notes.
 
-That rule is load-bearing. A grain-16 nap sitting next to one leftover note is not a pair the script will request. Folding them would glue a sealed block to a singleton and invert the age order the filenames exist to preserve. The script waits for another grain-1 neighbor, or for expand to make a same-grain pair visible later.
+A **wall** is an older row sitting before a bigger, newer one. A neighbors-only rule never pairs across a wall, so that row and everything older stay in the listing forever. Skipping to the nearest same-grain row is what lets a merge, a late note, a zipper reopen, or surgery heal.
+
+One writer's listing never rises. Each grain of 2 or more appears at most twice, and at most one of those grains is doubled. On that listing the oldest row with a twin is the oldest pair of neighbors, so one writer sees the same folds as before.
+
+A grain-16 nap sitting next to one leftover note is not a pair the script will request. Folding them would glue a sealed block to a singleton. The script waits for another grain-1 row. It never writes a pack whose grain is not a power of two. A pack already on disk with some other grain stays listed and is never requested.
 
 One writer, eight notes `A`–`H`, oldest first. Imagine the wake budget is 1 so every same-grain pair gets requested. Each letter is one original note. A box `AB` is the nap of those notes.
 
@@ -162,7 +166,7 @@ The agent supplies a caption. `nap` writes the new pair and removes the children
 
 ## Expand
 
-When the view has fewer nodes than the wake budget, wake may open a children file and replace the newest expandable nap with its two children, in memory, until it has enough lines or nothing left will split. It does not write those children back. The expanded ids are printable and zoomable.
+When the view has fewer nodes than the wake budget, wake may open a children file and replace the newest expandable nap with its two children, in memory, until it has enough lines or nothing left will split. After each split, the opened rows are sorted by each row's oldest note, so a newer child lands at its own date. It does not write those children back. The expanded ids are printable and zoomable.
 
 `nap` still takes view-node ids — ids that exist as files — not ids that exist only in that in-memory expansion.
 
@@ -182,7 +186,7 @@ flowchart TD
     Kids --> Unlink["Drop the smaller nap"]
 ```
 
-Two loose notes that share text are not skipped. Heal unlinks the older filename. Heal runs before `nap` resolves the ids the agent passed. If heal drops one of those ids, the command fails and does not fold; the original notes still live in the survivor. A fold of two view nodes with intersecting leaf sets is refused, so a pack cannot claim grain 2 for one receipt. Later adjacent naps whose leaf sets do not overlap still fold as usual.
+Two loose notes that share text are not skipped. Heal unlinks the older filename. Heal runs before `nap` resolves the ids the agent passed. If heal drops one of those ids, the command fails and does not fold; the original notes still live in the survivor. A fold of two view nodes with intersecting leaf sets is refused, so a pack cannot claim grain 2 for one receipt. Later naps of disjoint same-grain rows still fold as usual.
 
 The same eight-note alphabet, two writers. Both start from the shared base `A B C D`. Writer 1 continues with letters `E F`. Writer 2 continues with numbers `1 2`.
 
@@ -202,7 +206,7 @@ flowchart TB
     end
 ```
 
-Each writer folds as in the one-writer picture, same-grain only. Both can build the shared `ABCD`. Writer 1 is then stuck with `ABCD` next to `EF` (grain 4 next to grain 2). Writer 2 is stuck with `ABCD` next to `12`. Same-grain fold will not glue those.
+Each writer folds as in the one-writer picture, same-grain only. Both can build the shared `ABCD`. Writer 1 then waits with `ABCD` next to `EF` (grain 4 next to grain 2). Writer 2 waits with `ABCD` next to `12`. Same-grain fold will not glue those.
 
 ```mermaid
 flowchart TB
@@ -249,7 +253,7 @@ flowchart LR
     Z1["ABCD"]:::shared --- Z2["EF"]:::w1 --- Z3["12"]:::w2
 ```
 
-If each writer instead napped their leftover pair onto `ABCD`, merge lands two wholes. Neither contains the other: they share `A B C D` and each keeps its own continuation.
+If each writer instead had a grain-4 continuation and napped it onto `ABCD`, merge lands two wholes of grain 8. Neither contains the other: they share `A B C D` and each keeps its own continuation. `nap` refuses a grain-4 pack with a grain-2 pack, so this walk stays on equal grains.
 
 ```mermaid
 flowchart TB
@@ -257,17 +261,17 @@ flowchart TB
     classDef w1 fill:#e1f5fe,stroke:#01579b;
     classDef w2 fill:#fff3e0,stroke:#ef6c00;
 
-    subgraph whole1["ABCDEF"]
+    subgraph whole1["ABCDEFGH"]
         direction LR
-        P1A["A"]:::shared --- P1B["B"]:::shared --- P1C["C"]:::shared --- P1D["D"]:::shared --- P1E["E"]:::w1 --- P1F["F"]:::w1
+        P1A["A"]:::shared --- P1B["B"]:::shared --- P1C["C"]:::shared --- P1D["D"]:::shared --- P1E["E"]:::w1 --- P1F["F"]:::w1 --- P1G["G"]:::w1 --- P1H["H"]:::w1
     end
-    subgraph whole2["ABCD12"]
+    subgraph whole2["ABCD1234"]
         direction LR
-        P2A["A"]:::shared --- P2B["B"]:::shared --- P2C["C"]:::shared --- P2D["D"]:::shared --- P21["1"]:::w2 --- P22["2"]:::w2
+        P2A["A"]:::shared --- P2B["B"]:::shared --- P2C["C"]:::shared --- P2D["D"]:::shared --- P21["1"]:::w2 --- P22["2"]:::w2 --- P23["3"]:::w2 --- P24["4"]:::w2
     end
 ```
 
-The zipper opens `ABCDEF` back into its two children, then drops `ABCDEF`:
+The zipper opens `ABCDEFGH` back into its two children, then drops `ABCDEFGH`:
 
 ```mermaid
 flowchart LR
@@ -275,17 +279,17 @@ flowchart LR
     classDef w1 fill:#e1f5fe,stroke:#01579b;
     classDef w2 fill:#fff3e0,stroke:#ef6c00;
 
-    subgraph opened["Opened ABCDEF"]
+    subgraph opened["Opened ABCDEFGH"]
         direction LR
-        O1["ABCD"]:::shared --- O2["EF"]:::w1
+        O1["ABCD"]:::shared --- O2["EFGH"]:::w1
     end
     subgraph untouched["Still on disk"]
         direction LR
-        O3["ABCD12"]:::w2
+        O3["ABCD1234"]:::w2
     end
 ```
 
-`ABCD` is now a subset of `ABCD12`, so it drops too. The shared letters live on inside `ABCD12`. Writer 1’s continuation is `EF`. Writer 2’s continuation is already inside `ABCD12`. No original note was deleted.
+`ABCD` is now a subset of `ABCD1234`, so it drops too. The shared letters live on inside `ABCD1234`. Writer 1’s continuation is `EFGH`. Writer 2’s continuation is already inside `ABCD1234`. No original note was deleted.
 
 ```mermaid
 flowchart LR
@@ -294,7 +298,7 @@ flowchart LR
 
     subgraph done["After zipper"]
         direction LR
-        D1["EF"]:::w1 --- D2["ABCD12"]:::w2
+        D1["EFGH"]:::w1 --- D2["ABCD1234"]:::w2
     end
 ```
 
@@ -337,7 +341,7 @@ These look optional and are not.
 - **Wake dates leaves only, never ranges.** A note is `x1 YYYY-MM-DD: text` from the filename stamp. A pack is `xN <prefix>: caption` with no day. Fold quotes captions without grain or prefix; ids live on the `Run:` line. Fold and zoom take a unique prefix of a content id.
 - **Personal and machine facts stay out.** This store is facts about this directory hierarchy. That is product intent and the shipped default write rule. The prefix is repo policy the script does not parse.
 
-Two branches whose naps do not overlap merge, then fold from the oldest neighbors. Overlapping merge is zipper, not that case.
+Two branches whose naps do not overlap merge, then fold oldest pair first. Every pack the script writes has a power-of-two grain. Overlapping merge is zipper, not that case.
 
 ## What this is not
 

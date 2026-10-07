@@ -106,3 +106,19 @@ Fix middle orphans: replace the neighbors-only equal-grain fold picker with olde
     - Unchanged code: 7 failed, 395 passed. Unit 1 alone: the same 7 failed and 395 passed. Units 1–4: 5 failed, 397 passed, and every failure is a retarget the plan names.
     - For one writer, the new picker chose the same pair as the neighbors-only rule at all 6,404 fold steps (budgets 1–32, up to 200 notes).
     - B18 model: no stall while a pair was available, no notes lost, and the one-writer shape at 64 quiet notes, in 1.5–2.6 s per run. On the unchanged driver the same model stalls, so B18's red step works.
+
+## 2026-10-07 - BUILD - COMPLETE
+
+* Work completed
+    - Units 1–5, in order, with tests before production code on the executable units.
+    - Fixtures: `fold_ids` only builds balanced packs; `plant_pack` writes a legacy shape with no pairing policy.
+    - `nap` accepts a nearest same-grain power-of-two pair and refuses the rest in the pinned check order. `_adjacent_nodes` is gone.
+    - `fold_request` uses `_fold_pair`: oldest power-of-two row with a same-grain row below it, paired with the nearest such row.
+    - Wake sets `ProjectedNode.seq` and sorts opened rows by it after each split.
+    - Docs, help, and `systemPatterns.md` describe that rule. The one-writer walk in the architecture doc stays, because on a listing that never rises the pair is still the oldest neighbors.
+* Decisions made
+    - Advisories 1–6 applied. Advisory 7 not built.
+    - Closest-pair preference is pinned on `_pair_nodes`, not by a successful nap of identical text.
+* Insights
+    - `tox run-parallel`: py311, py312, py313, and py314 all OK. py311 reported 417 passed in 19.27 s.
+    - Seed 7 of the many-writers test was 3.17 s after reachability became one walk of the view.

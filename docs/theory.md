@@ -186,7 +186,7 @@ flowchart TD
     Heal --> Part["View is a partition again"]:::ok
 ```
 
-Fold is: merge two adjacent blocks of equal size. Expand is: split a block, for display only, writing nothing back.
+Fold is: merge two blocks of equal size — the oldest block that has a twin, with its nearest twin. Expand is: split a block, for display only, writing nothing back.
 
 ## A nap's filename
 

@@ -1440,7 +1440,7 @@ SumMem: shared memory for agents in a repository.
 
   {CLI_NAME} wake    [--path PATH]                    print this store's view
   {CLI_NAME} note    [--path PATH] TEXT               record one line
-  {CLI_NAME} nap     [--path PATH] ID-A ID-B CAPTION  fold two adjacent ids
+  {CLI_NAME} nap     [--path PATH] ID-A ID-B CAPTION  fold two ids of the same grain
   {CLI_NAME} zoom    [--path PATH] ID                 open a nap to its children
   {CLI_NAME} recall  [--path PATH] PATTERN            search remembered text
   {CLI_NAME} start <path>                             create a store in that directory

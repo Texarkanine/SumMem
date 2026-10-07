@@ -69,7 +69,7 @@ A range such as `#16-31` is a picture of one listing and a lie after the next me
 
 Filenames and `.tree` nap identity stay 16 hex. Display is a unique prefix of that field (floor 8). Wake, recall hits, and zoom children share that grammar. Recall searches the sentence (note text / nap caption), not the formatted line. Proofs walk `Tree.kids` for nested pack ids; they do not parse zoom stdout.
 
-A content id names leaves, not a unique view row: two notes with the same text share an id; after heal they are one view node. Adjacency still needs two distinct ids when two nodes exist. Prefix uniqueness is among distinct ids, not view-row count; a repeated id is still that one prefix. Recall and zoom unique-prefix against `named_ids`, which can print a longer prefix than wake for the same view pack.
+A content id names leaves, not a unique view row: two notes with the same text share an id; after heal they are one view node. A nap still needs two distinct rows when two nodes exist. Prefix uniqueness is among distinct ids, not view-row count; a repeated id is still that one prefix. Recall and zoom unique-prefix against `named_ids`, which can print a longer prefix than wake for the same view pack.
 
 ## Payloads are write-once; same-block naps union then zipper
 
@@ -81,7 +81,7 @@ Different pair bytes are different paths; git unions them. Wake may print two sa
 
 A missing or conflict-marked caption degrades to grain and unique prefix with no caption. Wake does not open `.tree` to list an at-or-over-budget view. It does not drop oldest view nodes to fit `WAKE_LINES`. It may open `.tree` to expand an under-budget view.
 
-Wake does not open `.tree` to heal overlapping packs; mutating `note` and `nap` may. Writers must not serialize on "cannot wake." Fold requests are equal-grain adjacent view nodes and still unlink; wake may expand in memory when the view is short.
+Wake does not open `.tree` to heal overlapping packs; mutating `note` and `nap` may. Writers must not serialize on "cannot wake." Fold requests name the oldest power-of-two row that has a same-grain row below it, paired with the nearest such row, and still unlink; wake may expand in memory when the view is short, then sort the opened rows by date.
 
 ## Root pushes; other stores pull
 
