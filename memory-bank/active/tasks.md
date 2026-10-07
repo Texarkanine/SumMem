@@ -300,6 +300,6 @@ No new technology - validation not required.
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
+- [x] Preflight (run 2: PASS WITH ADVISORY; advisories in `.preflight-status`)
 - [ ] Build
 - [ ] QA
