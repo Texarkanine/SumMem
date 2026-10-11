@@ -47,3 +47,9 @@ A single writer must see exactly today's behavior: the same pair requested at ev
 5. Every pre-existing test passes, with retargets limited to the ones named in the plan.
 6. `tox run-parallel` is green on py311–py314.
 7. The docs listed in Requirement 7 no longer say folds need neighbors.
+
+## Rework
+
+PR #87 review (cursor[bot], https://github.com/Texarkanine/SumMem/pull/87#discussion_r4242528865): a nap whose `.tree` is missing or will not parse is still a fold candidate by its filename grain. `fold_request` names it, `write_nap` cannot fold it, and the same request repeats on every `note`, so folding stalls. Such a nap must also not count as a nearer same-grain row in `write_nap`'s nearest-twin check.
+
+Fix: treat a nap with a missing or unreadable children file as ineligible for folding, the same way a non-power-of-two pack is: it stays listed, it is never requested, and it never blocks a pair of good rows. Recovery of the file belongs to the operator through git; the script does not repair or delete it.

@@ -152,3 +152,11 @@ Fix middle orphans: replace the neighbors-only equal-grain fold picker with olde
     - Pushed `middle-orphans` and opened draft PR https://github.com/Texarkanine/SumMem/pull/87 (`fix: fold the oldest same-grain pair across a wall`).
 * Decisions made
     - Archive waits. The operator is smoke-testing first.
+
+## 2026-10-11 - REWORK - INITIATED
+
+* Work completed
+    - Operator requested rework from PR #87 review feedback.
+* Decisions made
+    - Fix cursor[bot]'s finding (https://github.com/Texarkanine/SumMem/pull/87#discussion_r4242528865): a nap whose children file is missing or unreadable still counts by its filename grain. The fold picker names it, `nap` fails (`unknown id` / `unreadable pack`), and every later `note` asks for the same pair. Folding stops for good. `main` had the same stall only when the broken nap was in the oldest adjacent pair; oldest-pair-first makes it near-certain.
+    - Dismissed LlamaPReview's `_replace` / `seq` question: `_replace` rebuilds from `__slots__`.
