@@ -218,6 +218,29 @@ def test_nap_rejects_newline_caption(tmp_path, summem):
     assert _payload_names(repo) == before
 
 
+@pytest.mark.parametrize("how", ["missing", "unreadable"])
+def test_nap_pairs_across_a_same_grain_pack_whose_children_file_is_broken(tmp_path, summem, how):
+    """Grains 2, 2, 2 with the middle children file broken: the outer two fold; the broken row stays listed."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    for i in range(6):
+        m.write_note(repo, f"n{i}", datetime(2026, 1, 1, 0, 0, i + 1, tzinfo=UTC), Random(i))
+    for k in range(3):
+        notes = [node.id for node in m.list_view(repo) if node.kind == "note"]
+        m.write_nap(repo, notes[0], notes[1], f"pair {k}")
+    view = m.list_view(repo)
+    assert [node.leaves for node in view] == [2, 2, 2]
+    broken = view[1]
+    if how == "missing":
+        broken.tree_path.unlink()
+    else:
+        broken.tree_path.write_bytes(b"not a tree\n")
+    m.write_nap(repo, view[0].id, view[2].id, "outer pairs")
+    after = m.list_view(repo)
+    assert [node.leaves for node in after] == [4, 2]
+    assert after[1].name == broken.name
+
+
 def test_nap_rejects_pair_across_a_nearer_same_grain_row(tmp_path, summem):
     """A nearer row of the same grain between the two ids is rejected; nothing is written."""
     m = summem

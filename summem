@@ -867,6 +867,26 @@ def _fold_pair(grains: list[int]) -> tuple[int, int] | None:
     return None
 
 
+def _fold_grains(nodes: list[ViewNode]) -> list[int]:
+    """Return each row's grain for pairing, 0 for a nap whose children file is missing or unreadable.
+
+    ``nap`` cannot fold such a row, so it is never requested and never counts as a nearer twin.
+    """
+    grains = []
+    for node in nodes:
+        grain = node.leaves
+        if node.kind == "nap":
+            if node.tree_path is None:
+                grain = 0
+            else:
+                try:
+                    loads_tree(node.tree_path.read_bytes())
+                except _TREE_PARSE_ERRORS:
+                    grain = 0
+        grains.append(grain)
+    return grains
+
+
 def _pair_nodes(nodes: list[ViewNode], id_a: str, id_b: str) -> tuple[int, int]:
     """Return ``(lo, hi)`` for two distinct view rows, older first.
 
@@ -911,7 +931,7 @@ def write_nap(parent, id_a, id_b, caption, entry_chars: int | None = None, nodes
     total = len(digs_l) + len(digs_r)
     if len(digs_l) != len(digs_r) or not _is_pow2(total):
         raise ValueError("not a power of two")
-    if hi != _nearest_twin([node.leaves for node in nodes], lo):
+    if hi != _nearest_twin(_fold_grains(nodes), lo):
         raise ValueError("a nearer row of that grain sits between them")
     tree = Tree(kids=[child_l, child_r])
     digests = digs_l + digs_r
@@ -1291,7 +1311,7 @@ def fold_request(parent, wake_lines: int | None = None, nodes=None, entry_chars:
         nodes = list_view(parent)
     if len(nodes) <= wake_lines:
         return ""
-    pair = _fold_pair([node.leaves for node in nodes])
+    pair = _fold_pair(_fold_grains(nodes))
     if pair is None:
         return ""
     left, right = nodes[pair[0]], nodes[pair[1]]

@@ -167,3 +167,11 @@ Fix middle orphans: replace the neighbors-only equal-grain fold picker with olde
     - Classified the rework as Level 1.
 * Decisions made
     - Level 1: one component, one rule, no design choice. The picker already skips non-power-of-two rows; a nap with a missing or unreadable children file gets the same treatment.
+
+## 2026-10-11 - BUILD - COMPLETE
+
+* Work completed
+    - Four red tests first (fold request skips a broken pack; `nap` pairs across a broken same-grain row; each for a missing and an unreadable children file), then `_fold_grains` in `summem`, used by `fold_request` and `write_nap`. One sentence in `docs/architecture/index.md`.
+    - `tox run-parallel`: py311–py314 OK.
+* Insights
+    - The picker and the nearest-twin check must agree on which rows count. One helper feeds both, so a row the picker skips can never block a pair in `nap`.

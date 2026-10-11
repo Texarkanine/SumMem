@@ -1,0 +1,1 @@
+A nap whose .tree is missing or unreadable gets fold grain 0 (_fold_grains): never requested, never a nearer twin. Without it oldest-pair-first re-requests the broken nap on every note.

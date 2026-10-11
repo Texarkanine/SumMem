@@ -6,6 +6,7 @@ import re
 from datetime import datetime, timedelta, timezone
 from random import Random
 
+import pytest
 from conftest import dated_leaf
 from gitutil import fold_ids, init_repo
 
@@ -610,6 +611,36 @@ def test_run_line_for_a_skip_pair_is_accepted_by_nap(tmp_path, monkeypatch, caps
     _seal(m, repo, 1, 13, "d")
     view = m.list_view(repo)
     out = m.fold_request(repo, 3, nodes=view)
+    id_a, id_b = _RUN.search(out).groups()
+    assert m.main(["nap", id_a, id_b, "the two ones"]) == 0
+    assert capsys.readouterr().out.startswith("Saved.\n")
+
+
+def _break_children(node, how):
+    """Remove or corrupt a nap row's children file."""
+    if how == "missing":
+        node.tree_path.unlink()
+    else:
+        node.tree_path.write_bytes(b"not a tree\n")
+
+
+@pytest.mark.parametrize("how", ["missing", "unreadable"])
+def test_fold_request_skips_a_pack_whose_children_file_is_broken(tmp_path, monkeypatch, capsys, summem, how):
+    """Grains 2, 1, 2, 1, 1 with the oldest 2's children file broken: fold names the two oldest 1s, and nap accepts them."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    _seal(m, repo, 2, 0, "a")
+    _seal(m, repo, 1, 2, "b")
+    _seal(m, repo, 2, 3, "c")
+    _seal(m, repo, 1, 5, "d")
+    _seal(m, repo, 1, 6, "e")
+    view = m.list_view(repo)
+    assert [node.leaves for node in view] == [2, 1, 2, 1, 1]
+    _break_children(view[0], how)
+    view = m.list_view(repo)
+    out = m.fold_request(repo, 4, nodes=view)
+    assert _named_pair(m, view, out) == {view[1].id, view[3].id}
     id_a, id_b = _RUN.search(out).groups()
     assert m.main(["nap", id_a, id_b, "the two ones"]) == 0
     assert capsys.readouterr().out.startswith("Saved.\n")

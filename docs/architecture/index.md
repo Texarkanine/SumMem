@@ -119,7 +119,7 @@ A **wall** is an older row sitting before a bigger, newer one. A neighbors-only 
 
 One writer's listing never rises. Each grain of 2 or more appears at most twice, and at most one of those grains is doubled. On that listing the oldest row with a twin is the oldest pair of neighbors, so one writer sees the same folds as before.
 
-A grain-16 nap sitting next to one leftover note is not a pair the script will request. Folding them would glue a sealed block to a singleton. The script waits for another grain-1 row. It never writes a pack whose grain is not a power of two. A pack already on disk with some other grain stays listed and is never requested.
+A grain-16 nap sitting next to one leftover note is not a pair the script will request. Folding them would glue a sealed block to a singleton. The script waits for another grain-1 row. It never writes a pack whose grain is not a power of two. A pack already on disk with some other grain stays listed and is never requested. So does a pack whose children file is missing or unreadable: `nap` cannot fold it, and it never counts as a nearer row of its grain.
 
 One writer, eight notes `A`–`H`, oldest first. Imagine the wake budget is 1 so every same-grain pair gets requested. Each letter is one original note. A box `AB` is the nap of those notes.
 
