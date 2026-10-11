@@ -1,0 +1,1 @@
+Filename grain vs .tree digest count still stalls fold: #88 (build fold grain from _as_child). Shared broken-.tree test helper is #89. Neither blocks PR #87.
