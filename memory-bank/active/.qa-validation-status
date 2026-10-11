@@ -1,0 +1,9 @@
+PASS
+
+Scope: rework a60d9d0..HEAD (`_fold_grains`, its use in `fold_request` and `write_nap`, four tests, one architecture sentence). `tox -e py311`: 421 passed. `summem`, `.summem/summem`, and `dogfood/.summem/summem` are byte-identical.
+
+Advisories (non-blocking):
+- DRY: `_fold_grains` repeats `_as_child`'s children-file load (None check, `loads_tree`, `_TREE_PARSE_ERRORS`). Wrapping `_as_child(node)` and mapping `ValueError` to 0 would keep the picker and `nap` in step by construction. The two agree today: a missing file and a directory both raise `OSError` and are caught.
+- Residual stall: a nap whose `.tree` parses but whose digest count differs from its filename grain would still be requested, and `nap` would refuse it with "not a power of two". That takes a hand edit. It is outside the review finding.
+- Tests: `test_fold.py` has a `_break_children` helper; `test_nap.py` inlines the same four lines. Minor.
+- Cost: an over-budget `note` or `nap` now reads and parses every nap's `.tree`. The cost is bounded by view size. Wake does not call `fold_request`, so Constraint 3 holds.

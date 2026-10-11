@@ -12,3 +12,7 @@
 - [x] `test_fold.py::test_fold_request_skips_a_pack_whose_children_file_is_broken[missing|unreadable]` — grains 2, 1, 2, 1, 1 with the oldest 2 broken: request names the two oldest 1s and `nap` accepts the Run: line.
 - [x] `test_nap.py::test_nap_pairs_across_a_same_grain_pack_whose_children_file_is_broken[missing|unreadable]` — grains 2, 2, 2 with the middle broken: the outer two fold; the broken row stays listed.
 - [x] `tox run-parallel` green on py311–py314.
+
+## QA
+
+PASS (2026-10-11). `tox -e py311`: 421 passed. Advisories are in `.qa-validation-status`: `_fold_grains` duplicates `_as_child`'s load, a parse-valid tree with a wrong digest count could still stall, the test helper is inlined in `test_nap.py`, and there is a bounded extra `.tree` read per over-budget mutation.

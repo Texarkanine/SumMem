@@ -175,3 +175,15 @@ Fix middle orphans: replace the neighbors-only equal-grain fold picker with olde
     - `tox run-parallel`: py311–py314 OK.
 * Insights
     - The picker and the nearest-twin check must agree on which rows count. One helper feeds both, so a row the picker skips can never block a pair in `nap`.
+
+## 2026-10-11 - QA - COMPLETE
+
+* Work completed
+    - Reviewed the rework diff (`a60d9d0..HEAD`) against the brief's Rework section for KISS, DRY, YAGNI, completeness, regression, integrity, and documentation. `tox -e py311`: 421 passed. Vendored script copies match `summem`.
+* Decisions made
+    - PASS with four non-blocking advisories (details in `.qa-validation-status`): `_fold_grains` duplicates `_as_child`'s load; a parse-valid tree with a wrong digest count could still stall; the test helper is inlined in `test_nap.py`; there is a bounded extra `.tree` read per over-budget mutation.
+
+## 2026-10-11 - WRAP-UP
+
+* Work completed
+    - Reconciled persistent files. systemPatterns: added that a nap with a missing or unreadable `.tree` is never requested and never a nearer row. productContext: skip — no user, use case, or constraint changed. techContext: skip — no stack, tool, or test-process change.
