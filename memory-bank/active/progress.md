@@ -2,7 +2,7 @@
 
 Fix middle orphans: replace the neighbors-only equal-grain fold picker with oldest-pair-first skip fold, narrow `nap` to same-grain nearest pairs, sort wake's opened rows by date, leave legacy non-power-of-two packs alone, and update the docs. Red regression tests already exist on this branch.
 
-**Complexity:** Level 3
+**Complexity:** Level 1 (rework of a Level 3 task; the Level 3 reflection stands and `/niko-archive` still follows)
 
 ## 2026-10-06 - RESEARCH (pre-Niko) - COMPLETE
 
@@ -160,3 +160,10 @@ Fix middle orphans: replace the neighbors-only equal-grain fold picker with olde
 * Decisions made
     - Fix cursor[bot]'s finding (https://github.com/Texarkanine/SumMem/pull/87#discussion_r4242528865): a nap whose children file is missing or unreadable still counts by its filename grain. The fold picker names it, `nap` fails (`unknown id` / `unreadable pack`), and every later `note` asks for the same pair. Folding stops for good. `main` had the same stall only when the broken nap was in the oldest adjacent pair; oldest-pair-first makes it near-certain.
     - Dismissed LlamaPReview's `_replace` / `seq` question: `_replace` rebuilds from `__slots__`.
+
+## 2026-10-11 - COMPLEXITY-ANALYSIS - COMPLETE
+
+* Work completed
+    - Classified the rework as Level 1.
+* Decisions made
+    - Level 1: one component, one rule, no design choice. The picker already skips non-power-of-two rows; a nap with a missing or unreadable children file gets the same treatment.
