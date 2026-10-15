@@ -390,6 +390,30 @@ def test_main_version_rejects_extra_args():
     assert s.main(["version", "x"]) != 0
 
 
+def test_main_prints_fold_request_when_over_budget(tmp_path, monkeypatch, capsys, summem):
+    """After a root excision over budget, Run: names the two oldest survivors and omits the excised id."""
+    s = load_surgery()
+    m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
+    repo = init_repo(tmp_path / "r")
+    secret = "sentinel-fold-secret-kk11"
+    paths = _write_notes(m, repo, [secret, "keep-b", "keep-c", "keep-d"])
+    (repo / ".summem" / "config.toml").write_text("WAKE_LINES = 2\n", encoding="utf-8")
+    ids_before = [node.id for node in m.list_view(repo)]
+    monkeypatch.chdir(repo)
+    assert s.main(["--contains", secret]) == 0
+    out = capsys.readouterr().out
+    assert paths[0].name in out.splitlines()
+    assert "Run: .summem/summem nap " in out
+    remain = [node for node in m.list_view(repo) if node.kind == "note"]
+    assert len(remain) == 3
+    remain_ids = [node.id for node in remain]
+    pa = m.short_id(remain_ids[0], remain_ids)
+    pb = m.short_id(remain_ids[1], remain_ids)
+    assert f"nap {pa} {pb} " in out
+    assert ids_before[0] not in out
+
+
 def test_main_path_fold_request_is_copy_paste_safe(tmp_path, monkeypatch, capsys, summem):
     """After --path excision over budget, Run: naps that store from $PWD."""
     s = load_surgery()

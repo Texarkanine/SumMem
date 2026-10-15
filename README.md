@@ -42,7 +42,7 @@ Let's remember `i`:
 $ .summem/summem note --path dogfood i
 Saved.
 
-Compress these two into one line of at most 280 characters.
+Summarize these two into one line of at most 280 characters.
 Keep what has lasting effect, drop what does not. Invent nothing.
 
   g
@@ -200,7 +200,7 @@ uvx --with tox tox -e py311 -- tests/test_foo.py::test_bar
 Run those tests one at a time. Add `-n0` after `--`:
 
 ```bash
-uvx --with tox tox -e py311 -- -n0
+uvx --with tox tox -e py311 -- -n0 tests/test_foo.py::test_bar
 ```
 
 When `tox` is already on your `PATH`, omit `uvx --with tox`.
