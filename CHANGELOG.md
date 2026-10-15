@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.1](https://github.com/Texarkanine/SumMem/compare/v0.12.0...v0.12.1) (2026-10-15)
+
+
+### Bug Fixes
+
+* fold the oldest same-grain pair across a wall ([#87](https://github.com/Texarkanine/SumMem/issues/87)) ([08f02af](https://github.com/Texarkanine/SumMem/commit/08f02af63bf85aa89ffb237626e6479698ea55cf))
+
 ## [0.12.0](https://github.com/Texarkanine/SumMem/compare/v0.11.1...v0.12.0) (2026-09-16)
 
 
