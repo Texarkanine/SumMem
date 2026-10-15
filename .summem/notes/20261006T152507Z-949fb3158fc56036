@@ -1,0 +1,1 @@
+Equal-grain adjacent fold strands any node that sits before a bigger newer one (merge, late note, zipper reopen, surgery, odd-grain pack): it and every older node never fold again. tests/test_middle_orphans.py pins the outcome, not the pair.

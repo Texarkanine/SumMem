@@ -1,0 +1,1 @@
+Same-text rows share an id and a digest, so write_nap of that id twice hits overlapping packs. Closest-pair is pinned on _pair_nodes, not by a successful nap.

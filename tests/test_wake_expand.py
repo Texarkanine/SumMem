@@ -7,7 +7,7 @@ from pathlib import Path
 from random import Random
 
 from conftest import dated_leaf
-from gitutil import fold_ids, init_repo
+from gitutil import fold_ids, init_repo, plant_pack
 
 UTC = timezone.utc
 
@@ -241,9 +241,69 @@ def test_zoom_expanded_child_id(tmp_path, monkeypatch, summem):
     child = next(row for row in frontier if row.id not in file_ids)
     out = m.zoom_text(repo, child.id)
     assert child.kind == "nap"
+    assert child.leaves == 4
     ids = m.named_ids(repo)
-    pack, leaf = child.tree.kids
+    left, right = child.tree.kids
     assert out.splitlines() == [
-        f"x5 {m.short_id(pack.id, ids)}: eight-b-3",
-        dated_leaf(leaf.name.split("-")[0], "b5"),
+        f"x2 {m.short_id(left.id, ids)}: eight-b-0",
+        f"x2 {m.short_id(right.id, ids)}: eight-b-1",
+    ]
+
+
+def _leaf_line(path, text: str) -> str:
+    return dated_leaf(path.name.split("-")[0], text)
+
+
+def test_expand_prints_skip_pack_children_in_date_order(tmp_path, monkeypatch, summem):
+    """A skip pack of a and d around a pack of b and c opens as a, b, c, d."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    base = datetime(2026, 1, 1, tzinfo=UTC)
+    paths = [
+        m.write_note(repo, text, base + timedelta(seconds=i), Random(i))
+        for i, text in enumerate(("a", "b", "c", "d"), start=1)
+    ]
+    view = m.list_view(repo)
+    m.write_nap(repo, view[1].id, view[2].id, "bc")
+    view = m.list_view(repo)
+    m.write_nap(repo, view[0].id, view[2].id, "ad")
+    monkeypatch.setattr(m, "WAKE_LINES", 4)
+    lines = [line for line in m.wake_text(repo).splitlines() if line]
+    assert lines == [_leaf_line(path, text) for path, text in zip(paths, ("a", "b", "c", "d"))]
+
+
+def test_expand_prints_late_note_inside_a_pack_span_in_date_order(tmp_path, monkeypatch, summem):
+    """A note stamped between a pack's two children prints between them."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    base = datetime(2026, 1, 1, tzinfo=UTC)
+    b1 = m.write_note(repo, "b1", base + timedelta(seconds=1), Random(1))
+    b2 = m.write_note(repo, "b2", base + timedelta(seconds=3), Random(3))
+    view = m.list_view(repo)
+    m.write_nap(repo, view[0].id, view[1].id, "bb")
+    late = m.write_note(repo, "c", base + timedelta(seconds=2), Random(2))
+    monkeypatch.setattr(m, "WAKE_LINES", 4)
+    lines = [line for line in m.wake_text(repo).splitlines() if line]
+    assert lines == [_leaf_line(b1, "b1"), _leaf_line(late, "c"), _leaf_line(b2, "b2")]
+
+
+def test_expand_orders_same_second_rows_by_full_sequence(tmp_path, monkeypatch, summem):
+    """Same-second rows sort by the full {stamp}-{rand}, not by where the pack was spliced."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    names = {
+        "a": "20260101T000001Z-aaaaaaaaaaaaaaaa",
+        "b": "20260101T000001Z-bbbbbbbbbbbbbbbb",
+        "c": "20260101T000001Z-cccccccccccccccc",
+    }
+    for text, name in names.items():
+        m.rematerialize_child(repo, m.NoteChild(name=name, text=text))
+    view = m.list_view(repo)
+    plant_pack(m, repo, view[0], view[2], "ac")
+    monkeypatch.setattr(m, "WAKE_LINES", 4)
+    lines = [line for line in m.wake_text(repo).splitlines() if line]
+    assert lines == [
+        dated_leaf(names["a"].split("-")[0], "a"),
+        dated_leaf(names["b"].split("-")[0], "b"),
+        dated_leaf(names["c"].split("-")[0], "c"),
     ]

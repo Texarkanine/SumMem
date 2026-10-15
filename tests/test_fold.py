@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, timedelta, timezone
 from random import Random
 
+import pytest
 from conftest import dated_leaf
 from gitutil import fold_ids, init_repo
 
@@ -37,12 +39,20 @@ def _max_note_depth(m, tree, depth=1) -> int:
     return deepest
 
 
+def _equal_grain_indices(grains):
+    """Return the oldest adjacent equal-grain index pair, or None."""
+    for i in range(len(grains) - 1):
+        if grains[i] == grains[i + 1]:
+            return i, i + 1
+    return None
+
+
 def _equal_grain_pair(nodes):
     """Return the oldest adjacent same-leaf-count file ids, or None."""
-    for i in range(len(nodes) - 1):
-        if nodes[i].leaves == nodes[i + 1].leaves:
-            return nodes[i].id, nodes[i + 1].id
-    return None
+    pair = _equal_grain_indices([node.leaves for node in nodes])
+    if pair is None:
+        return None
+    return nodes[pair[0]].id, nodes[pair[1]].id
 
 
 def test_nap_stem_inherits_left_child_seq_prefix(tmp_path, summem):
@@ -539,4 +549,124 @@ def test_fold_request_empty_pack_caption_is_blank_quote(tmp_path, monkeypatch, s
     assert f"x2 {pa}:" not in out
     assert f"x2 {pb}:" not in out
     assert f"nap {pa} {pb} " in out
+
+
+_RUN = re.compile(r' nap(?: --path \S+)? (\S+) (\S+) "')
+
+
+def _seal(m, repo, count, start, prefix):
+    """Add *count* notes and, when there are at least two, fold only those notes."""
+    before = {node.id for node in m.list_view(repo)}
+    _add_notes(m, repo, count, start, prefix)
+    new = [node.id for node in m.list_view(repo) if node.kind == "note" and node.id not in before]
+    assert len(new) == count
+    if count >= 2:
+        fold_ids(m, repo, new, prefix)
+
+
+def _named_pair(m, view, out):
+    """Return the two full ids named on a fold request's Run: line."""
+    id_a, id_b = _RUN.search(out).groups()
+    ids = [node.id for node in view]
+    return {m.resolve_id(id_a, ids), m.resolve_id(id_b, ids)}
+
+
+def test_fold_request_skips_to_nearest_same_grain_row_across_a_wall(tmp_path, summem):
+    """Grains 8, 4, 2, 1, 4 over budget: fold names the two 4s, not the neighbors."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    _seal(m, repo, 8, 0, "a")
+    _seal(m, repo, 4, 8, "b")
+    _seal(m, repo, 2, 12, "c")
+    _seal(m, repo, 1, 14, "d")
+    _seal(m, repo, 4, 15, "e")
+    view = m.list_view(repo)
+    assert [node.leaves for node in view] == [8, 4, 2, 1, 4]
+    out = m.fold_request(repo, 4, nodes=view)
+    assert _named_pair(m, view, out) == {view[1].id, view[4].id}
+
+
+def test_fold_request_takes_oldest_row_with_a_twin_first(tmp_path, summem):
+    """Grains 8, 1, 4, 1 at budget 3: fold names the two 1s."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    _seal(m, repo, 8, 0, "a")
+    _seal(m, repo, 1, 8, "b")
+    _seal(m, repo, 4, 9, "c")
+    _seal(m, repo, 1, 13, "d")
+    view = m.list_view(repo)
+    assert [node.leaves for node in view] == [8, 1, 4, 1]
+    out = m.fold_request(repo, 3, nodes=view)
+    assert _named_pair(m, view, out) == {view[1].id, view[3].id}
+
+
+def test_run_line_for_a_skip_pair_is_accepted_by_nap(tmp_path, monkeypatch, capsys, summem):
+    """A skip pair's Run: line, pasted into nap, exits 0 and prints Saved."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    _seal(m, repo, 8, 0, "a")
+    _seal(m, repo, 1, 8, "b")
+    _seal(m, repo, 4, 9, "c")
+    _seal(m, repo, 1, 13, "d")
+    view = m.list_view(repo)
+    out = m.fold_request(repo, 3, nodes=view)
+    id_a, id_b = _RUN.search(out).groups()
+    assert m.main(["nap", id_a, id_b, "the two ones"]) == 0
+    assert capsys.readouterr().out.startswith("Saved.\n")
+
+
+def _break_children(node, how):
+    """Remove or corrupt a nap row's children file."""
+    if how == "missing":
+        node.tree_path.unlink()
+    else:
+        node.tree_path.write_bytes(b"not a tree\n")
+
+
+@pytest.mark.parametrize("how", ["missing", "unreadable"])
+def test_fold_request_skips_a_pack_whose_children_file_is_broken(tmp_path, monkeypatch, capsys, summem, how):
+    """Grains 2, 1, 2, 1, 1 with the oldest 2's children file broken: fold names the two oldest 1s, and nap accepts them."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    _seal(m, repo, 2, 0, "a")
+    _seal(m, repo, 1, 2, "b")
+    _seal(m, repo, 2, 3, "c")
+    _seal(m, repo, 1, 5, "d")
+    _seal(m, repo, 1, 6, "e")
+    view = m.list_view(repo)
+    assert [node.leaves for node in view] == [2, 1, 2, 1, 1]
+    _break_children(view[0], how)
+    view = m.list_view(repo)
+    out = m.fold_request(repo, 4, nodes=view)
+    assert _named_pair(m, view, out) == {view[1].id, view[3].id}
+    id_a, id_b = _RUN.search(out).groups()
+    assert m.main(["nap", id_a, id_b, "the two ones"]) == 0
+    assert capsys.readouterr().out.startswith("Saved.\n")
+
+
+def test_fold_pair_matches_neighbors_rule_for_one_writer(summem):
+    """One writer: _fold_pair matches the neighbors-only rule at every fold step."""
+    m = summem
+    for budget in range(1, 33):
+        grains = []
+        for _note in range(200):
+            grains.append(1)
+            while len(grains) > budget:
+                old = _equal_grain_indices(grains)
+                new = m._fold_pair(grains)
+                assert new == old, (budget, grains, old, new)
+                if old is None:
+                    break
+                i, j = old
+                grains = grains[:i] + [grains[i] + grains[j]] + grains[j + 1 :]
+
+
+def test_fold_pair_skips_non_power_of_two_rows(summem):
+    """_fold_pair skips rows whose grain is not a power of two."""
+    m = summem
+    assert m._fold_pair([6, 6, 2, 1, 1]) == (3, 4)
+    assert m._fold_pair([6, 6]) is None
+    assert m._fold_pair([8, 1, 4, 1]) == (1, 3)
 

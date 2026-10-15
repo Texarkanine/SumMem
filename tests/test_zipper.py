@@ -12,7 +12,7 @@ from random import Random
 
 import pytest
 
-from gitutil import assert_unique_cover, init_repo, reaches, zoom_reaches
+from gitutil import assert_unique_cover, init_repo, plant_pack, reaches, zoom_reaches
 
 UTC = timezone.utc
 
@@ -550,7 +550,7 @@ def test_heal_abd_vs_abe_unique_cover(tmp_path, summem):
     m.write_nap(repo, ids[0], ids[1], "ab")
     ab = next(n for n in m.list_view(repo) if n.kind == "nap")
     d = next(n for n in m.list_view(repo) if n.kind == "note")
-    m.write_nap(repo, ab.id, d.id, "abd")
+    plant_pack(m, repo, ab, d, "abd")
     abd = m.list_view(repo)[0]
     abd_tree = m.loads_tree(abd.tree_path.read_bytes())
     ab_child = abd_tree.kids[0]
@@ -752,7 +752,7 @@ def _plant_abd_abe(m, repo):
     m.write_nap(repo, ids[0], ids[1], "ab")
     ab = next(n for n in m.list_view(repo) if n.kind == "nap")
     d = next(n for n in m.list_view(repo) if n.kind == "note")
-    m.write_nap(repo, ab.id, d.id, "abd")
+    plant_pack(m, repo, ab, d, "abd")
     abd = m.list_view(repo)[0]
     abd_tree = m.loads_tree(abd.tree_path.read_bytes())
     e_note = m.NoteChild(name="20260101T000010Z-eeeeeeeeeeeeeeee", text="E")

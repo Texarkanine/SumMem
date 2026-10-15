@@ -1,0 +1,1 @@
+Pure pull-back fold (never jump a block over a bigger row) strands rows forever ([4, 1] before a merged 8-pack) and, in simulation, misordered 5-20x more notes than oldest-pair-first skip fold: stranded rows get jumped again and again.

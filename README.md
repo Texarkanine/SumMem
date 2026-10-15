@@ -149,7 +149,7 @@ Root `wake` prints the current agent how-to under `== SumMem Usage ==`, then any
 ```text
 summem wake    [--path PATH]                    print this store's view
 summem note    [--path PATH] TEXT               record one line
-summem nap     [--path PATH] ID-A ID-B CAPTION  fold two adjacent ids
+summem nap     [--path PATH] ID-A ID-B CAPTION  fold two ids of the same grain
 summem zoom    [--path PATH] ID                 open a nap to its children
 summem recall  [--path PATH] PATTERN            search remembered text
 summem start <path>                             create a store in that directory
@@ -157,7 +157,7 @@ summem init                                     print the agent prompt
 summem version                                  print this script's version
 ```
 
-Agents invoke `.summem/summem`. Sometimes recording a `note` will ask for a `nap` - a compression of two adjacent notes into one summary. Agents do that and then continue on with their work; thus the memories are intelligently compressed.
+Agents invoke `.summem/summem`. Sometimes recording a `note` will ask for a `nap` - a compression of two memories of the same size. Agents do that and then continue on with their work; thus the memories are intelligently compressed.
 
 `--path` aims at a file in the repo. The script walks from that path up to the nearest started store in the repository.
 
