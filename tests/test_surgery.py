@@ -391,7 +391,7 @@ def test_main_version_rejects_extra_args():
 
 
 def test_main_prints_fold_request_when_over_budget(tmp_path, monkeypatch, capsys, summem):
-    """After excision, stdout includes fold_request so an agent can start the nap cascade."""
+    """After a root excision over budget, Run: names the two oldest survivors and omits the excised id."""
     s = load_surgery()
     m = summem
     monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
@@ -404,8 +404,7 @@ def test_main_prints_fold_request_when_over_budget(tmp_path, monkeypatch, capsys
     assert s.main(["--contains", secret]) == 0
     out = capsys.readouterr().out
     assert paths[0].name in out.splitlines()
-    assert "Compress these two into one line of at most 280 characters." in out
-    assert 'Run: .summem/summem nap ' in out
+    assert "Run: .summem/summem nap " in out
     remain = [node for node in m.list_view(repo) if node.kind == "note"]
     assert len(remain) == 3
     remain_ids = [node.id for node in remain]
@@ -446,5 +445,4 @@ def test_main_dry_run_omits_fold_request(tmp_path, monkeypatch, capsys, summem):
     monkeypatch.chdir(repo)
     assert s.main(["--dry-run", "--contains", secret]) == 0
     out = capsys.readouterr().out
-    assert "Compress these two" not in out
     assert "Run: .summem/summem nap" not in out

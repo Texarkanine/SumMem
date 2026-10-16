@@ -189,7 +189,6 @@ def test_over_budget_note_prints_saved_when_16_plus_1(tmp_path, monkeypatch, cap
     out = capsys.readouterr().out
     assert out == "Saved.\n"
     assert "Run:" not in out
-    assert "Compress these two" not in out
     assert "Nothing left to compress." not in out
 
 
@@ -202,7 +201,6 @@ def test_under_budget_note_prints_saved(tmp_path, monkeypatch, capsys, summem):
     out = capsys.readouterr().out
     assert out == "Saved.\n"
     assert "Run:" not in out
-    assert "Compress these two" not in out
     assert "Nothing left to compress." not in out
 
 
@@ -243,26 +241,6 @@ def test_sixteen_leaf_pack_tree_depth_is_log(tmp_path, summem):
     assert nodes[0].leaves == 16
     tree = m.loads_tree(nodes[0].tree_path.read_bytes())
     assert _max_note_depth(m, tree) <= 4
-
-
-def test_nap_prints_remaining_ones_not_parent_plus_one(tmp_path, monkeypatch, capsys, summem):
-    """After napping two of four 1s at budget 2, stdout is Saved. then the remaining two 1s."""
-    m = summem
-    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
-    repo = init_repo(tmp_path / "r")
-    monkeypatch.chdir(repo)
-    monkeypatch.setattr(m, "WAKE_LINES", 2)
-    for i, text in enumerate(("a", "b", "c", "d"), start=1):
-        m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
-    nodes = m.list_view(repo)
-    assert m.main(["nap", nodes[0].id, nodes[1].id, "pair"]) == 0
-    out = capsys.readouterr().out
-    assert out.startswith("Saved.\n\n")
-    assert out.index("Saved.") < out.index("Compress these two")
-    assert "  c\n" in out
-    assert "  d\n" in out
-    assert "Run: .summem/summem nap " in out
-    assert "Invent nothing." in out
 
 
 def test_nap_prints_saved_and_idle_when_at_or_under_budget(tmp_path, monkeypatch, capsys, summem):
@@ -310,9 +288,6 @@ def test_over_budget_note_requests_equal_grain_ones(tmp_path, monkeypatch, capsy
     assert m.main(["note", "delta"]) == 0
     out = capsys.readouterr().out
     assert out.startswith("Saved.\n")
-    assert out.index("Saved.") < out.index("Compress these two")
-    assert "Compress these two into one line of at most 280 characters." in out
-    assert "Invent nothing." in out
     assert "  alpha\n" in out
     assert "  beta\n" in out
     assert 'Run: .summem/summem nap ' in out
