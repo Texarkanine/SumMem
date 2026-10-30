@@ -1326,7 +1326,7 @@ def fold_request(parent, wake_lines: int | None = None, nodes=None, entry_chars:
     left_src = left.caption
     right_src = right.caption
     return (
-        f"Compress these two into one line of at most {limit} characters.\n"
+        f"Summarize these two into one line of at most {limit} characters.\n"
         "Keep what has lasting effect, drop what does not. Invent nothing.\n"
         "\n"
         f"  {left_src}\n"

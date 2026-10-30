@@ -1,0 +1,1 @@
+README Developing is the human runbook: uvx command first. Omit test cache, fixture internals, pytest-testmon, and the Codecov secret.

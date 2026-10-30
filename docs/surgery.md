@@ -44,7 +44,7 @@ From a clone of this repository, with Python 3.11+:
 
 ## Aftercare
 
-Excision can invalidate captions. `surgery.py` will not nap those back up. After a real excision (not `--dry-run`), if the view is still over budget, stdout includes the same first fold request `note` would print (`Compress these two` / `Run: .summem/summem nap …`). Feed that to an agent; each successful `nap` prints `Saved.` then either the next pair or `Nothing left to compress.` `wake` does not demand a nap, so without this print you would have to `note` something else to start the cascade.
+Excision can invalidate captions. `surgery.py` will not nap those back up. After a real excision (not `--dry-run`), if the view is still over budget, stdout includes the same first fold request `note` would print (`Summarize these two` / `Run: .summem/summem nap …`). Feed that to an agent; each successful `nap` prints `Saved.` then either the next pair or `Nothing left to compress.` `wake` does not demand a nap, so without this print you would have to `note` something else to start the cascade.
 
 Leaving the hole is allowed; the next honest `note` will also print a fold request. It is polite for the surgeon to finish the naps.
 
