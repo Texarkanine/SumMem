@@ -1,4 +1,0 @@
-PASS
-- Restored root-excision fold request test in tests/test_surgery.py covers the two oldest surviving short ids and excised id omission without asserting fold-prompt verb.
-- README.md and docs/surgery.md accurately updated to "Summarize these two".
-- Serial py311 command in README.md correctly retains target test path.
