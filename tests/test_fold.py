@@ -675,3 +675,37 @@ def test_fold_request_skips_a_pack_whose_digest_count_is_not_the_stem_grain(
     assert m.main(["nap", id_a, id_b, "the two ones"]) == 0
     assert capsys.readouterr().out.startswith("Saved.\n")
 
+
+def _rename_stem_grain(m, node, grain: int) -> None:
+    """Point a nap pair's filename grain at *grain* and leave the children file bytes."""
+    stamp, rand, leafset, _old, variant = m._parse_nap_stem(node.name)
+    stem = f"{stamp}-{rand}-{leafset}-{grain}-{variant}"
+    folder = node.tree_path.parent
+    node.tree_path.rename(folder / f"{stem}.tree")
+    node.sum_path.rename(folder / f"{stem}.summ")
+
+
+def test_fold_request_folds_a_lying_filename_with_a_truthful_row(
+    tmp_path, monkeypatch, capsys, summem
+):
+    """Filename grains 4 and 2, both with 4 digests: fold names that pair, nap accepts it, and wake still lists the filenames."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    _seal(m, repo, 4, 0, "a")
+    _seal(m, repo, 4, 4, "b")
+    view = m.list_view(repo)
+    assert [node.leaves for node in view] == [4, 4]
+    _rename_stem_grain(m, view[1], 2)
+    view = m.list_view(repo)
+    assert [node.leaves for node in view] == [4, 2]
+    assert [len(m._as_child(node)[1]) for node in view] == [4, 4]
+    (repo / ".summem" / "config.toml").write_text("WAKE_LINES = 2\n", encoding="utf-8")
+    assert [line.split(" ", 1)[0] for line in m.wake_text(repo).splitlines()] == ["x4", "x2"]
+    out = m.fold_request(repo, 1, nodes=view)
+    assert _named_pair(m, view, out) == {view[0].id, view[1].id}
+    id_a, id_b = _RUN.search(out).groups()
+    assert m.main(["nap", id_a, id_b, "the eights"]) == 0
+    assert capsys.readouterr().out.startswith("Saved.\n")
+    assert [node.leaves for node in m.list_view(repo)] == [8]
+

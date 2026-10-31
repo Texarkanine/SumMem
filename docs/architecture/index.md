@@ -113,7 +113,7 @@ flowchart TD
     Over -->|no| Done["No fold request"]
 ```
 
-The pair is the oldest view node whose grain is a power of two and that has another row of that grain anywhere later in the listing, paired with the nearest such row. The two rows need not be neighbors. Same grain means they stand for the same number of original notes. That number is the count of notes in the children file. Wake lists the grain in the filename, and fold does not pair on it.
+The pair is the oldest view node whose grain is a power of two and that has another row of that grain anywhere later in the listing, paired with the nearest such row. The two rows need not be neighbors. Same grain means they stand for the same number of original notes. That number is the count of notes in the children file. Wake lists the grain in the filename. Fold and nap pair on that children count, including when the filename disagrees and the count is a power of two.
 
 A **wall** is an older row sitting before a bigger, newer one. A neighbors-only rule never pairs across a wall, so that row and everything older stay in the listing forever. Skipping to the nearest same-grain row is what lets a merge, a late note, a zipper reopen, or surgery heal.
 

@@ -909,8 +909,9 @@ def _pair_nodes(nodes: list[ViewNode], id_a: str, id_b: str) -> tuple[int, int]:
 def write_nap(parent, id_a, id_b, caption, entry_chars: int | None = None, nodes=None):
     """Fold two same-grain view rows into a nap pair. Return the .summ path.
 
-    The rows need not be neighbors. They must share a power-of-two grain, and
-    no row of that grain may sit between them.
+    The rows need not be neighbors. Grain is the digest count, not the filename.
+    The counts must match, their sum must be a power of two, and no row of that
+    count may sit between them.
     """
     require_entry(caption, entry_chars)
     if nodes is None:
@@ -921,10 +922,9 @@ def write_nap(parent, id_a, id_b, caption, entry_chars: int | None = None, nodes
     child_r, digs_r = _as_child(right)
     if set(digs_l) & set(digs_r):
         raise ValueError("overlapping packs")
-    if left.leaves != right.leaves:
+    if len(digs_l) != len(digs_r):
         raise ValueError("not the same grain")
-    total = len(digs_l) + len(digs_r)
-    if len(digs_l) != len(digs_r) or not _is_pow2(total):
+    if not _is_pow2(len(digs_l) + len(digs_r)):
         raise ValueError("not a power of two")
     if hi != _nearest_twin(_fold_grains(nodes), lo):
         raise ValueError("a nearer row of that grain sits between them")
