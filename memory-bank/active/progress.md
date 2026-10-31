@@ -87,3 +87,13 @@ Rework PR #95 so `note` and `nap` read and digest each nap children file (`.tree
     - Run 1's test advisory is taken. Both read-count tests assert only `<= 1`. QA re-ran them against the dd16eac `summem`: both red, with each `.tree` read 3 times. At HEAD both are green.
     - Clean: KISS, DRY, YAGNI, completeness, regression (`_replace_bytes` is the only store writer, and eviction keys match `list_view`), integrity, and documentation. `tox -e py311`: 426 passed.
     - Advisory, no action: the cache is set before the flock is taken, and a nested lock would turn it off for the rest of the outer call. Neither matters today.
+
+## 2026-10-31 - REFLECT - COMPLETE
+
+* Work completed
+    - `tox run-parallel`: py311, py312, py313, and py314 all OK.
+    - Reflection: `memory-bank/active/reflection/reflection-read-once.md`.
+    - Reconciled the persistent files:
+        - `productContext.md`: added a script size and cost constraint.
+        - `systemPatterns.md`: one parse per children file under the lock, and every write goes through `_replace_bytes`.
+        - `techContext.md`: skipped. No stack, tooling, or test-process change.

@@ -1,7 +1,7 @@
 # Active Context
 
 - **Current Task:** read-once (PR #95 rework: one `.tree` read per command)
-- **Phase:** QA - COMPLETE (PASS)
+- **Phase:** REFLECT - COMPLETE
 
 ## Files Modified
 
@@ -33,4 +33,4 @@
 
 ## Next Step
 
-- QA (subagent).
+- Operator: ponytail review and push; then `/niko-archive`.
