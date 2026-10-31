@@ -627,6 +627,8 @@ def _digests_of_tree(tree: Tree) -> list[str]:
     out: list[str] = []
     for child in tree.kids:
         if isinstance(child, NoteChild):
+            if not isinstance(child.text, str):
+                raise ValueError("unreadable pack")
             out.append(note_digest(note_file_bytes(child.text)))
         else:
             out.extend(_digests_of_tree(child.tree))
@@ -868,13 +870,19 @@ def _fold_pair(grains: list[int]) -> tuple[int, int] | None:
 
 
 def _fold_grains(nodes: list[ViewNode]) -> list[int]:
-    """Return the digest count ``nap`` would fold, or 0 when ``_as_child`` raises ValueError.
+    """Return the digest count ``nap`` would fold, or 0 when that count cannot be read.
 
+    A note is one digest, kept at ``node.leaves``. This scan does not open it.
+    A nap's count comes from ``_as_child``. ``ValueError`` is grain 0, including
+    a children file whose note text is not a string.
     Grain is that count, not the filename. Wake still lists the filename grain.
     0 is not a power of two, so the row is never requested and never a nearer twin.
     """
     grains = []
     for node in nodes:
+        if node.kind == "note":
+            grains.append(node.leaves)
+            continue
         try:
             grains.append(len(_as_child(node)[1]))
         except ValueError:

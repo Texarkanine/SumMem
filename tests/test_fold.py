@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import json
 import re
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from random import Random
 
 import pytest
@@ -613,6 +615,86 @@ def test_fold_request_skips_a_pack_whose_children_file_is_broken(tmp_path, monke
     view = m.list_view(repo)
     assert [node.leaves for node in view] == [2, 1, 2, 1, 1]
     _break_children(view[0], how)
+    view = m.list_view(repo)
+    out = m.fold_request(repo, 4, nodes=view)
+    assert _named_pair(m, view, out) == {view[1].id, view[3].id}
+    id_a, id_b = _RUN.search(out).groups()
+    assert m.main(["nap", id_a, id_b, "the two ones"]) == 0
+    assert capsys.readouterr().out.startswith("Saved.\n")
+
+
+def test_fold_request_keeps_a_note_unlinked_after_listing(tmp_path, monkeypatch, capsys, summem):
+    """Three notes, third file removed after listing: fold names the first two and nap writes a grain-2 pack.
+
+    The scan keeps each note at node.leaves and does not open a note file.
+    _as_child of the removed note still raises OSError.
+    """
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    _add_notes(m, repo, 3, 0, "n")
+    view = m.list_view(repo)
+    assert [node.leaves for node in view] == [1, 1, 1]
+    view[2].path.unlink()
+    opened = []
+    real_read = Path.read_bytes
+
+    def spy(self):
+        opened.append(self)
+        return real_read(self)
+
+    monkeypatch.setattr(Path, "read_bytes", spy)
+    try:
+        assert m._fold_grains(view) == [1, 1, 1]
+        assert opened == []
+    finally:
+        monkeypatch.setattr(Path, "read_bytes", real_read)
+    out = m.fold_request(repo, 1, nodes=view)
+    assert _named_pair(m, view, out) == {view[0].id, view[1].id}
+    id_a, id_b = _RUN.search(out).groups()
+    assert m.main(["nap", id_a, id_b, "the two notes"]) == 0
+    assert capsys.readouterr().out.startswith("Saved.\n")
+    assert [node.leaves for node in m.list_view(repo)] == [2]
+    with pytest.raises(OSError):
+        m._as_child(view[2])
+
+
+def _set_first_note_text(node, text):
+    """Replace the first note text in a children file. The file stays JSON."""
+    raw = json.loads(node.tree_path.read_text(encoding="utf-8"))
+
+    def walk(obj):
+        for child in obj["c"]:
+            if child.get("type") == "note":
+                child["text"] = text
+                return True
+            if child.get("type") == "nap" and walk(child["tree"]):
+                return True
+        return False
+
+    assert walk(raw)
+    node.tree_path.write_bytes((json.dumps(raw) + "\n").encode("utf-8"))
+
+
+@pytest.mark.parametrize("text", [1, {"k": "v"}], ids=["number", "object"])
+def test_fold_request_skips_a_pack_whose_note_text_is_not_a_string(
+    tmp_path, monkeypatch, capsys, summem, text
+):
+    """Grains 2, 1, 2, 1, 1 with the oldest 2's note text not a string: fold names the two oldest 1s, and nap accepts them."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    _seal(m, repo, 2, 0, "a")
+    _seal(m, repo, 1, 2, "b")
+    _seal(m, repo, 2, 3, "c")
+    _seal(m, repo, 1, 5, "d")
+    _seal(m, repo, 1, 6, "e")
+    view = m.list_view(repo)
+    assert [node.leaves for node in view] == [2, 1, 2, 1, 1]
+    _set_first_note_text(view[0], text)
+    m.loads_tree(view[0].tree_path.read_bytes())
+    with pytest.raises(ValueError, match="unreadable pack"):
+        m._as_child(view[0])
     view = m.list_view(repo)
     out = m.fold_request(repo, 4, nodes=view)
     assert _named_pair(m, view, out) == {view[1].id, view[3].id}
