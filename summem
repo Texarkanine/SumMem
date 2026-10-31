@@ -268,7 +268,7 @@ ENTRY_CHARS = 280
 WAKE_LINES = 32
 CLI_NAME = "summem"
 AGENT_BIN = ".summem/summem"
-__version__ = "0.12.1"  # x-release-please-version
+__version__ = "0.12.2"  # x-release-please-version
 
 
 def agent_invoke() -> str:
