@@ -45,3 +45,11 @@ Fold grain for pairing comes from the children `nap` can read, not from the file
     - The two fixes QA named are different products. The issue text does not choose between them. Left for the operator.
 * Insights
     - Digest-count grain without a filename check lets a lying stem fold with a truthful row of that count. Zeroing every stem/digest mismatch also skips two rows `nap` would accept today when they lie the same way.
+
+## 2026-10-30 - BUILD - IN-PROGRESS
+
+* Work completed
+    - Recorded the operator's choice and returned to build.
+* Decisions made
+    - `write_nap` drops the filename `leaves` check. Unequal digest counts are `not the same grain`. A power-of-two digest count stays eligible even when the filename disagrees, and it may fold with a truthful row of that count.
+    - Do not mark a row ineligible only because the filename and the digest count disagree. Wake still lists `node.leaves`. Leave the OSError advisory alone.

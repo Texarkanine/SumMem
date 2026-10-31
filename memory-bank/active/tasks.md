@@ -28,6 +28,12 @@ A children file that parsed still counted as the filename grain. `fold_request` 
 - `memory-bank/systemPatterns.md`
 - `.summem/` note, and the nap that note required
 
+## Rework
+
+- [ ] Test: filename grains differ, digest counts are equal and a power of two. The request names that pair, and `nap` accepts it. Wake still lists the filename grain.
+- [ ] `write_nap` drops `left.leaves != right.leaves`. `len(digs_l) != len(digs_r)` stays the same-grain refusal.
+- [ ] Keep the digest-count-3 test: the other legal pair is requested and accepted.
+
 ## QA
 
 **Result:** FAIL. Build must rerun.
