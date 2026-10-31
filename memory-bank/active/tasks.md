@@ -105,6 +105,6 @@ No new technology - validation not required. `global` and a module dict are stdl
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight (run 1 FAIL fixable: cached caption; plan amended)
-- [ ] Build
+- [x] Preflight (run 1 FAIL fixable: cached caption; plan amended; run 2 PASS WITH ADVISORY)
+- [x] Build (units 1–4 done; commit 4a0b9e9)
 - [ ] QA

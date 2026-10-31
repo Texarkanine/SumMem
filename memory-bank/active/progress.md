@@ -44,3 +44,21 @@ Rework PR #95 so `note` and `nap` read and digest each nap children file (`.tree
     - Advisory: the planned `with_store_lock` docstring reason ("a nap path names fixed bytes") is the claim run 1 disproved. Base it on "only this process writes under the lock, and `_replace_bytes` evicts what it writes".
     - Advisory: the note test needs at least two loose notes after heal for a `Run:` line. The nap test should take its pair from a `Run:` line, not from hard-coded indexes.
     - Radical (advisory): a write-through cache. Seed `(tree, digests)` after `_write_pair` in `rematerialize_child` and `write_nap`, so a post-merge zipper heal never reparses the kids it just wrote. About 2 to 3 lines; re-measure a merge-heal case first.
+
+## 2026-10-31 - BUILD - COMPLETE
+
+* Work completed
+    - TDD: two read-count tests were red at dd16eac, with each existing `.tree` read 3 times in both `note` and `nap`. Built to the amended plan; py311 gave 426 passed.
+    - Commit 4a0b9e9 `fix: read each children file once per command` holds the code, tests, the architecture sentence, and the SumMem notes and naps.
+    - Net `summem` delta from dd16eac is −8 lines (+36 −44; the lock body was re-indented).
+* Measurements after build, same 4094-leaf store, median of 15, two passes. Pass 1 was a noisier machine.
+    - `.tree` reads: `note` 22 → 11 and `nap` 34 → 12 (dd16eac → built). Digests: `note` 8236 → 4142 and `nap` 12353 → 4165.
+    - In-process, pass 1 then pass 2:
+        - `note`: main 85.0 / 64.7, dd16eac 110.4 / 67.5, built 69.1 / 51.1 ms.
+        - `nap`: main 121.3 / 90.0, dd16eac 141.6 / 123.6, built 56.8 / 55.6 ms.
+    - Subprocess median, interleaved, pass 1 then pass 2:
+        - `note`: main 175 / 140, dd16eac 197 / 154, built 162 / 137 ms.
+        - `nap`: main 188 / 174, dd16eac 207 / 181, built 170 / 128 ms.
+        - `version` (startup only): 59–82 ms.
+* Decisions made
+    - Declined preflight run 2's write-through cache. The benchmark has no heal split to justify the lines.
