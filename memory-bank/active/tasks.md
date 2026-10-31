@@ -107,4 +107,4 @@ No new technology - validation not required. `global` and a module dict are stdl
 - [x] Pre-Mortem complete
 - [x] Preflight (run 1 FAIL fixable: cached caption; plan amended; run 2 PASS WITH ADVISORY)
 - [x] Build (units 1–4 done; commit 4a0b9e9)
-- [ ] QA
+- [ ] QA (run 1 FAIL: SumMem memory still says heal walks raw JSON; Build must record a superseding note. See `.qa-validation-status`.)

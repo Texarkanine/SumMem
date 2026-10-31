@@ -62,3 +62,19 @@ Rework PR #95 so `note` and `nap` read and digest each nap children file (`.tree
         - `version` (startup only): 59–82 ms.
 * Decisions made
     - Declined preflight run 2's write-through cache. The benchmark has no heal split to justify the lines.
+
+## 2026-10-31 - QA - COMPLETE (run 1)
+
+* Result: `FAIL` (first line of `.qa-validation-status`). Build must rerun. The plan stands.
+* Findings
+    - Blocking (Documentation): SumMem memory still says heal walks raw JSON (#51). Root wake's first line reads "heal raw JSON". No new note supersedes it, so a later agent could restore the second parse that #88 rules out. Fix: record one superseding note, nap if asked, and commit. No code change.
+    - Advisory: the read-count tests pin the exact number of `.tree` files read (`len(counts) == 3` / `4`). The contract is "at most once", so a correct change that reads fewer files would turn them red.
+    - Advisory: `_digests_of_tree` now runs inside `_as_child`'s `try`, so non-`ValueError` digest errors give "unreadable pack". This matches heal's old refusal set (#88). `_CHILDREN` is set before the lock is taken, and nesting would fall back to a fresh parse. Neither needs action.
+    - Clean: KISS, DRY, YAGNI, completeness, integrity, regression (the eviction keys match the `list_view` paths), and the architecture sentence. `tox -e py311`: 426 passed.
+
+## 2026-10-31 - BUILD - COMPLETE (QA run 1 rework)
+
+* Work completed
+    - Recorded the superseding SumMem note: heal no longer walks raw JSON (#51 reversed). It shares `_as_child`'s parse and refusal set (#88). Did the nap the driver asked for.
+    - Took the QA advisory: the read-count tests now assert only `max(counts.values(), default=0) <= 1`, which is still red at dd16eac (3 reads). Dropped the unused return value of `_over_budget_naps`.
+    - `tox -e py311`: 426 passed. Commit d482447.
