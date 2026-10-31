@@ -14,3 +14,15 @@ Fold grain for pairing comes from the children `nap` can read, not from the file
     - Grain is `len(digests)` from `_as_child`, or 0 when that call raises `ValueError`. Filename grain stays on the wake listing.
 * Insights
     - `_as_child` already turns a missing or unreadable children file into `ValueError`. Catching that covers the #87 grain-0 cases without a second `loads_tree`.
+
+## 2026-10-30 - BUILD - COMPLETE
+
+* Work completed
+    - `_fold_grains` now uses `_as_child`. `ValueError` is grain 0. A parsed tree contributes its digest count.
+    - Added `test_fold_request_skips_a_pack_whose_digest_count_is_not_the_stem_grain`. It failed on the filename pair, then passed.
+    - `tox -e py311`: 421 passed.
+    - Recorded the rule in SumMem and napped the pair that note requested.
+* Decisions made
+    - Did not change `write_nap`'s filename equality check. The issue points `_fold_grains` at `_as_child` and leaves that check in place.
+* Insights
+    - A row whose digest count matches another row, while its filename grain does not, can still be requested and then refused with `not the same grain`. The filed stall is the opposite shape, and that shape is what the test pins.

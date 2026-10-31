@@ -1,11 +1,12 @@
 # Active Context
 
 ## Current Task: fold-grain-as-child
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Classified issue #88 as Level 1. The stall is one helper, `_fold_grains`, used by `fold_request` and by `write_nap`'s nearest-twin check.
-- Confirmed the hole. A `.tree` that parses keeps `node.leaves` from the filename. `nap` then refuses when the digest count disagrees (`not a power of two`), and the next note asks for the same pair.
+- Fold grain is the digest count from `_as_child`, or 0 when that call raises `ValueError`.
+- A hand-edited parsing tree is no longer requested at its filename grain. Wake still lists that filename grain.
+- `tox -e py311`: 421 passed.
 
 ## Next Step
-- Load the Level 1 workflow and build.
+- Level 1 QA.
