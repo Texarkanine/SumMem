@@ -1,0 +1,1 @@
+Fold scan keeps a loose note at node.leaves and does not open it. A parsed children file whose note text is not a string is grain 0 via ValueError.
