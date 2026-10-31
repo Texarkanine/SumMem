@@ -16,3 +16,16 @@ One bad fold row must drop out of the pair scan. A note that disappears after li
 * Insights
     - Catching `OSError` in the scan would also let the other rows fold, and would hide the missing note from the pair. The review asks for the note to stay at `node.leaves`.
     - `loads_tree` accepts a non-string `text`. `note_file_bytes` then raises `AttributeError` outside the `ValueError` catch.
+
+## 2026-10-31 - BUILD - COMPLETE
+
+* Work completed
+    - Failing tests for a note unlinked after listing, and for a parsed children file whose note text is not a string
+    - `_fold_grains` keeps notes at `node.leaves`
+    - `_digests_of_tree` raises `ValueError("unreadable pack")` for non-string note text
+    - py311: 425 passed
+* Decisions made
+    - The scan does not catch `OSError`. A missing note still counts as one digest until something naps that row.
+    - The new error is `ValueError`, not a wider catch
+* Insights
+    - Grain 0 from catching `OSError` would drop the missing note out of the pair. Keeping `node.leaves` leaves `OSError` on the nap of that row.

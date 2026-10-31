@@ -1,13 +1,14 @@
 # Active Context
 
 ## Current Task: fold-scan-rows
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
 
-- Classified the two pull request 95 review threads as one Level 1 bug in the fold scan.
-- Operator decision: this invocation is the approval. Do not restate intent or wait. Standing consent runs through QA, then remove `memory-bank/active/` and push this branch.
+- `_fold_grains` keeps a note at `node.leaves` and does not open the note file.
+- `_digests_of_tree` raises `ValueError("unreadable pack")` when a note's text is not a string. The scan's existing `except ValueError` sets grain 0.
+- py311: 425 passed, including the two new fold tests.
 
 ## Next Step
 
-- Load the Level 1 workflow and build.
+- Level 1 QA in a subagent.
