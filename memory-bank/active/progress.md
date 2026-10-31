@@ -78,3 +78,12 @@ Rework PR #95 so `note` and `nap` read and digest each nap children file (`.tree
     - Recorded the superseding SumMem note: heal no longer walks raw JSON (#51 reversed). It shares `_as_child`'s parse and refusal set (#88). Did the nap the driver asked for.
     - Took the QA advisory: the read-count tests now assert only `max(counts.values(), default=0) <= 1`, which is still red at dd16eac (3 reads). Dropped the unused return value of `_over_budget_naps`.
     - `tox -e py311`: 426 passed. Commit d482447.
+
+## 2026-10-31 - QA - COMPLETE (run 2)
+
+* Result: `PASS` (first line of `.qa-validation-status`)
+* Findings
+    - Run 1's blocker is resolved. Root wake lists the superseding note (heal shares `_as_child`'s parse, #51 reversed, #88) as the newest leaf, and the nap the driver asked for is committed. The x64 caption still says "heal raw JSON". Only the script writes captions, and the newer leaf supersedes it.
+    - Run 1's test advisory is taken. Both read-count tests assert only `<= 1`. QA re-ran them against the dd16eac `summem`: both red, with each `.tree` read 3 times. At HEAD both are green.
+    - Clean: KISS, DRY, YAGNI, completeness, regression (`_replace_bytes` is the only store writer, and eviction keys match `list_view`), integrity, and documentation. `tox -e py311`: 426 passed.
+    - Advisory, no action: the cache is set before the flock is taken, and a nested lock would turn it off for the rest of the outer call. Neither matters today.

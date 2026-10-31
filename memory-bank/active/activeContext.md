@@ -1,7 +1,7 @@
 # Active Context
 
 - **Current Task:** read-once (PR #95 rework: one `.tree` read per command)
-- **Phase:** BUILD - COMPLETE (QA run 1 rework)
+- **Phase:** QA - COMPLETE (PASS)
 
 ## Files Modified
 
