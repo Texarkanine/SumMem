@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.2](https://github.com/Texarkanine/SumMem/compare/v0.12.1...v0.12.2) (2026-10-31)
+
+
+### Bug Fixes
+
+* s/Commpress/Summarize in nap instructions to break attempted compression loops on high grains ([#90](https://github.com/Texarkanine/SumMem/issues/90)) ([b484212](https://github.com/Texarkanine/SumMem/commit/b4842121b7184d63741191095bd610ebaab36f21))
+
 ## [0.12.1](https://github.com/Texarkanine/SumMem/compare/v0.12.0...v0.12.1) (2026-10-15)
 
 
