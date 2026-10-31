@@ -35,3 +35,12 @@ Rework PR #95 so `note` and `nap` read and digest each nap children file (`.tree
 * Decisions made
     - Took the required fix: the cache holds `(Tree, digests)` keyed by `tree_path`; `NapChild` is built from the current node each call, so captions are never cached.
     - Took the advisory: `_replace_bytes` drops `dest` from the cache in one line, so nothing the driver writes is served stale. One line of cost, and two plan caveats are gone.
+
+## 2026-10-31 - PREFLIGHT - COMPLETE (run 2)
+
+* Result: `PASS WITH ADVISORY` (first line of `.preflight-status`)
+* Findings
+    - Run 1's fixable finding is resolved: the cache holds `(Tree, digests)` keyed on `tree_path`, captions come from the current node, and `_replace_bytes` evicts what the driver writes.
+    - Advisory: the planned `with_store_lock` docstring reason ("a nap path names fixed bytes") is the claim run 1 disproved. Base it on "only this process writes under the lock, and `_replace_bytes` evicts what it writes".
+    - Advisory: the note test needs at least two loose notes after heal for a `Run:` line. The nap test should take its pair from a `Run:` line, not from hard-coded indexes.
+    - Radical (advisory): a write-through cache. Seed `(tree, digests)` after `_write_pair` in `rematerialize_child` and `write_nap`, so a post-merge zipper heal never reparses the kids it just wrote. About 2 to 3 lines; re-measure a merge-heal case first.
