@@ -122,6 +122,17 @@ def fold_ids(m, repo, ids, caption: str) -> str:
 _FOLD_RUN = re.compile(r' nap(?: --path \S+)? (\S+) (\S+) "')
 
 
+def break_children(node, how: str) -> None:
+    """Remove or corrupt a nap row's children file.
+
+    ``missing`` unlinks it. Any other *how* writes ``not a tree``.
+    """
+    if how == "missing":
+        node.tree_path.unlink()
+    else:
+        node.tree_path.write_bytes(b"not a tree\n")
+
+
 def plant_pack(m, repo, left, right, caption: str) -> None:
     """Write a nap of two view rows with no pairing policy.
 

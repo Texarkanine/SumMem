@@ -9,7 +9,7 @@ from random import Random
 import pytest
 
 from conftest import dated_leaf
-from gitutil import init_repo, plant_pack
+from gitutil import break_children, init_repo, plant_pack
 
 UTC = timezone.utc
 
@@ -231,10 +231,7 @@ def test_nap_pairs_across_a_same_grain_pack_whose_children_file_is_broken(tmp_pa
     view = m.list_view(repo)
     assert [node.leaves for node in view] == [2, 2, 2]
     broken = view[1]
-    if how == "missing":
-        broken.tree_path.unlink()
-    else:
-        broken.tree_path.write_bytes(b"not a tree\n")
+    break_children(broken, how)
     m.write_nap(repo, view[0].id, view[2].id, "outer pairs")
     after = m.list_view(repo)
     assert [node.leaves for node in after] == [4, 2]
