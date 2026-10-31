@@ -1,0 +1,1 @@
+_as_child caches parses only inside with_store_lock (_CHILDREN; _replace_bytes forgets each write). Outside the lock nothing is cached: tests edit .tree/.summ in place between direct calls. The cache holds tree+digests, never the caption.

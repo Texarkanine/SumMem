@@ -176,7 +176,7 @@ Wake never refuses to print. A dirty caption degrades; it does not block the ses
 
 ## Zipper
 
-Two branches can each nap overlapping sets of the same original notes. Git merge then lands two naps. The next `note` or `nap` on this machine that writes to the store heals that. That invocation takes a same-machine lock: directory flock of `naps/` when that works, otherwise a lock file in an OS runtime directory. Neither is a committed object. Wake does not wait on it. Git merge remains the control across clones.
+Two branches can each nap overlapping sets of the same original notes. Git merge then lands two naps. The next `note` or `nap` on this machine that writes to the store heals that. That invocation takes a same-machine lock: directory flock of `naps/` when that works, otherwise a lock file in an OS runtime directory. Neither is a committed object. Wake does not wait on it. Git merge remains the control across clones. While the lock is held, each nap's children file is parsed at most once: heal, the fold scan, and `nap` share that parse, and a file the command writes is parsed fresh.
 
 ```mermaid
 flowchart TD

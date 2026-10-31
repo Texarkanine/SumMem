@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 import sys
 import types
+from collections import Counter
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from random import Random
@@ -169,25 +171,6 @@ def test_leaf_digests_none_when_tree_missing_or_malformed(tmp_path, summem):
     assert m.leaf_digests(ez) is None
 
 
-def test_leaf_digests_nap_does_not_build_tree(tmp_path, monkeypatch, summem):
-    """A nap's leaf-set is hashed from raw tree JSON, not a Tree graph."""
-    m = summem
-    repo = init_repo(tmp_path / "r")
-    texts = ["alpha", "beta"]
-    _write_notes(m, repo, texts)
-    expected = {m.note_digest(m.note_file_bytes(text)) for text in texts}
-    ids = [node.id for node in m.list_view(repo)]
-    m.write_nap(repo, ids[0], ids[1], "pair")
-    node = m.list_view(repo)[0]
-
-    def boom(*_args, **_kwargs):
-        raise AssertionError("digest-only work must not build Tree")
-
-    monkeypatch.setattr(m, "loads_tree", boom)
-    monkeypatch.setattr(m, "_tree_from_dict", boom)
-    assert m.leaf_digests(node) == expected
-
-
 def test_write_nap_reuses_nodes(tmp_path, monkeypatch, summem):
     """write_nap(nodes=...) does not call list_view."""
     m = summem
@@ -250,6 +233,69 @@ def test_cli_nap_passes_heal_nodes_to_write_nap(tmp_path, monkeypatch, summem):
     assert m.main(["nap", ids[0], ids[1], "pair"]) == 0
     assert seen.get("nodes") is not None
     assert {n.id for n in seen["nodes"]} == set(ids)
+
+
+def _over_budget_naps(m, repo):
+    """Grain-4 nap, grain-2 nap, broken grain-2 nap; WAKE_LINES = 2. Return the broken .tree path."""
+    _fold_balanced(m, repo, ["A", "B", "C", "D"], "abcd", start=1)
+    _fold_balanced(m, repo, ["E", "F"], "ef", start=10)
+    _fold_balanced(m, repo, ["G", "H"], "gh", start=20)
+    broken = next(n for n in m.list_view(repo) if n.caption == "gh-0").tree_path
+    broken.write_bytes(b"{not json")
+    (repo / ".summem" / "config.toml").write_text("WAKE_LINES = 2\n", encoding="utf-8")
+    return broken
+
+
+def _count_tree_reads(monkeypatch) -> Counter:
+    counts: Counter = Counter()
+    real = Path.read_bytes
+
+    def spy(self):
+        if self.suffix == ".tree":
+            counts[self] += 1
+        return real(self)
+
+    monkeypatch.setattr(Path, "read_bytes", spy)
+    return counts
+
+
+def test_cli_note_reads_each_children_file_once(tmp_path, monkeypatch, capsys, summem):
+    """One note reads each .tree at most once, through heal, its relist, and the fold scan.
+
+    Contract: the driver runs inside agent turns, so a command never parses the
+    same children file twice. The store has a grain-4 nap, a grain-2 nap, a
+    broken grain-2 nap, and a loose note heal must drop, and it is over budget.
+    """
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    broken = _over_budget_naps(m, repo)
+    dup = _write_notes(m, repo, ["A"], start=30)[0]
+    _write_notes(m, repo, ["x", "y"], start=40)
+    counts = _count_tree_reads(monkeypatch)
+    assert m.main(["note", "z"]) == 0
+    assert "Run:" in capsys.readouterr().out
+    assert not dup.exists()
+    assert broken in counts and len(counts) == 3
+    assert max(counts.values()) == 1, counts
+
+
+def test_cli_nap_reads_each_children_file_once(tmp_path, monkeypatch, capsys, summem):
+    """One nap reads each .tree at most once, through heal, the nearer-row check, and the next fold request.
+
+    Contract as for note. The new pack's children file counts too.
+    """
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    _over_budget_naps(m, repo)
+    _write_notes(m, repo, ["x", "y", "z"], start=40)
+    id_a, id_b = re.search(r' nap (\S+) (\S+) "', m.fold_request(repo, 2)).groups()
+    counts = _count_tree_reads(monkeypatch)
+    assert m.main(["nap", id_a, id_b, "xy"]) == 0
+    assert "Run:" in capsys.readouterr().out
+    assert len(counts) == 4
+    assert max(counts.values()) == 1, counts
 
 
 def test_heal_view_returns_final_view(tmp_path, summem):

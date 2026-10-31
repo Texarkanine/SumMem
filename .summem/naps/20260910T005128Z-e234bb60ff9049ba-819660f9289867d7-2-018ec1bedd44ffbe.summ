@@ -1,1 +1,0 @@
-Windows: AGENTS.md clone-portable (no C:\ argv0; not pasteable). Usage/Run may print host invoke. note/nap crash on import fcntl; pathlib --path and python .summem/summem work; no store lock file. No consumer .gitattributes; canonicalize CRLF on read; punt this-repo git symlink.
