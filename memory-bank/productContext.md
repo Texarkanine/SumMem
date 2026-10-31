@@ -53,6 +53,10 @@ Wake:
 
 - Wake never refuses to print. "Cannot wake, go nap first" is a defect. Wake never drops view nodes to fit the budget; over-budget listings stay complete until `note`/`nap` fold them back.
 
+Script size and cost:
+
+- The script is pasted into every consumer repository, where people read it, and it runs inside agent turns. It stays as short as it can and does no work the outcome does not need. Trade lines for speed only on a measured gain.
+
 CLI and scopes:
 
 - CLI output does not mention store files, hashes as paths, or git. Root-wake Usage treats the files the script wrote as part of your work, not a separate publish procedure.

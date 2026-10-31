@@ -1,0 +1,1 @@
+nap same-grain check is the digest count, not the filename. A lying stem stays eligible when that count is a power of two.

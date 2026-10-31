@@ -1,0 +1,1 @@
+Heal no longer walks raw JSON (#51 reversed): leaf_digests reads through _as_child, so heal, fold, and nap share one parse and one refusal set (#88). Do not bring back a second .tree parser for speed.
