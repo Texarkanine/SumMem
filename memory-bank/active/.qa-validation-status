@@ -1,0 +1,6 @@
+PASS
+
+- KISS / DRY / YAGNI: `break_children` in `tests/gitutil.py` replaces duplicate unlink and write logic in `test_fold.py` and `test_nap.py` with a concise helper without speculative abstractions or extra branches.
+- Completeness: Acceptance criteria 1-4 are completely met. `_break_children` is removed from `test_fold.py`, inline logic is removed from `test_nap.py`, both call `break_children(node, how)`, and all four parametrized cases pass.
+- Regression & Integrity: No changes to product code or public interfaces; all 420 tests across the full suite pass under `tox -e py311`.
+- Conventions: The helper adheres to `gitutil.py` naming and docstring conventions, and imports in both test modules remain clean and alphabetical.

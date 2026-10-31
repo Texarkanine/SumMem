@@ -65,6 +65,16 @@ No new technology - validation not required
 - A wide diff in `test_fold.py` or `test_nap.py` collides with #88. Response: already covered by the first challenge; the edit stays on the import and the call.
 - Preflight or build invents a new test file. Response: test plan says no new test files.
 
+## QA Review
+
+- **Verdict:** PASS
+- **Findings:**
+  - **KISS & DRY:** `break_children` in `tests/gitutil.py` consolidates the duplicate broken-children setup into a clean 5-line function without unnecessary indirection.
+  - **YAGNI:** Kept the existing semantics (non-`missing` falls back to `not a tree`) without speculative error raising or added parameters.
+  - **Completeness:** All 4 acceptance criteria satisfied. `_break_children` removed from `test_fold.py`, inline logic removed from `test_nap.py`, both invoke `break_children`, and all 4 parametrized test cases pass.
+  - **Regression & Integrity:** No product code modified. Full test suite passes (420 passed in py311).
+  - **Conventions:** Followed `gitutil` naming convention (`break_children`) and kept import lists alphabetical.
+
 ## Status
 
 - [x] Initialization complete
@@ -74,4 +84,4 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
