@@ -113,7 +113,7 @@ flowchart TD
     Over -->|no| Done["No fold request"]
 ```
 
-The pair is the oldest view node whose grain is a power of two and that has another row of that grain anywhere later in the listing, paired with the nearest such row. The two rows need not be neighbors. Same grain means they stand for the same number of original notes.
+The pair is the oldest view node whose grain is a power of two and that has another row of that grain anywhere later in the listing, paired with the nearest such row. The two rows need not be neighbors. Same grain means they stand for the same number of original notes. That number is the count of notes in the children file. Wake lists the grain in the filename. Fold and nap pair on that children count, including when the filename disagrees and the count is a power of two.
 
 A **wall** is an older row sitting before a bigger, newer one. A neighbors-only rule never pairs across a wall, so that row and everything older stay in the listing forever. Skipping to the nearest same-grain row is what lets a merge, a late note, a zipper reopen, or surgery heal.
 
@@ -176,7 +176,7 @@ Wake never refuses to print. A dirty caption degrades; it does not block the ses
 
 ## Zipper
 
-Two branches can each nap overlapping sets of the same original notes. Git merge then lands two naps. The next `note` or `nap` on this machine that writes to the store heals that. That invocation takes a same-machine lock: directory flock of `naps/` when that works, otherwise a lock file in an OS runtime directory. Neither is a committed object. Wake does not wait on it. Git merge remains the control across clones.
+Two branches can each nap overlapping sets of the same original notes. Git merge then lands two naps. The next `note` or `nap` on this machine that writes to the store heals that. That invocation takes a same-machine lock: directory flock of `naps/` when that works, otherwise a lock file in an OS runtime directory. Neither is a committed object. Wake does not wait on it. Git merge remains the control across clones. While the lock is held, each nap's children file is parsed at most once: heal, the fold scan, and `nap` share that parse, and a file the command writes is parsed fresh.
 
 ```mermaid
 flowchart TD

@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import json
 import re
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from random import Random
 
 import pytest
@@ -613,6 +615,86 @@ def test_fold_request_skips_a_pack_whose_children_file_is_broken(tmp_path, monke
     assert capsys.readouterr().out.startswith("Saved.\n")
 
 
+def test_fold_request_keeps_a_note_unlinked_after_listing(tmp_path, monkeypatch, capsys, summem):
+    """Three notes, third file removed after listing: fold names the first two and nap writes a grain-2 pack.
+
+    The scan keeps each note at node.leaves and does not open a note file.
+    _as_child of the removed note still raises OSError.
+    """
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    _add_notes(m, repo, 3, 0, "n")
+    view = m.list_view(repo)
+    assert [node.leaves for node in view] == [1, 1, 1]
+    view[2].path.unlink()
+    opened = []
+    real_read = Path.read_bytes
+
+    def spy(self):
+        opened.append(self)
+        return real_read(self)
+
+    monkeypatch.setattr(Path, "read_bytes", spy)
+    try:
+        assert m._fold_grains(view) == [1, 1, 1]
+        assert opened == []
+    finally:
+        monkeypatch.setattr(Path, "read_bytes", real_read)
+    out = m.fold_request(repo, 1, nodes=view)
+    assert _named_pair(m, view, out) == {view[0].id, view[1].id}
+    id_a, id_b = _RUN.search(out).groups()
+    assert m.main(["nap", id_a, id_b, "the two notes"]) == 0
+    assert capsys.readouterr().out.startswith("Saved.\n")
+    assert [node.leaves for node in m.list_view(repo)] == [2]
+    with pytest.raises(OSError):
+        m._as_child(view[2])
+
+
+def _set_first_note_text(node, text):
+    """Replace the first note text in a children file. The file stays JSON."""
+    raw = json.loads(node.tree_path.read_text(encoding="utf-8"))
+
+    def walk(obj):
+        for child in obj["c"]:
+            if child.get("type") == "note":
+                child["text"] = text
+                return True
+            if child.get("type") == "nap" and walk(child["tree"]):
+                return True
+        return False
+
+    assert walk(raw)
+    node.tree_path.write_bytes((json.dumps(raw) + "\n").encode("utf-8"))
+
+
+@pytest.mark.parametrize("text", [1, {"k": "v"}], ids=["number", "object"])
+def test_fold_request_skips_a_pack_whose_note_text_is_not_a_string(
+    tmp_path, monkeypatch, capsys, summem, text
+):
+    """Grains 2, 1, 2, 1, 1 with the oldest 2's note text not a string: fold names the two oldest 1s, and nap accepts them."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    _seal(m, repo, 2, 0, "a")
+    _seal(m, repo, 1, 2, "b")
+    _seal(m, repo, 2, 3, "c")
+    _seal(m, repo, 1, 5, "d")
+    _seal(m, repo, 1, 6, "e")
+    view = m.list_view(repo)
+    assert [node.leaves for node in view] == [2, 1, 2, 1, 1]
+    _set_first_note_text(view[0], text)
+    m.loads_tree(view[0].tree_path.read_bytes())
+    with pytest.raises(ValueError, match="unreadable pack"):
+        m._as_child(view[0])
+    view = m.list_view(repo)
+    out = m.fold_request(repo, 4, nodes=view)
+    assert _named_pair(m, view, out) == {view[1].id, view[3].id}
+    id_a, id_b = _RUN.search(out).groups()
+    assert m.main(["nap", id_a, id_b, "the two ones"]) == 0
+    assert capsys.readouterr().out.startswith("Saved.\n")
+
+
 def test_fold_pair_matches_neighbors_rule_for_one_writer(summem):
     """One writer: _fold_pair matches the neighbors-only rule at every fold step."""
     m = summem
@@ -636,4 +718,63 @@ def test_fold_pair_skips_non_power_of_two_rows(summem):
     assert m._fold_pair([6, 6, 2, 1, 1]) == (3, 4)
     assert m._fold_pair([6, 6]) is None
     assert m._fold_pair([8, 1, 4, 1]) == (1, 3)
+
+
+def test_fold_request_skips_a_pack_whose_digest_count_is_not_the_stem_grain(
+    tmp_path, monkeypatch, capsys, summem
+):
+    """Grains 2, 1, 2, 1, 1 with the oldest 2's tree parsing at another digest count: fold names the two oldest 1s, and nap accepts them."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    _seal(m, repo, 2, 0, "a")
+    _seal(m, repo, 1, 2, "b")
+    _seal(m, repo, 2, 3, "c")
+    _seal(m, repo, 1, 5, "d")
+    _seal(m, repo, 1, 6, "e")
+    view = m.list_view(repo)
+    assert [node.leaves for node in view] == [2, 1, 2, 1, 1]
+    tree = m.loads_tree(view[0].tree_path.read_bytes())
+    extra = m.NoteChild(name="20260101T000000Z-eeeeeeeeeeeeeeee", text="extra")
+    view[0].tree_path.write_bytes(m.dumps_tree(m.Tree(kids=[*tree.kids, extra])))
+    view = m.list_view(repo)
+    _child, digests = m._as_child(view[0])
+    assert len(digests) != view[0].leaves
+    x2_lines = [line for line in m.wake_text(repo).splitlines() if line.startswith("x2 ")]
+    assert len(x2_lines) == 1
+    assert x2_lines[0].endswith(": a-0")
+    out = m.fold_request(repo, 4, nodes=view)
+    assert _named_pair(m, view, out) == {view[1].id, view[3].id}
+    id_a, id_b = _RUN.search(out).groups()
+    assert m.main(["nap", id_a, id_b, "the two ones"]) == 0
+    assert capsys.readouterr().out.startswith("Saved.\n")
+
+
+def test_fold_request_folds_a_lying_filename_with_a_truthful_row(
+    tmp_path, monkeypatch, capsys, summem
+):
+    """Filename grains 4 and 2, both with 4 digests: fold names that pair, nap accepts it, and wake still lists the filenames."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    _seal(m, repo, 4, 0, "a")
+    _seal(m, repo, 4, 4, "b")
+    view = m.list_view(repo)
+    assert [node.leaves for node in view] == [4, 4]
+    stamp, rand, leafset, _old, variant = m._parse_nap_stem(view[1].name)
+    stem = f"{stamp}-{rand}-{leafset}-2-{variant}"
+    folder = view[1].tree_path.parent
+    view[1].tree_path.rename(folder / f"{stem}.tree")
+    view[1].sum_path.rename(folder / f"{stem}.summ")
+    view = m.list_view(repo)
+    assert [node.leaves for node in view] == [4, 2]
+    assert [len(m._as_child(node)[1]) for node in view] == [4, 4]
+    (repo / ".summem" / "config.toml").write_text("WAKE_LINES = 2\n", encoding="utf-8")
+    assert [line.split(" ", 1)[0] for line in m.wake_text(repo).splitlines()] == ["x4", "x2"]
+    out = m.fold_request(repo, 1, nodes=view)
+    assert _named_pair(m, view, out) == {view[0].id, view[1].id}
+    id_a, id_b = _RUN.search(out).groups()
+    assert m.main(["nap", id_a, id_b, "the eights"]) == 0
+    assert capsys.readouterr().out.startswith("Saved.\n")
+    assert [node.leaves for node in m.list_view(repo)] == [8]
 
