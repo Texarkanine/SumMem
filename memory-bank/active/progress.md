@@ -53,3 +53,14 @@ Fold grain for pairing comes from the children `nap` can read, not from the file
 * Decisions made
     - `write_nap` drops the filename `leaves` check. Unequal digest counts are `not the same grain`. A power-of-two digest count stays eligible even when the filename disagrees, and it may fold with a truthful row of that count.
     - Do not mark a row ineligible only because the filename and the digest count disagree. Wake still lists `node.leaves`. Leave the OSError advisory alone.
+
+## 2026-10-30 - BUILD - COMPLETE
+
+* Work completed
+    - Removed `left.leaves != right.leaves`. `len(digs_l) != len(digs_r)` raises `not the same grain`. A non-power-of-two total still raises `not a power of two`.
+    - Added `test_fold_request_folds_a_lying_filename_with_a_truthful_row`. It failed on `not the same grain`, then passed. The digest-count-3 test still passes.
+    - `tox -e py311`: 422 passed.
+* Decisions made
+    - Followed the operator: a lying stem stays eligible and may fold with a truthful row of the same digest count.
+* Insights
+    - A note and a 2-pack still fail `not the same grain`, because their digest counts are 1 and 2. Two legacy 6-packs still fail `not a power of two`.

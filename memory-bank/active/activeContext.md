@@ -1,12 +1,12 @@
 # Active Context
 
 ## Current Task: fold-grain-as-child
-**Phase:** BUILD - IN-PROGRESS
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Operator decided the fork: `write_nap` treats grain as the digest count. Remove `left.leaves != right.leaves`. `len(digs_l) != len(digs_r)` is the same-grain check.
-- A stem whose filename grain disagrees with its digest count stays eligible when that count is a power of two, and it may fold with a truthful row of that count.
-- Wake still lists `node.leaves`. The OSError advisory stays outside this issue.
+- Operator chose digest-count grain for `nap`. `write_nap` no longer compares filename `leaves`. Unequal digest counts are `not the same grain`.
+- A filename-2 row with 4 digests is requested with a real 4-pack, and `nap` accepts it. Wake still lists `x2` and `x4`.
+- `tox -e py311`: 422 passed.
 
 ## Next Step
-- Failing test for that pair, then the `write_nap` change.
+- Level 1 QA.
