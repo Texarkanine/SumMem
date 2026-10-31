@@ -1,0 +1,1 @@
+{"c":[{"name":"20260829T223329Z-dff4d96e7ee27dcc","text":"write_nap rejects any intersecting digest sets; two identical loose notes collapse on heal to the later filename (#77)","type":"note"},{"name":"20260829T230843Z-3ad41bcf17625899","text":"heal-same-text archived to memory-bank/archive/bug-fixes/20260829-heal-same-text.md; PR #79","type":"note"}]}

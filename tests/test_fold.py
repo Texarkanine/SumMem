@@ -8,7 +8,7 @@ from random import Random
 
 import pytest
 from conftest import dated_leaf
-from gitutil import fold_ids, init_repo
+from gitutil import break_children, fold_ids, init_repo
 
 UTC = timezone.utc
 
@@ -591,14 +591,6 @@ def test_run_line_for_a_skip_pair_is_accepted_by_nap(tmp_path, monkeypatch, caps
     assert capsys.readouterr().out.startswith("Saved.\n")
 
 
-def _break_children(node, how):
-    """Remove or corrupt a nap row's children file."""
-    if how == "missing":
-        node.tree_path.unlink()
-    else:
-        node.tree_path.write_bytes(b"not a tree\n")
-
-
 @pytest.mark.parametrize("how", ["missing", "unreadable"])
 def test_fold_request_skips_a_pack_whose_children_file_is_broken(tmp_path, monkeypatch, capsys, summem, how):
     """Grains 2, 1, 2, 1, 1 with the oldest 2's children file broken: fold names the two oldest 1s, and nap accepts them."""
@@ -612,7 +604,7 @@ def test_fold_request_skips_a_pack_whose_children_file_is_broken(tmp_path, monke
     _seal(m, repo, 1, 6, "e")
     view = m.list_view(repo)
     assert [node.leaves for node in view] == [2, 1, 2, 1, 1]
-    _break_children(view[0], how)
+    break_children(view[0], how)
     view = m.list_view(repo)
     out = m.fold_request(repo, 4, nodes=view)
     assert _named_pair(m, view, out) == {view[1].id, view[3].id}
