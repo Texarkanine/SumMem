@@ -1,13 +1,14 @@
 # Active Context
 
 ## Current Task: share-break-children
-**Phase:** PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Level 2 plan written for issue #89.
-- One executable step: move the broken-children setup to `break_children` in `tests/gitutil.py` and point the fold and nap tests at it.
-- No new product behavior. The four existing cases are the red/green lock. No new test file.
-- Public name is `break_children`, matching `plant_pack` and `fold_ids`. The else branch stays "write `not a tree`".
+- Added `break_children` in `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-feat/share-break-children/tests/gitutil.py`. `missing` unlinks `tree_path`. Any other `how` writes `not a tree`.
+- `tests/test_fold.py` and `tests/test_nap.py` call that helper. The local `_break_children` and the inline nap block are gone.
+- Red run: four failures with a `pass` stub (fold named the grain-2 pair; nap raised the nearer-row error). Green run: those four passed. Full `tox -e py311`: 420 passed.
+- Recorded the helper in the root SumMem store and napped the pair the script requested.
+- No product file changed. This repo has no lint or build target.
 
 ## Next Step
-- Preflight validation.
+- QA review.
