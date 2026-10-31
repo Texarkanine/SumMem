@@ -81,7 +81,7 @@ Different pair bytes are different paths; git unions them. Wake may print two sa
 
 A missing or conflict-marked caption degrades to grain and unique prefix with no caption. Wake does not open `.tree` to list an at-or-over-budget view. It does not drop oldest view nodes to fit `WAKE_LINES`. It may open `.tree` to expand an under-budget view.
 
-Wake does not open `.tree` to heal overlapping packs; mutating `note` and `nap` may. Writers must not serialize on "cannot wake." Fold requests name the oldest power-of-two row that has a same-grain row below it, paired with the nearest such row, and still unlink. A nap whose `.tree` is missing or unreadable is never requested and never counts as a nearer row: fold never names a row `nap` would refuse. Wake may expand in memory when the view is short, then sort the opened rows by date.
+Wake does not open `.tree` to heal overlapping packs; mutating `note` and `nap` may. Writers must not serialize on "cannot wake." Fold requests name the oldest power-of-two row that has a same-grain row below it, paired with the nearest such row, and still unlink. That grain is the count of notes in the children file, not the filename wake lists. A row whose children file nap cannot read is never requested and never counts as a nearer row. Wake may expand in memory when the view is short, then sort the opened rows by date.
 
 ## Root pushes; other stores pull
 
