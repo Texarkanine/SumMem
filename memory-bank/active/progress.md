@@ -14,3 +14,15 @@ Move the duplicated broken-children setup out of the fold and nap tests into one
     - Level 2 because the change is one test helper in a named home, with no product behavior and no approach to choose.
 * Insights
     - Fold's helper treats every non-`missing` value as unreadable. The nap test does the same. The shared helper should keep that branch.
+
+## 2026-10-30 - PLAN - COMPLETE
+
+* Work completed
+    - Wrote the Level 2 plan in `memory-bank/active/tasks.md`.
+    - Mapped the four existing cases as the only behaviors to keep.
+* Decisions made
+    - Helper name is `break_children` in `tests/gitutil.py`.
+    - No new test file and no product edit.
+    - Red run is the existing assertions against an empty stub.
+* Insights
+    - Issue #88 also edits fold and nap tests, so this diff must stay on the import and the call.

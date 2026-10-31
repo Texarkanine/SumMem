@@ -1,13 +1,13 @@
 # Active Context
 
 ## Current Task: share-break-children
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Confirmed a fresh task: `memory-bank/active/` had no ephemeral files.
-- Issue #89 is approved. Intent restatement was skipped under standing consent.
-- The hole is real. `tests/test_fold.py` defines `_break_children` (`missing` unlinks, otherwise writes `not a tree`). `tests/test_nap.py` repeats those lines in `test_nap_pairs_across_a_same_grain_pack_whose_children_file_is_broken`.
-- Level 2: a self-contained test-fixture move. No product change, no design fork. The home is already named (`tests/gitutil.py`).
+- Level 2 plan written for issue #89.
+- One executable step: move the broken-children setup to `break_children` in `tests/gitutil.py` and point the fold and nap tests at it.
+- No new product behavior. The four existing cases are the red/green lock. No new test file.
+- Public name is `break_children`, matching `plant_pack` and `fold_ids`. The else branch stays "write `not a tree`".
 
 ## Next Step
-- Load the Level 2 workflow and run the plan phase.
+- Preflight validation.
