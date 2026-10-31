@@ -676,15 +676,6 @@ def test_fold_request_skips_a_pack_whose_digest_count_is_not_the_stem_grain(
     assert capsys.readouterr().out.startswith("Saved.\n")
 
 
-def _rename_stem_grain(m, node, grain: int) -> None:
-    """Point a nap pair's filename grain at *grain* and leave the children file bytes."""
-    stamp, rand, leafset, _old, variant = m._parse_nap_stem(node.name)
-    stem = f"{stamp}-{rand}-{leafset}-{grain}-{variant}"
-    folder = node.tree_path.parent
-    node.tree_path.rename(folder / f"{stem}.tree")
-    node.sum_path.rename(folder / f"{stem}.summ")
-
-
 def test_fold_request_folds_a_lying_filename_with_a_truthful_row(
     tmp_path, monkeypatch, capsys, summem
 ):
@@ -696,7 +687,11 @@ def test_fold_request_folds_a_lying_filename_with_a_truthful_row(
     _seal(m, repo, 4, 4, "b")
     view = m.list_view(repo)
     assert [node.leaves for node in view] == [4, 4]
-    _rename_stem_grain(m, view[1], 2)
+    stamp, rand, leafset, _old, variant = m._parse_nap_stem(view[1].name)
+    stem = f"{stamp}-{rand}-{leafset}-2-{variant}"
+    folder = view[1].tree_path.parent
+    view[1].tree_path.rename(folder / f"{stem}.tree")
+    view[1].sum_path.rename(folder / f"{stem}.summ")
     view = m.list_view(repo)
     assert [node.leaves for node in view] == [4, 2]
     assert [len(m._as_child(node)[1]) for node in view] == [4, 4]
