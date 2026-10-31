@@ -1,0 +1,5 @@
+FAIL
+Fold request still names a pair `nap` refuses when two nap rows have equal digest counts but different filename grains: `_fold_grains` pairs them, `write_nap` raises "not the same grain" on `left.leaves != right.leaves`. Reproduced: filename grains [2, 4], digest counts [4, 4], `fold_request` names both, `nap` exits 1. Violates brief requirements 1 and 3. Build must rerun to make `_fold_grains` and `write_nap` agree (test first).
+Advisory: `_fold_grains` now reads every loose note file (`_note_child`), and an OSError there is not caught.
+Advisory: the new test only pins the digest-count-3 shape (not a power of two).
+tox -e py311: 421 passed.

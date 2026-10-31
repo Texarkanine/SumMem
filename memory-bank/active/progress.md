@@ -26,3 +26,22 @@ Fold grain for pairing comes from the children `nap` can read, not from the file
     - Did not change `write_nap`'s filename equality check. The issue points `_fold_grains` at `_as_child` and leaves that check in place.
 * Insights
     - A row whose digest count matches another row, while its filename grain does not, can still be requested and then refused with `not the same grain`. The filed stall is the opposite shape, and that shape is what the test pins.
+
+## 2026-10-30 - QA - COMPLETE (FAIL)
+
+* Work completed
+    - Reviewed the diff against the brief. `tox -e py311`: 421 passed.
+    - Reproduced a fold request that `nap` refuses: filename grains `[2, 4]`, digest counts `[4, 4]`.
+* Decisions made
+    - FAIL: requirement 3 is not met for that shape. Build reruns, test first.
+* Insights
+    - `write_nap` still checks `left.leaves != right.leaves` while `_fold_grains` now pairs on digest counts, so the two disagree whenever a stem and its tree differ.
+
+## 2026-10-30 - BUILD - BLOCKED
+
+* Work completed
+    - Stopped after the QA fail. Did not change `write_nap` or `_fold_grains` further.
+* Decisions made
+    - The two fixes QA named are different products. The issue text does not choose between them. Left for the operator.
+* Insights
+    - Digest-count grain without a filename check lets a lying stem fold with a truthful row of that count. Zeroing every stem/digest mismatch also skips two rows `nap` would accept today when they lie the same way.
