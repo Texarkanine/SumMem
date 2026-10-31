@@ -1,0 +1,18 @@
+PASS WITH ADVISORY
+
+Checked against the worktree at e3d01bf. No plan edits were needed: there were no change-detector steps and no test/production ordering problems.
+
+TDD plan encoding: PASS. The unit is a test-fixture refactor with no product change. The plan puts test-side edits and a stubbed `break_children` (step 1-2) before the red run (step 3) and the real body (step 4). The red run is sound. With the stub as `pass`, the children file stays intact, so in the fold case `fold_request` names the grain-2 pair (rows 0 and 2) rather than {row 1, row 3}, and in the nap case `write_nap(view[0], view[2])` raises ValueError because row 1 is a nearer same-grain row. That holds for both `missing` and `unreadable`. No new test and no helper-exists check is scheduled.
+
+Convention compliance: PASS. `plant_pack`, `fold_ids` and `init_repo` are unprefixed public helpers in `tests/gitutil.py`, imported by name, so `break_children` fits. `tests/gitutil.py` has no `break_children` yet and no other `_break_children` or `not a tree` copy exists in `tests/`. `test_nap.py:594` writes `{not json` in a different test, so it is not a duplicate.
+
+Dependency impact: PASS. `_break_children` is used once in `test_fold.py` (line 615). The inline copy is `test_nap.py` lines 234-237. Nothing else imports either. `tree_path` is on the view nodes in both call sites. No docs mention the fixture.
+
+Conflict detection: PASS. No existing helper overlaps. No product file is touched. Issue #88 lives in a sibling worktree, and the plan limits the diff to import lines and one call per file.
+
+Completeness: PASS. Requirements 1-5 and acceptance criteria 1-4 map to concrete edits in the three named files.
+
+Advisories:
+1. Step 1 adds the `break_children` import before step 2 adds the function, so the tests would not import until step 2. Do step 2 first, or treat 1-2 as one edit. The red run in step 3 comes after both, so it is unaffected.
+2. Keep the import lists alphabetical: `from gitutil import break_children, fold_ids, init_repo` and `from gitutil import break_children, init_repo, plant_pack`.
+3. Radical innovation (not applied): export `BROKEN_CHILDREN_HOWS = ["missing", "unreadable"]` from `gitutil.py` and use it in both `parametrize` decorators. The helper's `how` vocabulary would then live in one place. It would also touch the decorator lines that #88 may edit, which is why the plan's narrow-diff rule argues against it for this task.

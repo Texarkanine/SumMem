@@ -26,3 +26,12 @@ Move the duplicated broken-children setup out of the fold and nap tests into one
     - Red run is the existing assertions against an empty stub.
 * Insights
     - Issue #88 also edits fold and nap tests, so this diff must stay on the import and the call.
+
+## 2026-10-30 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Validated the plan against the fold, nap and gitutil test code.
+    - First line of `.preflight-status`: `PASS WITH ADVISORY`.
+* Insights
+    - The red run is sound for both `how` values against a `pass` stub.
+    - Advisories: do step 2 before the step 1 import, keep imports alphabetical, optional shared `how` list left out to avoid colliding with #88.
