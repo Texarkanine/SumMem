@@ -64,3 +64,19 @@ Fold grain for pairing comes from the children `nap` can read, not from the file
     - Followed the operator: a lying stem stays eligible and may fold with a truthful row of the same digest count.
 * Insights
     - A note and a 2-pack still fail `not the same grain`, because their digest counts are 1 and 2. Two legacy 6-packs still fail `not a power of two`.
+
+## 2026-10-30 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Reviewed HEAD (6862fb2) against the brief and the round-1 findings. `tox -e py311`: 422 passed.
+    - Confirmed the round-1 shape - filename grains [4, 2], digest counts [4, 4] - is requested and accepted, pinned by `test_fold_request_folds_a_lying_filename_with_a_truthful_row`. Wake still lists x4/x2.
+* Decisions made
+    - PASS: every requirement and acceptance criterion is met and test-pinned. Both round-1 advisories are resolved or operator-adjudicated.
+* Insights
+    - Request and refusal agree because `fold_request`, `write_nap`, and the nearer-twin check all derive grain from `_as_child`; there is no second source of truth left to disagree.
+
+## 2026-10-30 - WRAP-UP - COMPLETE
+
+* Work completed
+    - `tox run-parallel` passed on py311, py312, py313, and py314.
+    - productContext: skip — audience and constraints are unchanged, and no standing contract belongs there. systemPatterns: skip — fold and nap already pair on the children count. techContext: skip — the stack and the test runner are unchanged.

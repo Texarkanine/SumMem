@@ -1,0 +1,8 @@
+PASS
+
+QA round 2, reviewing HEAD (6862fb2). `tox -e py311`: 422 passed.
+
+- Round-1 FAIL (requirement 3) resolved: `write_nap` refuses on `len(digs_l) != len(digs_r)`, and `test_fold_request_folds_a_lying_filename_with_a_truthful_row` pins the round-1 shape - filename grains [4, 2], digest counts [4, 4]; fold names the pair, `nap` accepts it, wake still lists x4/x2.
+- Round-1 advisory (pow2 pin) resolved: the new test's digest count 4 differs from stem grain 2, so the digest count decides the pair.
+- Round-1 advisory (uncaught OSError) adjudicated by the operator: left as-is, recorded in progress.md.
+- No issue: KISS, DRY, YAGNI, completeness, regression, integrity, documentation. All 5 requirements and 3 acceptance criteria met and test-pinned.

@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: fold-grain-as-child
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
 - Operator chose digest-count grain for `nap`. `write_nap` no longer compares filename `leaves`. Unequal digest counts are `not the same grain`.
@@ -9,4 +9,4 @@
 - `tox -e py311`: 422 passed.
 
 ## Next Step
-- Level 1 QA.
+- Level 1 is complete at QA PASS. Leave `memory-bank/active/` in place.

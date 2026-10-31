@@ -46,3 +46,12 @@ Also delete the qa status file as part of entering QA. I'll git rm it in the sam
 - **Advisory:** `_fold_grains` now calls `_note_child`, which reads each loose note file. A note removed between listing and the request raises `OSError`, uncaught. It was not read before.
 - **Advisory:** the new test uses a digest count of 3, which `_fold_pair` already skips. It does not show that the digest count, rather than the filename, decides the pair. Pin a pow2 digest count that differs from the stem too.
 - **No issue:** KISS, DRY (reuses `_as_child`; second `loads_tree` removed), YAGNI, integrity. Docs in `docs/architecture/index.md` and `memory-bank/systemPatterns.md` updated and accurate. `_TREE_PARSE_ERRORS` is still used elsewhere. `tox -e py311`: 421 passed.
+
+## QA round 2
+
+**Result:** PASS. Reviewed HEAD (6862fb2). `tox -e py311`: 422 passed.
+
+- **Round-1 FAIL (requirement 3) resolved:** `write_nap` refuses on `len(digs_l) != len(digs_r)`, and `test_fold_request_folds_a_lying_filename_with_a_truthful_row` pins the round-1 shape - filename grains [4, 2], digest counts [4, 4]. Fold names the pair, `nap` accepts it, wake still lists x4/x2, and the rows fold into an 8-pack. Request and refusal agree because both derive grain from `_as_child`.
+- **Round-1 advisory (pow2 pin) resolved:** the new test's digest count 4 differs from stem grain 2, so the digest count, not the filename, decides the pair. The digest-count-3 test still pins acceptance criterion 1.
+- **Round-1 advisory (uncaught OSError) adjudicated:** the operator chose to leave it; recorded in progress.md. Not re-raised.
+- **No issue:** KISS (`_fold_grains` delegates to `_as_child`), DRY (second `loads_tree` removed; `_rename_stem_grain` reuses `m._parse_nap_stem`; no pre-existing rename helper), YAGNI, completeness (all 5 requirements and 3 acceptance criteria test-pinned), regression (unequal digest counts now refuse with the more accurate `not the same grain`; note-vs-pack and 6-pack refusals intact), integrity, documentation.
