@@ -1,1 +1,0 @@
-Windows: AGENTS.md clone-portable, stock stays Unix; do not advertise native support (no argv0 runs in both cmd.exe and Unix). Usage/Run: print host invoke (sys.executable). Lock and CRLF-on-read let a shop patch its bootstrap; no consumer .gitattributes, no store lock file.

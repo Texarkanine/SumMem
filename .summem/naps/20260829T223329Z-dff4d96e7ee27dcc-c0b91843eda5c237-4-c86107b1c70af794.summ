@@ -1,1 +1,0 @@
-write_nap rejects intersecting digest sets; identical loose notes heal to the later filename (#77). fold_request quotes caption/note text only; grain and date stay on wake, recall, zoom; ids stay on Run:. No nested stores: root wake omits catalog how-to; -h documents --path.
