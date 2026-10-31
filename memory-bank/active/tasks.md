@@ -9,3 +9,7 @@ A note unlinked after listing aborted every other row because `_fold_grains` ope
 A children file that parses, whose note text is not a string, raised `AttributeError` from `note_file_bytes` outside the scan's `ValueError` catch. `_digests_of_tree` now raises `ValueError("unreadable pack")` for that text. The existing catch makes the pack grain 0. Other exceptions are not caught.
 
 Files: `summem`, `tests/test_fold.py`.
+
+## QA
+
+PASS. `_fold_grains` keeps a note at `node.leaves` and does not open it. `_digests_of_tree` raises `ValueError("unreadable pack")` for non-string note text, which the existing catch maps to grain 0. Tests cover both cases. py311: 425 passed. No project doc mentions this path.
