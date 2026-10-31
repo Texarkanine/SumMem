@@ -51,7 +51,8 @@ The prototype was a process-wide path cache. It halves reads and JSON decodes, a
 4. Write code and run green in `summem`.
    - Add `_CHILDREN: dict | None = None` right after `_TREE_PARSE_ERRORS`.
    - `with_store_lock`: `global _CHILDREN`, then `_CHILDREN = {}`, then `try:` around the existing body and `finally: _CHILDREN = None`. Add one docstring line saying that under the lock a nap path names fixed bytes, so `_as_child` parses each children file once.
-   - `_as_child`: nap branch. Use `cache = {} if _CHILDREN is None else _CHILDREN`. On a miss, parse and digest inside the existing `try`, storing `(NapChild, digests)`, or storing `None` on `_TREE_PARSE_ERRORS`, which already includes `_digests_of_tree`'s `ValueError`. Raise `ValueError("unreadable pack")` on `None`. The `is_file()` "unknown id" check stays ahead of the cache, so an unlinked nap is never served from it.
+   - `_as_child`: nap branch. Use `cache = {} if _CHILDREN is None else _CHILDREN`, keyed on `tree_path`. On a miss, parse and digest inside the existing `try`, storing `(inner Tree, digests)`, or storing `None` on `_TREE_PARSE_ERRORS`, which already includes `_digests_of_tree`'s `ValueError`. Raise `ValueError("unreadable pack")` on `None`. Otherwise build `NapChild(id=node.id, sum=node.caption, tree=inner)` from the current node on every call, so captions are never cached (preflight finding 1). The `is_file()` "unknown id" check stays ahead of the cache, so an unlinked nap is never served from it.
+   - `_replace_bytes` (the only store writer): drop `dest` from the cache, as one line `(_CHILDREN or {}).pop(dest, None)`. A file this process writes is never served stale: a heal-repaired `.tree` or a write over a lying stem is parsed fresh (preflight finding 2 and its advisory).
    - `leaf_digests`: `try: return set(_as_child(node)[1])` with `except (OSError, ValueError): return None`.
    - Delete `_digests_of_dict`; it has no other callers.
    - Run the file, then the full `tox -e py311`.
@@ -85,9 +86,10 @@ No new technology - validation not required. `global` and a module dict are stdl
 ## Challenges & Mitigations
 
 - Stale reads across commands in one process (tests run many commands in one pytest worker): the cache exists only inside `with_store_lock`, and `finally` resets it. Direct calls outside the lock parse fresh, as before.
-- `.summ` caption baked into the cached `NapChild`: under the lock a stem names one `.tree` and `.summ` pair of fixed bytes, so the caption cannot change. Outside the lock nothing is cached.
-- Heal unlinks naps and rematerializes children inside the lock. Paths are content-addressed (variant tag over `.tree` and `.summ` bytes), so a recreated path has the same bytes. `is_file()` runs before the cache, so an unlinked nap is not served.
-- `write_nap` could overwrite a hand-crafted lying-stem file whose stem equals the new nap's. Writing that file requires forging a 16-hex variant tag; accept this as out of scope.
+- Captions: heal can write a missing `.summ` under the lock (`rematerialize_child` writes the pair unless both exist). The cache therefore holds only what the `.tree` yields, and `NapChild` takes `node.caption` from the current listing on every call.
+- Driver writes under the lock (heal rematerialize, `write_nap`, `write_note`) all go through `_replace_bytes`, which drops the path from the cache. A repaired broken `.tree` and a write over a lying stem are both parsed fresh. `is_file()` runs before the cache, so an unlinked nap is not served.
+- `surgery.py` runs `excise_note` under `with_store_lock`, so it gets the cache too. Its `fold_request` runs after the lock and parses fresh. `tests/test_surgery.py` covers it in the full py311 run.
+- `_CHILDREN` and `global` are the driver's first mutable module state. The `with_store_lock` docstring states why the state exists and where it is live. Callers must not mutate returned digests; today they only `set()`, `len()`, or concatenate them.
 - Refusal drift (#88): there is one parse, `_as_child`. Heal's refusal set was already equal to it (`_digests_of_dict` and `loads_tree` plus `_digests_of_tree` reject the same inputs), so heal's skip behavior does not change.
 
 ## Pre-Mortem
@@ -103,6 +105,6 @@ No new technology - validation not required. `global` and a module dict are stdl
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
+- [ ] Preflight (run 1 FAIL fixable: cached caption; plan amended)
 - [ ] Build
 - [ ] QA

@@ -1,7 +1,7 @@
 # Active Context
 
 - **Current Task:** read-once (PR #95 rework: one `.tree` read per command)
-- **Phase:** PLAN - COMPLETE
+- **Phase:** PREFLIGHT - COMPLETE (FAIL (fixable))
 
 ## What Was Done
 
