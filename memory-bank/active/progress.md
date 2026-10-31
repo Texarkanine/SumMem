@@ -1,0 +1,18 @@
+# Progress
+
+One bad fold row must drop out of the pair scan. A note that disappears after listing stays one digest and is not opened during the scan. A children file that parses with a non-string note text is grain 0. Neither aborts the other rows.
+
+**Complexity:** Level 1
+
+## 2026-10-31 - COMPLEXITY-ANALYSIS - COMPLETE
+
+* Work completed
+    - Read both review threads on pull request 95
+    - Traced `_fold_grains` through `_as_child`, `_note_child`, and `_digests_of_tree`
+* Decisions made
+    - Level 1: both failures live in the fold scan of `summem`
+    - A vanished note stays at `node.leaves` (one digest); the scan does not open it
+    - Non-string note text raises `ValueError` from the digest path so the existing catch applies
+* Insights
+    - Catching `OSError` in the scan would also let the other rows fold, and would hide the missing note from the pair. The review asks for the note to stay at `node.leaves`.
+    - `loads_tree` accepts a non-string `text`. `note_file_bytes` then raises `AttributeError` outside the `ValueError` catch.
