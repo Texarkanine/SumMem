@@ -645,3 +645,33 @@ def test_fold_pair_skips_non_power_of_two_rows(summem):
     assert m._fold_pair([6, 6]) is None
     assert m._fold_pair([8, 1, 4, 1]) == (1, 3)
 
+
+def test_fold_request_skips_a_pack_whose_digest_count_is_not_the_stem_grain(
+    tmp_path, monkeypatch, capsys, summem
+):
+    """Grains 2, 1, 2, 1, 1 with the oldest 2's tree parsing at another digest count: fold names the two oldest 1s, and nap accepts them."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    _seal(m, repo, 2, 0, "a")
+    _seal(m, repo, 1, 2, "b")
+    _seal(m, repo, 2, 3, "c")
+    _seal(m, repo, 1, 5, "d")
+    _seal(m, repo, 1, 6, "e")
+    view = m.list_view(repo)
+    assert [node.leaves for node in view] == [2, 1, 2, 1, 1]
+    tree = m.loads_tree(view[0].tree_path.read_bytes())
+    extra = m.NoteChild(name="20260101T000000Z-eeeeeeeeeeeeeeee", text="extra")
+    view[0].tree_path.write_bytes(m.dumps_tree(m.Tree(kids=[*tree.kids, extra])))
+    view = m.list_view(repo)
+    _child, digests = m._as_child(view[0])
+    assert len(digests) != view[0].leaves
+    x2_lines = [line for line in m.wake_text(repo).splitlines() if line.startswith("x2 ")]
+    assert len(x2_lines) == 1
+    assert x2_lines[0].endswith(": a-0")
+    out = m.fold_request(repo, 4, nodes=view)
+    assert _named_pair(m, view, out) == {view[1].id, view[3].id}
+    id_a, id_b = _RUN.search(out).groups()
+    assert m.main(["nap", id_a, id_b, "the two ones"]) == 0
+    assert capsys.readouterr().out.startswith("Saved.\n")
+

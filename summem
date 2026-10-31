@@ -868,22 +868,17 @@ def _fold_pair(grains: list[int]) -> tuple[int, int] | None:
 
 
 def _fold_grains(nodes: list[ViewNode]) -> list[int]:
-    """Return each row's grain for pairing, 0 for a nap whose children file is missing or unreadable.
+    """Return the digest count ``nap`` would fold, or 0 when ``_as_child`` raises ValueError.
 
-    ``nap`` cannot fold such a row, so it is never requested and never counts as a nearer twin.
+    Grain is that count, not the filename. Wake still lists the filename grain.
+    0 is not a power of two, so the row is never requested and never a nearer twin.
     """
     grains = []
     for node in nodes:
-        grain = node.leaves
-        if node.kind == "nap":
-            if node.tree_path is None:
-                grain = 0
-            else:
-                try:
-                    loads_tree(node.tree_path.read_bytes())
-                except _TREE_PARSE_ERRORS:
-                    grain = 0
-        grains.append(grain)
+        try:
+            grains.append(len(_as_child(node)[1]))
+        except ValueError:
+            grains.append(0)
     return grains
 
 
