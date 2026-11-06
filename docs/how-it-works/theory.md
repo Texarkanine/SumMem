@@ -1,6 +1,6 @@
-# Why SumMem Converges
+# Why It Converges
 
-This page explains why many agents can write to one memory, on different machines, with no lock between them, and still agree on the set of sentences the repository can produce.
+This page explains why many agents can write to one memory, on different machines, with no lock between them, and still agree on the set of sentences the repository can produce. [Why Writers Never Conflict](no-conflicts.md) shows the same thing with a real merge.
 
 The claim, once you have seen it: **the notes form a grow-only set, and that set converges. The files are a shrinking picture of that set. Compaction is invisible to the thing that converges.**
 
@@ -224,7 +224,7 @@ Facts converge. Structure does not.
 
 Two clones that have seen the same notes always agree on `L`. They need not agree on the partition. One may hold `ABCD` beside `EF` where the other holds `AB`, `CD` and `EF`. Both are correct: same notes, different cuts.
 
-[Architecture](architecture/index.md) says this and rules the "repair" out of scope.
+[Not Yet](../architecture/not-yet.md#not-this-fold) says this and rules the "repair" out of scope.
 
 Leaving it open is a judgement, not an oversight. Rebuilding one canonical grouping after every merge would mean rewriting bundles that are already correct, and it would still not settle the captions — two agents wrote two English sentences about the same pair of notes, and no rule picks the better one. SumMem picks one by a fixed rule and keeps every original sentence reachable underneath it. The cut is cosmetic; the contents are not.
 

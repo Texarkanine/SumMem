@@ -1,0 +1,38 @@
+# SumMem — docs-build toolchain only
+#
+# SumMem itself is the one `summem` script at the repository root. It has no
+# package manifest and no install step. This [project] table is a stub so uv
+# has a Python floor for the docs dependency group. It does not package
+# summem, and tox does not use it (tox.ini sets package = skip).
+#
+# Local preview and CI:
+#
+#     uv sync --group docs --frozen --no-config
+#     uv run --no-config properdocs serve
+#     uv run --no-config properdocs build --strict
+#
+# See: https://github.com/ProperDocs/properdocs
+
+[project]
+name = "summem-docs"
+version = "0"
+description = "Docs-build toolchain for SumMem (not a published package)."
+requires-python = ">=3.11"
+
+[dependency-groups]
+# Loose-compatible pins (~= on major.minor). uv.lock holds the exact versions.
+#
+# properdocs is a drop-in continuation of MkDocs 1.x. mkdocs-* plugins keep
+# their names and work unchanged; only the CLI command becomes `properdocs`.
+docs = [
+    "properdocs ~= 1.6",
+    "mkdocs-material ~= 9.5",
+    "mkdocs-awesome-pages-plugin ~= 2.9",
+    "mkdocs-llms-source>=1.2.0",
+    "pymdown-extensions ~= 10.7",
+]
+
+[tool.uv]
+required-version = ">=0.5"
+# The docs tools are this file's only purpose, so a bare `uv sync` installs them.
+default-groups = ["docs"]

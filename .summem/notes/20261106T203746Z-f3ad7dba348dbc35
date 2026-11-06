@@ -1,0 +1,1 @@
+Docs site is ProperDocs in docs/ (properdocs.yaml, strict). Links leaving docs/ must be full GitHub URLs. README is a GitHub welcome; the human test runbook moved to docs/contributing/testing.md.

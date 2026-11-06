@@ -1,0 +1,11 @@
+nav:
+  - Overview: index.md
+  - Quickstart: quickstart.md
+  - Commands: commands.md
+  - What to Remember: write-rule.md
+  - Stores and Settings: stores.md
+  - Working with Git: git.md
+  - Upgrading: upgrading.md
+  - Troubleshooting: troubleshooting.md
+  - Licensing: licensing.md
+  - ...

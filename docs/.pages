@@ -1,0 +1,8 @@
+nav:
+  - Home: index.md
+  - How It Works: how-it-works
+  - User Guide: user-guide
+  - Advanced: advanced
+  - Architecture: architecture
+  - Contributing: contributing
+  - ...

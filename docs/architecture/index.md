@@ -1,6 +1,6 @@
 # Architecture
 
-This page is the systems atlas: how SumMem’s algorithm and store fit together, and which constraints you must not remove without understanding them. How to run the commands lives in the [README](../../README.md). Why the arrangement converges under concurrent writers lives in [Theory](../theory.md). What this backend is not yet lives in [Notes](../notes.md).
+This page is the systems atlas: how SumMem’s algorithm and store fit together, and which constraints you must not remove without understanding them. How to run the commands lives in the [User Guide](../user-guide/index.md). The worked pictures of fold and zipper live in [How It Works](../how-it-works/index.md). Why the arrangement converges under concurrent writers lives in [Why It Converges](../how-it-works/theory.md). What this backend is not yet lives in [Not Yet](not-yet.md).
 
 SumMem is a grow-only set of short facts in a git repository, plus a decaying listing of that set. Agents never edit the files. They run a script. The script owns every path, name, timestamp, and hash.
 
@@ -72,7 +72,7 @@ Each of those is one **view node**. A complete nap is two physical files and sti
 
 A missing or conflict-marked caption still counts as a view node: grain and id prefix print, the caption does not. A missing or unreadable children file means that node will not split.
 
-Each store has a committed **settings** file. Two settings matter here: the length limit, and the **wake budget** — how many view nodes may exist before the script asks for a fold, and how short a listing must be before wake expands a nap in memory. Wake still prints every view node when the count is over budget. Missing values use the script’s defaults. Settings are not environment variables and are not rewritten unless someone runs `start`.
+Each store has a committed **settings** file. Two settings matter here: the length limit, and the **wake budget** — how many view nodes may exist before the script asks for a fold, and how short a listing must be before wake expands a nap in memory. Wake still prints every view node when the count is over budget. Missing values use the script’s defaults. Settings are not environment variables. The script writes the file only when it is missing; `start` on an existing store leaves it alone.
 
 ## Grain
 
@@ -121,44 +121,7 @@ One writer's listing never rises. Each grain of 2 or more appears at most twice,
 
 A grain-16 nap sitting next to one leftover note is not a pair the script will request. Folding them would glue a sealed block to a singleton. The script waits for another grain-1 row. It never writes a pack whose grain is not a power of two. A pack already on disk with some other grain stays listed and is never requested. So does a pack whose children file is missing or unreadable: `nap` cannot fold it, and it never counts as a nearer row of its grain.
 
-One writer, eight notes `A`–`H`, oldest first. Imagine the wake budget is 1 so every same-grain pair gets requested. Each letter is one original note. A box `AB` is the nap of those notes.
-
-```mermaid
-flowchart LR
-    classDef note fill:#e1f5fe,stroke:#01579b;
-    classDef nap fill:#f3e5f5,stroke:#7b1fa2;
-
-    A["A"]:::note --- B["B"]:::note --- C["C"]:::note --- D["D"]:::note --- E["E"]:::note --- F["F"]:::note --- G["G"]:::note --- H["H"]:::note
-```
-
-Oldest grain-1 neighbors fold, four times:
-
-```mermaid
-flowchart LR
-    classDef nap fill:#f3e5f5,stroke:#7b1fa2;
-
-    AB["AB"]:::nap --- CD["CD"]:::nap --- EF["EF"]:::nap --- GH["GH"]:::nap
-```
-
-Oldest grain-2 neighbors fold, twice:
-
-```mermaid
-flowchart LR
-    classDef nap fill:#f3e5f5,stroke:#7b1fa2;
-
-    ABCD["ABCD"]:::nap --- EFGH["EFGH"]:::nap
-```
-
-Then the last same-grain pair:
-
-```mermaid
-flowchart LR
-    classDef nap fill:#f3e5f5,stroke:#7b1fa2;
-
-    ALL["ABCDEFGH"]:::nap
-```
-
-Eight notes become one view node. Zoom still opens `ABCDEFGH` into `ABCD` and `EFGH`, and so on, down to the letters. The originals never left the children files.
+[How SumMem Works](../how-it-works/index.md#only-equal-grains-fold) shows one writer folding eight notes into one view node. Zoom still opens it down to the letters; the originals never leave the children files.
 
 The agent supplies a caption. `nap` writes the new pair and removes the children. If the view is still over budget, the script asks for the next same-grain pair. Fold still removes the children; it does not keep them on disk “because wake will expand.”
 
@@ -188,121 +151,9 @@ flowchart TD
 
 Two loose notes that share text are not skipped. Heal unlinks the older filename. Heal runs before `nap` resolves the ids the agent passed. If heal drops one of those ids, the command fails and does not fold; the original notes still live in the survivor. A fold of two view nodes with intersecting leaf sets is refused, so a pack cannot claim grain 2 for one receipt. Later naps of disjoint same-grain rows still fold as usual.
 
-The same eight-note alphabet, two writers. Both start from the shared base `A B C D`. Writer 1 continues with letters `E F`. Writer 2 continues with numbers `1 2`.
+[Why Writers Never Conflict](../how-it-works/no-conflicts.md#summaries-that-overlap) walks two writers through both cases: a subset nap dropped, and an overlapping nap opened then dropped. No original note is deleted in either.
 
-```mermaid
-flowchart TB
-    classDef shared fill:#f3e5f5,stroke:#7b1fa2;
-    classDef w1 fill:#e1f5fe,stroke:#01579b;
-    classDef w2 fill:#fff3e0,stroke:#ef6c00;
-
-    subgraph writer1notes["Writer 1"]
-        direction LR
-        A["A"]:::shared --- B["B"]:::shared --- C["C"]:::shared --- D["D"]:::shared --- E["E"]:::w1 --- F["F"]:::w1
-    end
-    subgraph writer2notes["Writer 2"]
-        direction LR
-        A2["A"]:::shared --- B2["B"]:::shared --- C2["C"]:::shared --- D2["D"]:::shared --- N1["1"]:::w2 --- N2["2"]:::w2
-    end
-```
-
-Each writer folds as in the one-writer picture, same-grain only. Both can build the shared `ABCD`. Writer 1 then waits with `ABCD` next to `EF` (grain 4 next to grain 2). Writer 2 waits with `ABCD` next to `12`. Same-grain fold will not glue those.
-
-```mermaid
-flowchart TB
-    classDef shared fill:#f3e5f5,stroke:#7b1fa2;
-    classDef w1 fill:#e1f5fe,stroke:#01579b;
-    classDef w2 fill:#fff3e0,stroke:#ef6c00;
-
-    subgraph writer1stuck["Writer 1"]
-        direction LR
-        W1A["ABCD"]:::shared --- W1B["EF"]:::w1
-    end
-    subgraph writer2stuck["Writer 2"]
-        direction LR
-        W2A["ABCD"]:::shared --- W2B["12"]:::w2
-    end
-```
-
-If writer 2 never folded `AB` with `CD`, merge is the union of the two views: the parts and the whole.
-
-```mermaid
-flowchart TB
-    classDef shared fill:#f3e5f5,stroke:#7b1fa2;
-    classDef w1 fill:#e1f5fe,stroke:#01579b;
-    classDef w2 fill:#fff3e0,stroke:#ef6c00;
-
-    subgraph from1["From writer 1"]
-        direction LR
-        U1["ABCD"]:::shared --- U2["EF"]:::w1
-    end
-    subgraph from2["From writer 2"]
-        direction LR
-        U3["AB"]:::shared --- U4["CD"]:::shared --- U5["12"]:::w2
-    end
-```
-
-`AB` and `CD` are subsets of `ABCD`. The zipper drops the subsets. What remains does not overlap:
-
-```mermaid
-flowchart LR
-    classDef shared fill:#f3e5f5,stroke:#7b1fa2;
-    classDef w1 fill:#e1f5fe,stroke:#01579b;
-    classDef w2 fill:#fff3e0,stroke:#ef6c00;
-
-    Z1["ABCD"]:::shared --- Z2["EF"]:::w1 --- Z3["12"]:::w2
-```
-
-If each writer instead had a grain-4 continuation and napped it onto `ABCD`, merge lands two wholes of grain 8. Neither contains the other: they share `A B C D` and each keeps its own continuation. `nap` refuses a grain-4 pack with a grain-2 pack, so this walk stays on equal grains.
-
-```mermaid
-flowchart TB
-    classDef shared fill:#f3e5f5,stroke:#7b1fa2;
-    classDef w1 fill:#e1f5fe,stroke:#01579b;
-    classDef w2 fill:#fff3e0,stroke:#ef6c00;
-
-    subgraph whole1["ABCDEFGH"]
-        direction LR
-        P1A["A"]:::shared --- P1B["B"]:::shared --- P1C["C"]:::shared --- P1D["D"]:::shared --- P1E["E"]:::w1 --- P1F["F"]:::w1 --- P1G["G"]:::w1 --- P1H["H"]:::w1
-    end
-    subgraph whole2["ABCD1234"]
-        direction LR
-        P2A["A"]:::shared --- P2B["B"]:::shared --- P2C["C"]:::shared --- P2D["D"]:::shared --- P21["1"]:::w2 --- P22["2"]:::w2 --- P23["3"]:::w2 --- P24["4"]:::w2
-    end
-```
-
-The zipper opens `ABCDEFGH` back into its two children, then drops `ABCDEFGH`:
-
-```mermaid
-flowchart LR
-    classDef shared fill:#f3e5f5,stroke:#7b1fa2;
-    classDef w1 fill:#e1f5fe,stroke:#01579b;
-    classDef w2 fill:#fff3e0,stroke:#ef6c00;
-
-    subgraph opened["Opened ABCDEFGH"]
-        direction LR
-        O1["ABCD"]:::shared --- O2["EFGH"]:::w1
-    end
-    subgraph untouched["Still on disk"]
-        direction LR
-        O3["ABCD1234"]:::w2
-    end
-```
-
-`ABCD` is now a subset of `ABCD1234`, so it drops too. The shared letters live on inside `ABCD1234`. Writer 1’s continuation is `EFGH`. Writer 2’s continuation is already inside `ABCD1234`. No original note was deleted.
-
-```mermaid
-flowchart LR
-    classDef w1 fill:#e1f5fe,stroke:#01579b;
-    classDef w2 fill:#fff3e0,stroke:#ef6c00;
-
-    subgraph done["After zipper"]
-        direction LR
-        D1["EFGH"]:::w1 --- D2["ABCD1234"]:::w2
-    end
-```
-
-Rebuilding an age-aligned cover of the whole merged leaf list is not this algorithm. See [Notes](../notes.md).
+Rebuilding an age-aligned cover of the whole merged leaf list is not this algorithm. See [Not Yet](not-yet.md#not-this-fold).
 
 ## Zoom and recall
 
@@ -359,13 +210,14 @@ SumMem is also not:
 
 | If you are changing | Read |
 |---|---|
-| What an agent is allowed to know or type | The README command table, the activation block (write rule and wake handoff), and root-wake Usage (argv, grammar, writer-only). Do not leak store paths into the agent interface. CLI output stays silent on git. Usage treats the files the script wrote as part of your work, not a separate publish procedure. |
+| What an agent is allowed to know or type | The operator command table (`usage_text`, mirrored in [Commands](../user-guide/commands.md)), the activation block (write rule and wake handoff), and root-wake Usage (argv, grammar, writer-only). Do not leak store paths into the agent interface. CLI output stays silent on git. Usage treats the files the script wrote as part of your work, not a separate publish procedure. |
 | How notes land under concurrency | Notes. Recording a note must still commute. |
 | How summaries and originals survive squash | Naps. Fold. Zoom is a property of the current commit. |
 | How recall or zoom unique-prefix or walk children files | Zoom and recall. Parse each view `.tree` at most once. Prefix uniqueness is among distinct ids. |
-| Merge behavior or a new file that every note updates | Zipper. Recording a note commutes. No shared mutable index. |
-| Wake budget, decay shape, or “cannot wake” | The view. Grain. Fold. Expand. Wake never blocks. |
+| Merge behavior or a new file that every note updates | Zipper. Recording a note commutes. No shared mutable index. The worked merge in [Why Writers Never Conflict](../how-it-works/no-conflicts.md) must still be true. |
+| Wake budget, decay shape, or “cannot wake” | The view. Grain. Fold. Expand. Wake never blocks. The walk-through on [How SumMem Works](../how-it-works/index.md) must still be true. |
 | Package vs repo vs machine-global | Scopes. Store, driver, and activation. |
 | How a directory becomes a store | `start`. Empty packages stay empty. |
-| Disk format or a new backend | The agent interface must not change. Store roles must still exist. See [Notes](../notes.md). |
-| On-disk nap filenames (four-part-64 and five-part-64 to five-part-16) | Run `migrate.py` from a clone of this repository against the target git root. Do not `mv` by hand. The script shortens nested `.tree` nap ids, recomputes the variant tag from the rewritten pair bytes, and writes five-part-16. Unmigrated old stems are invisible to the driver. |
+| Disk format or a new backend | The agent interface must not change. Store roles must still exist. See [Not Yet](not-yet.md). Update [Store Files](../advanced/store-files.md). |
+| On-disk nap filenames (four-part-64 and five-part-64 to five-part-16) | Run `migrate.py` from a clone of this repository against the target git root ([Upgrading](../user-guide/upgrading.md#older-nap-files)). Do not `mv` by hand. The script shortens nested `.tree` nap ids, recomputes the variant tag from the rewritten pair bytes, and writes five-part-16. Unmigrated old stems are invisible to the driver. |
+| The docs site | [Docs Site](../contributing/docs.md). One home per fact: link to the page that owns it. |
