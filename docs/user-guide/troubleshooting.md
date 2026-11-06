@@ -14,7 +14,7 @@
 ## Agents do not use SumMem
 
 - **The block is not at the top of `AGENTS.md`.** Put the block that `init` prints at the very top. See [Quickstart](quickstart.md).
-- **The agent reads `CLAUDE.md`, not `AGENTS.md`.** Put `@AGENTS.md` at the top of `CLAUDE.md`.
+- **The agent only reads some other instructions file.** Import `AGENTS.md` from that file, for example with `@AGENTS.md` at the top of `CLAUDE.md`, or copy the block there.
 - **The agent's tool will not run the command.** Some agent tools ask before running a command, or block commands they do not know. Allow `python .summem/summem` and `.summem/summem`.
 - **Python is too old.** See `SumMem needs Python 3.11 or newer` below.
 

@@ -2,8 +2,6 @@
 
 Issues and pull requests are welcome at [Texarkanine/SumMem](https://github.com/Texarkanine/SumMem).
 
-Before you change how SumMem behaves, read [Architecture](../architecture/index.md). It names the constraints that look optional and are not. These pages cover the day-to-day loops.
-
 ## The repository
 
 | Path | What it is |
@@ -20,6 +18,7 @@ Before you change how SumMem behaves, read [Architecture](../architecture/index.
 
 ## Rules for changes
 
+- **Read [Architecture](../architecture/index.md) before you change how SumMem behaves.** It names the constraints that look optional and are not.
 - **Behavior changes start with a failing test.** This applies to the script, its output, and anything else it runs. The full rule is in [`always-tdd.md`](https://github.com/Texarkanine/SumMem/blob/main/.claude/rules/shared/always-tdd.md). It does not apply to prose such as these docs. Do not write tests that only check the wording of a document.
 - **Keep the script short.** `summem` is copied into every repository that uses it, people read it there, and it runs inside agent turns. Use the fewest lines that do the job, and do no work the result does not need. Trade lines for speed only when you have measured the gain.
 - **Keep `AGENTS.md` in step with `init`.** This repository's activation block must match what `init` prints. A test checks this.

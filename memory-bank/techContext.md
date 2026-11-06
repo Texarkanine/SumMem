@@ -48,5 +48,5 @@ Tests load repo-root `summem` once per session via a pytest fixture (`SourceFile
 
 - `README.md` — what it is, the docs-site link, a short quick start, what is in the repository
 - `docs/` — the docs site: how it works, user guide, advanced, architecture, contributing
-- `docs/architecture/index.md` — algorithm, store layout, invariants, change surfaces
+- `docs/architecture/` — the atlas: overview with invariants and change surfaces (`index.md`), then store, view and folding, merges and healing, reading
 - `LICENSE` — AGPL-3.0

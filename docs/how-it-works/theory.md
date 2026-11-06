@@ -1,6 +1,6 @@
 # Why It Converges
 
-This page explains why many agents can write to one memory, on different machines, with no lock between them, and still agree on the set of sentences the repository can produce. [Why Writers Never Conflict](no-conflicts.md) shows the same thing with a real merge.
+Many agents can write to one memory, on different machines, with no lock between them, and still agree on the set of sentences the repository can produce.
 
 The claim, once you have seen it: **the notes form a grow-only set, and that set converges. The files are a shrinking picture of that set. Compaction is invisible to the thing that converges.**
 
@@ -23,6 +23,8 @@ Keep every receipt in a box. Never throw one away.
 When the box gets crowded, staple a batch together and write one line on the front of the batch. You have not lost a receipt. Pull the staple and they all come back. The box reads shorter and holds the same money.
 
 Now give two people their own box and let them staple their own batches. Tip both boxes into one.
+
+You may find two copies of the same receipt, because both people kept one. Keep one copy. Two copies of one receipt are still one receipt, and the money does not double.
 
 You may find a receipt loose *and* inside somebody else's stapled bundle. Throw away the loose copy. You have lost nothing: the loose one and the stapled one are the same receipt.
 
@@ -59,7 +61,7 @@ The word *summary* misleads here. The caption summarises. The nap does not. A na
 
 ## Names that come from contents
 
-Give every note a name that depends only on its contents: the [SHA-256](https://en.wikipedia.org/wiki/SHA-2) of its bytes. Two files with the same bytes get the same name. This is [content addressing](https://en.wikipedia.org/wiki/Content-addressable_storage). It lets us talk about *which* notes a bundle holds without caring where the bundle came from.
+Give every note a name that depends only on its contents: the [SHA-256](https://en.wikipedia.org/wiki/SHA-2) of its bytes. Two files with the same bytes get the same name. This is [content addressing](https://en.wikipedia.org/wiki/Content-addressable_storage). It lets us talk about *which* notes a bundle holds without caring where the bundle came from. It also means a sentence recorded twice, by two writers who never met, is the same note: the duplicate receipt from the shoebox.
 
 Each item in the view stands for some collection of notes. A loose note stands for one. A bundle stands for all the notes inside it. Call that collection `leaves(v)`.
 
@@ -71,7 +73,7 @@ To answer it we need a single object that is "what the store remembers."
 
 ## What the store means
 
-A [set](https://en.wikipedia.org/wiki/Set_(mathematics)) is a collection with no order and no repeats.
+A [set](https://en.wikipedia.org/wiki/Set_(mathematics)) is a collection with no order and no repeats. "No repeats" matters: a sentence recorded twice is one member of the set, not two.
 
 Let `S` be a store: the finite collection of items currently in its view. Define
 
@@ -188,6 +190,18 @@ flowchart TD
 
 Fold is: merge two blocks of equal size — the oldest block that has a twin, with its nearest twin. Expand is: split a block, for display only, writing nothing back.
 
+### Duplicate receipts
+
+The partition also explains what happens to a sentence recorded twice.
+
+Two copies of one sentence are one member of `L`. As files they are two items whose `leaves` are the same note, so they overlap, and the view is not a partition until one goes. Heal keeps the later filename. A loose copy of a sentence that already sits inside a bundle goes the same way: the bundle keeps it.
+
+An agent that records a sentence the store already holds still hears `Saved.` The fact is in `L`; only the extra file is gone.
+
+The same reasoning forbids folding the two copies together. A block's grain is its size in `L`, and these two files cover one note. A nap of them would claim grain 2 for grain 1, so `nap` refuses any pair whose notes overlap.
+
+**The store converges over the set of remembered notes.** How many times a note was recorded is not a fact it remembers.
+
 ## A nap's filename
 
 A nap's two files share one stem. Here is one:
@@ -229,13 +243,3 @@ Two clones that have seen the same notes always agree on `L`. They need not agre
 Leaving it open is a judgement, not an oversight. Rebuilding one canonical grouping after every merge would mean rewriting bundles that are already correct, and it would still not settle the captions — two agents wrote two English sentences about the same pair of notes, and no rule picks the better one. SumMem picks one by a fixed rule and keeps every original sentence reachable underneath it. The cut is cosmetic; the contents are not.
 
 State it plainly: **strong eventual consistency on what is remembered, and none on how it is grouped or worded.**
-
-## Duplicate receipts
-
-A receipt loose and also inside a bundle is one receipt: throw the loose copy away. Two loose copies of one sentence are one receipt: keep the later filename.
-
-An agent that notes that sentence again still hears `Saved.` The fact is in `L`; the new file is gone.
-
-Two copies of one sentence are one member of `L`. Their `leaves` overlap, so they are not two blocks of a partition. Grain is the block's size, which is 1. Folding the two files would write grain 2. That fold is refused.
-
-**The store converges over the set of remembered notes.** Multiplicity is not a fact.

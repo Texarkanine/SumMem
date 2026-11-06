@@ -5,8 +5,8 @@ Set up SumMem in a repository in a few minutes.
 ## Prerequisites
 
 - A git repository.
-- Python 3.11 or newer, available as both `python` and `python3`. The activation block runs `python .summem/summem wake`, and the script's first line asks for `python3`.
-- An agent that reads `AGENTS.md`, or `CLAUDE.md`, and can run shell commands.
+- **Python 3.11 or newer, as a requirement of your repository.** Every agent that works in the repository runs SumMem, on whatever machine it runs on. That includes other contributors' machines and CI. So everyone who works on the repository needs Python 3.11 or newer, available as both `python` and `python3`: the activation block runs `python .summem/summem wake`, and the script's first line asks for `python3`. If your repository does not already require Python 3.11, add it to the prerequisites in your contributing guide.
+- Agents that read `AGENTS.md` and can run shell commands.
 
 ## Set up a repository
 
@@ -28,7 +28,7 @@ Set up SumMem in a repository in a few minutes.
 
     `init` prints a short instruction, a `---` line, and then the block. Put everything below the `---` at the top of `AGENTS.md`. The block tells agents to wake SumMem at the start of each session, and says what this repository remembers. You may change what it remembers: see [What to Remember](write-rule.md).
 
-    Claude Code reads `CLAUDE.md`, not `AGENTS.md`. If you use it, put `@AGENTS.md` at the top of `CLAUDE.md`.
+    If your repository also has a `CLAUDE.md`, you do not need to copy the block into it. Put `@AGENTS.md` at the top of `CLAUDE.md` to import `AGENTS.md` instead, so both files share one copy.
 
 3. Add this line to `.gitignore`:
 

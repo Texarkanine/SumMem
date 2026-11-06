@@ -2,11 +2,9 @@
 
 Many agents can write to one SumMem store at the same time: in different branches, on different machines, with no lock between them. When their branches merge, git reports no conflict in the store, and no memory is lost.
 
-This page shows a real merge, explains why git has nothing to conflict on, and then shows what SumMem tidies up after a merge.
-
 ## A real merge
 
-Alice and Bob branch from the same store. It holds four notes, `a` to `d`, and its list is capped at 4 lines. Each of them adds one note. That puts the list over its cap, so each is asked to fold `a` and `b`, and each writes their own summary.
+Alice and Bob branch from the same store. It holds four notes, `a` to `d`, and its wake budget is 4 lines. Each of them adds one note. That puts the list over its budget, so each is asked to fold `a` and `b`, and each writes their own summary.
 
 On Alice's branch:
 
@@ -80,7 +78,7 @@ So merging two stores gives the union of their files. The one store file people 
 
 A merge can leave the list in two untidy shapes. Neither loses a memory. The next `note` or `nap` puts each one right. `wake` never changes files, so reading never waits for repair.
 
-The list can also be longer than its cap right after a merge. `wake` still prints every line, and the next `note` or `nap` asks for folds until the list is back within its cap.
+The list can also be longer than its budget right after a merge. `wake` still prints every line, and the next `note` or `nap` asks for folds until the list is back within its budget.
 
 ### Two summaries of the same notes
 

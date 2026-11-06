@@ -16,7 +16,7 @@ SumMem is one Python script. Put it in your repository and add a short block to 
 
 ## Quick start
 
-You need a git repository and Python 3.11 or newer.
+You need a git repository, and everyone who works in it needs Python 3.11 or newer.
 
 1. Copy [`summem`](summem) to `.summem/summem` in your repository's root, and make it executable.
 2. Run `.summem/summem init`, and put the block it prints at the top of `AGENTS.md`.

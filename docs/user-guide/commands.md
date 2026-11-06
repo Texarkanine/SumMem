@@ -1,6 +1,6 @@
 # Commands
 
-Agents run these commands as `.summem/summem <command>`. Root `wake` prints the agents' version of this page, so agents do not need to read it.
+Agents run these commands as `.summem/summem <command>`. They learn them from the how-to that root `wake` prints.
 
 ```text
 summem wake    [--path PATH]                    print this store's view
@@ -56,7 +56,7 @@ You are up to speed.
 
 `wake --path <dir>` prints only the nearest store's list for that path, with no how-to and no catalog.
 
-`wake` never changes a file and never refuses to print. If the list is over its cap, for example right after a merge, `wake` prints all of it. The next `note` or `nap` folds it back.
+`wake` never changes a file and never refuses to print. If the list is over its wake budget, for example right after a merge, `wake` prints all of it. The next `note` or `nap` folds it back.
 
 ## `note TEXT`
 
@@ -64,7 +64,7 @@ Records one line and prints `Saved.`
 
 The text must be a single line, at most 280 bytes of UTF-8 by default. Accented and other non-ASCII characters take 2 or more bytes. The limit is the store's `ENTRY_CHARS` setting.
 
-If the list is now over its cap, `note` then asks for a nap:
+If the list is now over its wake budget, `note` then asks for a nap:
 
 ```text
 Saved.

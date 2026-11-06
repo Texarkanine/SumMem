@@ -1,4 +1,8 @@
 nav:
   - Overview: index.md
+  - The Store: store.md
+  - The View and Folding: view-and-folding.md
+  - Merges and Healing: healing.md
+  - Reading: reading.md
   - Not Yet: not-yet.md
   - ...

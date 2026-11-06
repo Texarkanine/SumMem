@@ -30,7 +30,7 @@ Right after a merge, `wake` can look untidy:
 
 - **Two lines with the same id.** Two branches summarized the same memories in different words.
 - **A summary next to part of itself.** One branch folded further than the other, so a nap and a smaller nap of some of the same memories are both listed.
-- **More lines than the cap.** Both branches added memories.
+- **More lines than the wake budget.** Both branches added memories.
 
 All three are expected. The next `note` or `nap` on that branch tidies them, and asks for any folds that are needed. Nothing has been lost.
 

@@ -2,8 +2,6 @@
 
 SumMem keeps a repository's memory as small files in git. It shows agents a short list of those memories. The list stays short because old memories fold into one-line summaries, and each summary keeps the original memories inside it.
 
-This page walks through a small store in the SumMem repository, then shows the files on disk.
-
 ## The cycle
 
 ```mermaid
@@ -33,7 +31,7 @@ Agents never touch the files. They run the script, and the script writes, names,
 
 ## A walk through one store
 
-The SumMem repository has a small store in `dogfood/`. Its list is capped at 4 lines, and it holds the letters `a` to `h`:
+The SumMem repository has a small store in `dogfood/`. It holds the letters `a` to `h`. Its **wake budget** is 4 lines: the length SumMem keeps its list near.
 
 ```console
 $ .summem/summem wake --path dogfood
@@ -43,6 +41,8 @@ x1 2026-08-19: g
 x1 2026-08-19: h
 You are up to speed.
 ```
+
+The budget is a target, not a hard limit. A merge can push the list over it for a while; the next writes fold it back.
 
 Each line starts with its **grain**: how many original memories it stands for. An `x1` line is a single memory, called a **note**, shown with the day it was written. An `x2` or `x4` line is a summary, called a **nap**. A nap shows an id instead of a day.
 
@@ -61,7 +61,7 @@ Keep what has lasting effect, drop what does not. Invent nothing.
 Run: .summem/summem nap --path dogfood 3fc87382 fa6da6a9 "<your line>"
 ```
 
-The list would now have 5 lines, one more than its cap. So `note` asks for a nap. SumMem picks the oldest two memories of the same grain, `g` and `h`. It prints the command to run, with a placeholder for the summary.
+The list would now have 5 lines, one over its budget. So `note` asks for a nap. SumMem picks the oldest two memories of the same grain, `g` and `h`. It prints the command to run, with a placeholder for the summary.
 
 Write the summary:
 
@@ -72,7 +72,7 @@ Saved.
 Nothing left to compress.
 ```
 
-The list is back within its cap:
+The list is back within its budget:
 
 ```console
 $ .summem/summem wake --path dogfood
@@ -106,7 +106,7 @@ x1 2026-08-19: f
 
 SumMem only folds two memories of the same grain: two notes, two `x2` naps, two `x4` naps. If that reminds you of the game [2048](https://classic.play2048.co/), it should.
 
-Here is one writer with eight notes, `A` to `H`, oldest first. Pretend the cap is 1, so every possible pair gets folded. Each letter is one note. A box `AB` is the nap of those two notes.
+Here is one writer with eight notes, `A` to `H`, oldest first. Pretend the budget is 1 line, so every possible pair gets folded. Each letter is one note. A box `AB` is the nap of those two notes.
 
 ```mermaid
 flowchart LR
@@ -144,7 +144,7 @@ flowchart LR
 
 Eight notes became one line. Zoom still opens `ABCDEFGH` into `ABCD` and `EFGH`, and so on down to the letters.
 
-With a real cap, such as the default of 32 lines, the newest memories stay as single notes and the oldest become summaries of summaries. Each level of nesting doubles the grain, so 2048 notes are only eleven levels deep.
+With a real budget, such as the default of 32 lines, the newest memories stay as single notes and the oldest become summaries of summaries. Each level of nesting doubles the grain, so 2048 notes are only eleven levels deep.
 
 ## On disk
 

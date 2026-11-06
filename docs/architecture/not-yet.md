@@ -4,15 +4,15 @@ Things that are not true of SumMem yet, and that were not replaced with a differ
 
 ## Not this backend
 
-- A second on-disk backend (sqlite or otherwise). The agent commands stay the same if that happens. Store roles in [Architecture](index.md) must still exist.
-- Harness hooks as the way memory loads. They may nag. Session start is still the `AGENTS.md` bootstrap and a root `wake`.
+- A second on-disk backend, such as SQLite. If that happens, the agent commands stay the same, and every store role in [Architecture](index.md) must still exist.
+- Harness hooks as the way memory loads. Hooks may remind. Session start is still the activation block in `AGENTS.md` and a root `wake`.
 
 ## Not this host
 
-- Native Windows as a supported host. There is no clone-portable argv0 that both `cmd.exe` and a Unix shell will execute. The committed bootstrap wake is `python .summem/summem wake`. Root-wake Usage/`Run:` are host-specific: bare `.summem/summem` on Unix, `python .summem/summem` on Windows. Spec: [windows-compat-audit](https://github.com/Texarkanine/SumMem/blob/main/memory-bank/archive/enhancements/20260909-windows-compat-audit.md). The Unix-only AGENTS.md wake and `sys.executable` recipes in that spec are superseded.
+- Native Windows as a supported host. There is no clone-portable command that both `cmd.exe` and a Unix shell will run. The committed first wake is `python .summem/summem wake`. Root-wake Usage and `Run:` lines are host-specific: bare `.summem/summem` on Unix, `python .summem/summem` on Windows. Spec: [windows-compat-audit](https://github.com/Texarkanine/SumMem/blob/main/memory-bank/archive/enhancements/20260909-windows-compat-audit.md). Its Unix-only `AGENTS.md` wake and `sys.executable` recipes are superseded.
 
 ## Not this fold
 
-- OptMem’s aligned `cover(T)` after merge: tile the sorted leaf sequence with aligned power-of-two blocks and rebuild `[0, 8192)` over interleaved pasts. This backend requests the oldest power-of-two row that has a same-grain row below it, paired with the nearest such row, and may expand a nap in memory when the view is short. After a long-lived merge it does not re-cover. [Why It Converges](../how-it-works/theory.md#what-does-not-converge) argues why leaving the cut unconverged is safe.
-- A pack-size cap: never fold past *N* original notes per `.tree` (256 was a reasonable first *N*). View-node **count** stays on the order of `WAKE_LINES`. File **size** is where lifetime `T` shows up. GitHub warns around 50–100 MB; at ~280 bytes per note that is hundreds of thousands of notes in one block.
-- Hot margin: how close to “now” a block may be before the script will nap it. The script has `ENTRY_CHARS` and `WAKE_LINES` only. Nap of a sealed pair is the agent’s job when the fold request prints.
+- **Re-grouping after a merge.** After a long-lived merge, SumMem keeps whatever grouping the merge left, heals overlaps, and folds forward oldest pair first. It does not rebuild one canonical grouping of all notes, such as aligned power-of-two blocks over the notes in time order. [Why It Converges](../how-it-works/theory.md#what-does-not-converge) argues why leaving the grouping unconverged is safe.
+- **A nap size cap**: never fold past *N* original notes in one children file (256 was a reasonable first *N*). The number of rows stays near `WAKE_LINES`; the size of the oldest children file is where a store's lifetime shows up. GitHub warns at around 50–100 MB per file. At about 280 bytes per note, that is hundreds of thousands of notes in one nap.
+- **A hot margin**: how close to "now" a block may be before the script will fold it. The script has only `ENTRY_CHARS` and `WAKE_LINES`. Folding a requested pair is the agent's job when the fold request prints.

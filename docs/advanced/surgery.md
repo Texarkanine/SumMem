@@ -51,7 +51,7 @@ $ python /path/to/SumMem/surgery.py --path dogfood --dry-run --contains g
 
 Opening naps removes their summaries and leaves more lines in the list. `surgery.py` does not write new summaries.
 
-If the list is now over its cap, `surgery.py` ends by printing the same fold request that `note` would print, with a `Run:` line. `wake` does not ask for folds, so this is the easiest way to start them. After you commit the clean tip:
+If the list is now over its wake budget, `surgery.py` ends by printing the same fold request that `note` would print, with a `Run:` line. `wake` does not ask for folds, so this is the easiest way to start them. After you commit the clean tip:
 
 1. Give the `Run:` line to an agent, or run it yourself with a summary of the two quoted lines.
 2. Each `nap` prints `Saved.`, then the next request or `Nothing left to compress.` Repeat until it says `Nothing left to compress.`

@@ -1,6 +1,6 @@
 # Product Context
 
-These sections are the business context of SumMem: who it is for, what it is for, and what bounds it. The algorithm and store layout live in [`docs/architecture/index.md`](../docs/architecture/index.md).
+These sections are the business context of SumMem: who it is for, what it is for, and what bounds it. The algorithm and store layout live under [`docs/architecture/`](../docs/architecture/index.md).
 
 ## Target Audience
 

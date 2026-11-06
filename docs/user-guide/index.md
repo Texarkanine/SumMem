@@ -2,8 +2,6 @@
 
 SumMem has two kinds of user. You look after the repository: you set SumMem up once and decide what the repository remembers. Agents use it in every session.
 
-Just want it running? Go to the [Quickstart](quickstart.md).
-
 ## What you do
 
 - **Once:** put the script in the repository and the activation block in `AGENTS.md`. See [Quickstart](quickstart.md).
@@ -25,7 +23,7 @@ sequenceDiagram
         opt Learned something worth keeping
             Agent->>Script: note
             Script-->>Agent: Saved.
-            opt List is over its cap
+            opt List is over its budget
                 Script-->>Agent: summarize these two
                 Agent->>Script: nap
                 Script-->>Agent: Saved.

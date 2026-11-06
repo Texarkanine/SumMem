@@ -61,7 +61,7 @@ Remove the `#` from a line and change the value to set it for that store.
 
 | Setting | Default | What it controls |
 |---|---|---|
-| `WAKE_LINES` | 32 | The list's cap. When a store holds more lines than this, `note` and `nap` ask for folds. When it holds fewer, `wake` may open recent naps to fill the space, without changing any file. |
+| `WAKE_LINES` | 32 | The wake budget: the list length SumMem aims for. It is a target, not a hard limit. When a store holds more lines than this, `note` and `nap` ask for folds. When it holds fewer, `wake` may open recent naps to fill the space, without changing any file. |
 | `ENTRY_CHARS` | 280 | The longest note or nap summary, in bytes of UTF-8. |
 
 A smaller `WAKE_LINES` means a shorter wake and more folding. A larger one keeps more memories word for word, at the cost of a longer wake in every session.

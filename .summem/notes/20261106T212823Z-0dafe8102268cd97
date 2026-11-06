@@ -1,0 +1,1 @@
+Docs: WAKE_LINES is the wake budget, a target the view moves toward; never call it a cap. Claude Code reads AGENTS.md, so onboarding has no CLAUDE.md step (an @AGENTS.md import only DRYs a repo that has both).
