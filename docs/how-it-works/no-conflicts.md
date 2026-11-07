@@ -171,7 +171,7 @@ flowchart TB
     end
 ```
 
-SumMem opens `ABCDEFGH` into its two children, then removes `ABCDEFGH`'s files:
+The two are the same size, so SumMem opens the one whose file name sorts first. Here that is `ABCD1234`. SumMem writes out its two children, then removes `ABCD1234`'s files:
 
 ```mermaid
 flowchart LR
@@ -179,17 +179,17 @@ flowchart LR
     classDef w1 fill:#e1f5fe,stroke:#01579b;
     classDef w2 fill:#fff3e0,stroke:#ef6c00;
 
-    subgraph opened["Opened ABCDEFGH"]
+    subgraph opened["Opened ABCD1234"]
         direction LR
-        O1["ABCD"]:::shared --- O2["EFGH"]:::w1
+        O1["ABCD"]:::shared --- O2["1234"]:::w2
     end
     subgraph untouched["Still on disk"]
         direction LR
-        O3["ABCD1234"]:::w2
+        O3["ABCDEFGH"]:::w1
     end
 ```
 
-`ABCD` now sits entirely inside `ABCD1234`, so its files are removed too. Every letter and number is still in exactly one place. No memory was lost.
+`ABCD` now sits entirely inside `ABCDEFGH`, so its files are removed too. Every letter and number is still in exactly one place. No memory was lost.
 
 ```mermaid
 flowchart LR
@@ -198,7 +198,7 @@ flowchart LR
 
     subgraph done["After the repair"]
         direction LR
-        D1["EFGH"]:::w1 --- D2["ABCD1234"]:::w2
+        D1["ABCDEFGH"]:::w1 --- D2["1234"]:::w2
     end
 ```
 

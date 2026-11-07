@@ -59,8 +59,10 @@ If the list is now over its wake budget, `surgery.py` ends by printing the same 
 
 You may also leave the extra lines. The next `note` will ask for the same folds.
 
-Then check that the text is gone. This should print nothing:
+Then check, in the same store, that the text is gone. Give `recall` the `--path` you gave `surgery.py`, if any. `recall` takes a regular expression, so put `\` before any of `. ^ $ * + ? ( ) [ ] { } | \` in the text. This should print nothing:
 
 ```bash
-.summem/summem recall 'the removed text'
+.summem/summem recall --path PATH 'the removed text'
 ```
+
+If it prints a note, run `surgery.py` on that note too. If it prints a summary, the text is in a caption, and `surgery.py` removes only notes.

@@ -66,7 +66,7 @@ Until the next heal, `wake` can print both rows, with one id.
 
 ### Overlap
 
-When two naps hold some of the same memories but neither holds all of the other's, heal opens the smaller one: it writes the nap's children out as rows and removes the nap's files. Repeated, this removes each child whose memories the larger nap already holds, and keeps the rest.
+When two naps hold some of the same memories but neither holds all of the other's, heal opens the smaller one: it writes the nap's children out as rows and removes the nap's files. Of two naps the same size, it opens the one whose name sorts first. Repeated, this removes each child whose memories the other nap already holds, and keeps the rest.
 
 ## When heal runs
 

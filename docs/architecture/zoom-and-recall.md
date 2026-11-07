@@ -16,7 +16,7 @@ So the view answers everyday questions with captions standing in for their child
 
 ## Unreadable children files
 
-When `zoom` or `recall` cannot read a children file, it prints `skipped a pack` once on standard error and still prints whatever other naps answered. `wake` stays silent about it.
+`zoom` of a nap whose children file cannot be read fails with `unreadable pack`. When `zoom` or `recall` searches inside naps and cannot read one, it prints `skipped a pack` on standard error for that file and still prints whatever other naps answered. `wake` stays silent about it.
 
 ## Cost
 

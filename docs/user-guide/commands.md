@@ -95,7 +95,7 @@ Nothing left to compress.
 
 After `Saved.`, `nap` prints either the next fold request or `Nothing left to compress.`
 
-SumMem chooses which two memories to fold: the oldest memory that has another of the same grain later in the list, with the nearest such memory. `nap` refuses any other pair. See [Troubleshooting](troubleshooting.md) for the messages.
+SumMem asks for one pair at a time: the oldest memory that has another of the same grain later in the list, with the nearest such memory. `nap` also accepts any other two memories of the same grain with no memory of that grain between them. [Troubleshooting](troubleshooting.md) lists what it refuses.
 
 ## `zoom ID`
 
