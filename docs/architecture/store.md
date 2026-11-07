@@ -48,7 +48,7 @@ Fields 1 to 4 are fixed by which notes the nap holds. Only the variant tag diffe
 - Two writers who write the same nap, byte for byte, write the same path. Git sees one file.
 - Two writers who fold the same notes with different captions write two paths. At grain 4 and above, different nested captions or a different grouping also change the children file, and so the tag. Git keeps both files without a conflict.
 
-The next heal keeps the nap whose name sorts last ([Same content id](merges-and-healing.md#same-content-id)). The two names differ only in the variant tag, and the tag is a hash of each nap's files. So sorting the names compares hashes of what the naps contain. The survivor does not depend on which writer was first or which branch merged last, and every clone that has both naps keeps the same one. [Why It Converges](../how-it-works/why-it-converges.md#a-max-register-for-captions) shows why that choice is safe.
+The next heal keeps the nap whose name sorts last ([Same content id](merges-and-healing.md#same-content-id)). The two names differ only in the variant tag, and the tag is a hash of each nap's files. So sorting the names compares hashes of what the naps contain. The survivor does not depend on which writer was first or which branch merged last, and every clone that has both naps keeps the same one. [Why Memories Converge](../how-it-works/why-memories-converge.md#a-max-register-for-captions) shows why that choice is safe.
 
 ### How the name got here
 

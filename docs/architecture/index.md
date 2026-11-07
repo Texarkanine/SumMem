@@ -29,7 +29,7 @@ These are three different things.
 
 The on-disk format can change later only if agents still never touch store files.
 
-## Vocabulary
+## Glossary
 
 | Term | Meaning | Defined in |
 |---|---|---|

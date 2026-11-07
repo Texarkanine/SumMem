@@ -214,5 +214,5 @@ The `x4` nap `a, b, c, d` holds two naps, `a & b` and `c & d`, and each of those
 ## Where next
 
 - [Why Writers Never Conflict](no-conflicts.md): what happens when many agents write at once and their branches merge.
-- [Why It Converges](why-it-converges.md): the shoebox made exact: a proof that clones which have seen the same notes remember the same things.
+- [Why Memories Converge](why-memories-converge.md): the shoebox made exact: a proof that clones which have seen the same notes remember the same things.
 - [Quickstart](../user-guide/quickstart.md): set it up in your repository.

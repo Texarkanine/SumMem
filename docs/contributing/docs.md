@@ -41,7 +41,9 @@ uv run --no-config properdocs build --strict
 - Start a page with its subject, not with where other things are.
 - To illustrate a rule, state it in prose first, then show the diagram, then give the details.
 - Say "file" when you mean a file on disk, and "memory" when you mean what a note or nap remembers. Heal removes files, never memories.
+- Say a value increases or decreases, not that it rises or falls. "Falls" also means "lands on", as in "falls on a Monday".
 - In a flowchart, start and end nodes are rounded, decisions are diamonds, and steps are rectangles. Rows of boxes that show a listing are not flowcharts.
+- If a flowchart's lines cross, change the order you declare its edges in. Mermaid's layout places branches left to right in the order they are declared, so declaring the longer branch first usually untangles loops. Leave a `%%` comment saying why the order matters.
 
 ## Links
 

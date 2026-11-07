@@ -26,17 +26,19 @@ It repeats until no two rows hold the same memory.
 
 ```mermaid
 flowchart TD
+    %% Declare the longer "no" branch before "yes". Dagre lays branches out
+    %% left to right in that order, and the two loops then nest without crossing.
     Start(["Heal, from note or nap"]) --> Share{"Do two rows hold the same memory?"}
     Share -->|no| Done(["Done: no two rows hold the same memory"])
     Share -->|yes| Sub{"Are one row's memories all inside the other's?"}
-    Sub -->|yes| Drop["Remove that row's files"]
     Sub -->|no| Kids["Write the smaller nap's two children out as rows"]
     Kids --> Unlink["Remove the smaller nap's files"]
-    Drop --> Share
     Unlink --> Share
+    Sub -->|yes| Drop["Remove that row's files"]
+    Drop --> Share
 ```
 
-Every step either removes a row whose memories another row still holds, or replaces a nap with its own children. No step changes which memories the store holds. [Why It Converges](../how-it-works/why-it-converges.md#what-each-operation-does-to-meaning) states that as a property, and [Why Writers Never Conflict](../how-it-works/no-conflicts.md#summaries-that-overlap) walks through both branches of the diagram with pictures.
+Every step either removes a row whose memories another row still holds, or replaces a nap with its own children. No step changes which memories the store holds. [Why Memories Converge](../how-it-works/why-memories-converge.md#what-each-operation-does-to-meaning) states that as a property, and [Why Writers Never Conflict](../how-it-works/no-conflicts.md#summaries-that-overlap) walks through both branches of the diagram with pictures.
 
 The opening branch is also called the **zipper**: it unzips the smaller nap so the larger one can keep what they share.
 

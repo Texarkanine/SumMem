@@ -60,7 +60,7 @@ x1 2026-11-06: 1 (bob)
 x1 2026-11-06: f (alice)
 ```
 
-SumMem did not keep Alice's summary because she merged, or because she wrote last. It kept the summary whose file name sorts last. Every clone that merges the same files keeps the same one. [Why It Converges](why-it-converges.md#a-max-register-for-captions) explains why that rule is safe.
+SumMem did not keep Alice's summary because she merged, or because she wrote last. It kept the summary whose file name sorts last. Every clone that merges the same files keeps the same one. [Why Memories Converge](why-memories-converge.md#a-max-register-for-captions) explains why that rule is safe.
 
 ## Why git has nothing to conflict on
 
@@ -212,4 +212,4 @@ The order of memories comes from their file names, not from commit times. A reba
 
 ## The short version
 
-The memories form a set that only grows. A merge takes the union. Folding and repair change how the set is grouped and worded, never which memories are in it. For why every clone that has seen the same notes agrees on what is remembered, see [Why It Converges](why-it-converges.md).
+The memories form a set that only grows. A merge takes the union. Folding and repair change how the set is grouped and worded, never which memories are in it. For why every clone that has seen the same notes agrees on what is remembered, see [Why Memories Converge](why-memories-converge.md).

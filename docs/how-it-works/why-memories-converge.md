@@ -1,8 +1,8 @@
-# Why It Converges
+# Why Memories Converge
 
 Many agents can write to one memory, on different machines, with no lock between them, and still agree on the set of sentences the repository can produce.
 
-The claim, once you have seen it: **the notes form a grow-only set, and that set converges. The files are a shrinking picture of that set. Compaction is invisible to the thing that converges.**
+The claim, once you have seen it: **the notes form a grow-only set of memories, and that set converges. The files are a shrinking picture of that set. Compaction is invisible to the thing that converges.**
 
 ## Two writers, no lock
 
@@ -127,7 +127,7 @@ Every clone that has seen the same notes agrees on `L`, no matter what order the
 
 That property is [strong eventual consistency](https://en.wikipedia.org/wiki/Eventual_consistency#Strong_eventual_consistency). A structure with it is a [conflict-free replicated data type](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type), or CRDT.
 
-**So: the notes form a grow-only set, and that set is a CRDT. The files are not. Compaction is invisible to the thing that converges.**
+**So: the notes form a grow-only set of memories, and that set is a CRDT. The files are not. Compaction is invisible to the thing that converges.**
 
 For anyone comparing this to the CRDT literature:
 
