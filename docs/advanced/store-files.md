@@ -31,19 +31,13 @@ The file holds the note's text and one newline. A note is never edited. When it 
 
 ## Naps
 
-A nap is two files that share a name. The name has five parts:
+A nap is two files that share a name:
 
 ```text
 20260819T213123Z-5e64febd8268823c-cfbf987aa25d8492-2-8f8111f124e6075e
 ```
 
-1. `20260819T213123Z`: the time of the nap's oldest note.
-2. `5e64febd8268823c`: that note's random part.
-3. `cfbf987aa25d8492`: the nap's **id**, a hash of the original notes under it. `wake` prints a prefix of it.
-4. `2`: the grain, how many original notes the nap stands for.
-5. `8f8111f124e6075e`: a hash of the `.tree` and `.summ` contents. Two writers who word a summary differently get different file names here.
-
-The first two parts put the nap where its oldest note sat in the list. [Why It Converges](../how-it-works/theory.md#a-naps-filename) explains why the fields are in this order.
+The five parts are the time and random part of the nap's oldest note, the nap's **id** (`wake` prints a prefix of it), the grain, and a hash of the `.tree` and `.summ` contents. [The Store: Nap names](../architecture/store.md#nap-names) explains each part and why it is there.
 
 ### The `.summ` file
 

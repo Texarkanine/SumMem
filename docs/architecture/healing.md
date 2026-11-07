@@ -4,25 +4,28 @@ A git merge of two stores is the union of their files. Nothing in a store is eve
 
 ## What a merge can leave
 
-Three shapes, each from writers who did not see each other's work:
+Each shape comes from branches that did not see each other's work:
 
 | Shape | How it happens |
 |---|---|
-| Two loose notes with the same text | Two writers recorded the same sentence. Their files differ only in name. |
-| Two naps with the same content id | Two writers folded the same notes with different captions. Their variant tags differ, so git keeps both. |
-| Two naps whose notes overlap | Two writers grouped some of the same notes differently. |
+| Two naps with the same content id | Two branches got the same fold request, and each writer worded its own caption. The request is deterministic, so this is the ordinary result of two branches recording notes near the budget. The variant tags differ, so git keeps both. |
+| Two naps whose notes overlap | Two branches grouped some of the same notes differently. |
+| A loose note beside a nap that holds it | The same note file is back in two places. Say a branch keeps going after its first pull request was squash-merged, and `main` folds that pull request's note in the meantime. Merging the branch again brings the loose file back, beside the nap. A cherry-pick, a revert, or a heal on another branch that opened a nap can do the same. |
+| Two loose notes with the same text | Two writers recorded the same line, byte for byte. This is rare. Notes are free text of up to 280 bytes by default, usually written by a language model, and two independent writers almost never produce the same line. |
 
-A loose note whose text already sits inside a nap is the first shape again: the same sentence, once loose and once folded.
+The last two are one repair: a note whose text another row already holds. That repair earns its place through the third shape, not the fourth. Two writers seldom write the same sentence, but git often puts one note in two places.
 
 ## Heal
 
-**Heal** is the repair for all three. It loops until no two rows share an original note:
+**Heal** is the repair for all four. It loops until no two rows share an original note:
 
 ```mermaid
 flowchart TD
-    Share["Two rows share original notes"] --> Sub{"One row's notes are a subset of the other's?"}
-    Sub -->|yes| Drop["Remove the subset row"]
-    Sub -->|no| Kids["Write the smaller nap's children back out as rows"]
+    Start(["Heal, from note or nap"]) --> Share{"Do two rows share an original note?"}
+    Share -->|no| Done(["Done: no two rows share a note"])
+    Share -->|yes| Sub{"Are one row's notes all inside the other?"}
+    Sub -->|yes| Drop["Remove that row"]
+    Sub -->|no| Kids["Write the smaller nap's two children back out as rows"]
     Kids --> Unlink["Remove the smaller nap"]
     Drop --> Share
     Unlink --> Share
@@ -32,17 +35,25 @@ Every step either removes a row whose notes are all still held elsewhere, or rep
 
 The opening-up branch is also called the **zipper**: it unzips the smaller nap so the larger one can keep what they share.
 
-### Same text
+### A note held twice
 
-Two notes with the same text have the same content id, so each one's notes are a subset of the other's. Heal keeps the later filename. A loose note whose text is already inside a nap is dropped; the nap keeps it.
+A note's content id comes from its text, so a loose note and any other row holding the same text share that note.
 
-An agent that records a sentence the store already holds still hears `Saved.` The fact is in the store; the extra file is not.
+- Beside a nap that holds it, the loose note is removed. The nap keeps it.
+- Beside a loose note with the same text, the earlier filename is removed and the later one stays.
+
+The same repair runs when an agent records a sentence the store already holds, because `note` heals right after it writes. `note` prints `Saved.` either way. That is true of what the store remembers, not of the files:
+
+| The sentence was already | On disk after `note` |
+|---|---|
+| Inside a nap | Nothing has changed. `note` wrote the new file, and heal removed it. |
+| A loose note | The old file is gone and the new one stays, so the note now lists at today's date. |
 
 Two copies of one sentence are one fact, so they can never fold together. A nap of them would claim grain 2 for one note. `nap` refuses any pair whose notes overlap.
 
 ### Same content id
 
-Two naps with the same content id hold the same notes. Heal keeps the one whose filename sorts last. Their names differ only in the variant tag, so the survivor is chosen by content, not by who wrote last or merged last. Every clone that has both files keeps the same one. Its `.tree` and `.summ` are one pair and always survive together.
+Two naps with the same content id hold the same notes. Heal keeps the one whose filename sorts last. Their [names](store.md#nap-names) differ only in the variant tag, so the survivor is chosen by content, not by who wrote last or merged last. Every clone that has both files keeps the same one. Its `.tree` and `.summ` are one pair and always survive together.
 
 Until the next heal, `wake` can print both rows, with one id.
 

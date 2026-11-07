@@ -14,31 +14,7 @@ The second problem is size. A memory that only grows is unreadable by the thousa
 
 Shrinking is where most designs fail. Two agents who each tidy up, alone, usually produce two tidyings that fight.
 
-## A shoebox of receipts
-
-Start here. No code yet.
-
-Keep every receipt in a box. Never throw one away.
-
-When the box gets crowded, staple a batch together and write one line on the front of the batch. You have not lost a receipt. Pull the staple and they all come back. The box reads shorter and holds the same money.
-
-Now give two people their own box and let them staple their own batches. Tip both boxes into one.
-
-You may find two copies of the same receipt, because both people kept one. Keep one copy. Two copies of one receipt are still one receipt, and the money does not double.
-
-You may find a receipt loose *and* inside somebody else's stapled bundle. Throw away the loose copy. You have lost nothing: the loose one and the stapled one are the same receipt.
-
-You may find a small staple sitting next to a large one that already holds those same receipts plus more. Throw away the small staple. The large one still holds the money.
-
-You may find two staples that overlap but neither sits inside the other. Pull the smaller staple, put its receipts back in the box, and throw the empty wrapper. Some of those receipts now sit loose next to the larger staple. They are already inside it, so they go too. The receipts that lived only in the smaller staple stay. The money is unchanged.
-
-That is the whole design. Two people tidy at the same time, in different rooms, and never argue — because tidying does not change what the box is worth.
-
-Those objects have names:
-
-- A receipt is a **note**.
-- A stapled bundle with a line on the front is a **nap**.
-- Tipping the boxes together is a **git merge**.
+SumMem's answer is the [shoebox of receipts](index.md#a-shoebox-of-receipts): tidying that never changes what the box is worth. This page makes that exact.
 
 ## Notes, naps, and the view
 
@@ -61,7 +37,7 @@ The word *summary* misleads here. The caption summarises. The nap does not. A na
 
 ## Names that come from contents
 
-Give every note a name that depends only on its contents: the [SHA-256](https://en.wikipedia.org/wiki/SHA-2) of its bytes. Two files with the same bytes get the same name. This is [content addressing](https://en.wikipedia.org/wiki/Content-addressable_storage). It lets us talk about *which* notes a bundle holds without caring where the bundle came from. It also means a sentence recorded twice, by two writers who never met, is the same note: the duplicate receipt from the shoebox.
+Give every note a name that depends only on its contents: the [SHA-256](https://en.wikipedia.org/wiki/SHA-2) of its bytes. Two files with the same bytes get the same name. This is [content addressing](https://en.wikipedia.org/wiki/Content-addressable_storage). It lets us talk about *which* notes a bundle holds without caring where the bundle came from. It also means a sentence recorded twice, by two writers who never met, is the same note: the receipt the shop printed twice.
 
 Each item in the view stands for some collection of notes. A loose note stands for one. A bundle stands for all the notes inside it. Call that collection `leaves(v)`.
 
@@ -124,9 +100,9 @@ flowchart LR
     classDef files fill:#fff3e0,stroke:#ef6c00;
     classDef meaning fill:#e8f5e9,stroke:#2e7d32;
 
-    Before["View: A, B, CD"]:::files --> Nap["nap A with B"]:::files
+    Before(["View: A, B, CD"]):::files --> Nap["nap A with B"]:::files
     Nap --> After["View: AB, CD"]:::files
-    After --> Same["L still A, B, C, D"]:::meaning
+    After --> Same(["L is still A, B, C, D"]):::meaning
 ```
 
 This is why `nap` deletes files without danger. It is not deleting notes. It is re-describing the same notes more compactly, and the notes are still spelled out inside the bundle it just wrote. SumMem writes the bundle before it unlinks either child so no moment exists where a sentence lives nowhere.
@@ -164,7 +140,7 @@ For anyone comparing this to the CRDT literature:
 
 ## The view is a partition
 
-`L` tells us the store converges. It says nothing about what `wake` prints. That needs a second idea.
+`L` tells us the store converges. It says nothing about what `wake` prints, which is [not a list of files](../architecture/view-and-folding.md#the-view) either. That needs a second idea.
 
 A [partition](https://en.wikipedia.org/wiki/Partition_of_a_set) of a set is a way of cutting it into pieces that do not overlap and that together cover everything.
 
@@ -184,8 +160,8 @@ flowchart TD
     classDef overlap fill:#ffebee,stroke:#c62828;
     classDef ok fill:#e8f5e9,stroke:#2e7d32;
 
-    Merge["Merge lands ABCD beside AB and CD"]:::overlap --> Heal["Heal drops AB and CD"]:::ok
-    Heal --> Part["View is a partition again"]:::ok
+    Merge(["Merge lands ABCD beside AB and CD"]):::overlap --> Heal["Heal drops AB and CD"]:::ok
+    Heal --> Part(["View is a partition again"]):::ok
 ```
 
 Fold is: merge two blocks of equal size — the oldest block that has a twin, with its nearest twin. Expand is: split a block, for display only, writing nothing back.
@@ -196,35 +172,19 @@ The partition also explains what happens to a sentence recorded twice.
 
 Two copies of one sentence are one member of `L`. As files they are two items whose `leaves` are the same note, so they overlap, and the view is not a partition until one goes. Heal keeps the later filename. A loose copy of a sentence that already sits inside a bundle goes the same way: the bundle keeps it.
 
-An agent that records a sentence the store already holds still hears `Saved.` The fact is in `L`; only the extra file is gone.
+So recording a sentence the store already holds adds nothing to `L`. `note` still prints `Saved.`, which is true of `L`, and heal [removes the extra file](../architecture/healing.md#a-note-held-twice).
 
 The same reasoning forbids folding the two copies together. A block's grain is its size in `L`, and these two files cover one note. A nap of them would claim grain 2 for grain 1, so `nap` refuses any pair whose notes overlap.
 
 **The store converges over the set of remembered notes.** How many times a note was recorded is not a fact it remembers.
 
-## A nap's filename
-
-A nap's two files share one stem. Here is one:
-
-```
-20260829T161934Z-c4a81e07b39d52f6-7e2b0c91a4d8351f-2-b8f16d03e5a9274c
-```
-
-The same stem with `.summ` is the caption; with `.tree`, the children. The fields, in order:
-
-1. `20260829T161934Z` — the UTC time from the leftmost child
-2. `c4a81e07b39d52f6` — that child's random suffix
-3. `7e2b0c91a4d8351f` — the leaf-set id, a hash of the notes inside
-4. `2` — grain, how many notes
-5. `b8f16d03e5a9274c` — the variant tag, a hash of the children-file bytes and the caption bytes
-
-The first four fields are fixed by which notes went in, and which of them sorts first. Only the last field moves when two agents write different captions for the same pair.
-
 ## A max-register for captions
 
 Imagine: two agents fold the same two notes and each writes a different caption.
 
-Same notes means the same leaf-set field, the same leftmost child, the same grain. Only the variant tag differs. Two filenames. Git unions them. Both appear in the view, briefly, as two rows with one id.
+A [nap's name](../architecture/store.md#nap-names) has five fields. The first four are fixed by which notes went in: the time and random suffix of the oldest note, the leaf-set id, and the grain. The fifth, the variant tag, is a hash of the nap's two files.
+
+Same notes means the same first four fields. Only the variant tag differs. Two filenames. Git unions them. Both appear in the view, briefly, as two rows with one id.
 
 Heal settles it. The view is sorted by filename, and when two items cover the same notes, the earlier name loses. Since the names differ only in that trailing hash, the surviving caption is the one whose variant tag sorts highest.
 

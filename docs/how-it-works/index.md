@@ -2,6 +2,29 @@
 
 SumMem keeps a repository's memory as small files in git. It shows agents a short list of those memories. The list stays short because old memories fold into one-line summaries, and each summary keeps the original memories inside it.
 
+## A shoebox of receipts
+
+Start with no code at all.
+
+Keep every receipt in a box. Never throw one away.
+
+When the box gets crowded, staple a batch together and write one line on the front. You have not lost a receipt: pull the staple and they all come back. The box reads shorter and holds the same money.
+
+Now give two people their own box, and let each staple their own batches. Tip both boxes into one. Some receipts now turn up twice:
+
+- **The same batch twice, with different lines on the front.** Both people stapled the same receipts, and each wrote their own line. Keep one batch. The receipts are the same; only the line differs.
+- **A receipt loose, and also inside a batch.** One person stapled it and the other did not. Throw away the loose copy: it is the same receipt.
+- **A small batch beside a large one that holds those receipts and more.** Throw away the small batch. The large one still holds the money.
+- **Two batches that overlap, where neither holds all of the other.** Pull the smaller staple and put its receipts back in the box. The ones the larger batch already holds go, as above. The rest stay loose.
+- **Two copies of one receipt.** Rarely, the shop printed the same receipt twice and each person kept a copy. Keep one. The money does not double.
+
+That is the whole design. Two people tidy at the same time, in different rooms, and never argue, because tidying never changes what the box is worth.
+
+- A receipt is a **note**.
+- A stapled batch, with its one line on the front, is a **nap**.
+- Tipping the boxes together is a **git merge**.
+- Throwing out the copies is **healing**.
+
 ## The cycle
 
 ```mermaid
@@ -193,5 +216,5 @@ The `x4` nap `a, b, c, d` holds two naps, `a & b` and `c & d`, and each of those
 ## Where next
 
 - [Why Writers Never Conflict](no-conflicts.md): what happens when many agents write at once and their branches merge.
-- [Why It Converges](theory.md): the reasoning behind that, from a shoebox of receipts to a proof.
+- [Why It Converges](theory.md): the shoebox made exact: a proof that clones which have seen the same notes remember the same things.
 - [Quickstart](../user-guide/quickstart.md): set it up in your repository.

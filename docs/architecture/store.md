@@ -25,19 +25,42 @@ A **nap** stands for two view rows of the same grain, with a one-line summary. I
 - The **caption** (`.summ`) is the summary: one line, with the same length limit as a note. `wake` prints it.
 - The **children file** (`.tree`) holds the two rows it replaced, down to the text of every original note. `zoom` and deep `recall` read it.
 
-The shared name has five parts:
-
-1. The UTC time of the nap's oldest note.
-2. That note's random suffix.
-3. The 16-hex **content id** of the notes the nap stands for.
-4. The grain.
-5. A 16-hex **variant tag**: a hash of the children file's bytes and the caption's bytes.
-
-The first two parts make the nap sort where its oldest note sorted, not at the time of the fold. Agents never see or type the variant tag. The public id is the third part.
-
 A fold writes the new nap first, then removes its two children. The children leave the working tree only after the nap's children file exists on disk.
 
-Names in two older formats are not read at all: four parts, or five parts whose third part is 64 hex. `migrate.py` rewrites both, along with the ids nested in their children files. See [Upgrading](../user-guide/upgrading.md#older-nap-files).
+## Nap names
+
+A nap's name does two jobs. It holds everything `wake` needs to list the nap without opening its children file. And it changes whenever the nap's bytes change, so two writers never write different bytes to one path.
+
+```text
+20260819T213123Z-5e64febd8268823c-cfbf987aa25d8492-2-8f8111f124e6075e
+```
+
+| | Field | Why it is in the name |
+|---|---|---|
+| 1 | `20260819T213123Z`, the UTC time of the nap's oldest note | Sorting by name is the order. The nap sorts where its oldest note sorted, not at the time of the fold. |
+| 2 | `5e64febd8268823c`, that note's random suffix | Notes from the same second keep their order, and the nap sorts exactly where its oldest note did. |
+| 3 | `cfbf987aa25d8492`, the **content id** | The public id: `wake` prints a prefix of it, and `nap` and `zoom` take one. It comes from the notes alone, so two writers who fold the same notes name the same id. See [Identity](#identity). |
+| 4 | `2`, the grain | `wake` prints `x2` without opening the children file. Folding does not trust this field: it counts the notes in the children file. |
+| 5 | `8f8111f124e6075e`, the **variant tag** | A hash of the children file's bytes and the caption's bytes. Agents never see or type it. |
+
+Fields 1 to 4 are fixed by which notes the nap holds. Only the variant tag differs between two naps of the same notes, and it differs exactly when their bytes do:
+
+- Two writers who write the same nap, byte for byte, write the same path. Git sees one file.
+- Two writers who fold the same notes with different captions write two paths. At grain 4 and above, different nested captions or a different grouping also change the children file, and so the tag. Git keeps both files without a conflict, and heal keeps the name that sorts last: [Same content id](healing.md#same-content-id).
+
+Because only the tag differs, "sorts last" means "has the highest variant tag". The survivor is chosen by content, so every clone keeps the same one. [Why It Converges](../how-it-works/theory.md#a-max-register-for-captions) shows why that choice is safe.
+
+### How the name got here
+
+Each change below broke stores written before it.
+
+| Release | Change | Why |
+|---|---|---|
+| 0.7.0 | Captions renamed from `.sum` to `.summ` ([#47](https://github.com/Texarkanine/SumMem/issues/47)) | `.sum` is a common suffix for checksum files. |
+| 0.8.0 | Variant tag added, from four fields to five ([#61](https://github.com/Texarkanine/SumMem/issues/61)) | With four fields, two writers who folded the same notes with different captions wrote different bytes to one path. Git reported an add/add conflict on `.summ`, and at grain 4 and above on `.tree` too. Resolving the two files from different sides left a caption that did not describe its children. |
+| 0.9.0 | Content id shortened from 64 hex to 16 ([#67](https://github.com/Texarkanine/SumMem/issues/67)) | A grain-2 name was 122 characters, too long for some file systems once a clone sits deep in a directory tree: eCryptfs allows about 143 bytes per name, and Windows drives traditionally 260 characters per path. 16 hex is 64 bits; a 1% chance of any collision in one store takes about 600 million ids. |
+
+The script does not read the older names at all. `migrate.py` rewrites four-field names and 64-hex ids, including the ids nested in children files: see [Upgrading](../user-guide/upgrading.md#older-nap-files). The `.sum` rename was a one-line `find` in the 0.7.0 release notes.
 
 ## Identity
 
@@ -49,7 +72,7 @@ A row's **content id** is a hash of the original notes it stands for, never of i
 
 The script computes both hashes itself, with the Python standard library. It does not shell out, and it does not use git's hasher: either would change the id when the machine or the repository's hash function changes.
 
-Two notes with the same text have the same id. They are one fact. [Merges and Healing](healing.md#same-text) keeps one file.
+Two notes with the same text have the same id. They are one fact. [Merges and Healing](healing.md#a-note-held-twice) keeps one file.
 
 ## The children file
 

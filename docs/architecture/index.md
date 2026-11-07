@@ -38,13 +38,14 @@ The on-disk format can change later only if agents still never touch store files
 | caption | A nap's one-line summary, in its `.summ` file | [The Store](store.md#naps) |
 | children file | A nap's `.tree` file: its two children, down to every original note | [The Store](store.md#the-children-file) |
 | content id | A hash of the original notes a row stands for | [The Store](store.md#identity) |
+| variant tag | The last field of a nap's name: a hash of its two files | [The Store](store.md#nap-names) |
 | view, row | The listing `wake` prints, and one entry in it | [The View and Folding](view-and-folding.md#the-view) |
 | grain | How many original notes a row stands for | [The View and Folding](view-and-folding.md#grain) |
 | wake budget | The number of rows the view aims for | [The View and Folding](view-and-folding.md#the-wake-budget) |
 | fold | Replacing two same-grain rows with a nap | [The View and Folding](view-and-folding.md#fold) |
 | wall | An older row before a bigger, newer one | [The View and Folding](view-and-folding.md#walls) |
 | expand | `wake` opening naps in memory to fill spare lines | [The View and Folding](view-and-folding.md#expand) |
-| heal, zipper | Removing rows that repeat notes, after a merge | [Merges and Healing](healing.md) |
+| heal, zipper | Removing rows that repeat notes, after a merge or a repeated `note` | [Merges and Healing](healing.md) |
 | catalog | Root `wake`'s list of the other stores | [Reading](reading.md#wake) |
 
 ## Invariants
@@ -86,7 +87,7 @@ SumMem is also not:
 | What an agent is told, or may type | The operator command table (`usage_text`, mirrored in [Commands](../user-guide/commands.md)), the activation block (write rule and wake handoff), and root-wake Usage (argv, grammar, writer-only). Do not leak store paths into the agent interface. CLI output stays silent on git. Usage treats the files the script wrote as part of the agent's work, not a separate publish step. |
 | How notes land under concurrency | [The Store: Notes](store.md#notes). Recording a note must still commute. |
 | How summaries and originals survive squash | [The Store: Naps](store.md#naps) and [Reading: Zoom](reading.md#zoom). |
-| Nap filenames or the children file format | [The Store](store.md). Then [Store Files](../advanced/store-files.md), and `migrate.py` if old names must be rewritten ([Upgrading](../user-guide/upgrading.md#older-nap-files)). Do not rename files by hand. |
+| Nap filenames or the children file format | [The Store: Nap names](store.md#nap-names) and [The children file](store.md#the-children-file). Then [Store Files](../advanced/store-files.md), and `migrate.py` if old names must be rewritten ([Upgrading](../user-guide/upgrading.md#older-nap-files)). Do not rename files by hand. |
 | The wake budget, fold rule, or decay shape | [The View and Folding](view-and-folding.md). The walk-through on [How SumMem Works](../how-it-works/index.md) must still be true. |
 | Merge behavior, or any file that every note would update | [Merges and Healing](healing.md). The worked merge in [Why Writers Never Conflict](../how-it-works/no-conflicts.md) must still be true. |
 | How wake, zoom, or recall print or search | [Reading](reading.md). |

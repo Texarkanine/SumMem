@@ -8,6 +8,18 @@ The **view** is every loose note plus every nap in a store, sorted by filename. 
 
 A row whose caption is missing or holds conflict markers still lists: its grain and id print, its caption does not. A row whose children file is missing or unreadable will not split.
 
+!!! note "What `wake` prints is not a list of files"
+
+    `wake` prints rows, and a row is not a file. Do not expect its output to match `ls` or `git status`.
+
+    - A nap is two files and one row. The notes inside it have no file of their own.
+    - Under budget, `wake` [expands](#expand) naps in memory. Their children print as rows but exist only inside a children file. `zoom` opens them; `nap` refuses them with `unknown id`.
+    - Over budget, `wake` prints every row, so the list can run past the [wake budget](#the-wake-budget).
+    - Right after a merge, until the next `note` or `nap` [heals](healing.md), two rows can share notes, or print with the same id.
+    - Two clones that hold the same notes can print different lists: the same facts, grouped and worded differently.
+
+    What does hold: every memory line that `wake`, `zoom`, or `recall` prints comes from a file at the tip of the branch.
+
 ## Grain
 
 **Grain** is how many original notes a row stands for. A loose note is grain 1. A nap that covers sixteen original notes is grain 16.
@@ -30,13 +42,17 @@ The **wake budget** (`WAKE_LINES`, 32 by default) is the number of view rows Sum
 
 ```mermaid
 flowchart TD
-    Note["note: write a new file"] --> Over{"View over budget?"}
-    Nap["nap: write the nap, then remove its children"] --> Over
-    Over -->|yes| Pair["Request the oldest same-grain pair"]
-    Over -->|no| Done["No request"]
+    Note(["note"]) --> WriteNote["Write the note, then heal"]
+    Nap(["nap"]) --> WriteNap["Heal, write the nap, then remove its two rows"]
+    WriteNote --> Over{"Is the view over budget?"}
+    WriteNap --> Over
+    Over -->|no| None(["No request"])
+    Over -->|yes| Pair{"Is there a same-grain pair?"}
+    Pair -->|no| None
+    Pair -->|yes| Request(["Request the oldest same-grain pair"])
 ```
 
-When a write leaves the view over budget, the script requests one fold. The pair is:
+When a write leaves the view over budget, the script requests one fold, if a pair exists. The pair is:
 
 - the **oldest** row whose grain is a power of two and that has another row of that grain anywhere later in the listing,
 - paired with the **nearest** such later row.

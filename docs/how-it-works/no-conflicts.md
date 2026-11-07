@@ -68,7 +68,7 @@ Git reports a conflict when two branches change the same file in different ways.
 
 - **Every write is a new file.** A note's name is the UTC time it was written plus 16 random hex characters. Two writers do not pick the same name.
 - **No file is ever edited.** Notes, summaries, and children files are written once and never changed. A correction is a new note.
-- **Same name means same bytes.** A nap's name is built from what is in it: the notes under it, its summary, and its children. Two writers who write the same nap write the same file, byte for byte. Two writers who word the summary differently write two different files.
+- **Same name means same bytes.** A [nap's name](../architecture/store.md#nap-names) is built from what is in it: the notes under it, its summary, and its children. Two writers who write the same nap write the same file, byte for byte. Two writers who word the summary differently write two different files.
 - **Deletions never clash.** Git can only conflict on a deletion if the other branch edited that file, and no one edits store files. When two branches fold the same memories, both delete the same files, which git also accepts.
 - **There is no shared index.** No counter, log, or table of contents is updated on every write. A file like that is exactly what two writers would both edit.
 
@@ -76,7 +76,9 @@ So merging two stores gives the union of their files. The one store file people 
 
 ## What the next write tidies up
 
-A merge can leave the list in two untidy shapes. Neither loses a memory. The next `note` or `nap` puts each one right. `wake` never changes files, so reading never waits for repair.
+A merge can leave two lines in the list that hold some of the same memories. Nothing is lost, and the next `note` or `nap` puts it right. `wake` never changes files, so reading never waits for repair.
+
+Here are the two common shapes. [Merges and Healing](../architecture/healing.md#what-a-merge-can-leave) lists every one.
 
 The list can also be longer than its budget right after a merge. `wake` still prints every line, and the next `note` or `nap` asks for folds until the list is back within its budget.
 
