@@ -88,7 +88,7 @@ jq -r '.. | objects | select(.type == "note") | .text' .summem/naps/<name>.tree
 
 A nap's id is the first 16 hex characters of a SHA-256 hash. SumMem hashes each original note file, sorts those hashes, joins them, and hashes the result. The id depends only on which notes are under the nap. It does not depend on the summary's words or on how the notes were grouped. [The Store](../architecture/store.md#identity) has the exact rules.
 
-Two notes with the same text have the same hash, so the store keeps only one of them.
+Two notes with the same text have the same hash, so they are one memory, and the store holds it once.
 
 ## What is not in the store
 

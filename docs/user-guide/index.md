@@ -5,7 +5,7 @@ SumMem has two kinds of user. You look after the repository: you set SumMem up o
 ## What you do
 
 - **Once:** put the script in the repository and the activation block in `AGENTS.md`. See [Quickstart](quickstart.md).
-- **When you choose:** change what the repository remembers, in [What to Remember](write-rule.md). Give a package its own memory, in [Stores and Settings](stores.md).
+- **When you choose:** change what the repository remembers, in [What to Remember](what-to-remember.md). Give a package its own memory, in [Stores and Settings](stores.md).
 - **In review:** memory files arrive in pull requests like any other change. See [Working with Git](git.md).
 - **When a new version ships:** copy the newer script. See [Upgrading](upgrading.md).
 

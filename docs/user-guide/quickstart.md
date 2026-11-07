@@ -26,7 +26,7 @@ Set up SumMem in a repository in a few minutes.
     .summem/summem init
     ```
 
-    `init` prints a short instruction, a `---` line, and then the block. Put everything below the `---` at the top of `AGENTS.md`. The block tells agents to wake SumMem at the start of each session, and says what this repository remembers. You may change what it remembers: see [What to Remember](write-rule.md).
+    `init` prints a short instruction, a `---` line, and then the block. Put everything below the `---` at the top of `AGENTS.md`. The block tells agents to wake SumMem at the start of each session, and says what this repository remembers. You may change what it remembers: see [What to Remember](what-to-remember.md).
 
     If your repository also has a `CLAUDE.md`, you do not need to copy the block into it. Put `@AGENTS.md` at the top of `CLAUDE.md` to import `AGENTS.md` instead, so both files share one copy.
 
@@ -60,5 +60,5 @@ In a monorepo, `.summem/summem start packages/api` gives that directory its own 
 ## What next
 
 - [Commands](commands.md): what each command does and prints.
-- [What to Remember](write-rule.md): change what the repository remembers.
+- [What to Remember](what-to-remember.md): change what the repository remembers.
 - [Working with Git](git.md): what memory looks like in commits and pull requests.

@@ -11,7 +11,7 @@ In a pull request, memory changes look like this:
 - **A note** is one new file under `.summem/notes/`, holding one line of text.
 - **A nap** adds two files under `.summem/naps/`, a `.summ` and a `.tree` with the same name, and deletes the note or nap files it folded.
 
-Notes are plain text, so review them like any other change. Look for memories that should not be there: personal data, facts about one machine, or news. See [What to Remember](write-rule.md).
+Notes are plain text, so review them like any other change. Look for memories that should not be there: personal data, facts about one machine, or news. See [What to Remember](what-to-remember.md).
 
 ## Do not edit store files
 

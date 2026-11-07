@@ -14,7 +14,7 @@ The second problem is size. A memory that only grows is unreadable by the thousa
 
 Shrinking is where most designs fail. Two agents who each tidy up, alone, usually produce two tidyings that fight.
 
-SumMem's answer is the [shoebox of receipts](index.md#a-shoebox-of-receipts): tidying that never changes what the box is worth. This page makes that exact.
+SumMem's answer is the [shoebox of receipts](index.md#a-shoebox-of-receipts): tidying that never changes what the box is worth.
 
 ## Notes, naps, and the view
 
@@ -41,11 +41,7 @@ Give every note a name that depends only on its contents: the [SHA-256](https://
 
 Each item in the view stands for some collection of notes. A loose note stands for one. A bundle stands for all the notes inside it. Call that collection `leaves(v)`.
 
-The question this page answers:
-
-> When two clones merge, do they remember the same things?
-
-To answer it we need a single object that is "what the store remembers."
+So: when two clones merge, do they remember the same things? Answering that needs one object that stands for what a store remembers.
 
 ## What the store means
 
@@ -105,7 +101,7 @@ flowchart LR
     After --> Same(["L is still A, B, C, D"]):::meaning
 ```
 
-This is why `nap` deletes files without danger. It is not deleting notes. It is re-describing the same notes more compactly, and the notes are still spelled out inside the bundle it just wrote. SumMem writes the bundle before it unlinks either child so no moment exists where a sentence lives nowhere.
+This is why `nap` deletes files without danger. It removes no member of `L`: it re-describes the same notes more compactly, and every one of them is still spelled out inside the bundle it just wrote. SumMem writes the bundle before it unlinks either child's file, so no moment exists where a sentence lives nowhere.
 
 Across the whole system there is exactly one operation that changes `L`, and it only ever adds: `note`.
 
@@ -119,7 +115,7 @@ The store's files form one such structure, joined by git's union of paths. The s
 
     L(S₁ ∪ S₂)  =  L(S₁) ∪ L(S₂)
 
-A map that turns the join on one side into the join on the other is a [semilattice homomorphism](https://en.wikipedia.org/wiki/Homomorphism). That single line is the whole convergence argument. Everything above was naming the pieces it uses.
+A map that turns the join on one side into the join on the other is a [semilattice homomorphism](https://en.wikipedia.org/wiki/Homomorphism). That single line is the whole convergence argument.
 
 Union has three properties that make the rest follow:
 
@@ -140,7 +136,7 @@ For anyone comparing this to the CRDT literature:
 
 ## The view is a partition
 
-`L` tells us the store converges. It says nothing about what `wake` prints, which is [not a list of files](../architecture/view-and-folding.md#the-view) either. That needs a second idea.
+`L` tells us the store converges. It says nothing about what `wake` prints, which is [not a list of files](../architecture/wake.md#the-view) either. That needs a second idea.
 
 A [partition](https://en.wikipedia.org/wiki/Partition_of_a_set) of a set is a way of cutting it into pieces that do not overlap and that together cover everything.
 
@@ -172,7 +168,7 @@ The partition also explains what happens to a sentence recorded twice.
 
 Two copies of one sentence are one member of `L`. As files they are two items whose `leaves` are the same note, so they overlap, and the view is not a partition until one goes. Heal keeps the later filename. A loose copy of a sentence that already sits inside a bundle goes the same way: the bundle keeps it.
 
-So recording a sentence the store already holds adds nothing to `L`. `note` still prints `Saved.`, which is true of `L`, and heal [removes the extra file](../architecture/healing.md#a-note-held-twice).
+So recording a sentence the store already holds adds nothing to `L`. `note` still prints `Saved.`, which is true of `L`, and heal [removes the extra file](../architecture/merges-and-healing.md#a-note-held-twice).
 
 The same reasoning forbids folding the two copies together. A block's grain is its size in `L`, and these two files cover one note. A nap of them would claim grain 2 for grain 1, so `nap` refuses any pair whose notes overlap.
 

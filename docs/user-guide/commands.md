@@ -80,7 +80,7 @@ Run: .summem/summem nap --path dogfood 3fc87382 fa6da6a9 "<your line>"
 
 The `Run:` line is the exact command to run, with the summary in place of `<your line>`. When more than one fold is needed, the request ends with a count of how many remain after this one.
 
-Recording text that the store already holds still prints `Saved.` The store keeps one copy.
+Recording text that the store already holds still prints `Saved.` The store still holds that memory once, not twice.
 
 ## `nap ID-A ID-B CAPTION`
 
@@ -130,7 +130,7 @@ Creates a store in that directory. It creates the directory if it does not exist
 
 ## `init`
 
-Prints the activation block for `AGENTS.md`, with a short instruction above it. See [Quickstart](quickstart.md) and [What to Remember](write-rule.md).
+Prints the activation block for `AGENTS.md`, with a short instruction above it. See [Quickstart](quickstart.md) and [What to Remember](what-to-remember.md).
 
 ## `version`
 

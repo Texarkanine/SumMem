@@ -36,7 +36,7 @@ Merge made by the 'ort' strategy.
  3 files changed, 3 insertions(+)
 ```
 
-The merge is clean. Bob's branch added three files that Alice's branch does not have: his note and the two files of his nap. Both branches deleted the same two notes, `a` and `b`.
+The merge is clean. Bob's branch added three files that Alice's branch does not have: his note and the two files of his nap. Both branches deleted the same two note files, `a` and `b`, whose text now lives in their naps.
 
 Right after the merge, `wake` lists both summaries. They have the same id, because a nap's id comes from the notes under it, not from the summary's words:
 
@@ -60,7 +60,7 @@ x1 2026-11-06: 1 (bob)
 x1 2026-11-06: f (alice)
 ```
 
-SumMem did not keep Alice's summary because she merged, or because she wrote last. It kept the summary whose file name sorts last. Every clone that merges the same files keeps the same one. [Why It Converges](theory.md#a-max-register-for-captions) explains why that rule is safe.
+SumMem did not keep Alice's summary because she merged, or because she wrote last. It kept the summary whose file name sorts last. Every clone that merges the same files keeps the same one. [Why It Converges](why-it-converges.md#a-max-register-for-captions) explains why that rule is safe.
 
 ## Why git has nothing to conflict on
 
@@ -78,7 +78,7 @@ So merging two stores gives the union of their files. The one store file people 
 
 A merge can leave two lines in the list that hold some of the same memories. Nothing is lost, and the next `note` or `nap` puts it right. `wake` never changes files, so reading never waits for repair.
 
-Here are the two common shapes. [Merges and Healing](../architecture/healing.md#what-a-merge-can-leave) lists every one.
+Here are the two common shapes. [Merges and Healing](../architecture/merges-and-healing.md#what-a-merge-can-leave) lists every one.
 
 The list can also be longer than its budget right after a merge. `wake` still prints every line, and the next `note` or `nap` asks for folds until the list is back within its budget.
 
@@ -142,7 +142,7 @@ flowchart TB
     end
 ```
 
-`AB` and `CD` sit entirely inside `ABCD`, so SumMem drops them. What is left does not overlap:
+`AB` and `CD` sit entirely inside `ABCD`, so SumMem removes their files: `ABCD` holds every memory they held. What is left does not overlap:
 
 ```mermaid
 flowchart LR
@@ -171,7 +171,7 @@ flowchart TB
     end
 ```
 
-SumMem opens `ABCDEFGH` back into its two children, then drops `ABCDEFGH`:
+SumMem opens `ABCDEFGH` into its two children, then removes `ABCDEFGH`'s files:
 
 ```mermaid
 flowchart LR
@@ -189,7 +189,7 @@ flowchart LR
     end
 ```
 
-`ABCD` now sits entirely inside `ABCD1234`, so it is dropped too. Every letter and number is still in exactly one place. No original note was deleted.
+`ABCD` now sits entirely inside `ABCD1234`, so its files are removed too. Every letter and number is still in exactly one place. No memory was lost.
 
 ```mermaid
 flowchart LR
@@ -212,4 +212,4 @@ The order of memories comes from their file names, not from commit times. A reba
 
 ## The short version
 
-The memories form a set that only grows. A merge takes the union. Folding and repair change how the set is grouped and worded, never which memories are in it. For why every clone that has seen the same notes agrees on what is remembered, see [Why It Converges](theory.md).
+The memories form a set that only grows. A merge takes the union. Folding and repair change how the set is grouped and worded, never which memories are in it. For why every clone that has seen the same notes agrees on what is remembered, see [Why It Converges](why-it-converges.md).

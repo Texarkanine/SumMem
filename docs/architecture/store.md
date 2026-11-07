@@ -8,7 +8,7 @@ Two writers who each learned a fact must be able to record it at the same time, 
 
 Git is also not a clock, and not an archive of deleted sentences. A squash-merge keeps only the files that exist at the branch tip. Anything a later `zoom` must still see has to be in one of those files.
 
-So SumMem has no primary writer. It has files, and a listing of the facts in those files that gets shorter as the facts age. That listing is the [view](view-and-folding.md#the-view).
+So SumMem has no primary writer. It has files, and a listing of the facts in those files that gets shorter as the facts age. That listing is the [view](wake.md#the-view).
 
 ## Notes
 
@@ -25,7 +25,7 @@ A **nap** stands for two view rows of the same grain, with a one-line summary. I
 - The **caption** (`.summ`) is the summary: one line, with the same length limit as a note. `wake` prints it.
 - The **children file** (`.tree`) holds the two rows it replaced, down to the text of every original note. `zoom` and deep `recall` read it.
 
-A fold writes the new nap first, then removes its two children. The children leave the working tree only after the nap's children file exists on disk.
+A fold writes the new nap first, then removes the files of the two rows it replaced. Those files leave the working tree only after the nap's children file, which holds their memories, exists on disk.
 
 ## Nap names
 
@@ -46,9 +46,9 @@ A nap's name does two jobs. It holds everything `wake` needs to list the nap wit
 Fields 1 to 4 are fixed by which notes the nap holds. Only the variant tag differs between two naps of the same notes, and it differs exactly when their bytes do:
 
 - Two writers who write the same nap, byte for byte, write the same path. Git sees one file.
-- Two writers who fold the same notes with different captions write two paths. At grain 4 and above, different nested captions or a different grouping also change the children file, and so the tag. Git keeps both files without a conflict, and heal keeps the name that sorts last: [Same content id](healing.md#same-content-id).
+- Two writers who fold the same notes with different captions write two paths. At grain 4 and above, different nested captions or a different grouping also change the children file, and so the tag. Git keeps both files without a conflict.
 
-Because only the tag differs, "sorts last" means "has the highest variant tag". The survivor is chosen by content, so every clone keeps the same one. [Why It Converges](../how-it-works/theory.md#a-max-register-for-captions) shows why that choice is safe.
+The next heal keeps the nap whose name sorts last ([Same content id](merges-and-healing.md#same-content-id)). The two names differ only in the variant tag, and the tag is a hash of each nap's files. So sorting the names compares hashes of what the naps contain. The survivor does not depend on which writer was first or which branch merged last, and every clone that has both naps keeps the same one. [Why It Converges](../how-it-works/why-it-converges.md#a-max-register-for-captions) shows why that choice is safe.
 
 ### How the name got here
 
@@ -72,7 +72,7 @@ A row's **content id** is a hash of the original notes it stands for, never of i
 
 The script computes both hashes itself, with the Python standard library. It does not shell out, and it does not use git's hasher: either would change the id when the machine or the repository's hash function changes.
 
-Two notes with the same text have the same id. They are one fact. [Merges and Healing](healing.md#a-note-held-twice) keeps one file.
+Two notes with the same text have the same id. They are one memory, and [heal](merges-and-healing.md#a-note-held-twice) leaves it in one row.
 
 ## The children file
 
@@ -86,7 +86,7 @@ The document is deterministic. The same children in the same order, with the sam
 
 ## Settings
 
-Each store has a committed `config.toml` with two settings: the length limit (`ENTRY_CHARS`) and the [wake budget](view-and-folding.md#the-wake-budget) (`WAKE_LINES`). Missing values use the script's defaults.
+Each store has a committed `config.toml` with two settings: the length limit (`ENTRY_CHARS`) and the [wake budget](wake.md#the-wake-budget) (`WAKE_LINES`). Missing values use the script's defaults.
 
 Settings are not environment variables. The script writes the file only when it is missing, so `start` on an existing store leaves it alone.
 
@@ -96,4 +96,4 @@ A command uses **one** store. It walks from the work path, `--path` or the curre
 
 The git root gets a store on the first store command. Every other store is created with `start`. The script never parses workspace manifests, and walking up never creates a store, so an empty package stays empty even when someone records a note from deep inside it.
 
-How other stores reach an agent is in [Reading](reading.md#wake).
+Agents learn about the other stores from the catalog in a [root wake](wake.md#a-root-wake).

@@ -1,6 +1,6 @@
 # Licensing
 
-SumMem is licensed under the [GNU AGPL v3](https://github.com/Texarkanine/SumMem/blob/main/LICENSE), with additional permissions. The comment block at the top of [`summem`](https://github.com/Texarkanine/SumMem/blob/main/summem) states those permissions. **That block is the authoritative statement.** This page summarizes it.
+SumMem is licensed under the [GNU AGPL v3](https://github.com/Texarkanine/SumMem/blob/main/LICENSE), with additional permissions. The comment block at the top of [`summem`](https://github.com/Texarkanine/SumMem/blob/main/summem) states those permissions. **That block is the authoritative statement.**
 
 | Part | License |
 |---|---|

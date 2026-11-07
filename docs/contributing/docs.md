@@ -35,6 +35,14 @@ uv run --no-config properdocs build --strict
 
 `docs` is the default dependency group, so a bare `uv sync` installs the same tools. Keep `--frozen --no-config` anyway: without them, a stale lock is silently rewritten using your own uv settings.
 
+## Pages
+
+- Name a page's file after its title, so the URL says what the page says: "Merges and Healing" is `merges-and-healing.md`. If you retitle a page, rename its file and fix the links.
+- Start a page with its subject, not with where other things are.
+- To illustrate a rule, state it in prose first, then show the diagram, then give the details.
+- Say "file" when you mean a file on disk, and "memory" when you mean what a note or nap remembers. Heal removes files, never memories.
+- In a flowchart, start and end nodes are rounded, decisions are diamonds, and steps are rectangles. Rows of boxes that show a listing are not flowcharts.
+
 ## Links
 
 - Link to another page by its path in `docs/`, such as `../user-guide/quickstart.md`. The build checks these links.

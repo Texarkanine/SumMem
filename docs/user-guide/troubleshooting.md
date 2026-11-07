@@ -7,7 +7,7 @@
 | `start` printed nothing. | That is success. Check with root `wake`: the new store appears in the catalog. |
 | Two `wake` lines have the same id. | Two branches summarized the same memories in different words. The next `note` or `nap` keeps one. See [Working with Git](git.md#merges). |
 | `wake` prints more lines than `WAKE_LINES`. | Usually right after a merge. `wake` never drops lines. The next `note` or `nap` asks for folds until the list fits. |
-| An agent noted something the store already had, and still got `Saved.` | The store keeps one copy of the same text. The note was not lost. |
+| An agent noted something the store already had, and still got `Saved.` | The store holds each memory once, so it removed one of the two files. The memory was not lost. |
 | `wake` shows fewer naps after an upgrade. | The naps have names in an older format. See [Upgrading](upgrading.md#older-nap-files). |
 | `recall` printed nothing. | No match. `recall` is case-sensitive; start the pattern with `(?i)` to ignore case. |
 

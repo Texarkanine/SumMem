@@ -4,8 +4,6 @@ SumMem keeps a repository's memory as small files in git. It shows agents a shor
 
 ## A shoebox of receipts
 
-Start with no code at all.
-
 Keep every receipt in a box. Never throw one away.
 
 When the box gets crowded, staple a batch together and write one line on the front. You have not lost a receipt: pull the staple and they all come back. The box reads shorter and holds the same money.
@@ -185,7 +183,7 @@ Changes to be committed:
 ```
 
 - The new file under `notes/` is `i`. A note is one file holding one line. Its name is the time it was written, in UTC, plus random characters.
-- The two deleted notes are `g` and `h`.
+- The two deleted note files are `g` and `h`. Their text is now in the nap.
 - The two new files under `naps/` are the nap. They share one name:
     - The `.summ` file holds the summary, `g & h`. This is what `wake` prints.
     - The `.tree` file holds the original notes that the summary stands for.
@@ -216,5 +214,5 @@ The `x4` nap `a, b, c, d` holds two naps, `a & b` and `c & d`, and each of those
 ## Where next
 
 - [Why Writers Never Conflict](no-conflicts.md): what happens when many agents write at once and their branches merge.
-- [Why It Converges](theory.md): the shoebox made exact: a proof that clones which have seen the same notes remember the same things.
+- [Why It Converges](why-it-converges.md): the shoebox made exact: a proof that clones which have seen the same notes remember the same things.
 - [Quickstart](../user-guide/quickstart.md): set it up in your repository.
