@@ -23,3 +23,12 @@ Fix the five docs inaccuracies found in PR 99 review (zipper example, nap pair r
     - Merges-and-healing also said "the larger nap" in Overlap; changed to "the other nap" so the same-size case reads true.
 * Insights
     - The two pages that use letter labels (no-conflicts, how-it-works index) only stay true if the labels are read as note text; the zipper result depends on content-id order.
+
+## 2026-11-07 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Checked all five fixes against the driver source; re-ran the strict docs build (OK).
+* Decisions made
+    - PASS with four advisories, none blocking (see `.qa-validation-status`).
+* Insights
+    - Same-grain naps folded from one shared child share its sequence prefix, so in a real store their name order comes down to the hashed content id.

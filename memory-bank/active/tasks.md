@@ -17,3 +17,12 @@ Docs on branch `docsite` stated five things the driver does not do. Each claim w
 
 - `uv run --no-config properdocs build --strict`: OK.
 - `tox -e py311`: 426 passed (docs-only change; no product behavior touched).
+
+## QA
+
+PASS. All five claims checked against `summem` (`_first_overlap`, `heal_view`, `write_nap`, `zoom_text`, `recall_text`, `surgery.py` arguments). QA re-ran the strict docs build: OK. Four advisories, none blocking; see `.qa-validation-status`:
+
+- Zipper: the `ABCD1234`-first result holds when labels are read as names; real names sort by hashed content id after a shared prefix.
+- Zoom: a missing `.tree` gives `unknown id`, not `skipped a pack`; Troubleshooting already covers it.
+- Surgery: no hint for telling a note hit (`x1`) from a summary hit (`xN`).
+- Surgery: the code block always shows `--path PATH`, though the prose says "if any".
