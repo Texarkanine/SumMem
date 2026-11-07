@@ -94,4 +94,4 @@ SumMem is also not:
 | How wake, zoom, or recall print or search | [Wake](wake.md) and [Zoom and Recall](zoom-and-recall.md). |
 | Repository vs package vs machine scope, or how a directory becomes a store | [The Store: More than one store](store.md#more-than-one-store) and [Wake: A root wake](wake.md#a-root-wake). |
 | A different on-disk backend | The agent interface must not change, and every store role must still exist. See [Not Yet](not-yet.md). |
-| The docs site | [Docs Site](../contributing/docs.md). Give each fact one home and link to it. |
+| The docs site | [Docs Site](../contributing/docs.md). |
