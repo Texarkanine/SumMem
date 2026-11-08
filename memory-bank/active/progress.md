@@ -90,5 +90,16 @@
 * Insights
     - Reusing `_as_child`, `_projected_child`, and `_index_tree` in `_nap_miss` kept the already-folded and `not a fold row` checks within a single pass over view naps without duplicating tree traversal or id computation
 
+## 2026-11-07 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-start-help-nap.md`
+    - Recorded that `start` requires an existing directory in `systemPatterns.md`
+* Decisions made
+    - Left the outside-a-repository sentence as QA found it
+    - Did not add a store note. View ids as `leafset_id` are already remembered
+* Insights
+    - A note id on wake is `leafset_id` of the digest. The raw digest matches nothing in the view.
+
 
 

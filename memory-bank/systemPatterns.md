@@ -53,7 +53,7 @@ Agents never create, edit, or delete store files. Invented filenames and rewritt
 
 ## A scope is a started directory
 
-Walk up. Do not parse workspace manifests. Do not create a store because someone recorded a note from a deep folder. The git root auto-creates on first `wake`, `note`, `nap`, `zoom`, or `recall`. Every other store is `start <dir>`. Empty packages stay empty.
+Walk up. Do not parse workspace manifests. Do not create a store because someone recorded a note from a deep folder. The git root auto-creates on first `wake`, `note`, `nap`, `zoom`, or `recall`. Every other store is `start <dir>` on a directory that already exists. `start` does not create that directory. Empty packages stay empty.
 
 ## Ingest commutes; naps are content-addressed
 
