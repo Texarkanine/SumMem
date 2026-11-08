@@ -45,7 +45,7 @@ Bare invocation and `-h` print a handwritten catalog (`usage_text`); a command r
 
 ## Agent-facing errors are ratchets
 
-Stderr states the problem. It adds a next step only when that step is known and not obvious. Do not invent a repair. A `nap` whose two ids are already some nap's two children succeeds. Two known ids that are not that pair are `not a fold row`. `unknown id` on a nap identity miss does not say to copy an id from wake. `unknown id` when a view nap has no children file stays problem-only. Zoom's identity miss still says to copy an id from wake, because zoom can open the rows wake printed. Shared `require_entry` copy must be true for both `note` and `nap`.
+Stderr states the problem. It adds a next step only when that step is known and not obvious. Do not invent a repair. A `nap` whose two ids are already some nap's two children succeeds. Two known ids that are not that pair are `not a fold row`. `unknown id` on a nap identity miss names each unmatched token and does not say to copy an id from wake. `unknown id` when a view nap has no children file stays problem-only. Zoom's identity miss still says to copy an id from wake, because zoom can open the rows wake printed. Shared `require_entry` copy must be true for both `note` and `nap`.
 
 ## Script is the only writer
 

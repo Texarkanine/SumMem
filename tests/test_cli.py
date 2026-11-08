@@ -365,9 +365,24 @@ def test_unknown_prefix_is_error(tmp_path, monkeypatch, capsys, summem):
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=timezone.utc), Random(2))
     assert m.main(["nap", "deadbeef", "cafebabe", "pair"]) == 1
     err = capsys.readouterr().err
-    assert err == "unknown id\n"
+    assert err == "unknown id: deadbeef cafebabe\n"
     assert "wake" not in err
     assert list((repo / ".summem" / "naps").glob("*.summ")) == []
+
+
+def test_unknown_nap_id_names_only_the_miss(tmp_path, monkeypatch, capsys, summem):
+    """A nap with one unknown id names that token."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=timezone.utc), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=timezone.utc), Random(2))
+    known = m.list_view(repo)[0].id
+    assert m.main(["nap", known, "deadbeef", "pair"]) == 1
+    err = capsys.readouterr().err
+    assert err == "unknown id: deadbeef\n"
+    assert known not in err
+    assert "wake" not in err
 
 
 def _note_id(m, text):

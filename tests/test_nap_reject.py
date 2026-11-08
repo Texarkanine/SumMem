@@ -84,7 +84,7 @@ def test_nap_unknown_ids_rejected_without_writing(tmp_path):
     result = _run_nap(repo, ["deadbeef", "cafebabe", "caption"])
     err = result.stderr.decode("utf-8", "replace")
     assert result.returncode != 0
-    assert err.strip() == "unknown id"
+    assert err.strip() == "unknown id: deadbeef cafebabe"
     assert "wake" not in err
     assert _payload_files(repo) == []
 

@@ -33,7 +33,7 @@ Error messages go to standard error, and the command exits with a non-zero statu
 | `One line only. Merge the lines.` | `note`, `nap` | The text has a line break. |
 | `note is empty` | `note`, `nap` | There is no text. |
 | `unknown id. Copy an id from wake.` | `zoom` | No line `zoom` can open has that id. |
-| `unknown id` | `nap` | That id is not in the store. |
+| `unknown id: …` | `nap` | That id is not in the store. |
 | `not a fold row` | `nap` | Both ids exist, and they are not the two children of a nap. A pair that already is those two children succeeds instead. |
 | `ambiguous id. Give a longer prefix.` | `nap`, `zoom` | More than one id starts with what was typed. |
 | `not a content id: …. Copy an id from wake.` | `nap`, `zoom` | What was typed is not an id. Line numbers and ranges such as `0-3` are not ids. |

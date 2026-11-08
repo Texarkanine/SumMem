@@ -918,7 +918,7 @@ def _nap_miss(nodes, token_a: str, token_b: str) -> str | None:
     """Return None when *token_a* and *token_b* are already one nap's two children.
 
     Both tokens naming a known id, without being that pair, is ``not a fold row``.
-    A token that names nothing is ``unknown id``.
+    A token that names nothing is ``unknown id`` followed by each such token.
     """
     known = [node.id for node in nodes]
     for node in nodes:
@@ -937,9 +937,10 @@ def _nap_miss(nodes, token_a: str, token_b: str) -> str | None:
             right = _one_id(token_b, [rows[0].id, rows[1].id])
             if left and right and left != right:
                 return None
-    if _one_id(token_a, known) and _one_id(token_b, known):
+    missed = [token for token in (token_a, token_b) if _one_id(token, known) is None]
+    if not missed:
         return "not a fold row"
-    return "unknown id"
+    return "unknown id: " + " ".join(missed)
 
 
 def write_nap(parent, id_a, id_b, caption, entry_chars: int | None = None, nodes=None):
