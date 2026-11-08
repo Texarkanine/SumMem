@@ -1,6 +1,0 @@
-PASS
-
-## Semantic Findings
-
-- **Advisory (Documentation — `docs/user-guide/commands.md:142`)**: The "Outside a repository" section says "`init`, `version`, and `-h` work anywhere." Since `help` is now a documented command in the table at the top of `commands.md` that rewrites to `-h` before repository resolution, `help` works outside a repository too; omitting it there does not contradict anything and does not block acceptance.
-- **No KISS, DRY, YAGNI, Completeness, Regression, or Integrity issues**: `_nap_miss`, `_one_id`, `_cli_path`, `start`, and `help` are concise, reuse `_as_child`, `_projected_child`, and `_index_tree` without extra abstractions, and meet all acceptance criteria with full test coverage (`441 passed` in `py311`).

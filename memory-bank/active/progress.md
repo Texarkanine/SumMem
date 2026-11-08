@@ -112,5 +112,16 @@
 * Insights
     - The pair check can use `root_kids` from the walk `_nap_miss` already runs
 
+## 2026-11-07 - REWORK - INITIATED
+
+* Work completed
+    - Operator chose rework of start-help-nap over archive, from PR 101 review
+* Decisions made
+    - The help printout names one way to do each thing. `help` keeps working and is not listed
+    - A nap of some nap's two direct children succeeds even when that nap is nested inside a larger one
+    - The sentences that already describe that success stay. No added sentence whose only job is to mention the nested case
+* Insights
+    - On main, both the one-level retry and the nested retry already failed with `unknown id`. The nested miss is a hole in this branch's new success path, which only checks `root_kids`
+
 
 

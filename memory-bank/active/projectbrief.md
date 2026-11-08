@@ -55,3 +55,23 @@ An agent passes an id that is not a row `nap` can fold. The refusal says what we
 4. Bare `summem` still writes the catalog to stderr and exits 2.
 5. A second `nap` of a pair that is already folded exits 0, prints `Saved.`, does not add a nap, and does not tell the agent to retry that pair.
 6. `nap` of an id that is not that pair exits non-zero, does not mention `wake`, and does not mention store files or git.
+
+## Rework
+
+PR 101 review. The operator chose rework over archive.
+
+### Help catalog
+
+The canonical help printout lists one way to do each thing. `help` and `help <command>` stay working aliases of `-h` and `<command> -h`, and the printout does not name them. Someone who already knows the alias may use it. The catalog does not offer it as a choice.
+
+The user-guide table that claims to be that printout matches it. It does not add a sentence whose job is to reveal the alias.
+
+### Nested nap retry
+
+A `nap` of two ids that are already some nap's two direct children succeeds, including when that nap sits inside a larger nap and is no longer a view row. The command prints `Saved.`, writes nothing, and then the real next fold or the idle line.
+
+Two ids that are not that pair stay `not a fold row`. An id the store does not have stays `unknown id`.
+
+### Documentation of that retry
+
+The sentences already written for this behavior become true when the retry succeeds. Leave them. Add no sentence whose only job is to mention the nested case. Change a sentence only when it is false or clumsy after the code is right, and then in the voice of the page it sits on.
