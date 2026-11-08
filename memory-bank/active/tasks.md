@@ -85,4 +85,14 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
+
+### QA Review Findings
+
+- **KISS**: Pass. `_nap_miss` iterates over `(index["root_kids"], *index["kids"].values())` reusing existing child-pair matching logic without added abstractions.
+- **DRY**: Pass. Reuses `kids` populated by `_index_tree` and the existing `_one_id` resolver.
+- **YAGNI**: Pass. No unused parameters, speculative logic, or extraneous helper methods added.
+- **Completeness**: Pass. Catalog omits `help` command, user guide matches catalog, buried nap pairs succeed, and invalid folds continue to fail with appropriate errors (`not a fold row` / `unknown id`).
+- **Regression**: Pass. All 443 tests pass under `py311`. CLI dispatch for `help` and `help <command>` remains fully functional.
+- **Integrity**: Pass. No scaffolding remnants, magic numbers, or debug artifacts.
+- **Documentation**: Pass. User-guide commands table and description updated cleanly; troubleshooting and architecture docs already match the implemented contract.

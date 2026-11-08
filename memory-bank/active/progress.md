@@ -168,6 +168,18 @@
 * Insights
     - The red buried-pair run was `not a fold row` for ids `2bba5f0f6700c665` and `50782259f93147cb`, the same pair the review named
 
+## 2026-11-07 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Performed post-implementation semantic review of rework against the implementation plan, project brief, and system patterns
+    - Verified all 443 tests pass under `tox -e py311`
+    - Wrote `PASS` status to `memory-bank/active/.qa-validation-status`
+* Decisions made
+    - Approved rework implementation: help catalog omission and buried-pair nap retry both pass all semantic checks without issues or advisories
+* Insights
+    - Pair-matching across `(index["root_kids"], *index["kids"].values())` in `_nap_miss` cleanly covers direct view nap children and nested nap children in a single uniform check without adding tree-indexing helpers or mutating AST structures
+
+
 
 
 
