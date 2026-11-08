@@ -4,7 +4,7 @@ This file is the briefing. The atlas is [`docs/architecture/`](../docs/architect
 
 ## How This System Works
 
-SumMem is a script that owns a grow-only set of facts in the git tree, and a decaying view of that set. Agents never touch the store. They run `wake`, `note`, `nap`, `recall`, `zoom`, `start`, `init`, and `version` via `.summem/summem`.
+SumMem is a script that owns a grow-only set of facts in the git tree, and a decaying view of that set. Agents never touch the store. They run `wake`, `note`, `nap`, `recall`, `zoom`, `start`, `init`, `version`, and `help` via `.summem/summem`.
 
 The view matches [OptMem](https://github.com/VictorTaelin/OptMem): short notes, a merge tree of summaries, a bounded wake. The store does not. OptMem's one append-only log and position-as-identity cannot survive squash-merge, uninterested conflict resolution, or many writers at once. SumMem keeps the view and replaces the single log with a directory of immutable files.
 
@@ -29,7 +29,7 @@ graph TD
 
 ## Operator help is handwritten; agent invoke is host-specific
 
-Bare invocation and `-h` print a handwritten catalog (`usage_text`); a command registered only with argparse will not appear there. `usage_text` uses `CLI_NAME` (`summem`).
+Bare invocation and `-h` print a handwritten catalog (`usage_text`); a command registered only with argparse will not appear there. The catalog names one way to do each thing. `help` works and is not listed. `usage_text` uses `CLI_NAME` (`summem`).
 
 `prompt_text` names SumMem, then the wake command `python .summem/summem wake`; it does not name `{AGENT_BIN}` as an invoke. `how_to_text` and `fold_request`'s `Run:` line use `agent_invoke()`: `AGENT_BIN` when this host can exec that path, otherwise `python {AGENT_BIN}`. That `Run:` line includes `--path REL` when walk-up from `$PWD` would not select the store that produced the ids.
 
@@ -45,7 +45,7 @@ Bare invocation and `-h` print a handwritten catalog (`usage_text`); a command r
 
 ## Agent-facing errors are ratchets
 
-Stderr states the problem. It adds a next step only when that step is known and not obvious. Do not invent a repair. The same words can name two causes: `unknown id` on an identity miss says to copy an id from wake; `unknown id` when a view nap has no children file does not. Shared `require_entry` copy must be true for both `note` and `nap`.
+Stderr states the problem. It adds a next step only when that step is known and not obvious. Do not invent a repair. A `nap` whose two ids are already some nap's two children succeeds. Two known ids that are not that pair are `not a fold row`. `unknown id` on a nap identity miss names each unmatched token and does not say to copy an id from wake. `unknown id` when a view nap has no children file stays problem-only. Zoom's identity miss still says to copy an id from wake, because zoom can open the rows wake printed. Shared `require_entry` copy must be true for both `note` and `nap`.
 
 ## Script is the only writer
 
@@ -53,7 +53,7 @@ Agents never create, edit, or delete store files. Invented filenames and rewritt
 
 ## A scope is a started directory
 
-Walk up. Do not parse workspace manifests. Do not create a store because someone recorded a note from a deep folder. The git root auto-creates on first `wake`, `note`, `nap`, `zoom`, or `recall`. Every other store is `start <dir>`. Empty packages stay empty.
+Walk up. Do not parse workspace manifests. Do not create a store because someone recorded a note from a deep folder. The git root auto-creates on first `wake`, `note`, `nap`, `zoom`, or `recall`. Every other store is `start <dir>` on a directory that already exists. `start` does not create that directory. Empty packages stay empty.
 
 ## Ingest commutes; naps are content-addressed
 

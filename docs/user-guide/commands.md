@@ -126,7 +126,7 @@ The search is case-sensitive. Start the pattern with `(?i)` to ignore case. No m
 
 ## `start <path>`
 
-Creates a store in that directory. It creates the directory if it does not exist. On success it prints nothing. See [Stores and Settings](stores.md).
+Creates a store in a directory that already exists. It prints `There is a store in ./path.` whether the store is new or already there, and it does not rewrite an existing config. A path that is not a directory fails with `not a directory: ./path`. See [Stores and Settings](stores.md).
 
 ## `init`
 

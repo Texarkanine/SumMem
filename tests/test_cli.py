@@ -365,9 +365,133 @@ def test_unknown_prefix_is_error(tmp_path, monkeypatch, capsys, summem):
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=timezone.utc), Random(2))
     assert m.main(["nap", "deadbeef", "cafebabe", "pair"]) == 1
     err = capsys.readouterr().err
-    assert "unknown id" in err
-    assert "Copy an id from wake" in err
+    assert err == "unknown id: deadbeef cafebabe\n"
+    assert "wake" not in err
     assert list((repo / ".summem" / "naps").glob("*.summ")) == []
+
+
+def test_unknown_nap_id_names_only_the_miss(tmp_path, monkeypatch, capsys, summem):
+    """A nap with one unknown id names that token."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=timezone.utc), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=timezone.utc), Random(2))
+    known = m.list_view(repo)[0].id
+    assert m.main(["nap", known, "deadbeef", "pair"]) == 1
+    err = capsys.readouterr().err
+    assert err == "unknown id: deadbeef\n"
+    assert known not in err
+    assert "wake" not in err
+
+
+def _note_id(m, text):
+    return m.leafset_id([m.note_digest(m.note_file_bytes(text))])
+
+
+def _nap_names(repo):
+    naps = repo / ".summem" / "naps"
+    return sorted(p.name for p in naps.iterdir() if p.is_file() and not p.name.startswith("."))
+
+
+def test_second_nap_of_folded_notes_succeeds(tmp_path, monkeypatch, capsys, summem):
+    """Napping a pair that is already folded prints Saved. and writes nothing."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=timezone.utc), Random(1))
+    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=timezone.utc), Random(2))
+    ids = [node.id for node in m.list_view(repo)]
+    pa, pb = m.short_id(ids[0], ids), m.short_id(ids[1], ids)
+    assert m.main(["nap", pa, pb, "pair"]) == 0
+    names = _nap_names(repo)
+    capsys.readouterr()
+    assert m.main(["nap", pa, pb, "again"]) == 0
+    captured = capsys.readouterr()
+    assert captured.out == "Saved.\n\nNothing left to compress.\n"
+    assert captured.err == ""
+    assert _nap_names(repo) == names
+
+
+def test_nap_of_expanded_children_succeeds(tmp_path, monkeypatch, capsys, summem):
+    """Napping the two children of an existing nap succeeds and writes nothing."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    for i, text in enumerate(("a", "b", "c", "d"), start=1):
+        m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=timezone.utc), Random(i))
+    by_text = {node.caption: node.id for node in m.list_view(repo)}
+    assert m.main(["nap", by_text["a"], by_text["b"], "ab"]) == 0
+    assert m.main(["nap", by_text["c"], by_text["d"], "cd"]) == 0
+    children = [node.id for node in m.list_view(repo)]
+    assert m.main(["nap", children[0], children[1], "abcd"]) == 0
+    names = _nap_names(repo)
+    capsys.readouterr()
+    assert m.main(["nap", children[0], children[1], "again"]) == 0
+    captured = capsys.readouterr()
+    assert captured.out == "Saved.\n\nNothing left to compress.\n"
+    assert captured.err == ""
+    assert _nap_names(repo) == names
+
+
+def test_nap_of_nested_cousins_is_not_a_fold_row(tmp_path, monkeypatch, capsys, summem):
+    """Two ids inside a nap, but not its two children, are not a fold row."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    for i, text in enumerate(("a", "b", "c", "d"), start=1):
+        m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=timezone.utc), Random(i))
+    by_text = {node.caption: node.id for node in m.list_view(repo)}
+    assert m.main(["nap", by_text["a"], by_text["b"], "ab"]) == 0
+    assert m.main(["nap", by_text["c"], by_text["d"], "cd"]) == 0
+    children = [node.id for node in m.list_view(repo)]
+    assert m.main(["nap", children[0], children[1], "abcd"]) == 0
+    names = _nap_names(repo)
+    capsys.readouterr()
+    assert m.main(["nap", _note_id(m, "a"), _note_id(m, "c"), "cross"]) == 1
+    captured = capsys.readouterr()
+    assert captured.err == "not a fold row\n"
+    assert "wake" not in captured.err
+    assert _nap_names(repo) == names
+
+
+def test_nap_of_buried_pair_succeeds(tmp_path, monkeypatch, capsys, summem):
+    """Napping the two children of a nap that was folded further prints Saved. and writes nothing."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    for i, text in enumerate(("a", "b", "c", "d"), start=1):
+        m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=timezone.utc), Random(i))
+    by_text = {node.caption: node.id for node in m.list_view(repo)}
+    assert m.main(["nap", by_text["a"], by_text["b"], "ab"]) == 0
+    assert m.main(["nap", by_text["c"], by_text["d"], "cd"]) == 0
+    children = [node.id for node in m.list_view(repo)]
+    assert m.main(["nap", children[0], children[1], "abcd"]) == 0
+    names = _nap_names(repo)
+    capsys.readouterr()
+    assert m.main(["nap", _note_id(m, "a"), _note_id(m, "b"), "again"]) == 0
+    captured = capsys.readouterr()
+    assert captured.out == "Saved.\n\nNothing left to compress.\n"
+    assert captured.err == ""
+    assert _nap_names(repo) == names
+
+
+def test_nap_of_view_row_and_nested_id_is_not_a_fold_row(tmp_path, monkeypatch, capsys, summem):
+    """A current row plus an id that only lives inside a nap is not a fold row."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    for i, text in enumerate(("a", "b", "c"), start=1):
+        m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=timezone.utc), Random(i))
+    by_text = {node.caption: node.id for node in m.list_view(repo)}
+    assert m.main(["nap", by_text["a"], by_text["b"], "ab"]) == 0
+    names = _nap_names(repo)
+    capsys.readouterr()
+    assert m.main(["nap", by_text["c"], _note_id(m, "a"), "mix"]) == 1
+    captured = capsys.readouterr()
+    assert captured.err == "not a fold row\n"
+    assert "wake" not in captured.err
+    assert _nap_names(repo) == names
 
 
 def test_ambiguous_prefix_is_error(tmp_path, monkeypatch, capsys, summem):
@@ -445,6 +569,81 @@ def test_help_flag_prints_catalog(capsys, summem):
     assert "file" in catalog.lower() or "directory" in catalog.lower()
 
 
+def test_catalog_does_not_list_the_help_command(summem):
+    """The printed catalog does not offer help as a command."""
+    catalog = summem.usage_text()
+    assert "summem help" not in catalog
+    assert "<command> -h" in catalog
+
+
+def test_help_command_prints_catalog(capsys, summem):
+    """help prints the same catalog as -h, on stdout, and exits 0."""
+    m = summem
+    assert m.main(["help"]) == 0
+    captured = capsys.readouterr()
+    assert captured.out == m.usage_text()
+    assert captured.err == ""
+
+
+def test_help_note_matches_note_help_flag(capsys, summem):
+    """help note prints the same text as note -h."""
+    m = summem
+    assert m.main(["note", "-h"]) == 0
+    note_help = capsys.readouterr().out
+    assert m.main(["help", "note"]) == 0
+    captured = capsys.readouterr()
+    assert captured.out == note_help
+    assert captured.err == ""
+    assert "--path" in captured.out
+
+
+def test_help_start_prints_help_and_creates_nothing(tmp_path, monkeypatch, capsys, summem):
+    """help start prints start's help and does not create a directory named help."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["start", "-h"]) == 0
+    start_help = capsys.readouterr().out
+    assert m.main(["help", "start"]) == 0
+    captured = capsys.readouterr()
+    assert captured.out == start_help
+    assert captured.err == ""
+    assert "--path" not in captured.out
+    assert not (repo / "help").exists()
+    assert list(repo.rglob(".summem")) == []
+
+
+def test_bare_invocation_writes_catalog_to_stderr(capsys, summem):
+    """A bare call prints the catalog on stderr and exits 2."""
+    m = summem
+    assert m.main([]) == 2
+    captured = capsys.readouterr()
+    assert captured.err == m.usage_text()
+    assert captured.out == ""
+
+
+def test_note_help_records_the_word(tmp_path, monkeypatch, summem):
+    """note help records the text help."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["note", "help"]) == 0
+    notes = [p for p in (repo / ".summem" / "notes").iterdir() if p.is_file() and not p.name.startswith(".")]
+    assert len(notes) == 1
+    assert notes[0].read_text(encoding="utf-8") == "help\n"
+
+
+def test_note_double_dash_records_help_flag(tmp_path, monkeypatch, summem):
+    """note -- --help records the literal --help."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["note", "--", "--help"]) == 0
+    notes = [p for p in (repo / ".summem" / "notes").iterdir() if p.is_file() and not p.name.startswith(".")]
+    assert len(notes) == 1
+    assert notes[0].read_text(encoding="utf-8") == "--help\n"
+
+
 def test_help_before_command_prints_command_help(capsys, summem):
     """-h wake prints wake help including --path, not top-level-only usage."""
     m = summem
@@ -502,6 +701,7 @@ def test_start_without_repository_errors(tmp_path, monkeypatch, capsys, summem):
     """start outside a repository exits 1 and does not create a store."""
     m = summem
     monkeypatch.chdir(tmp_path)
+    (tmp_path / "pkg").mkdir()
     assert m.main(["start", "pkg"]) == 1
     err = capsys.readouterr().err
     assert "repository" in err.lower()

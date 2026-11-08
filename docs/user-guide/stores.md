@@ -16,7 +16,7 @@ In a monorepo, or any repository where one directory has its own concerns, give 
 .summem/summem start packages/api
 ```
 
-`start` creates `packages/api/.summem/config.toml`, and creates the directory too if it does not exist. It prints nothing when it succeeds. Running it on a directory that already has a store changes nothing.
+`packages/api` must already exist. `start` prints `There is a store in ./packages/api.` It creates the store when that directory does not have one, and it leaves an existing config unchanged.
 
 Only the root needs a copy of the script. Every store is used through the root's `.summem/summem`.
 

@@ -70,10 +70,11 @@ def test_resolve_omitted_path_uses_cwd(tmp_path, summem):
 
 
 def test_start_creates_store_in_dir(tmp_path, monkeypatch, summem):
-    """start <dir> creates a store in that directory."""
+    """start creates a store in a directory that already exists."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
+    (repo / "foo/packages/baz").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "foo/packages/baz"]) == 0
     store = repo / "foo" / "packages" / "baz" / ".summem"
     assert not (store / "summem").exists()
@@ -89,6 +90,7 @@ def test_start_does_not_create_ancestor_stores(tmp_path, monkeypatch, summem):
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
+    (repo / "foo/packages/baz").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "foo/packages/baz"]) == 0
     assert not (repo / "foo" / ".summem").exists()
     assert not (repo / "foo" / "packages" / ".summem").exists()
@@ -102,11 +104,86 @@ def test_start_without_dir_is_usage(tmp_path, monkeypatch, summem):
     assert m.main(["start"]) == 2
 
 
+def test_start_says_there_is_a_store(tmp_path, monkeypatch, capsys, summem):
+    """start on an existing directory prints one line and creates the store."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    (repo / "pkg").mkdir()
+    assert m.main(["start", "pkg"]) == 0
+    out = capsys.readouterr().out
+    assert out == "There is a store in ./pkg.\n"
+    store = repo / "pkg" / ".summem"
+    assert (store / "notes").is_dir()
+    assert (store / "naps").is_dir()
+    assert not (store / "summem").exists()
+    config = (store / "config.toml").read_text(encoding="utf-8")
+    assert config.lstrip().startswith("#")
+    assert "notes/" not in out
+    assert "naps/" not in out
+    assert "git" not in out.lower()
+
+
+def test_start_again_prints_the_same_line(tmp_path, monkeypatch, capsys, summem):
+    """A second start prints the same line and does not rewrite config."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    (repo / "pkg").mkdir()
+    assert m.main(["start", "pkg"]) == 0
+    config = (repo / "pkg" / ".summem" / "config.toml").read_bytes()
+    capsys.readouterr()
+    assert m.main(["start", "pkg"]) == 0
+    captured = capsys.readouterr()
+    assert captured.out == "There is a store in ./pkg.\n"
+    assert captured.err == ""
+    assert (repo / "pkg" / ".summem" / "config.toml").read_bytes() == config
+
+
+def test_start_refuses_missing_directory(tmp_path, monkeypatch, capsys, summem):
+    """start does not create a missing directory."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["start", "missing"]) == 1
+    err = capsys.readouterr().err
+    assert err == "not a directory: ./missing\n"
+    assert not (repo / "missing").exists()
+    assert "git" not in err.lower()
+    assert "notes/" not in err
+    assert "naps/" not in err
+
+
+def test_start_refuses_missing_nested_directory(tmp_path, monkeypatch, capsys, summem):
+    """start does not create missing parents or the target."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    assert m.main(["start", "foo/packages/baz"]) == 1
+    err = capsys.readouterr().err
+    assert err == "not a directory: ./foo/packages/baz\n"
+    assert not (repo / "foo").exists()
+
+
+def test_start_refuses_a_file(tmp_path, monkeypatch, capsys, summem):
+    """start on a file reports that it is not a directory and creates no store."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    (repo / "file").write_text("x", encoding="utf-8")
+    assert m.main(["start", "file"]) == 1
+    err = capsys.readouterr().err
+    assert err == "not a directory: ./file\n"
+    assert (repo / "file").is_file()
+    assert list(repo.rglob(".summem")) == []
+
+
 def test_note_path_writes_started_store(tmp_path, monkeypatch, summem):
     """note --path into a started package writes there, not at git root."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
+    (repo / "foo/packages/baz").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "foo/packages/baz"]) == 0
     assert m.main(["note", "--path", "foo/packages/baz/fee.ts", "child"]) == 0
     child_notes = [
@@ -123,6 +200,7 @@ def test_note_path_rolls_up_when_unstarted(tmp_path, monkeypatch, summem):
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
+    (repo / "foo/packages/baz").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "foo/packages/baz"]) == 0
     assert m.main(["note", "--path", "foo/packages/other/x.ts", "rootish"]) == 0
     root_notes = [p for p in (repo / ".summem" / "notes").iterdir() if not p.name.startswith(".")]
@@ -137,6 +215,7 @@ def test_nap_zoom_recall_path_use_started_store(tmp_path, monkeypatch, capsys, s
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
+    (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
     assert m.main(["note", "--path", "pkg", "alpha"]) == 0
     assert m.main(["note", "--path", "pkg", "beta"]) == 0
@@ -165,6 +244,7 @@ def test_note_path_fold_request_is_copy_paste_safe(tmp_path, monkeypatch, capsys
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
+    (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
     (repo / "pkg" / ".summem" / "config.toml").write_text("WAKE_LINES = 1\n", encoding="utf-8")
     assert m.main(["note", "--path", "pkg", "alpha"]) == 0
@@ -188,6 +268,7 @@ def test_config_wake_lines_is_per_store(tmp_path, monkeypatch, capsys, summem):
     monkeypatch.chdir(repo)
     m.ensure_store(repo)
     (repo / ".summem" / "config.toml").write_text("WAKE_LINES = 1\n", encoding="utf-8")
+    (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
     assert m.main(["note", "root-a"]) == 0
     capsys.readouterr()
@@ -208,7 +289,9 @@ def test_config_entry_chars_is_per_store_for_notes_and_naps(tmp_path, monkeypatc
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
+    (repo / "tight").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "tight"]) == 0
+    (repo / "wide").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "wide"]) == 0
     (repo / "tight" / ".summem" / "config.toml").write_text("ENTRY_CHARS = 5\n", encoding="utf-8")
     (repo / "wide" / ".summem" / "config.toml").write_text("ENTRY_CHARS = 300\n", encoding="utf-8")
@@ -281,6 +364,7 @@ def test_root_wake_catalog_is_labeled_paths_not_commands(tmp_path, monkeypatch, 
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
+    (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
     assert m.main(["note", "--path", "pkg", "pkg-note"]) == 0
     capsys.readouterr()
@@ -304,6 +388,7 @@ def test_empty_root_omits_project_root_header(tmp_path, monkeypatch, capsys, sum
     monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
+    (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
     capsys.readouterr()
     assert m.main(["wake"]) == 0
@@ -334,6 +419,7 @@ def test_pull_wake_omits_usage(tmp_path, monkeypatch, capsys, summem):
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
+    (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
     assert m.main(["note", "--path", "pkg", "pkg-note"]) == 0
     capsys.readouterr()
@@ -350,6 +436,7 @@ def test_root_wake_catalogs_other_store(tmp_path, monkeypatch, capsys, summem):
     monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
+    (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
     assert m.main(["note", "root-note"]) == 0
     assert m.main(["note", "--path", "pkg", "pkg-note"]) == 0
@@ -374,6 +461,7 @@ def test_catalog_empty_store_prints_zero(tmp_path, monkeypatch, capsys, summem):
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
+    (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
     capsys.readouterr()
     assert m.main(["wake"]) == 0
@@ -386,6 +474,7 @@ def test_catalog_one_note_prints_one(tmp_path, monkeypatch, capsys, summem):
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
+    (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
     assert m.main(["note", "--path", "pkg", "pkg-note"]) == 0
     capsys.readouterr()
@@ -401,7 +490,9 @@ def test_catalog_does_not_pad_count_width(tmp_path, monkeypatch, capsys, summem)
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
+    (repo / "a").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "a"]) == 0
+    (repo / "b").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "b"]) == 0
     for i in range(10):
         assert m.main(["note", "--path", "b", f"n{i}"]) == 0
@@ -418,6 +509,7 @@ def test_catalog_text_does_not_list_view(tmp_path, monkeypatch, summem):
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
+    (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
     assert m.main(["note", "--path", "pkg", "pkg-note"]) == 0
 
@@ -435,6 +527,7 @@ def test_catalog_folded_pair_counts_as_two(tmp_path, monkeypatch, capsys, summem
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
+    (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
     assert m.main(["note", "--path", "pkg", "alpha"]) == 0
     assert m.main(["note", "--path", "pkg", "beta"]) == 0
@@ -459,6 +552,7 @@ def test_catalog_skips_cached_notes_nap_unlinked(tmp_path, monkeypatch, capsys, 
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
+    (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
     assert m.main(["note", "--path", "pkg", "alpha"]) == 0
     assert m.main(["note", "--path", "pkg", "beta"]) == 0
@@ -478,6 +572,7 @@ def test_pull_wake_omits_catalog_and_root_notes(tmp_path, monkeypatch, capsys, s
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
+    (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
     assert m.main(["note", "root-note"]) == 0
     assert m.main(["note", "--path", "pkg", "pkg-note"]) == 0
@@ -499,7 +594,9 @@ def test_ignored_store_omitted_from_catalog(tmp_path, monkeypatch, capsys, summe
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     (repo / ".git" / "info" / "exclude").write_text("secret/.summem\n", encoding="utf-8")
+    (repo / "secret").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "secret"]) == 0
+    (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
     assert m.main(["note", "--path", "secret", "hidden"]) == 0
     assert m.main(["note", "--path", "pkg", "visible"]) == 0
@@ -518,7 +615,9 @@ def test_gitignore_store_omitted_from_catalog(tmp_path, monkeypatch, capsys, sum
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     (repo / ".gitignore").write_text("hidden/.summem\n", encoding="utf-8")
+    (repo / "hidden").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "hidden"]) == 0
+    (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
     capsys.readouterr()
     assert m.main(["wake"]) == 0
@@ -532,6 +631,7 @@ def test_catalog_does_not_os_walk(tmp_path, monkeypatch, capsys, summem):
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
+    (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
     capsys.readouterr()
 
@@ -551,6 +651,7 @@ def test_file_ignored_config_still_catalogs_store(tmp_path, monkeypatch, capsys,
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     (repo / ".gitignore").write_text("config.toml\n", encoding="utf-8")
+    (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
     assert m.main(["note", "--path", "pkg", "visible"]) == 0
     capsys.readouterr()
@@ -566,6 +667,7 @@ def test_catalog_requires_config_toml_sentinel(tmp_path, monkeypatch, capsys, su
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     (repo / "bare" / ".summem").mkdir(parents=True)
+    (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
     capsys.readouterr()
     assert m.main(["wake"]) == 0

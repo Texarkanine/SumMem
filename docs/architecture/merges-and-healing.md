@@ -76,7 +76,7 @@ When two naps hold some of the same memories but neither holds all of the other'
 | `nap` | Before resolving the ids the agent passed. |
 | `wake`, `zoom`, `recall` | Never. Reading never waits on a repair. |
 
-Because `nap` heals first, an id the agent copied from a fold request can be gone by the time it runs: a merge landed in between, or another agent on the machine ran the same request first. Then `nap` fails with `unknown id` and folds nothing. The memories still live in the row that survived, and the next fold request names current ids.
+Because `nap` heals first, an id from a fold request can be gone by the time a later `nap` runs: a merge landed in between, or another agent on the machine ran the same request first. If that pair is already the two children of a nap, `nap` succeeds, prints `Saved.`, and then whatever fold is actually left. The memories stay in the nap that won. An id the store does not have is `unknown id`.
 
 ## The lock
 

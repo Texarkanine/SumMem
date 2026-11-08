@@ -1,6 +1,6 @@
 # Tech Context
 
-The file backend is a Python 3 shebang script. Agents talk to a stable CLI (`wake`, `note`, `nap`, `recall`, `zoom`, `start`, `init`, `version`). The on-disk format may later change, including to sqlite; the command table (`usage_text`, printed by `summem -h`) must not.
+The file backend is a Python 3 shebang script. Agents talk to a stable CLI (`wake`, `note`, `nap`, `recall`, `zoom`, `start`, `init`, `version`, `help`). The on-disk format may later change, including to sqlite; the command table (`usage_text`, printed by `summem -h`) must not.
 
 A store is a `.summem/` directory (not `.mem/` — that name is already taken in this problem space). Nap captions are `.summ` (not `.sum` — that suffix is checksums). Per-store settings live in `.summem/config.toml`, read with stdlib [`tomllib`](https://docs.python.org/3/library/tomllib.html) (added in 3.11; parse only). Default config is a commented template written as text, not a TOML dump.
 

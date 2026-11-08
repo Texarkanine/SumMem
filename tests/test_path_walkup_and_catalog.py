@@ -29,6 +29,7 @@ def _notes(store: Path) -> list[Path]:
 def test_note_path_lands_in_started_store_else_ancestor(tmp_path):
     """note --path writes into a started store, else the next ancestor."""
     repo = init_repo(tmp_path / "r")
+    (repo / "foo/packages/baz").mkdir(parents=True, exist_ok=True)
     _run([sys.executable, str(SCRIPT), "start", "foo/packages/baz"], repo)
     _run(
         [sys.executable, str(SCRIPT), "note", "--path", "foo/packages/baz/fee.ts", "child"],
@@ -50,6 +51,7 @@ def test_note_path_lands_in_started_store_else_ancestor(tmp_path):
 def test_root_wake_lists_other_stores_pull_prints_only_that_store(tmp_path):
     """Root wake lists other stores; wake --path prints that store only."""
     repo = init_repo(tmp_path / "r")
+    (repo / "pkg").mkdir()
     _run([sys.executable, str(SCRIPT), "start", "pkg"], repo)
     _run([sys.executable, str(SCRIPT), "note", "root-note"], repo)
     _run([sys.executable, str(SCRIPT), "note", "--path", "pkg", "pkg-note"], repo)
