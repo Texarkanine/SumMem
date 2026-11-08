@@ -26,3 +26,34 @@
 * Insights
     - Napping the two children `wake` expanded is the nap that already exists, so it is the success path, not a second error
 
+## 2026-11-07 - PREFLIGHT - FAIL (fixable)
+
+* Work completed
+    - Preflight of the first plan returned three fixable findings and no plan edits
+* Decisions made
+    - Revise the plan and preflight again
+* Insights
+    - A note's view id is `leafset_id` of its digest, 16 hex. The raw digest does not match a wake prefix.
+    - `tests/test_path_walkup_and_catalog.py` also starts directories it does not create.
+
+## 2026-11-07 - PLAN - COMPLETE
+
+* Work completed
+    - Revised the plan for the three preflight findings and the commands-table advisory
+* Decisions made
+    - `_nap_miss` reuses `_projected_child` and `_index_tree`. No new child-id helper.
+    - Known ids are view rows plus nested tree ids. One of each, when not a direct pair, is `not a fold row`.
+* Insights
+    - The id formula was already in two places. A third copy of the raw digest would not match wake.
+
+## 2026-11-07 - PREFLIGHT - COMPLETE (FAIL (fixable))
+
+* Work completed
+    - Validated the implementation plan against the codebase, test suite, and documentation
+    - Wrote `memory-bank/active/.preflight-status` with first line `FAIL (fixable)`
+* Decisions made
+    - Flagged three fixable plan issues before Build: `tests/test_path_walkup_and_catalog.py` calling `start` on uncreated directories, `_nap_miss` using `note_digest` instead of `leafset_id([note_digest(...)])` for `NoteChild` ids, and `_nap_miss` checking only nap trees rather than `view_ids | nested_ids` when classifying `not a fold row`
+* Insights
+    - A `NoteChild`'s 16-hex content id is `leafset_id([note_digest(note_file_bytes(text))])`, not the raw 64-hex `note_digest`
+
+
