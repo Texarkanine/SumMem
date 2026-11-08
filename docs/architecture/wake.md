@@ -53,7 +53,7 @@ The **wake budget** (`WAKE_LINES`, 32 by default) is the number of rows the view
 
 Under budget, `wake` opens the children file of the newest nap that can split, and prints its two children in its place. It repeats until the listing reaches the budget or nothing left will split. After each split it sorts the opened rows by each row's oldest note, so a newer child lands at its own date.
 
-Expansion happens in memory and writes nothing. The expanded rows print with their ids, and `zoom` can open them. `nap` of those two children is the nap that already exists: it succeeds and writes nothing. A pair that is not some nap's two children is refused with `not a fold row`. No fold request names an expanded row: requests are built from the rows on disk.
+Expansion happens in memory and writes nothing. The expanded rows print with their ids, and `zoom` can open them. `nap` of those two children is the nap that already exists: it succeeds and writes no new nap. A pair that is not some nap's two children is refused with `not a fold row`. No fold request names an expanded row: requests are built from the rows on disk.
 
 A nap whose children file is missing or unreadable does not split, and `wake` says nothing about it.
 
