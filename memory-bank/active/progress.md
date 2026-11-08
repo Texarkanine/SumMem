@@ -123,5 +123,14 @@
 * Insights
     - On main, both the one-level retry and the nested retry already failed with `unknown id`. The nested miss is a hole in this branch's new success path, which only checks `root_kids`
 
+## 2026-11-07 - COMPLEXITY-ANALYSIS - COMPLETE
+
+* Work completed
+    - Classified the rework as Level 2
+* Decisions made
+    - Level 2: one script, the catalog mirror in the user guide, and no architectural choice
+* Insights
+    - Item 1 is a product rule about what the catalog prints. Item 2 is a hole in the success path this branch added. Together they stay inside the CLI that already owns both.
+
 
 
