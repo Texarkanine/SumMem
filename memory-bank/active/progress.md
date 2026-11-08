@@ -101,5 +101,16 @@
 * Insights
     - A note id on wake is `leafset_id` of the digest. The raw digest matches nothing in the view.
 
+## 2026-11-07 - SAVE
+
+* Work completed
+    - Opened draft PR 101
+    - Slimmed `_nap_miss` onto `resolve_id` and `root_kids`, and dropped a redundant path join in `start` (`fix: ponytail` on the PR branch)
+    - py311: 441 passed after the slim
+* Decisions made
+    - Did not fold the two nap refusals into one string, and did not walk trees on a nap that already resolves
+* Insights
+    - The pair check can use `root_kids` from the walk `_nap_miss` already runs
+
 
 
