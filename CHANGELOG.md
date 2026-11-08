@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.0](https://github.com/Texarkanine/SumMem/compare/v0.12.2...v0.13.0) (2026-11-08)
+
+
+### Features
+
+* **docs:** add a ProperDocs documentation site ([#99](https://github.com/Texarkanine/SumMem/issues/99)) ([ae2ea72](https://github.com/Texarkanine/SumMem/commit/ae2ea726a2f1a1de4b96f08242218fa887d8927f))
+
 ## [0.12.2](https://github.com/Texarkanine/SumMem/compare/v0.12.1...v0.12.2) (2026-10-31)
 
 
