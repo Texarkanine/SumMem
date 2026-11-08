@@ -1,0 +1,1 @@
+Windows: CRLF canonicalized on read; lock is naps/ flock else runtime-dir file, msvcrt wait 30s monotonic (test allows 1e-9 slack). Bootstrap wake is python .summem/summem wake; Usage bare on Unix, python-prefixed on Windows. Never monkeypatch os.name to nt on Linux.

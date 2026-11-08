@@ -32,4 +32,4 @@ Completed work is summarized under `memory-bank/archive/<kind>/YYYYMMDD-<task-id
 
 ## When to load
 
-When the task needs project, architecture, or stack context, read the relevant persistent file(s). Do not load every memory-bank file on every chat. The algorithm and store layout live in `docs/architecture/index.md`.
+When the task needs project, architecture, or stack context, read the relevant persistent file(s). Do not load every memory-bank file on every chat. The algorithm and store layout live under `docs/architecture/`, starting at `docs/architecture/index.md`.

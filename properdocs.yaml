@@ -1,0 +1,96 @@
+site_name: SumMem
+site_description: >-
+  A committed, concurrent memory for agents working in a git repository.
+site_url: https://texarkanine.github.io/SumMem/
+site_author: Texarkanine
+
+repo_url: https://github.com/Texarkanine/SumMem
+repo_name: Texarkanine/SumMem
+edit_uri: edit/main/docs/
+
+docs_dir: docs
+site_dir: site
+
+# Strict mode turns warnings into errors. With the validation block below,
+# this is the gate for broken links and anchors across docs/.
+strict: true
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.indexes
+    - navigation.instant
+    - navigation.sections
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - navigation.tracking
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+    - content.action.view
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+    logo: material/head-lightbulb-outline
+
+extra_css:
+  - stylesheets/extra.css
+
+plugins:
+  - search
+  - awesome-pages
+  - llms-source:
+      source_revision: true
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - footnotes
+  - tables
+  - toc:
+      permalink: true
+      permalink_title: Permanent link to this section
+      # GitHub-compatible slugs, so docs/ markdown links work the same on
+      # github.com and on the site.
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Texarkanine/SumMem
+  generator: false

@@ -1,8 +1,6 @@
 # Architecture
 
-This page is the systems atlas: how SumMem’s algorithm and store fit together, and which constraints you must not remove without understanding them. How to run the commands lives in the [README](../../README.md). Why the arrangement converges under concurrent writers lives in [Theory](../theory.md). What this backend is not yet lives in [Notes](../notes.md).
-
-SumMem is a grow-only set of short facts in a git repository, plus a decaying listing of that set. Agents never edit the files. They run a script. The script owns every path, name, timestamp, and hash.
+SumMem is a grow-only set of short facts in a git repository, plus a listing of those facts that gets shorter as they age. Agents never edit the files. They run a script, and the script owns every path, name, timestamp, and hash.
 
 ```mermaid
 graph TD
@@ -10,362 +8,90 @@ graph TD
     classDef script fill:#fff3e0,stroke:#ef6c00;
     classDef store fill:#f3e5f5,stroke:#7b1fa2;
 
-    Prompt["Session prompt"]:::agent --> Agents["Agents"]:::agent
-    Agents --> CLI["The script"]:::script
-    CLI --> Notes["Notes: one immutable file each"]:::store
-    CLI --> Naps["Naps: caption + children"]:::store
-    CLI --> Cfg["Per-store settings"]:::store
-    CLI --> Root["Root wake"]:::script
-    Root --> Usage["Usage how-to"]:::script
-    Root --> Catalog["Catalog of other stores"]:::script
-    Root --> View["Decaying view"]:::script
+    Block["Activation block in AGENTS.md"]:::agent -->|"wake at session start"| Agents["Agents"]:::agent
+    Agents -->|"wake, note, nap, zoom, recall"| Script["The script"]:::script
+    Script -.->|"how-to, catalog, memories, fold requests"| Agents
+    Script -->|"reads, writes, heals"| Store
+    subgraph Store["A store: .summem/"]
+        Notes["Notes: one immutable file each"]:::store
+        Naps["Naps: caption + children file"]:::store
+        Cfg["config.toml"]:::store
+    end
 ```
-
-The diagram names the pieces this page will define, in this order: the prompt that loads the tool, the script agents run, the two kinds of store file, the per-store settings, and what a root wake prints.
 
 ## Store, driver, and activation
 
-These are three different objects.
-
-A **store** is the data: a directory of notes, naps, and settings under `.summem/`.
-
-The **driver** is the script agents run. Creating a store creates the data directories and a default settings file. It does not place or overwrite the driver. This development repo keeps one script at the repository root and points each store’s script path at it.
-
-**Activation** is a block of instructions at the top of committed `AGENTS.md`. The `init` command prints that block as a starting write rule; after insert it is that repository's policy until someone edits it. The script does not reassert its default over an edited prefix. Presence of the driver is not activation. Command recipes live in root-wake Usage, not in this block.
-
-A command resolves one store by walking from the work path — `--path`, or the current directory — toward the git root and taking the first directory that already has a store. The git root gets a store on the first store command. Every other store is created with `start`.
-
-The on-disk backend can change later only if agents still never touch store files.
-
-## Why the store is files
-
-Two writers who each learned a fact must be able to record it at the same time, on different machines, without a shared counter or a lock that spans clones. Two new files is a merge git already knows how to do. One append-only log with a next id is not: both writers pick the same next slot.
-
-Git is also not a clock and not an archive of deleted sentences. Squash-merge keeps the files that exist at the branch tip. Anything a later zoom must still see has to be in one of those files.
-
-So SumMem has no primary writer. It has files, and a listing of those files that gets shorter as facts age.
-
-## Notes
-
-A **note** is one immutable file: one line of text, with a length limit. There is no edit. A retraction is a new note. Rewriting a note is the one way to create a real content conflict; the script never does it.
-
-The filename carries writer time in UTC and a random suffix. Filename sort is the order. Git-add date, squash commit time, and `git log` are the wrong clock.
-
-A single note is written to a temp path and renamed into place.
-
-## Naps
-
-A **nap** is a summary of two view rows of the same grain. They need not be neighbors in the listing. It is two files that share a name:
-
-- The **caption** (`.summ`) is one line, the same length limit as a note. Wake prints it.
-- The **children file** (`.tree`) is a dump of those two rows. Zoom and deep recall need it after squash.
-
-The shared name starts with the left child’s time and random suffix so the nap sorts where that child sorted, not at “now.” After that come the 16-hex leaf-set id, the grain, and a 16-hex variant tag of the pair bytes. Agents never see or type the tag. The public id is still the leaf-set field. Four-part names and five-part names whose leaf-set field is 64 hex are not view nodes; `migrate.py` rewrites both and nested JSON ids.
-
-Fold writes a new pair, then removes the children from the listing. Children leave the working tree only after the parent children file exists on disk.
-
-## The view
-
-The **view** is the current listing: every loose note, plus every nap. A nap still counts if only one of its two files is present. Sorted by filename.
-
-Each of those is one **view node**. A complete nap is two physical files and still one view node.
-
-A missing or conflict-marked caption still counts as a view node: grain and id prefix print, the caption does not. A missing or unreadable children file means that node will not split.
-
-Each store has a committed **settings** file. Two settings matter here: the length limit, and the **wake budget** — how many view nodes may exist before the script asks for a fold, and how short a listing must be before wake expands a nap in memory. Wake still prints every view node when the count is over budget. Missing values use the script’s defaults. Settings are not environment variables and are not rewritten unless someone runs `start`.
-
-## Grain
-
-**Grain** is how many original notes a view node stands for. A loose note is grain 1. A nap that covers sixteen original notes is grain 16.
-
-Grain is the only size fold cares about. It is not the number of physical files.
-
-## Identity
-
-A view node’s **content id** is a digest of the original notes it stands for, never of the caption.
-
-1. Hash each original note’s file bytes.
-2. Sort those hashes and concatenate them with no delimiter.
-3. Hash that join and keep the first 16 hex characters. That value is the **leaf-set id**.
-
-The script computes both hashes itself. It does not shell out, and it does not use git’s hasher: those would change the id when the machine or the repository hash changes.
-
-The children file is a JSON document: a list of exactly two children. A child is either a note (its filename and its text) or a nap (its leaf-set id, its caption, and that nap’s own two children). Nesting stops at notes. Equal-grain fold builds a balanced binary tree, so 2048 original notes are eleven naps deep, not a chain of 2048 braces. Every original sentence still lives in that one file — the file gets fatter with grain, not deeper without bound. Unknown fields are ignored. A missing or unknown kind of child is an error; kind is not inferred from other keys. There is no version field.
-
-That document is deterministic for one tree: same child order, nested captions, and grouping produce the same bytes. Two agents who nap the same two loose notes with different pair bytes write different complete paths; git unions them. Wake may print two same-id rows until the next `note` or `nap`. The same leaf-set id folded in a different grouping, or with different nested captions, is the same id and different children-file bytes.
-
-Wake, recall, and zoom print a unique prefix of the id, long enough to be unambiguous in that listing. Stored leaf-set ids are 16 hex; display is that unique prefix (floor 8). Two notes with the same text share an id; heal keeps one (the later filename). A later note whose text already sits inside a pack is the same receipt: heal drops the loose file. A command that looks like a positional range is rejected.
-
-## Fold
-
-When the view has more nodes than the wake budget, `note` and `nap` ask the agent to fold.
-
-```mermaid
-flowchart TD
-    Note["note: write a new path"] --> View["View"]
-    Nap["nap: write parent, then remove children"] --> View
-    View --> Count{"View-node count vs wake budget"}
-    Count -->|"at or over"| Files["Print view nodes; do not open children"]
-    Count -->|"under"| Expand["Expand the newest nap in memory"]
-    Note --> Over{"View still over budget?"}
-    Nap --> Over
-    Over -->|yes| Pair["Request the oldest same-grain pair"]
-    Over -->|no| Done["No fold request"]
-```
-
-The pair is the oldest view node whose grain is a power of two and that has another row of that grain anywhere later in the listing, paired with the nearest such row. The two rows need not be neighbors. Same grain means they stand for the same number of original notes. That number is the count of notes in the children file. Wake lists the grain in the filename. Fold and nap pair on that children count, including when the filename disagrees and the count is a power of two.
-
-A **wall** is an older row sitting before a bigger, newer one. A neighbors-only rule never pairs across a wall, so that row and everything older stay in the listing forever. Skipping to the nearest same-grain row is what lets a merge, a late note, a zipper reopen, or surgery heal.
-
-One writer's listing never rises. Each grain of 2 or more appears at most twice, and at most one of those grains is doubled. On that listing the oldest row with a twin is the oldest pair of neighbors, so one writer sees the same folds as before.
-
-A grain-16 nap sitting next to one leftover note is not a pair the script will request. Folding them would glue a sealed block to a singleton. The script waits for another grain-1 row. It never writes a pack whose grain is not a power of two. A pack already on disk with some other grain stays listed and is never requested. So does a pack whose children file is missing or unreadable: `nap` cannot fold it, and it never counts as a nearer row of its grain.
-
-One writer, eight notes `A`–`H`, oldest first. Imagine the wake budget is 1 so every same-grain pair gets requested. Each letter is one original note. A box `AB` is the nap of those notes.
-
-```mermaid
-flowchart LR
-    classDef note fill:#e1f5fe,stroke:#01579b;
-    classDef nap fill:#f3e5f5,stroke:#7b1fa2;
-
-    A["A"]:::note --- B["B"]:::note --- C["C"]:::note --- D["D"]:::note --- E["E"]:::note --- F["F"]:::note --- G["G"]:::note --- H["H"]:::note
-```
-
-Oldest grain-1 neighbors fold, four times:
-
-```mermaid
-flowchart LR
-    classDef nap fill:#f3e5f5,stroke:#7b1fa2;
-
-    AB["AB"]:::nap --- CD["CD"]:::nap --- EF["EF"]:::nap --- GH["GH"]:::nap
-```
-
-Oldest grain-2 neighbors fold, twice:
-
-```mermaid
-flowchart LR
-    classDef nap fill:#f3e5f5,stroke:#7b1fa2;
-
-    ABCD["ABCD"]:::nap --- EFGH["EFGH"]:::nap
-```
-
-Then the last same-grain pair:
-
-```mermaid
-flowchart LR
-    classDef nap fill:#f3e5f5,stroke:#7b1fa2;
-
-    ALL["ABCDEFGH"]:::nap
-```
-
-Eight notes become one view node. Zoom still opens `ABCDEFGH` into `ABCD` and `EFGH`, and so on, down to the letters. The originals never left the children files.
-
-The agent supplies a caption. `nap` writes the new pair and removes the children. If the view is still over budget, the script asks for the next same-grain pair. Fold still removes the children; it does not keep them on disk “because wake will expand.”
-
-`nap` of two nodes whose leaf sets overlap is rejected. Overlap is the zipper’s job.
-
-## Expand
-
-When the view has fewer nodes than the wake budget, wake may open a children file and replace the newest expandable nap with its two children, in memory, until it has enough lines or nothing left will split. After each split, the opened rows are sorted by each row's oldest note, so a newer child lands at its own date. It does not write those children back. The expanded ids are printable and zoomable.
-
-`nap` still takes view-node ids — ids that exist as files — not ids that exist only in that in-memory expansion.
-
-When the view meets or exceeds the budget, wake lists every view node. It does not drop the oldest to fit the budget, open children files to list, or zipper. The next `note` or `nap` is what folds the count back to spec.
-
-Wake never refuses to print. A dirty caption degrades; it does not block the session.
-
-## Zipper
-
-Two branches can each nap overlapping sets of the same original notes. Git merge then lands two naps. The next `note` or `nap` on this machine that writes to the store heals that. That invocation takes a same-machine lock: directory flock of `naps/` when that works, otherwise a lock file in an OS runtime directory. Neither is a committed object. Wake does not wait on it. Git merge remains the control across clones. While the lock is held, each nap's children file is parsed at most once: heal, the fold scan, and `nap` share that parse, and a file the command writes is parsed fresh.
-
-```mermaid
-flowchart TD
-    Share["Two view naps share original notes"] --> Sub{"One leaf set is a subset of the other?"}
-    Sub -->|yes| Drop["Drop the subset nap"]
-    Sub -->|no| Kids["Write the smaller nap's children back out"]
-    Kids --> Unlink["Drop the smaller nap"]
-```
-
-Two loose notes that share text are not skipped. Heal unlinks the older filename. Heal runs before `nap` resolves the ids the agent passed. If heal drops one of those ids, the command fails and does not fold; the original notes still live in the survivor. A fold of two view nodes with intersecting leaf sets is refused, so a pack cannot claim grain 2 for one receipt. Later naps of disjoint same-grain rows still fold as usual.
-
-The same eight-note alphabet, two writers. Both start from the shared base `A B C D`. Writer 1 continues with letters `E F`. Writer 2 continues with numbers `1 2`.
-
-```mermaid
-flowchart TB
-    classDef shared fill:#f3e5f5,stroke:#7b1fa2;
-    classDef w1 fill:#e1f5fe,stroke:#01579b;
-    classDef w2 fill:#fff3e0,stroke:#ef6c00;
-
-    subgraph writer1notes["Writer 1"]
-        direction LR
-        A["A"]:::shared --- B["B"]:::shared --- C["C"]:::shared --- D["D"]:::shared --- E["E"]:::w1 --- F["F"]:::w1
-    end
-    subgraph writer2notes["Writer 2"]
-        direction LR
-        A2["A"]:::shared --- B2["B"]:::shared --- C2["C"]:::shared --- D2["D"]:::shared --- N1["1"]:::w2 --- N2["2"]:::w2
-    end
-```
-
-Each writer folds as in the one-writer picture, same-grain only. Both can build the shared `ABCD`. Writer 1 then waits with `ABCD` next to `EF` (grain 4 next to grain 2). Writer 2 waits with `ABCD` next to `12`. Same-grain fold will not glue those.
-
-```mermaid
-flowchart TB
-    classDef shared fill:#f3e5f5,stroke:#7b1fa2;
-    classDef w1 fill:#e1f5fe,stroke:#01579b;
-    classDef w2 fill:#fff3e0,stroke:#ef6c00;
-
-    subgraph writer1stuck["Writer 1"]
-        direction LR
-        W1A["ABCD"]:::shared --- W1B["EF"]:::w1
-    end
-    subgraph writer2stuck["Writer 2"]
-        direction LR
-        W2A["ABCD"]:::shared --- W2B["12"]:::w2
-    end
-```
-
-If writer 2 never folded `AB` with `CD`, merge is the union of the two views: the parts and the whole.
-
-```mermaid
-flowchart TB
-    classDef shared fill:#f3e5f5,stroke:#7b1fa2;
-    classDef w1 fill:#e1f5fe,stroke:#01579b;
-    classDef w2 fill:#fff3e0,stroke:#ef6c00;
-
-    subgraph from1["From writer 1"]
-        direction LR
-        U1["ABCD"]:::shared --- U2["EF"]:::w1
-    end
-    subgraph from2["From writer 2"]
-        direction LR
-        U3["AB"]:::shared --- U4["CD"]:::shared --- U5["12"]:::w2
-    end
-```
-
-`AB` and `CD` are subsets of `ABCD`. The zipper drops the subsets. What remains does not overlap:
-
-```mermaid
-flowchart LR
-    classDef shared fill:#f3e5f5,stroke:#7b1fa2;
-    classDef w1 fill:#e1f5fe,stroke:#01579b;
-    classDef w2 fill:#fff3e0,stroke:#ef6c00;
-
-    Z1["ABCD"]:::shared --- Z2["EF"]:::w1 --- Z3["12"]:::w2
-```
-
-If each writer instead had a grain-4 continuation and napped it onto `ABCD`, merge lands two wholes of grain 8. Neither contains the other: they share `A B C D` and each keeps its own continuation. `nap` refuses a grain-4 pack with a grain-2 pack, so this walk stays on equal grains.
-
-```mermaid
-flowchart TB
-    classDef shared fill:#f3e5f5,stroke:#7b1fa2;
-    classDef w1 fill:#e1f5fe,stroke:#01579b;
-    classDef w2 fill:#fff3e0,stroke:#ef6c00;
-
-    subgraph whole1["ABCDEFGH"]
-        direction LR
-        P1A["A"]:::shared --- P1B["B"]:::shared --- P1C["C"]:::shared --- P1D["D"]:::shared --- P1E["E"]:::w1 --- P1F["F"]:::w1 --- P1G["G"]:::w1 --- P1H["H"]:::w1
-    end
-    subgraph whole2["ABCD1234"]
-        direction LR
-        P2A["A"]:::shared --- P2B["B"]:::shared --- P2C["C"]:::shared --- P2D["D"]:::shared --- P21["1"]:::w2 --- P22["2"]:::w2 --- P23["3"]:::w2 --- P24["4"]:::w2
-    end
-```
-
-The zipper opens `ABCDEFGH` back into its two children, then drops `ABCDEFGH`:
-
-```mermaid
-flowchart LR
-    classDef shared fill:#f3e5f5,stroke:#7b1fa2;
-    classDef w1 fill:#e1f5fe,stroke:#01579b;
-    classDef w2 fill:#fff3e0,stroke:#ef6c00;
-
-    subgraph opened["Opened ABCDEFGH"]
-        direction LR
-        O1["ABCD"]:::shared --- O2["EFGH"]:::w1
-    end
-    subgraph untouched["Still on disk"]
-        direction LR
-        O3["ABCD1234"]:::w2
-    end
-```
-
-`ABCD` is now a subset of `ABCD1234`, so it drops too. The shared letters live on inside `ABCD1234`. Writer 1’s continuation is `EFGH`. Writer 2’s continuation is already inside `ABCD1234`. No original note was deleted.
-
-```mermaid
-flowchart LR
-    classDef w1 fill:#e1f5fe,stroke:#01579b;
-    classDef w2 fill:#fff3e0,stroke:#ef6c00;
-
-    subgraph done["After zipper"]
-        direction LR
-        D1["EFGH"]:::w1 --- D2["ABCD1234"]:::w2
-    end
-```
-
-Rebuilding an age-aligned cover of the whole merged leaf list is not this algorithm. See [Notes](../notes.md).
-
-## Zoom and recall
-
-Zoom walks a children file in the current commit. Every sentence zoom still owes lives in a file at the tip, inside a children file if not still a loose note. An older commit is not an index.
-
-Everyday recall is the view, with captions standing in for napped children. Recall that must see original sentences or nested nap captions reads children files as well.
-
-Wake, recall, and zoom share `format_wake_line`: dated leaves and unique-prefix packs. Fold quotes captions without grain or prefix; the ids live on the `Run:` line. Recall searches note text and nap captions, not grain, prefix, or day. Pack prefixes are unique among `named_ids` (view plus nested tree ids). Recall and zoom build that uniqueness once per command — sort the distinct ids and take the longest common prefix with each neighbor — so each printed line is a lookup. They parse each view children file at most once; `named_ids` is that walk's id list. Wake may still call `short_id` per line; fold calls it for the `Run:` ids. Stored leaf-set ids are 16 hex; listings unique-prefix that field.
-
-Zoom and recall print one agent-safe line when they skip an unreadable sibling children file, and do not fail if another pack answered. Wake stays silent.
-
-## Scopes
-
-A command resolves **one** store. The work path may be a file: the walk starts at that file’s directory. The script does not parse workspace manifests. It does not create a store because someone recorded a note from a deep folder.
-
-Root wake prints `== SumMem Usage ==`, then a labeled catalog of every other started store (`N: ./path` note count from filenames, not pull commands), then the root listing when that listing is non-empty, labeled `== Project-root Memories ==`. The catalog is a walk of the tree that honors git ignore. It is not a committed index. A wake aimed at a path prints only the nearest store: no Usage, no catalog, no Project-root header.
-
-A child store in context is advertised, not enforced. Do not load every started store in the root wake.
-
-Outside a repository, store commands fail. `init`, `version`, and help still print.
+These are three different things.
+
+- A **store** is the data: a `.summem/` directory of notes, naps, and settings. See [The Store](store.md).
+- The **driver** is the script agents run. Creating a store creates its directories and settings file; it never places or overwrites the driver. This repository keeps one script at its root, and its stores link to it.
+- **Activation** is the block at the top of committed `AGENTS.md`. `init` prints a starting version. Once inserted, the block is the repository's own policy, and its write rule is the repository's to edit. The script never reads `AGENTS.md`, so it never puts its default back over an edited block. Having the driver in the repository is not activation. Command recipes live in the how-to that root `wake` prints, not in the block.
+
+The on-disk format can change later only if agents still never touch store files.
+
+## Glossary
+
+| Term | Meaning | Defined in |
+|---|---|---|
+| note | One memory: one line, in one immutable file | [The Store](store.md#notes) |
+| nap | A caption plus a children file, standing for two rows of the same grain | [The Store](store.md#naps) |
+| caption | A nap's one-line summary, in its `.summ` file | [The Store](store.md#naps) |
+| children file | A nap's `.tree` file: its two children, down to every original note | [The Store](store.md#the-children-file) |
+| content id | A hash of the original notes a row stands for | [The Store](store.md#identity) |
+| variant tag | The last field of a nap's name: a hash of its two files | [The Store](store.md#nap-names) |
+| view, row | The listing `wake` prints, and one entry in it | [Wake](wake.md#the-view) |
+| grain | How many original notes a row stands for | [Wake](wake.md#grain) |
+| memory line | How `wake`, `zoom`, and `recall` print one row | [Wake](wake.md#memory-lines) |
+| wake budget | The number of rows the view aims for | [Wake](wake.md#the-wake-budget) |
+| fold | Replacing two same-grain rows with a nap | [Folding](folding.md#fold) |
+| wall | An older row before a bigger, newer one | [Folding](folding.md#walls) |
+| expand | `wake` opening naps in memory to fill spare lines | [Wake](wake.md#expand) |
+| heal, zipper | Removing rows whose memories another row already holds, after a merge or a repeated `note` | [Merges and Healing](merges-and-healing.md) |
+| catalog | Root `wake`'s list of the other stores | [Wake](wake.md#a-root-wake) |
 
 ## Invariants
 
 These look optional and are not.
 
 - **The script is the only writer.** Agents never create, edit, or delete store files.
-- **Recording a note commutes.** Two notes are two paths. There is no next id and no shared index everyone updates.
-- **Sequence is in the filename.** Writer time for notes; the left child’s time for naps. Not `git log`.
-- **The children file is write-once and canonical.** The same tree dumps to the same bytes. Fold writes a new path; it does not patch. The same leaf-set id is not the same bytes when grouping or nested captions differ.
-- **Same-block naps union, then zipper.** Different pair bytes are different paths. Git merges them as a set. Wake may print two same-id rows until the next `note` or `nap`. Equal leaf-sets collapse to the lexicographically greatest complete stem. `.tree` and `.summ` are one atomic variant pair. File count returns to O(view) after heal. A legacy driver is not a supported concurrent writer once five-part stems exist.
-- **Zoom is a property of the current commit.** Every owed sentence lives in a file at the tip.
-- **Wake never blocks.** Missing or dirty captions degrade. Wake never refuses to print.
-- **Empty packages stay empty.** The root auto-creates; every other store is `start`. Walking up does not create a store.
-- **Root pushes; other stores pull.** Root wake catalogs. A pull is a wake aimed at a path.
-- **Settings live in the store.** Not in the environment. Missing settings mean script defaults.
-- **Wake dates leaves only, never ranges.** A note is `x1 YYYY-MM-DD: text` from the filename stamp. A pack is `xN <prefix>: caption` with no day. Fold quotes captions without grain or prefix; ids live on the `Run:` line. Fold and zoom take a unique prefix of a content id.
-- **Personal and machine facts stay out.** This store is facts about this directory hierarchy. That is product intent and the shipped default write rule. The prefix is repo policy the script does not parse.
-
-Two branches whose naps do not overlap merge, then fold oldest pair first. Every pack the script writes has a power-of-two grain. Overlapping merge is zipper, not that case.
+- **Recording a note commutes.** Two notes are two paths. There is no next id and no shared index that every write updates.
+- **Order is in the filename.** Writer time for notes; the oldest note's time for naps. Never `git log`.
+- **Children files are written once and are canonical.** The same tree dumps to the same bytes. Fold writes a new file; it never patches one.
+- **Merges union, then heal.** Different bytes are different paths, and git merges them as a set. The next `note` or `nap` heals the view so no two rows share a note, and the file count returns to the size of the view. See [Merges and Healing](merges-and-healing.md).
+- **Every nap's grain is a power of two.** Fold pairs equal grains, oldest pair first, across walls. See [Folding](folding.md#fold).
+- **Zoom is a property of the current commit.** Every sentence a zoom can owe is in a file at the tip.
+- **Wake never blocks.** It never refuses to print, never drops rows to fit the budget, and degrades a damaged caption instead of failing.
+- **The wake budget is a target.** Writes move the view toward it; a merge can exceed it until the next writes fold.
+- **Empty packages stay empty.** The root store is created automatically; every other store needs `start`. Walking up never creates a store.
+- **The root pushes; other stores pull.** Root `wake` catalogs other stores; an agent loads one with `wake --path`.
+- **Settings live in the store,** not in the environment. Missing settings take the script's defaults.
+- **Rows are named by content, never by position.** Notes print with a day, naps with a unique id prefix. Ranges are rejected.
+- **Personal and machine facts stay out.** A store holds facts about its directory tree. That is the product's intent and the default write rule. The write rule is the repository's own text; the script never reads it.
+- **A driver older than five-part nap names is not a supported concurrent writer.**
 
 ## What this is not
 
-This repository also keeps task working notes under `memory-bank/`. That is a different system: scoped to a task, archived when the task ends. SumMem is not that.
+This repository also keeps task notes under `memory-bank/`. That is a different system: scoped to one task, and archived when the task ends.
 
 SumMem is also not:
 
-- one growing log that every note appends to
-- a lease, a primary agent, or a custom merge driver
-- git history as the zoom tree
-- harness hooks as the way memory loads — hooks may nag; the bootstrap and a root wake are how memory enters context
-- a package manifest as a scope
+- one growing log that every note appends to;
+- a lease, a primary agent, or a custom merge driver;
+- git history as the zoom tree;
+- harness hooks as the way memory loads;
+- a package manifest as a scope.
 
 ## Change surfaces
 
 | If you are changing | Read |
 |---|---|
-| What an agent is allowed to know or type | The README command table, the activation block (write rule and wake handoff), and root-wake Usage (argv, grammar, writer-only). Do not leak store paths into the agent interface. CLI output stays silent on git. Usage treats the files the script wrote as part of your work, not a separate publish procedure. |
-| How notes land under concurrency | Notes. Recording a note must still commute. |
-| How summaries and originals survive squash | Naps. Fold. Zoom is a property of the current commit. |
-| How recall or zoom unique-prefix or walk children files | Zoom and recall. Parse each view `.tree` at most once. Prefix uniqueness is among distinct ids. |
-| Merge behavior or a new file that every note updates | Zipper. Recording a note commutes. No shared mutable index. |
-| Wake budget, decay shape, or “cannot wake” | The view. Grain. Fold. Expand. Wake never blocks. |
-| Package vs repo vs machine-global | Scopes. Store, driver, and activation. |
-| How a directory becomes a store | `start`. Empty packages stay empty. |
-| Disk format or a new backend | The agent interface must not change. Store roles must still exist. See [Notes](../notes.md). |
-| On-disk nap filenames (four-part-64 and five-part-64 to five-part-16) | Run `migrate.py` from a clone of this repository against the target git root. Do not `mv` by hand. The script shortens nested `.tree` nap ids, recomputes the variant tag from the rewritten pair bytes, and writes five-part-16. Unmigrated old stems are invisible to the driver. |
+| What an agent is told, or may type | The operator command table (`usage_text`, mirrored in [Commands](../user-guide/commands.md)), the activation block (write rule and wake handoff), and root-wake Usage (argv, grammar, writer-only). Do not leak store paths into the agent interface. CLI output stays silent on git. Usage treats the files the script wrote as part of the agent's work, not a separate publish step. |
+| How notes land under concurrency | [The Store: Notes](store.md#notes). Recording a note must still commute. |
+| How summaries and originals survive squash | [The Store: Naps](store.md#naps) and [Zoom and Recall](zoom-and-recall.md#zoom). |
+| Nap filenames or the children file format | [The Store: Nap names](store.md#nap-names) and [The children file](store.md#the-children-file). Then [Store Files](../advanced/store-files.md), and `migrate.py` if old names must be rewritten ([Upgrading](../user-guide/upgrading.md#older-nap-files)). Do not rename files by hand. |
+| The wake budget, fold rule, or decay shape | [Wake: The wake budget](wake.md#the-wake-budget) and [Folding](folding.md). The walk-through on [How SumMem Works](../how-it-works/index.md) must still be true. |
+| Merge behavior, or any file that every note would update | [Merges and Healing](merges-and-healing.md). The worked merge in [Why Writers Never Conflict](../how-it-works/no-conflicts.md) must still be true. |
+| How wake, zoom, or recall print or search | [Wake](wake.md) and [Zoom and Recall](zoom-and-recall.md). |
+| Repository vs package vs machine scope, or how a directory becomes a store | [The Store: More than one store](store.md#more-than-one-store) and [Wake: A root wake](wake.md#a-root-wake). |
+| A different on-disk backend | The agent interface must not change, and every store role must still exist. See [Not Yet](not-yet.md). |
+| The docs site | [Docs Site](../contributing/docs.md). |

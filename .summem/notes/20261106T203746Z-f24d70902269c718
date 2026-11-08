@@ -1,0 +1,1 @@
+start is silent on success, creates a missing directory, and never rewrites an existing config.toml.

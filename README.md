@@ -4,232 +4,46 @@
 
 **A committed, concurrent memory for agents working in a git repository.**
 
-Drop the `summem` Python script into your repo and bootstrap a few lines in your `AGENTS.md`, and all the agents that work on your repo will start remembering what's going on with it.
-
-## Why Memory?
-
-Many agents may work on a repository. They'll make decisions, discover facts and gotchas, and... forget it all and leave no record, unless you do something about it.
-
-### Why Repo Memory?
-
-If *you* set up memory for *your* agent on *your* machine via an MCP, server (local or remote), or some other means, that doesn't help other contributors. *Your* agents may one-shot changes to the repository but you'll still receive low-quality contributions from the rest of the world. The memory of what's good and how things are done needs to come along with your code.
-
-### Why SumMem?
-
-- **Repo-local** — memories are stored in the repository, in git. No external dependencies or servers - once you've got the repository, you've got the memory.
-- **Many writers, no lock** — two memories are two distinct file paths: git merges do not corrupt memory.
-- **Bounded context** — recent facts stay verbatim; older compress into summaries so the initial "remembering" is a fixed size.
-- **Perfect recall when needed** — original memories of compressed summaries persist and may be surfaced on-demand.
-- **Hierarchical stores** — Got a monorepo or other situation where memories should be scoped to a subdirectory? No problem; just `start <dir>` and you've got a second store.
-- **Universal** — drop the script in, update your `AGENTS.md`, and jsut about every agent, everywhere, will start recalling *and* contributing memories.
-
-## Example
-
-In this repo, there's a store in the `dogfood` directory. We've been remembering letters of the English alphabet, and we've gotten as far as `h`:
-
-```
-$ .summem/summem wake --path dogfood
-x4 01b18901: a, b, c, d
-x2 abd13ab8: e & f
-x1 2026-08-19: g
-x1 2026-08-19: h
-You are up to speed.
-```
-
-Let's remember `i`:
-
-```
-$ .summem/summem note --path dogfood i
-Saved.
-
-Summarize these two into one line of at most 280 characters.
-Keep what has lasting effect, drop what does not. Invent nothing.
-
-  g
-  h
-
-Run: .summem/summem nap --path dogfood 3fc87382 fa6da6a9 "<your line>"
-```
-
-OK, let's nap:
-
-```
-$ .summem/summem nap --path dogfood 3fc87382 fa6da6a9 "g & h"
-Saved.
-
-Nothing left to compress.
-```
-
-Now what does memory look like?
-
-```
-$ .summem/summem wake --path dogfood
-x4 01b18901: a, b, c, d
-x2 abd13ab8: e & f
-x2 cfbf987a: g & h
-x1 2026-08-25: i
-You are up to speed.
-```
-
-We were asked to nap because `dogfood` is capped at 4 memories total. If we'd just added `i`, that would have been 5 lines - so the oldest memories of the smallest eligible size got compressed into one.
-In this case, that was the single `g` and `h` memories.
-
-What if we need specifics that the `g & h` summary doesn't provide? That's OK; we can zoom into that memory:
-
-```
-$ .summem/summem zoom --path dogfood cfbf987a
-x1 2026-08-19: g
-x1 2026-08-19: h
-```
-
-Eidedic!
-
-Finally, you may wonder what this looks like on disk. We haven't committed yet:
-
-```
-$ git st
-...
-Changes to be committed:
-  (use "git restore --staged <file>..." to unstage)
-        new file:   dogfood/.summem/naps/20260819T213123Z-5e64febd8268823c-cfbf987aa25d8492-2-8f8111f124e6075e.summ
-        new file:   dogfood/.summem/naps/20260819T213123Z-5e64febd8268823c-cfbf987aa25d8492-2-8f8111f124e6075e.tree
-        deleted:    dogfood/.summem/notes/20260819T213123Z-5e64febd8268823c
-        deleted:    dogfood/.summem/notes/20260819T213139Z-e82628a6be85430a
-        new file:   dogfood/.summem/notes/20260826T025412Z-7157ba614d46767c
-```
-
-You can see two old notes were `deleted` - the old individual `g` and `h`. A new note is added - that's our `i` memory.
-Then, there are two `nap` files:
-
-- `.summ` contains our summary, `g & h`.
-- `.tree` contains the original notes - in json form - that were compressed into that summary.
-
-Because `g & h` is only an `x2` memory, it only has two notes in its `.tree`:
-
-```json
-{
-  "c": [
-    {
-      "name": "20260819T213123Z-5e64febd8268823c",
-      "text": "g",
-      "type": "note"
-    },
-    {
-      "name": "20260819T213139Z-e82628a6be85430a",
-      "text": "h",
-      "type": "note"
-    }
-  ]
-}
-```
-
-But that original `a, b, c, d` memory? Yeah, it's got all four in there.
-
-And [that's how SumMem works](https://classic.play2048.co/)!
-
-## Quick Start
-
-### Prerequisites
-
-- A git repository
-- Python 3.11+ (`tomllib`)
-
-### Onboard a repository
-
-1. Copy [summem](./summem) into `.summem/summem` in your repository's root.
-2. Run `.summem/summem init` and insert that print at the top of committed `AGENTS.md`. The block is a starting write rule; you may edit what this repository remembers. Command syntax will come from `summem` itself when agents run `wake`.
-3. Add `**/.summem/__pycache__/` to your `.gitignore`
-4. The first `wake`, `note`, `nap`, `zoom`, or `recall` creates the root store. Until someone `start`s another path, every note in the tree rolls up there.
-5. (optional): run `.summem/summem start <path>` now for any sub-packages (i.e. in a monorepo)
-
-### Day to day
-
-Root `wake` prints the current agent how-to under `== SumMem Usage ==`, then any catalog of other stores, then the memories. Copying a newer script updates that how-to. It does not overwrite the write rule in `AGENTS.md`.
-
-```text
-summem wake    [--path PATH]                    print this store's view
-summem note    [--path PATH] TEXT               record one line
-summem nap     [--path PATH] ID-A ID-B CAPTION  fold two ids of the same grain
-summem zoom    [--path PATH] ID                 open a nap to its children
-summem recall  [--path PATH] PATTERN            search remembered text
-summem start <path>                             create a store in that directory
-summem init                                     print the agent prompt
-summem version                                  print this script's version
-```
-
-Agents invoke `.summem/summem`. Sometimes recording a `note` will ask for a `nap` - a compression of two memories of the same size. Agents do that and then continue on with their work; thus the memories are intelligently compressed.
-
-`--path` aims at a file in the repo. The script walks from that path up to the nearest started store in the repository.
+SumMem is one Python script. Put it in your repository and add a short block to `AGENTS.md`. From then on, each agent that works in the repository starts its session with what earlier agents learned, and records what it learns. The memories are small files in git, so they travel with every clone and pull request. Many agents can write at once, and git merges never conflict on them.
 
 ## Documentation
 
-- [Architecture](docs/architecture/index.md) — algorithm, store layout, invariants
-- [Theory](docs/theory.md) — why concurrent writers converge, from a shoebox of receipts up to the homomorphism
-- [Emergency surgery](docs/surgery.md) — zipper-excise one raw note at the branch tip (not a shipped command)
-- [Notes](docs/notes.md) — what this backend is not yet
-- [AGENTS.md](AGENTS.md) — this repository's activation plus extra agent context
+**<https://texarkanine.github.io/SumMem/>**
 
-## Developing
+- [How SumMem works](https://texarkanine.github.io/SumMem/how-it-works/) and [why writers never conflict](https://texarkanine.github.io/SumMem/how-it-works/no-conflicts/)
+- [Quickstart](https://texarkanine.github.io/SumMem/user-guide/quickstart/) and the [User Guide](https://texarkanine.github.io/SumMem/user-guide/)
+- [Architecture](https://texarkanine.github.io/SumMem/architecture/) and [Contributing](https://texarkanine.github.io/SumMem/contributing/)
 
-### Run the tests
+## Quick start
 
-From the repository root:
+You need a git repository, and everyone who works in it needs Python 3.11 or newer.
 
-```bash
-uvx --with tox tox run-parallel
-```
+1. Copy [`summem`](summem) to `.summem/summem` in your repository's root, and make it executable.
+2. Run `.summem/summem init`, and put the block it prints at the top of `AGENTS.md`.
+3. Add `**/.summem/__pycache__/` to `.gitignore`, and commit.
 
-`uvx` supplies `tox` for that command. This is the full local run. It tests each installed Python from 3.11 through 3.14 at the same time. Each Python uses at most four test workers (`-n auto --maxprocesses=4`).
+The [Quickstart](https://texarkanine.github.io/SumMem/user-guide/quickstart/) has the details.
 
-Do not run two tox commands for the same Python version in one checkout. Both commands write the same directory under `.tox/`.
+## What is in this repository
 
-### Other ways to run
+| Path | What it is |
+|---|---|
+| [`summem`](summem) | The script. This one file is the whole product. |
+| [`surgery.py`](surgery.py) | Removes one note from a store, after a mistake. Not part of an install. |
+| [`migrate.py`](migrate.py) | Rewrites nap files from older formats. Not part of an install. |
+| [`docs/`](docs/) | The documentation site. |
+| [`tests/`](tests/) | The test suite. |
+| [`dogfood/`](dogfood/) | A small example store, used in the documentation. |
+| [`.summem/`](.summem/) | This repository's own memory. |
+| [`memory-bank/`](memory-bank/) | Task notes for agents developing SumMem. |
+| [`AGENTS.md`](AGENTS.md) | Instructions for agents working on this repository. |
 
-While you edit, test Python 3.11:
+## Contributing
 
-```bash
-uvx --with tox tox -e py311
-```
-
-Run one file or one test. Put the pytest path after `--`:
-
-```bash
-uvx --with tox tox -e py311 -- tests/test_foo.py::test_bar
-```
-
-Run those tests one at a time. Add `-n0` after `--`:
-
-```bash
-uvx --with tox tox -e py311 -- -n0 tests/test_foo.py::test_bar
-```
-
-When `tox` is already on your `PATH`, omit `uvx --with tox`.
-
-`tox` with no extra arguments runs the same Python versions one after another.
-
-### Notes
-
-The tests load the `summem` file at the repository root. That file has no `.py` suffix.
-
-Pull requests run [`.github/workflows/pr.yaml`](.github/workflows/pr.yaml). That workflow runs `tox -e py311` through `py314`.
-
-A push to `main` runs [`.github/workflows/ci.yaml`](.github/workflows/ci.yaml). That workflow runs the same tests, then `tox -e coverage`, and uploads the report to Codecov.
-
-`tox -e coverage` writes `coverage/lcov.info`. It runs the tests one at a time. Run it as its own command.
+See [Contributing](https://texarkanine.github.io/SumMem/contributing/).
 
 ## License
 
-The program is licensed under the [GNU AGPL v3](LICENSE). 
-The prompt that is recommended for insertion into `AGENTS.md` is separately licensed under the [0BSD license](https://opensource.org/licenses/0BSD).
+The program is licensed under the [GNU AGPL v3](LICENSE). The block that `init` prints for `AGENTS.md` is also available under [0BSD](https://opensource.org/licenses/0BSD). Running the script, including by an agent, does not make your repository a covered work.
 
-Additional permissions for invocation and the 0BSD terms for the agent prompt template live in the comment block at the top of `summem`. **That block is the authoritative statement.**
-
-Summarized,
-
-> Put the bootstrap prompt anywhere you need, with no restrictions.
->
-> Invoking the script does not make the caller or the containing repo a covered work. Using the script inside your org doesn't require making any source available.
->
-> Making a modified version available outside your organization — by distributing it, or by offering remote interaction with it — remains AGPL.
->
-> Use it to make your agents better, whether those agents serve you or your customers - just don't Tivoize me!
+The comment block at the top of [`summem`](summem) is the authoritative statement. [Licensing](https://texarkanine.github.io/SumMem/user-guide/licensing/) explains it in plain words.

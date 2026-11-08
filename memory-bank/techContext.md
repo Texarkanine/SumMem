@@ -1,6 +1,6 @@
 # Tech Context
 
-The file backend is a Python 3 shebang script. Agents talk to a stable CLI (`wake`, `note`, `nap`, `recall`, `zoom`, `start`, `init`, `version`). The on-disk format may later change, including to sqlite; the command table in the README must not.
+The file backend is a Python 3 shebang script. Agents talk to a stable CLI (`wake`, `note`, `nap`, `recall`, `zoom`, `start`, `init`, `version`). The on-disk format may later change, including to sqlite; the command table (`usage_text`, printed by `summem -h`) must not.
 
 A store is a `.summem/` directory (not `.mem/` — that name is already taken in this problem space). Nap captions are `.summ` (not `.sum` — that suffix is checksums). Per-store settings live in `.summem/config.toml`, read with stdlib [`tomllib`](https://docs.python.org/3/library/tomllib.html) (added in 3.11; parse only). Default config is a commented template written as text, not a TOML dump.
 
@@ -16,13 +16,15 @@ Activation is the SumMem block at the top of committed `AGENTS.md`: the reposito
 
 The intended floor is Python 3.11 so `tomllib` is available without a backport. The script checks `sys.version_info` immediately after `import sys` and before any `import tomllib`, so Python 3.10 prints `SumMem needs Python 3.11 or newer` instead of dying on the import. `tomllib`, `fcntl`, `msvcrt`, `subprocess`, and `random` load inside the functions that need them; `version`, `init`, and bare help do not import them.
 
-Content-addressed reads canonicalize CR LF to LF before digest, JSON parse, and caption. View types are `__slots__` classes, not dataclasses. There is no project manifest and no hatchling package. Invoke the driver as `summem`. Tests must not use this machine's bare `python3` (3.10). Run tests as in Testing Process below.
+Content-addressed reads canonicalize CR LF to LF before digest, JSON parse, and caption. View types are `__slots__` classes, not dataclasses. `summem` has no package manifest and no hatchling package; the root `pyproject.toml` holds only the docs-site toolchain. Invoke the driver as `summem`. Tests must not use this machine's bare `python3` (3.10). Run tests as in Testing Process below.
 
 Hashing is SHA-256 from the language standard library (`hashlib` in Python 3). Do not call `sha256sum` or `openssl`. Do not use `git hash-object`.
 
 ## Build Tools
 
-None. The product is one shebang file; there is no packaging step and no separate database to provision.
+None for the product. It is one shebang file; there is no packaging step and no separate database to provision.
+
+The docs site is ProperDocs with the Material theme, configured in `properdocs.yaml`. Its toolchain is the `docs` dependency group in `pyproject.toml`, locked in `uv.lock`; run uv with `--no-config`. The loop and publishing rules are in [`docs/contributing/docs.md`](../docs/contributing/docs.md).
 
 ## License
 
@@ -44,6 +46,7 @@ Tests load repo-root `summem` once per session via a pytest fixture (`SourceFile
 
 ## Canonical documents
 
-- `README.md` — what it is, why, quickstart, command table
-- `docs/architecture/index.md` — algorithm, store layout, invariants, change surfaces
+- `README.md` — what it is, the docs-site link, a short quick start, what is in the repository
+- `docs/` — the docs site: how it works, user guide, advanced, architecture, contributing
+- `docs/architecture/` — the atlas: overview with invariants and change surfaces (`index.md`), then store, view and folding, merges and healing, reading
 - `LICENSE` — AGPL-3.0

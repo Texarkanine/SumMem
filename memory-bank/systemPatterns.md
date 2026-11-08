@@ -1,6 +1,6 @@
 # System Patterns
 
-This file is the briefing. The atlas is [`docs/architecture/index.md`](../docs/architecture/index.md). What this backend is not yet lives in [`docs/notes.md`](../docs/notes.md).
+This file is the briefing. The atlas is [`docs/architecture/`](../docs/architecture/index.md). What this backend is not yet lives in [`docs/architecture/not-yet.md`](../docs/architecture/not-yet.md).
 
 ## How This System Works
 
