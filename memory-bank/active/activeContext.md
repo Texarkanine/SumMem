@@ -1,12 +1,13 @@
 # Active Context
 
 ## Current Task: help catalog and nested nap retry
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
 
-- Level 2. Dropping the `help` alias from the printed catalog, and accepting a nap whose pair is buried inside a larger nap, are one contained change to `summem` plus the user-guide table that copies the catalog. The approach is already chosen.
+- Planned three steps: drop the `help` row from `usage_text`, make the commands table match that printout, and pair-match every nap `_index_tree` already records.
+- The four sentences that already say a finished pair succeeds stay. No added sentence.
 
 ## Next Step
 
-- Load the Level 2 workflow and plan.
+- Preflight the plan.

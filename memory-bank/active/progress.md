@@ -132,5 +132,17 @@
 * Insights
     - Item 1 is a product rule about what the catalog prints. Item 2 is a hole in the success path this branch added. Together they stay inside the CLI that already owns both.
 
+## 2026-11-07 - PLAN - COMPLETE
+
+* Work completed
+    - Wrote the Level 2 plan for the help-catalog omission and the buried-pair nap
+* Decisions made
+    - `usage_text` loses the `help` row. The argv rewrite stays
+    - The commands table returns to naming only `-h` and `<command> -h`
+    - `_nap_miss` pair-matches `root_kids` and every list in `index["kids"]`
+    - The four sentences that already describe that success are not edited
+* Insights
+    - `kids` does not include the view nap's own pair. Both lists are required
+
 
 
