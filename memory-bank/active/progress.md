@@ -156,6 +156,18 @@
 * Insights
     - Removing `help` from `usage_text()` does not affect existing test assertions; `main()` help argv rewriting continues to function seamlessly
 
+## 2026-11-07 - BUILD - COMPLETE
+
+* Work completed
+    - Dropped the `help` row from the printed catalog and from the commands table
+    - `_nap_miss` now accepts a pair buried inside a larger nap
+    - py311: 443 passed
+* Decisions made
+    - Kept `root_kids` and `kids`. Did not add a pairs field to `_index_tree`
+    - Did not edit the four sentences that already describe this success
+* Insights
+    - The red buried-pair run was `not a fold row` for ids `2bba5f0f6700c665` and `50782259f93147cb`, the same pair the review named
+
 
 
 

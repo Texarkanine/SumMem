@@ -930,13 +930,13 @@ def _nap_miss(nodes, token_a: str, token_b: str) -> str | None:
             continue
         index = _index_tree(child.tree)
         known.extend(index["ids"])
-        rows = index["root_kids"]
-        if len(rows) != 2 or None in rows:
-            continue
-        left = _one_id(token_a, [rows[0].id, rows[1].id])
-        right = _one_id(token_b, [rows[0].id, rows[1].id])
-        if left and right and left != right:
-            return None
+        for rows in (index["root_kids"], *index["kids"].values()):
+            if len(rows) != 2 or None in rows:
+                continue
+            left = _one_id(token_a, [rows[0].id, rows[1].id])
+            right = _one_id(token_b, [rows[0].id, rows[1].id])
+            if left and right and left != right:
+                return None
     if _one_id(token_a, known) and _one_id(token_b, known):
         return "not a fold row"
     return "unknown id"
@@ -1497,7 +1497,6 @@ SumMem: shared memory for agents in a repository.
   {CLI_NAME} start <path>                             create a store in that directory
   {CLI_NAME} init                                     print the agent prompt
   {CLI_NAME} version                                  print this script's version
-  {CLI_NAME} help    [command]                        same text as -h
 
 Every command except start, init, and version takes optional --path. Omit it to use $PWD.
 --path aims at a file or directory and walks up to the nearest store.

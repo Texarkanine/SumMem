@@ -11,10 +11,9 @@ summem recall  [--path PATH] PATTERN            search remembered text
 summem start <path>                             create a store in that directory
 summem init                                     print the agent prompt
 summem version                                  print this script's version
-summem help    [command]                        same text as -h
 ```
 
-That table is what `.summem/summem -h` prints. `.summem/summem help` prints it too. For one command's options, run `.summem/summem <command> -h` or `.summem/summem help <command>`.
+That table is what `.summem/summem -h` prints. For one command's options, run `.summem/summem <command> -h`.
 
 ## Choosing a store with `--path`
 

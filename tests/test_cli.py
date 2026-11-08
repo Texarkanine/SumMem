@@ -440,6 +440,27 @@ def test_nap_of_nested_cousins_is_not_a_fold_row(tmp_path, monkeypatch, capsys, 
     assert _nap_names(repo) == names
 
 
+def test_nap_of_buried_pair_succeeds(tmp_path, monkeypatch, capsys, summem):
+    """Napping the two children of a nap that was folded further prints Saved. and writes nothing."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    for i, text in enumerate(("a", "b", "c", "d"), start=1):
+        m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=timezone.utc), Random(i))
+    by_text = {node.caption: node.id for node in m.list_view(repo)}
+    assert m.main(["nap", by_text["a"], by_text["b"], "ab"]) == 0
+    assert m.main(["nap", by_text["c"], by_text["d"], "cd"]) == 0
+    children = [node.id for node in m.list_view(repo)]
+    assert m.main(["nap", children[0], children[1], "abcd"]) == 0
+    names = _nap_names(repo)
+    capsys.readouterr()
+    assert m.main(["nap", _note_id(m, "a"), _note_id(m, "b"), "again"]) == 0
+    captured = capsys.readouterr()
+    assert captured.out == "Saved.\n\nNothing left to compress.\n"
+    assert captured.err == ""
+    assert _nap_names(repo) == names
+
+
 def test_nap_of_view_row_and_nested_id_is_not_a_fold_row(tmp_path, monkeypatch, capsys, summem):
     """A current row plus an id that only lives inside a nap is not a fold row."""
     m = summem
@@ -531,6 +552,13 @@ def test_help_flag_prints_catalog(capsys, summem):
     assert "PWD" in catalog
     assert "--path" in catalog
     assert "file" in catalog.lower() or "directory" in catalog.lower()
+
+
+def test_catalog_does_not_list_the_help_command(summem):
+    """The printed catalog does not offer help as a command."""
+    catalog = summem.usage_text()
+    assert "summem help" not in catalog
+    assert "<command> -h" in catalog
 
 
 def test_help_command_prints_catalog(capsys, summem):
