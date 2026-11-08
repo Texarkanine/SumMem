@@ -350,6 +350,7 @@ def test_main_path_flag(tmp_path, monkeypatch, summem):
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
+    (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
     secret = "sentinel-path-secret-jj00"
     path = m.write_note(repo / "pkg", secret, datetime(2026, 1, 1, tzinfo=UTC), Random(1))
@@ -420,6 +421,7 @@ def test_main_path_fold_request_is_copy_paste_safe(tmp_path, monkeypatch, capsys
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
+    (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
     secret = "sentinel-fold-path-secret-mm33"
     _write_notes(m, repo / "pkg", [secret, "keep-b", "keep-c", "keep-d"])

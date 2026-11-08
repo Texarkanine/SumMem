@@ -4,7 +4,6 @@
 
 | What you see | Why |
 |---|---|
-| `start` printed nothing. | That is success. Check with root `wake`: the new store appears in the catalog. |
 | Two `wake` lines have the same id. | Two branches summarized the same memories in different words. The next `note` or `nap` keeps one. See [Working with Git](git.md#merges). |
 | `wake` prints more lines than `WAKE_LINES`. | Usually right after a merge. `wake` never drops lines. The next `note` or `nap` asks for folds until the list fits. |
 | An agent noted something the store already had, and still got `Saved.` | The store holds each memory once, so it removed one of the two files. The memory was not lost. |
@@ -33,7 +32,9 @@ Error messages go to standard error, and the command exits with a non-zero statu
 | `Too long: N bytes, limit L. …` | `note`, `nap` | The text is longer than the store's `ENTRY_CHARS`, counted in bytes of UTF-8. |
 | `One line only. Merge the lines.` | `note`, `nap` | The text has a line break. |
 | `note is empty` | `note`, `nap` | There is no text. |
-| `unknown id. Copy an id from wake.` | `nap`, `zoom` | No line in the current list has that id. After a merge, the next write may have tidied that line away; run `wake` again for current ids. |
+| `unknown id. Copy an id from wake.` | `zoom` | No line `zoom` can open has that id. |
+| `unknown id` | `nap` | That id is not in the store. |
+| `not a fold row` | `nap` | Both ids exist, and they are not the two children of a nap. A pair that already is those two children succeeds instead. |
 | `ambiguous id. Give a longer prefix.` | `nap`, `zoom` | More than one id starts with what was typed. |
 | `not a content id: …. Copy an id from wake.` | `nap`, `zoom` | What was typed is not an id. Line numbers and ranges such as `0-3` are not ids. |
 | `not two rows` | `nap` | The two ids name the same line. |

@@ -11,9 +11,10 @@ summem recall  [--path PATH] PATTERN            search remembered text
 summem start <path>                             create a store in that directory
 summem init                                     print the agent prompt
 summem version                                  print this script's version
+summem help    [command]                        same text as -h
 ```
 
-That table is what `.summem/summem -h` prints. For one command's options, run `.summem/summem <command> -h`.
+That table is what `.summem/summem -h` prints. `.summem/summem help` prints it too. For one command's options, run `.summem/summem <command> -h` or `.summem/summem help <command>`.
 
 ## Choosing a store with `--path`
 
@@ -126,7 +127,7 @@ The search is case-sensitive. Start the pattern with `(?i)` to ignore case. No m
 
 ## `start <path>`
 
-Creates a store in that directory. It creates the directory if it does not exist. On success it prints nothing. See [Stores and Settings](stores.md).
+Creates a store in a directory that already exists. It prints `There is a store in ./path.` whether the store is new or already there, and it does not rewrite an existing config. A path that is not a directory fails with `not a directory: ./path`. See [Stores and Settings](stores.md).
 
 ## `init`
 

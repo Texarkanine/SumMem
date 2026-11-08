@@ -1,0 +1,1 @@
+CRLF as LF on read. Lock: flock naps/, else runtime-dir; msvcrt 30s, slack 1e-9. Never monkeypatch os.name to nt. python .summem/summem wake; names no path. Usage bare Unix, python Windows. N: ./path (note +1, nap leaves once). --path walks up. Nap line sequences; Saved. is ACK.

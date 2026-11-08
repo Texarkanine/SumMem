@@ -891,7 +891,7 @@ def _pair_nodes(nodes: list[ViewNode], id_a: str, id_b: str) -> tuple[int, int]:
     hits_a = [i for i, node in enumerate(nodes) if node.id == id_a]
     hits_b = [i for i, node in enumerate(nodes) if node.id == id_b]
     if not hits_a or not hits_b:
-        raise ValueError("unknown id. Copy an id from wake.")
+        raise ValueError("unknown id")
     best: tuple[int, int, int] | None = None
     for ia in hits_a:
         for ib in hits_b:
@@ -904,6 +904,48 @@ def _pair_nodes(nodes: list[ViewNode], id_a: str, id_b: str) -> tuple[int, int]:
     if best is None:
         raise ValueError("not two rows")
     return best[1], best[2]
+
+
+def _one_id(token: str, ids: list[str]) -> str | None:
+    """Return the single id in *ids* that *token* prefixes, or None."""
+    hits = list(dict.fromkeys(item for item in ids if item.startswith(token)))
+    if len(hits) == 1:
+        return hits[0]
+    return None
+
+
+def _nap_miss(nodes, token_a: str, token_b: str) -> str | None:
+    """Return None when *token_a* and *token_b* are already one nap's two children.
+
+    Both tokens naming a known id, without being that pair, is ``not a fold row``.
+    A token that names nothing is ``unknown id``. A note id is the 16-hex
+    ``leafset_id`` of its digest, the same id ``list_view`` prints.
+    """
+    known = [node.id for node in nodes]
+    paired = False
+    for node in nodes:
+        if node.kind != "nap":
+            continue
+        try:
+            child, _digests = _as_child(node)
+        except ValueError:
+            continue
+        tree = child.tree
+        known.extend(_index_tree(tree)["ids"])
+        if len(tree.kids) != 2:
+            continue
+        rows = [_projected_child(kid) for kid in tree.kids]
+        if rows[0] is None or rows[1] is None:
+            continue
+        left = _one_id(token_a, [rows[0].id, rows[1].id])
+        right = _one_id(token_b, [rows[0].id, rows[1].id])
+        if left and right and left != right:
+            paired = True
+    if paired:
+        return None
+    if _one_id(token_a, known) and _one_id(token_b, known):
+        return "not a fold row"
+    return "unknown id"
 
 
 def write_nap(parent, id_a, id_b, caption, entry_chars: int | None = None, nodes=None):
@@ -1461,6 +1503,7 @@ SumMem: shared memory for agents in a repository.
   {CLI_NAME} start <path>                             create a store in that directory
   {CLI_NAME} init                                     print the agent prompt
   {CLI_NAME} version                                  print this script's version
+  {CLI_NAME} help    [command]                        same text as -h
 
 Every command except start, init, and version takes optional --path. Omit it to use $PWD.
 --path aims at a file or directory and walks up to the nearest store.
@@ -1480,6 +1523,20 @@ def _cli_argv(argv: list[str] | None) -> list[str]:
     return list(argv)
 
 
+def _cli_path(text: str) -> str:
+    """Return *text* in the ./path form the root-wake catalog uses."""
+    path = Path(text)
+    if path.is_absolute():
+        try:
+            path = path.relative_to(Path.cwd())
+        except ValueError:
+            return Path(text).as_posix()
+    shown = path.as_posix()
+    if shown == "." or shown.startswith("./"):
+        return shown
+    return f"./{shown}"
+
+
 def main(argv: list[str] | None = None) -> int:
     """Run a SumMem subcommand. Return 0 on success, 2 on usage, 1 on validation."""
     require_python()
@@ -1487,6 +1544,8 @@ def main(argv: list[str] | None = None) -> int:
     if not args_list:
         sys.stderr.write(usage_text())
         return 2
+    if args_list[0] == "help":
+        args_list = ["-h", *args_list[1:]]
     if args_list[0] in _HELP_FLAGS:
         if len(args_list) == 1 or args_list[1] not in _COMMANDS:
             sys.stdout.write(usage_text())
@@ -1524,17 +1583,20 @@ def main(argv: list[str] | None = None) -> int:
     except SystemExit as exc:
         return 0 if exc.code is None else int(exc.code)
     if args.cmd == "start":
+        shown = _cli_path(args.dir)
         target = Path(args.dir)
         if not target.is_absolute():
             target = Path.cwd() / target
-        probe = target if target.exists() else target.parent
+        if not target.is_dir():
+            sys.stderr.write(f"not a directory: {shown}\n")
+            return 1
         try:
-            find_store_parent(probe)
+            find_store_parent(target)
         except ValueError as exc:
             sys.stderr.write(f"{exc}\n")
             return 1
-        target.mkdir(parents=True, exist_ok=True)
         ensure_store(target)
+        sys.stdout.write(f"There is a store in {shown}.\n")
         return 0
     if args.cmd == "init":
         sys.stdout.write(init_text())
@@ -1583,9 +1645,17 @@ def main(argv: list[str] | None = None) -> int:
         def nap_locked():
             view = heal_view(parent)
             view_ids = [node.id for node in view]
-            id_a = resolve_id(args.id_a, view_ids)
-            id_b = resolve_id(args.id_b, view_ids)
-            write_nap(parent, id_a, id_b, args.caption, k["ENTRY_CHARS"], nodes=view)
+            try:
+                id_a = resolve_id(args.id_a, view_ids)
+                id_b = resolve_id(args.id_b, view_ids)
+            except ValueError as exc:
+                if not str(exc).startswith("unknown id"):
+                    raise
+                miss = _nap_miss(view, args.id_a, args.id_b)
+                if miss is not None:
+                    raise ValueError(miss) from None
+            else:
+                write_nap(parent, id_a, id_b, args.caption, k["ENTRY_CHARS"], nodes=view)
             return fold_request(parent, k["WAKE_LINES"], entry_chars=k["ENTRY_CHARS"])
 
         try:

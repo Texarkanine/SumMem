@@ -67,5 +67,17 @@
 * Insights
     - Single-pass inspection of view naps with `_as_child` and `_index_tree` provides both direct-pair detection and complete known-id cataloging for `not a fold row` vs `unknown id` determination
 
+## 2026-11-07 - BUILD - COMPLETE
+
+* Work completed
+    - Implemented start, help, and nap replies with tests first
+    - py311 suite: 441 passed
+* Decisions made
+    - One start sentence for a new store and an existing store
+    - `help` is a rewrite onto `-h`, not a new parser
+    - An already-folded pair skips `write_nap` and still prints `Saved.`
+* Insights
+    - Note ids inside a nap are `leafset_id` of the digest. Matching the raw digest misses them.
+
 
 

@@ -365,8 +365,8 @@ def test_nap_rejects_unknown_id(tmp_path, summem):
     with pytest.raises(ValueError) as caught:
         m.write_nap(repo, ids[0], "0" * 64, "pair")
     err = str(caught.value)
-    assert "unknown id" in err
-    assert "Copy an id from wake" in err
+    assert err == "unknown id"
+    assert "wake" not in err
     assert "notes/" not in err
     assert "naps/" not in err
     assert "git" not in err
