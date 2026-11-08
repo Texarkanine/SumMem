@@ -908,21 +908,19 @@ def _pair_nodes(nodes: list[ViewNode], id_a: str, id_b: str) -> tuple[int, int]:
 
 def _one_id(token: str, ids: list[str]) -> str | None:
     """Return the single id in *ids* that *token* prefixes, or None."""
-    hits = list(dict.fromkeys(item for item in ids if item.startswith(token)))
-    if len(hits) == 1:
-        return hits[0]
-    return None
+    try:
+        return resolve_id(token, ids)
+    except ValueError:
+        return None
 
 
 def _nap_miss(nodes, token_a: str, token_b: str) -> str | None:
     """Return None when *token_a* and *token_b* are already one nap's two children.
 
     Both tokens naming a known id, without being that pair, is ``not a fold row``.
-    A token that names nothing is ``unknown id``. A note id is the 16-hex
-    ``leafset_id`` of its digest, the same id ``list_view`` prints.
+    A token that names nothing is ``unknown id``.
     """
     known = [node.id for node in nodes]
-    paired = False
     for node in nodes:
         if node.kind != "nap":
             continue
@@ -930,19 +928,15 @@ def _nap_miss(nodes, token_a: str, token_b: str) -> str | None:
             child, _digests = _as_child(node)
         except ValueError:
             continue
-        tree = child.tree
-        known.extend(_index_tree(tree)["ids"])
-        if len(tree.kids) != 2:
-            continue
-        rows = [_projected_child(kid) for kid in tree.kids]
-        if rows[0] is None or rows[1] is None:
+        index = _index_tree(child.tree)
+        known.extend(index["ids"])
+        rows = index["root_kids"]
+        if len(rows) != 2 or None in rows:
             continue
         left = _one_id(token_a, [rows[0].id, rows[1].id])
         right = _one_id(token_b, [rows[0].id, rows[1].id])
         if left and right and left != right:
-            paired = True
-    if paired:
-        return None
+            return None
     if _one_id(token_a, known) and _one_id(token_b, known):
         return "not a fold row"
     return "unknown id"
@@ -1530,11 +1524,9 @@ def _cli_path(text: str) -> str:
         try:
             path = path.relative_to(Path.cwd())
         except ValueError:
-            return Path(text).as_posix()
+            return path.as_posix()
     shown = path.as_posix()
-    if shown == "." or shown.startswith("./"):
-        return shown
-    return f"./{shown}"
+    return shown if shown == "." or shown.startswith("./") else f"./{shown}"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -1585,8 +1577,6 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "start":
         shown = _cli_path(args.dir)
         target = Path(args.dir)
-        if not target.is_absolute():
-            target = Path.cwd() / target
         if not target.is_dir():
             sys.stderr.write(f"not a directory: {shown}\n")
             return 1
