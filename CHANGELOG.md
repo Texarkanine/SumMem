@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.0](https://github.com/Texarkanine/SumMem/compare/v0.13.0...v0.14.0) (2026-11-08)
+
+
+### Features
+
+* report start, help, and a finished nap ([#101](https://github.com/Texarkanine/SumMem/issues/101)) ([dc74da4](https://github.com/Texarkanine/SumMem/commit/dc74da420d83f20b441d244fe686066d80de0288))
+
 ## [0.13.0](https://github.com/Texarkanine/SumMem/compare/v0.12.2...v0.13.0) (2026-11-08)
 
 
