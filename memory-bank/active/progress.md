@@ -79,5 +79,16 @@
 * Insights
     - Note ids inside a nap are `leafset_id` of the digest. Matching the raw digest misses them.
 
+## 2026-11-07 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Performed post-implementation semantic review against the implementation plan, project brief, and system patterns
+    - Verified all 441 tests pass under `py311`
+    - Wrote `PASS` status to `memory-bank/active/.qa-validation-status`
+* Decisions made
+    - Approved implementation with one non-blocking documentation advisory (`docs/user-guide/commands.md:142`)
+* Insights
+    - Reusing `_as_child`, `_projected_child`, and `_index_tree` in `_nap_miss` kept the already-folded and `not a fold row` checks within a single pass over view naps without duplicating tree traversal or id computation
+
 
 

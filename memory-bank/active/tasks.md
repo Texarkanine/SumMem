@@ -113,4 +113,10 @@ No new technology - validation not required
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
+
+## QA Results
+
+- **Status**: PASS
+- **Advisory (`docs/user-guide/commands.md:142`)**: "Outside a repository" mentions "`init`, `version`, and `-h` work anywhere"; `help` works outside a repository as well via the `-h` rewrite, though omitting it does not conflict with the rest of the guide.
+- **Verification**: All KISS, DRY, YAGNI, Completeness, Regression, Integrity, and Documentation checks passed; `tox -e py311` passed (`441 passed`).
