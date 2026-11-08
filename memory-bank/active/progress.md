@@ -56,4 +56,16 @@
 * Insights
     - A `NoteChild`'s 16-hex content id is `leafset_id([note_digest(note_file_bytes(text))])`, not the raw 64-hex `note_digest`
 
+## 2026-11-07 - PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+
+* Work completed
+    - Validated revised implementation plan against codebase, test suites, and documentation
+    - Verified all three previous fixable findings and the commands table advisory were resolved in the plan
+    - Overwrote `memory-bank/active/.preflight-status` with `PASS WITH ADVISORY`
+* Decisions made
+    - Approved plan for build transition with one advisory finding on structuring `_nap_miss`
+* Insights
+    - Single-pass inspection of view naps with `_as_child` and `_index_tree` provides both direct-pair detection and complete known-id cataloging for `not a fold row` vs `unknown id` determination
+
+
 
