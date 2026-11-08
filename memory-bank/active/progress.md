@@ -179,6 +179,18 @@
 * Insights
     - Pair-matching across `(index["root_kids"], *index["kids"].values())` in `_nap_miss` cleanly covers direct view nap children and nested nap children in a single uniform check without adding tree-indexing helpers or mutating AST structures
 
+## 2026-11-07 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-start-help-nap.md`
+    - Recorded the one-way catalog in `systemPatterns.md`
+    - py311–py314 passed (443)
+* Decisions made
+    - Left the four nap sentences as written
+    - Did not add a pairs field to `_index_tree`
+* Insights
+    - `root_kids` is only the view nap's own pair. Nested pairs live in `kids`
+
 
 
 

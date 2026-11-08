@@ -29,7 +29,7 @@ graph TD
 
 ## Operator help is handwritten; agent invoke is host-specific
 
-Bare invocation and `-h` print a handwritten catalog (`usage_text`); a command registered only with argparse will not appear there. `usage_text` uses `CLI_NAME` (`summem`).
+Bare invocation and `-h` print a handwritten catalog (`usage_text`); a command registered only with argparse will not appear there. The catalog names one way to do each thing. `help` works and is not listed. `usage_text` uses `CLI_NAME` (`summem`).
 
 `prompt_text` names SumMem, then the wake command `python .summem/summem wake`; it does not name `{AGENT_BIN}` as an invoke. `how_to_text` and `fold_request`'s `Run:` line use `agent_invoke()`: `AGENT_BIN` when this host can exec that path, otherwise `python {AGENT_BIN}`. That `Run:` line includes `--path REL` when walk-up from `$PWD` would not select the store that produced the ids.
 

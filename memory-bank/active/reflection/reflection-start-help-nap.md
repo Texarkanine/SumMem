@@ -4,37 +4,34 @@ date: 2026-11-07
 complexity_level: 2
 ---
 
-# Reflection: start, help, and nap replies
+# Reflection: help catalog and nested nap retry
 
 ## Summary
 
-`start`, `help`, and `nap` now answer in the short lines the operator asked for. The py311 suite passed (441), and QA passed.
+The rework took `help` off the printed catalog and made a nap of an already-buried pair succeed. QA passed. py311–py314 passed (443).
 
 ## Requirements vs Outcome
 
-All ten requirements shipped. One start sentence covers a new store and an existing one. A missing path is refused and nothing is created. `help` is the existing `-h` text, including `help <command>`. Bare `summem` stays stderr and exit 2. An already-folded pair prints `Saved.` and writes nothing. Other nap misses are `not a fold row` or `unknown id`, with no wake hint. Zoom still names wake.
-
-`help` was added to the command lists in `systemPatterns.md` and `techContext.md`. No `_child_id` helper. QA's advisory is still open: `docs/user-guide/commands.md` says `init`, `version`, and `-h` work outside a repository, and does not name `help`.
+The catalog names one way. `help` and `help <command>` still print the same text as `-h` and are not listed. The commands table matches that printout. A nap of two ids that are already some nap's two children succeeds when that nap sits inside a larger one, prints `Saved.`, and writes nothing. The four sentences that already said so were left as written. They are true now.
 
 ## Plan Accuracy
 
-The sequence held. Preflight caught three plan errors before build: subprocess `start` calls the plan had not listed, a note id described as the raw digest, and a known-id set that omitted view rows. During build, a mechanical insert then skipped five `start` sites whose previous line already mentioned `repo`.
+The sequence held: catalog test, table, buried-pair test, then the loop. The red run was `not a fold row` for the same ids the review named. Preflight suggested a new pairs field on `_index_tree`. The plan's loop over `kids` and `root_kids` was enough, and that is what shipped.
 
 ## Build & QA Observations
 
-Each slice went red, then green: start, help, then nap. QA passed with the one documentation advisory above. It was left as written.
+Each new test went red, then green. QA passed with no findings. No lint target exists. The full matrix passed.
 
 ## Insights
 
 ### Technical
 
-- A note id on wake is `leafset_id` of that note's digest, 16 hex. The raw digest matches nothing in the view.
-- An already-folded nap is that nap's two direct children. Two ids nested under it, but not that pair, are `not a fold row`.
+- `root_kids` is the view nap's own pair. Each nap inside that tree is a separate list in `kids`. A check that reads only `root_kids` accepts one depth and refuses the next.
 
 ### Process
 
-- When a command's contract changes, the plan has to name every caller, including subprocess tests outside the unit file the new tests live in.
+- Nothing notable
 
 ### Million-Dollar Question
 
-The small shape is the one that fits. `help` is the `-h` catalog, `start` says a store is there and will not create a path, and a nap that already exists is the same `Saved.` as a note. A new id helper would not have been clearer. The projection already returns the id wake prints.
+The loop that shipped is the small version. `kids` is already every nested nap's children. A second pairs field would copy that.
