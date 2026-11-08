@@ -144,5 +144,18 @@
 * Insights
     - `kids` does not include the view nap's own pair. Both lists are required
 
+## 2026-11-07 - PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+
+* Work completed
+    - Preflighted rework plan for help catalog omission and nested nap retry against codebase reality
+    - Validated TDD plan encoding, convention compliance, dependency impact, and completeness
+    - Wrote `PASS WITH ADVISORY` to `memory-bank/active/.preflight-status`
+* Decisions made
+    - Approved plan for build transition
+    - Recorded advisory finding regarding direct canonical pair indexing in `_index_tree`
+* Insights
+    - Removing `help` from `usage_text()` does not affect existing test assertions; `main()` help argv rewriting continues to function seamlessly
+
+
 
 
