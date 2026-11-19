@@ -163,3 +163,18 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
     - Finding 33's planted overlapping packs must hold valid, heal-eligible trees, or "pairs stay on disk" is vacuous against a `heal_view` call.
     - `fold_balanced`, `plant_abd_abe`, and the heal-only helpers have a single consumer, so promoting them to `gitutil` is not needed.
     - Advisory: a throwaway mutation sweep would show the strengthened tests can actually go red.
+
+## 2026-11-19 - BUILD - COMPLETE
+
+* Work completed
+    - Unit 1: Remediated standalone findings across `test_caption_conflict.py`, `test_nap_reject.py` (with `text=True` for cross-platform newline safety), `test_path_walkup_and_catalog.py`, `test_recall.py`, `test_scopes.py` (planting two valid equal-leafset 2-pack variants plus an invalid-UTF-8 loose note for `catalog_text`), and `test_surgery.py`.
+    - Unit 2: Replaced `_equal_grain_pair`, `boom` stubs, and private `_fold_grains`/`_as_child` calls in `tests/test_fold.py` with public `fold_request` and `leaf_digests` checks.
+    - Unit 3: Cleaned `tests/test_init.py` and `tests/test_version.py`, promoted `COMMAND_ONLY` and `fresh_imported` into `tests/gitutil.py`, and partitioned `tests/test_cli.py` (57 → 17) across `tests/test_cli_bootstrap.py` (10, with execution-based Python <3.11 floor import guard), `tests/test_cli_help.py` (11), `tests/test_nap.py` (+11), and `tests/test_zoom.py` (+4).
+    - Unit 4: Promoted shared multi-consumer helpers (`write_notes`, `payload_names`, `plant_nap`, `balanced_4`) into `tests/gitutil.py`, deduplicated `test_surgery.py`, `test_nap.py`, and `test_wake_expand.py`, partitioned `tests/test_zipper.py` (45) into `tests/test_rematerialize.py` (11), `tests/test_heal_view.py` (16), `tests/test_cli_heal.py` (8), and `tests/test_store_lock.py` (6), and deleted `tests/test_zipper.py`.
+    - Unit 5: Removed the false `AGENTS.md` sync bullet in `docs/contributing/index.md`, updated `memory-bank/techContext.md`, and ran `uv run --no-config properdocs build --strict` (0 warnings) and `uvx --with tox tox run-parallel` (`py311`–`py314`, 445 passed per environment).
+* Decisions made
+    - Used Finding 38's first prescribed remediation in `tests/test_surgery.py::test_main_prints_fold_request_when_over_budget` (deleting the unread `_host_needs_interpreter` monkeypatch and asserting `f"Run: {m.agent_invoke()} nap " in out`) because `tests/test_summem_fixture.py` forbids `"load_summem"` in `tests/test_*.py`.
+    - Kept single-consumer helpers (`_fold_balanced`, `_plant_abd_abe`, `_plant_variant`, `_block_naps_dir_open`) local to their capability modules per Preflight Advisory 2.
+* Insights
+    - Full-suite verification caught the `test_summem_fixture.py` lexical check on `"load_summem"` across `py311`–`py314` and confirmed the exact 445-test reconciliation (`459 − 14 = 445`).
+

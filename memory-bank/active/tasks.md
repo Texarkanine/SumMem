@@ -51,7 +51,7 @@ No new product executable behavior (`summem`, `surgery.py`, and `migrate.py` are
 3. [x] In `tests/test_path_walkup_and_catalog.py`, replace the conditional `cat_end` fallback in `test_root_wake_lists_other_stores_pull_prints_only_that_store` with unconditional `cat_end = root_lines.index("== Project-root Memories ==")` (Finding 29; Findings 47 & 49 declined per unit-vs-binary-integration layering).
 4. [x] In `tests/test_recall.py`, replace `assert isinstance(out, str)` with `assert out == ""` and trim redundant `not in err` checks after exact `assert err == "skipped a pack\n"` in `test_recall_malformed_tree_does_not_raise` and `test_recall_unprojectable_note_name_skips` (Findings 30 & 31).
 5. [x] In `tests/test_scopes.py`: add `assert ".summem/summem" not in catalog` to `test_root_wake_catalogs_other_store`; rename `test_monkeypatch_wake_lines_still_applies_when_config_omits_knob` to `test_omitted_config_wake_lines_uses_default_budget` (Finding 32); rewrite `test_catalog_text_does_not_list_view` without `boom` stubs by writing an invalid-UTF-8 loose note file in `pkg/.summem/notes/` and two overlapping 2-pack stems directly via `m.nap_stem` in `pkg/.summem/naps/` (without unlinking), then asserting `catalog_text` reports `5: ./pkg` while leaving both overlapping nap pairs on disk (Finding 33); delete `test_catalog_does_not_os_walk` (Finding 34); rename `test_catalog_requires_config_toml_sentinel` to `test_empty_summem_dir_without_files_is_not_started_or_cataloged` with matching docstring (Finding 35).
-6. [x] In `tests/test_surgery.py`: rename `test_dry_run_prints_chain_and_writes_nothing` to `test_dry_run_returns_chain_and_writes_nothing` (Finding 36); update `test_main_usage_without_target` to invoke `s.main(["--root"]) == 2` and assert `captured.out == ""` and `captured.err == s._usage()` (Finding 37); add `monkeypatch.setattr(s, "load_summem", lambda: m)` in `test_main_prints_fold_request_when_over_budget` so `s.main` uses the patched `summem` module (Finding 38); capture `before = _store_bytes(repo)` in `test_main_dry_run_omits_fold_request` and assert `"Run:" not in out` and `_store_bytes(repo) == before` (Finding 39).
+6. [x] In `tests/test_surgery.py`: rename `test_dry_run_prints_chain_and_writes_nothing` to `test_dry_run_returns_chain_and_writes_nothing` (Finding 36); update `test_main_usage_without_target` to invoke `s.main(["--root"]) == 2` and assert `captured.out == ""` and `captured.err == s._usage()` (Finding 37); delete the unread `monkeypatch.setattr(m, "_host_needs_interpreter", ...)` setup in `test_main_prints_fold_request_when_over_budget` and assert `f"Run: {m.agent_invoke()} nap " in out` (Finding 38 option 1, avoiding `test_summem_fixture.py`'s ban on `"load_summem"` in `test_*.py`); capture `before = _store_bytes(repo)` in `test_main_dry_run_omits_fold_request` and assert `"Run:" not in out` and `_store_bytes(repo) == before` (Finding 39).
 7. [x] Run `tox -e py311 -- tests/test_caption_conflict.py tests/test_nap_reject.py tests/test_path_walkup_and_catalog.py tests/test_recall.py tests/test_scopes.py tests/test_surgery.py` and confirm green.
 
 ### 2. Remediate `tests/test_fold.py` findings — test-only refactor
@@ -97,9 +97,9 @@ No new product executable behavior (`summem`, `surgery.py`, and `migrate.py` are
 - Files: `docs/contributing/index.md`, `memory-bank/techContext.md`
 - No tests: prose/policy artifact
 
-1. [ ] In `docs/contributing/index.md`, remove the bullet `- **Keep \`AGENTS.md\` in step with \`init\`.** This repository's activation block must match what \`init\` prints. A test checks this.` since the repository's `AGENTS.md` is operator-owned and `test_agents_md_starts_with_prompt_text` is deleted.
-2. [ ] In `memory-bank/techContext.md`, replace `"This repository's \`AGENTS.md\` prefix locksteps with \`prompt_text()\`; tests do not pin write-rule wording."` with `"Tests do not pin write-rule wording or this repository's \`AGENTS.md\`."` to match the deletion of `test_agents_md_starts_with_prompt_text`.
-3. [ ] Run full matrix verification (`tox run-parallel` across `py311`–`py314`) and `uv run --no-config properdocs build --strict` to confirm zero regressions.
+1. [x] In `docs/contributing/index.md`, remove the bullet `- **Keep \`AGENTS.md\` in step with \`init\`.** This repository's activation block must match what \`init\` prints. A test checks this.` since the repository's `AGENTS.md` is operator-owned and `test_agents_md_starts_with_prompt_text` is deleted.
+2. [x] In `memory-bank/techContext.md`, replace `"This repository's \`AGENTS.md\` prefix locksteps with \`prompt_text()\`; tests do not pin write-rule wording."` with `"Tests do not pin write-rule wording or this repository's \`AGENTS.md\`."` to match the deletion of `test_agents_md_starts_with_prompt_text`.
+3. [x] Run full matrix verification (`tox run-parallel` across `py311`–`py314`) and `uv run --no-config properdocs build --strict` to confirm zero regressions.
 
 ## Technology Validation
 
@@ -129,6 +129,6 @@ No new technology - validation not required.
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
-- [ ] Build
+- [x] Preflight
+- [x] Build
 - [ ] QA

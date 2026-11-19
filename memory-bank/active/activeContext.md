@@ -1,10 +1,15 @@
 # Active Context
 
 ## Current Task: multi-store-filing
-**Phase:** PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Updated `memory-bank/active/tasks.md` (Revision 3) to add `docs/contributing/index.md` line 24 removal to Unit 5 (resolving the Preflight Run 2 `FAIL (fixable)` finding) and incorporated the remaining partition, helper-sharing, and variant-planting advisories.
+- Completed all 5 rework implementation units in `memory-bank/active/tasks.md`:
+  - Modified `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-multi-store-filing/tests/test_caption_conflict.py`, `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-multi-store-filing/tests/test_nap_reject.py`, `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-multi-store-filing/tests/test_path_walkup_and_catalog.py`, `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-multi-store-filing/tests/test_recall.py`, `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-multi-store-filing/tests/test_scopes.py`, `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-multi-store-filing/tests/test_surgery.py`, `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-multi-store-filing/tests/test_fold.py`, `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-multi-store-filing/tests/test_init.py`, `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-multi-store-filing/tests/test_version.py`, `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-multi-store-filing/tests/test_cli.py`, `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-multi-store-filing/tests/test_nap.py`, `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-multi-store-filing/tests/test_zoom.py`, `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-multi-store-filing/tests/test_wake_expand.py`, `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-multi-store-filing/tests/gitutil.py`, `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-multi-store-filing/docs/contributing/index.md`, and `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-multi-store-filing/memory-bank/techContext.md`.
+  - Created `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-multi-store-filing/tests/test_cli_bootstrap.py`, `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-multi-store-filing/tests/test_cli_help.py`, `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-multi-store-filing/tests/test_rematerialize.py`, `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-multi-store-filing/tests/test_heal_view.py`, `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-multi-store-filing/tests/test_cli_heal.py`, and `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-multi-store-filing/tests/test_store_lock.py`.
+  - Deleted `/home/mobaxterm/worktrees/Texarkanine/SumMem/SumMem-multi-store-filing/tests/test_zipper.py`.
+- Recoverable adjustment during Build: `tests/test_summem_fixture.py::test_test_modules_do_not_reference_load_summem` forbids the token `"load_summem"` in any `tests/test_*.py` module, so Finding 38 in `tests/test_surgery.py::test_main_prints_fold_request_when_over_budget` used the audit's first prescribed option (removing the unread `_host_needs_interpreter` monkeypatch and asserting `f"Run: {m.agent_invoke()} nap " in out`).
+- Verified `uv run --no-config properdocs build --strict` (exit 0) and `uvx --with tox tox run-parallel` (`py311`–`py314`, 445 passed per environment).
 
 ## Next Step
-- Run Level 2 Preflight validation via subagent (`/niko-preflight`).
+- Transition to Level 2 QA phase via subagent (`/niko-qa`).

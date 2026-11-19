@@ -373,8 +373,6 @@ def test_main_prints_fold_request_when_over_budget(tmp_path, monkeypatch, capsys
     """After a root excision over budget, Run: names the two oldest survivors and omits the excised id."""
     s = load_surgery()
     m = summem
-    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
-    monkeypatch.setattr(s, "load_summem", lambda: m)
     repo = init_repo(tmp_path / "r")
     secret = "sentinel-fold-secret-kk11"
     paths = _write_notes(m, repo, [secret, "keep-b", "keep-c", "keep-d"])
@@ -384,7 +382,7 @@ def test_main_prints_fold_request_when_over_budget(tmp_path, monkeypatch, capsys
     assert s.main(["--root", "--contains", secret]) == 0
     out = capsys.readouterr().out
     assert paths[0].name in out.splitlines()
-    assert "Run: .summem/summem nap " in out
+    assert f"Run: {m.agent_invoke()} nap " in out
     remain = [node for node in m.list_view(repo) if node.kind == "note"]
     assert len(remain) == 3
     remain_ids = [node.id for node in remain]
