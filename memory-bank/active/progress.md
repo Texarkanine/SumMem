@@ -131,3 +131,14 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 * Insights
     - Passing `nodes=nodes[1:]` (`["b", "c"]`) against an on-disk 3-note store (`"a"`, `"b"`, `"c"`) verifies `nodes=` reuse via two independent observables (`"  a\n" not in out` and `"compression" not in out`).
 
+## 2026-11-19 - PREFLIGHT (REVISION 2) - COMPLETE (FAIL (fixable))
+
+* Work completed
+    - Re-validated the revised rework plan against `tests/`, `summem`, `surgery.py`, `docs/`, and the SLOBAC audit. `.preflight-status` first line: `FAIL (fixable)`.
+* Decisions made
+    - No in-phase plan edits: no TDD ordering swaps and no whole-step strikes were needed.
+* Insights
+    - Deleting `test_agents_md_starts_with_prompt_text` makes `docs/contributing/index.md` line 24 ("A test checks this.") false; Unit 5 must cover that doc (or the AGENTS.md sync check must move to a non-pytest CI step).
+    - Prior Preflight defects are fixed: Finding 17 assertion is no longer vacuous, and the 459 -> 445 count reconciles (14 deletions).
+    - Advisories: `_balanced_4` return-shape mismatch between `test_zipper.py` and `test_surgery.py`; `test_wake_expand.py` duplicate `_payload_names`; `test_zipper.py` partition assignment detail; overlapping-pack planting for Finding 33 needs a variant helper.
+
