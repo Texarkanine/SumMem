@@ -58,26 +58,23 @@ def test_init_rejects_extra_args(summem):
 
 
 def test_init_rejects_path_flag(capsys, summem):
-    """init --path is rejected; init -h does not list --path."""
+    """init --path is rejected; init -h prints root usage."""
     m = summem
     assert m.main(["init", "--path", "."]) != 0
     capsys.readouterr()
     assert m.main(["init", "-h"]) == 0
     captured = capsys.readouterr()
-    text = captured.out + captured.err
-    assert "--path" not in text
+    assert captured.out == m.usage_text()
+    assert captured.err == ""
 
 
 def test_help_before_init_prints_init_help(capsys, summem):
-    """-h init prints init help, not top-level-only usage."""
+    """-h init prints root usage on stdout."""
     m = summem
-    catalog = m.usage_text()
     assert m.main(["-h", "init"]) == 0
     captured = capsys.readouterr()
-    text = captured.out + captured.err
-    assert captured.out
-    assert "{wake,note" not in text
-    assert catalog.strip() not in text
+    assert captured.out == m.usage_text()
+    assert captured.err == ""
 
 
 def test_how_to_text_notes_are_part_of_the_work(summem):

@@ -1490,24 +1490,18 @@ def usage_text() -> str:
     return f"""\
 SumMem: shared memory for agents in a repository.
 
-  {CLI_NAME} wake    [--path PATH]                    print this store's view
-  {CLI_NAME} note    [--path PATH] TEXT               record one line
-  {CLI_NAME} nap     [--path PATH] ID-A ID-B CAPTION  fold two ids of the same grain
-  {CLI_NAME} zoom    [--path PATH] ID                 open a nap to its children
-  {CLI_NAME} recall  [--path PATH] PATTERN            search remembered text
-  {CLI_NAME} start <path>                             create a store in that directory
-  {CLI_NAME} init                                     print the agent prompt
-  {CLI_NAME} version                                  print this script's version
+  {CLI_NAME} wake    [--path PATH]                              print this store's view
+  {CLI_NAME} note    (--root | --path FILE) TEXT                record one line
+  {CLI_NAME} nap     (--root | --path STORE) ID-A ID-B CAPTION  fold two ids of the same grain
+  {CLI_NAME} zoom    (--root | --path STORE) ID                 open a nap to its children
+  {CLI_NAME} recall  (--root | --path STORE) PATTERN            search remembered text
+  {CLI_NAME} start <path>                                       create a store in that directory
+  {CLI_NAME} init                                               print the agent prompt
+  {CLI_NAME} version                                            print this script's version
 
-Every command except start, init, and version takes optional --path. Omit it to use $PWD.
---path aims at a file or directory and walks up to the nearest store.
-
-For a command's options: {CLI_NAME} <command> -h
+note, nap, zoom, and recall require --root or --path.
+--root selects the repository-root store; --path walks up from a file or directory to the nearest store.
 """
-
-
-_COMMANDS = ("wake", "note", "nap", "zoom", "recall", "start", "init", "version")
-_HELP_FLAGS = ("-h", "--help")
 
 
 def _cli_argv(argv: list[str] | None) -> list[str]:
@@ -1536,13 +1530,10 @@ def main(argv: list[str] | None = None) -> int:
     if not args_list:
         sys.stderr.write(usage_text())
         return 2
-    if args_list[0] == "help":
-        args_list = ["-h", *args_list[1:]]
-    if args_list[0] in _HELP_FLAGS:
-        if len(args_list) == 1 or args_list[1] not in _COMMANDS:
-            sys.stdout.write(usage_text())
-            return 0
-        args_list = [args_list[1], "--help", *args_list[2:]]
+    opts = args_list[: args_list.index("--")] if "--" in args_list else args_list
+    if args_list[0] == "help" or "-h" in opts or "--help" in opts:
+        sys.stdout.write(usage_text())
+        return 0
     if args_list == ["version"]:
         sys.stdout.write(f"{__version__}\n")
         return 0

@@ -546,6 +546,9 @@ def test_bare_invocation_prints_command_catalog(capsys, summem):
     for name in ("wake", "note", "nap", "zoom", "recall"):
         assert name in lines
         assert "--path" in lines[name]
+    for name in ("note", "nap", "zoom", "recall"):
+        assert "--root" in lines[name]
+    assert "--root" not in lines["wake"]
     assert "start" in lines
     assert "--path" not in lines["start"]
     assert "init" in lines
@@ -561,19 +564,19 @@ def test_help_flag_prints_catalog(capsys, summem):
     for flag in ("-h", "--help"):
         assert m.main([flag]) == 0
         captured = capsys.readouterr()
-        text = captured.out + captured.err
-        assert catalog in text
-        assert captured.out
-    assert "PWD" in catalog
+        assert captured.out == catalog
+        assert captured.err == ""
+    assert "PWD" not in catalog
+    assert "--root" in catalog
     assert "--path" in catalog
     assert "file" in catalog.lower() or "directory" in catalog.lower()
 
 
 def test_catalog_does_not_list_the_help_command(summem):
-    """The printed catalog does not offer help as a command."""
+    """The printed catalog does not offer help as a command or <command> -h."""
     catalog = summem.usage_text()
     assert "summem help" not in catalog
-    assert "<command> -h" in catalog
+    assert "<command> -h" not in catalog
 
 
 def test_help_command_prints_catalog(capsys, summem):
@@ -585,30 +588,66 @@ def test_help_command_prints_catalog(capsys, summem):
     assert captured.err == ""
 
 
+def test_subcommand_help_prints_root_usage_without_touching_store(tmp_path, monkeypatch, capsys, summem):
+    """note --help, note --root 'x' --help, -h, and help print root usage, exit 0, and touch nothing."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    locks_dir = tmp_path / "locks"
+    monkeypatch.setattr(m, "_runtime_lock_path", lambda _store: locks_dir / "store.lock")
+
+    def boom(*_a, **_k):
+        raise AssertionError("help must not lock or mutate")
+
+    monkeypatch.setattr(m, "with_store_lock", boom)
+    monkeypatch.setattr(m, "ensure_store", boom)
+    catalog = m.usage_text()
+    for argv in (
+        ["note", "--help"],
+        ["note", "--root", "x", "--help"],
+        ["-h"],
+        ["--help"],
+        ["help"],
+        ["help", "note"],
+        ["help", "start"],
+    ):
+        assert m.main(argv) == 0, argv
+        captured = capsys.readouterr()
+        assert captured.out == catalog, argv
+        assert captured.err == "", argv
+    assert not (repo / ".summem").exists()
+    assert not locks_dir.exists()
+    assert not (repo / "help").exists()
+    code, imported = _fresh_imported(["note", "--root", "x", "--help"])
+    assert code == 0
+    for name in _COMMAND_ONLY:
+        assert imported[name] is False, name
+
+
 def test_help_note_matches_note_help_flag(capsys, summem):
-    """help note prints the same text as note -h."""
+    """help note and note -h both print the root usage catalog."""
     m = summem
     assert m.main(["note", "-h"]) == 0
     note_help = capsys.readouterr().out
+    assert note_help == m.usage_text()
     assert m.main(["help", "note"]) == 0
     captured = capsys.readouterr()
-    assert captured.out == note_help
+    assert captured.out == m.usage_text()
     assert captured.err == ""
-    assert "--path" in captured.out
 
 
 def test_help_start_prints_help_and_creates_nothing(tmp_path, monkeypatch, capsys, summem):
-    """help start prints start's help and does not create a directory named help."""
+    """help start and start -h print root usage and do not create a directory named help."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     assert m.main(["start", "-h"]) == 0
     start_help = capsys.readouterr().out
+    assert start_help == m.usage_text()
     assert m.main(["help", "start"]) == 0
     captured = capsys.readouterr()
-    assert captured.out == start_help
+    assert captured.out == m.usage_text()
     assert captured.err == ""
-    assert "--path" not in captured.out
     assert not (repo / "help").exists()
     assert list(repo.rglob(".summem")) == []
 
@@ -645,31 +684,30 @@ def test_note_double_dash_records_help_flag(tmp_path, monkeypatch, summem):
 
 
 def test_help_before_command_prints_command_help(capsys, summem):
-    """-h wake prints wake help including --path, not top-level-only usage."""
+    """-h wake prints the root usage catalog on stdout."""
     m = summem
     assert m.main(["-h", "wake"]) == 0
     captured = capsys.readouterr()
-    text = captured.out + captured.err
-    assert "--path" in text
-    assert "{wake,note" not in text
+    assert captured.out == m.usage_text()
+    assert captured.err == ""
 
 
 def test_command_help_still_shows_path(capsys, summem):
-    """wake -h still shows --path."""
+    """wake -h prints the root usage catalog on stdout."""
     m = summem
     assert m.main(["wake", "-h"]) == 0
     captured = capsys.readouterr()
-    text = captured.out + captured.err
-    assert "--path" in text
+    assert captured.out == m.usage_text()
+    assert captured.err == ""
 
 
 def test_start_help_omits_path(capsys, summem):
-    """start -h does not list --path."""
+    """start -h prints the root usage catalog on stdout."""
     m = summem
     assert m.main(["start", "-h"]) == 0
     captured = capsys.readouterr()
-    text = captured.out + captured.err
-    assert "--path" not in text
+    assert captured.out == m.usage_text()
+    assert captured.err == ""
 
 
 def test_catalog_omits_store_paths_and_git(capsys, summem):

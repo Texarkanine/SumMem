@@ -35,7 +35,7 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 
 ## Implementation Plan
 
-### 1. Side-Effect-Free Help Interception and `usage_text()` — executable
+### 1. Side-Effect-Free Help Interception and `usage_text()` — executable [DONE]
 
 - Files: `summem`, `tests/test_cli.py`, `tests/test_init.py`, `tests/test_version.py`
 
