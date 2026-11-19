@@ -1,11 +1,10 @@
 # Active Context
 
 ## Current Task: multi-store-filing
-**Phase:** PREFLIGHT - COMPLETE (FAIL (fixable))
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Created Level 2 rework implementation plan in `memory-bank/active/tasks.md` covering all 49 findings from `.slobac/2026-11-19T14-31-00/audit.md` (47 remediated across 4 test-refactor units + 1 persistent `memory-bank/techContext.md` sync unit; Findings 47 and 49 declined per the unit-vs-binary-integration layer boundary).
-- Verified exact test-function conservation across the planned splits of `tests/test_cli.py` and `tests/test_zipper.py`.
+- Revised Level 2 rework plan in `memory-bank/active/tasks.md` addressing the Preflight `FAIL (fixable)` defect in Finding 17 (`assert "compression" not in out` plus `nodes=nodes[1:]`) and incorporating all six actionable Preflight advisories (help-loop deduplication to 11 tests, `wake_lines=0` on healed identical notes, deduplicating shared helpers in `test_surgery.py`/`test_nap.py` via `gitutil.py`, removing `if m._try_fcntl() is None:` in `held()`, housing `COMMAND_ONLY`/`fresh_imported` in `gitutil.py`, and moving `_note_id`/`_nap_names` with the `nap` CLI tests; expected collected test count `459 → 445`).
 
 ## Next Step
-- Transition to Level 2 Preflight phase via subagent (`/niko-preflight`).
+- Re-run Level 2 Preflight validation via subagent (`/niko-preflight`).

@@ -119,3 +119,15 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
     - Unit 2 step 4 (Finding 17): `out.splitlines()[-2]` is never the remaining-compressions line, so `"compression" not in out.splitlines()[-2]` is vacuous; assert `"compression" not in out` instead.
     - Advisories: retained `note -h`/`start -h` duplicates beside the extended help loop; trivially-green identical-notes `fold_request(repo, 1)`; identical helper copies in `test_surgery.py`/`test_nap.py`/`test_wake_expand.py` after promotion; leftover `_try_fcntl() is None` branch in the store-lock body.
     - Baseline is 459 collected tests; the plan's deletions and one split imply 447 after build.
+
+## 2026-11-19 - PLAN (REVISION 2) - COMPLETE
+
+* Work completed
+    - Updated `memory-bank/active/tasks.md` to fix the vacuous `splitlines()[-2]` assertion in Unit 2 step 4 (`assert "compression" not in out` with `nodes=nodes[1:]`) and fold in all six actionable Preflight advisories.
+* Decisions made
+    - Fold `test_help_note_matches_note_help_flag` and `test_help_start_prints_help_and_creates_nothing` into `test_subcommand_help_prints_root_usage_without_touching_store` (`test_cli_help.py`: 11 tests; expected post-build collected suite: 445 tests).
+    - Pass `wake_lines=0` in `test_fold_request_is_empty_after_healing_identical_notes` so `_fold_pair` runs instead of hitting `len(nodes) <= wake_lines`.
+    - Put `COMMAND_ONLY` and `fresh_imported` in `tests/gitutil.py` and point `test_surgery.py` and `test_nap.py` at promoted `gitutil` helpers.
+* Insights
+    - Passing `nodes=nodes[1:]` (`["b", "c"]`) against an on-disk 3-note store (`"a"`, `"b"`, `"c"`) verifies `nodes=` reuse via two independent observables (`"  a\n" not in out` and `"compression" not in out`).
+
