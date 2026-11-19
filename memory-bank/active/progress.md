@@ -109,5 +109,13 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 * Insights
     - `summem.leaf_digests(node)` already wraps `_as_child(node)` and returns `None` on `(OSError, ValueError)`, cleanly replacing all 4 private `_as_child` assertions in `tests/test_fold.py`.
 
+## 2026-11-19 - PREFLIGHT - COMPLETE (FAIL (fixable))
 
-
+* Work completed
+    - Validated the rework plan against `tests/`, `summem`, `surgery.py`, `memory-bank/`, CI config, and the SLOBAC audit. `.preflight-status` first line: `FAIL (fixable)`.
+* Decisions made
+    - No in-phase plan edits: no TDD ordering swaps and no whole-step strikes were needed.
+* Insights
+    - Unit 2 step 4 (Finding 17): `out.splitlines()[-2]` is never the remaining-compressions line, so `"compression" not in out.splitlines()[-2]` is vacuous; assert `"compression" not in out` instead.
+    - Advisories: retained `note -h`/`start -h` duplicates beside the extended help loop; trivially-green identical-notes `fold_request(repo, 1)`; identical helper copies in `test_surgery.py`/`test_nap.py`/`test_wake_expand.py` after promotion; leftover `_try_fcntl() is None` branch in the store-lock body.
+    - Baseline is 459 collected tests; the plan's deletions and one split imply 447 after build.
