@@ -64,3 +64,14 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 * Insights
     - `README.md` needed no edits: it contains no CLI invocations, so FR-10's README surface was already clean.
     - Two informational items ride to the operator with the PASS: the help scan's `--` boundary (FR-7 refinement, pinned by `test_note_double_dash_records_help_flag`) and the `Run: nap --path <dir>` sibling-cwd walk-up limit inherited from #103 FR-5.
+
+## 2026-11-19 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-multi-store-filing.md`.
+    - Reconciled persistent files (`productContext.md` and `systemPatterns.md` updated; `techContext.md` skipped — toolchain, lazy-import floor, test runner, and no-wording-pin oracle remain accurate).
+    - Recorded durable gotcha/contract note in `.summem/` and completed the requested `nap --root` fold.
+* Decisions made
+    - Stopped Niko workflow at the Level 2 terminal node (`Reflect -> ManualArchive`) before opening the draft pull request requested by the operator.
+* Insights
+    - Store-layer functions (`fold_request`) must remain usable on bare non-git `tmp_path` directories (`test_fold_many_writers.py`), while CLI entrypoints enforce `.git` presence.

@@ -1,11 +1,12 @@
 # Active Context
 
 ## Current Task: multi-store-filing
-**Phase:** QA - COMPLETE (PASS)
+**Phase:** REFLECT - COMPLETE
 
 ## What Was Done
-- Completed Units 1–5 in strict TDD order across `summem`, `surgery.py`, `AGENTS.md`, `tests/`, `docs/`, and persistent memory-bank files (`productContext.md`, `systemPatterns.md`), incorporating all Preflight advisories.
-- Verified `uv run --no-config properdocs build --strict` (zero warnings) and full `tox run-parallel` matrix (`py311`, `py312`, `py313`, `py314` all green, 459 passed per env).
+- Completed Level 2 reflection in `memory-bank/active/reflection/reflection-multi-store-filing.md`.
+- Reconciled persistent memory-bank files (`productContext.md` and `systemPatterns.md` updated in Build Unit 5; `techContext.md` verified accurate and skipped).
+- Recorded durable repository contract/gotcha note in `.summem/` and compacted the resulting fold pair.
 
 ## Next Step
-- QA PASSED - proceed to `/niko-reflect`.
+- Run `/niko-archive` when ready to archive `multi-store-filing` (after PR review/merge).
