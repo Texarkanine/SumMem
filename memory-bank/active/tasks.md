@@ -62,7 +62,7 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 3. Write tests and run red: Implement the new `surgery.py` tests (checking exit `2` and unchanged store bytes when neither or both store flags are passed, `--root` excision from inside a started child directory, and root-relative `Run:` fold output from a subdirectory) and update existing `s.main(...)` calls and `f"nap --root {pa} {pb} "` assertion in `tests/test_surgery.py`. Run `tox -e py311 -- tests/test_surgery.py` and confirm red.
 4. Write code and run green: Add `--root` (`action="store_true"`) to `surgery.py`'s `ArgumentParser` and update `_usage()`; check `args.root == (args.path is not None)` after `parse_args`, writing `m._store_flag_error("surgery")` to `sys.stderr` and returning `2`; resolve `parent` via `m.find_store_parent(Path.cwd())` for `--root` and `m.resolve_parent(Path.cwd(), args.path)` for `--path`. Run `tox -e py311 -- tests/test_surgery.py` and confirm green.
 
-### 4. Non-Empty Catalog Filtering, `how_to_text()`, `prompt_text()`, and `AGENTS.md` Lockstep — executable
+### 4. Non-Empty Catalog Filtering, `how_to_text()`, `prompt_text()`, and `AGENTS.md` Lockstep — executable [DONE]
 
 - Files: `summem`, `AGENTS.md`, `tests/test_scopes.py`, `tests/test_init.py`
 

@@ -444,10 +444,11 @@ def started_stores(git_root) -> list[Path]:
 
 
 def catalog_text(git_root, resolved_parent) -> str:
-    """Return root-wake catalog of other started stores, or empty.
+    """Return root-wake catalog of non-empty other started stores, or empty.
 
     Each line after the header is ``N: ./path``: note count from filenames,
-    then the store path. Pulls pass a non-root *resolved_parent* and get empty.
+    then the store path. Child stores whose count is ``0`` are omitted. Pulls
+    pass a non-root *resolved_parent* and get empty.
     """
     root = Path(git_root).resolve()
     if Path(resolved_parent).resolve() != root:
@@ -456,7 +457,7 @@ def catalog_text(git_root, resolved_parent) -> str:
     rows = [
         f"{count}: ./{parent.relative_to(root).as_posix()}"
         for parent, count in sorted(counts.items())
-        if parent != root
+        if parent != root and count > 0
     ]
     if not rows:
         return ""
@@ -1320,7 +1321,10 @@ def wake_text(parent) -> str:
 def _fold_store_flag(parent) -> str:
     """Return the root-relative store flag (``--root`` or ``--path REL``) for *parent*."""
     resolved_parent = Path(parent).resolve()
-    resolved_root = Path(find_store_parent(resolved_parent)).resolve()
+    try:
+        resolved_root = Path(find_store_parent(resolved_parent)).resolve()
+    except ValueError:
+        return "--root"
     if resolved_parent == resolved_root:
         return "--root"
     return f"--path {resolved_parent.relative_to(resolved_root).as_posix()}"
@@ -1446,30 +1450,30 @@ def how_to_text(*, catalog: bool = False) -> str:
 
     The section includes its ``== SumMem Usage ==`` header and a trailing
     newline, matching ``catalog_text()``. It is not the operator ``-h``
-    catalog from ``usage_text()``. When *catalog* is true, append how to
-    read ``N: ./path`` catalog lines, pull with ``wake --path``, and record
-    with ``note --path`` (walk-up).
+    catalog from ``usage_text()``. Base text always explains ``--path`` and
+    ``--root``; when *catalog* is true, append how to read ``N: ./path``
+    catalog lines and pull with ``wake --path``.
     """
     invoke = agent_invoke()
     text = f"""\
 == SumMem Usage ==
 
-`{invoke} note "…"` records one short line.
+Read `wake` output to the end; never pipe it through `head`, `tail`, or a pager.
+
+`{invoke} note --path <file> "…"` records one short line in the nearest store for that file; `{invoke} note --root "…"` records in the project-root store. Pass `--root` or `--path <store>` (which walks up the same way) to `nap`, `recall`, and `zoom`.
 
 Never invent filenames, rewrite note bytes, or delete memory files by hand. The script is the only writer. The files it writes are part of your work; do not leave them untracked.
 
 If `note` asks for a nap, do that nap before your next action.
 
-`{invoke} recall <regex>` searches remembered text word for word. `{invoke} zoom <id>` opens a pack: a line with an `x<N> <hash>:` prefix is a nap that can be zoomed in on. A leaf is `x1 YYYY-MM-DD:` and is not a zoom target.
+`{invoke} recall --root <regex>` (or `--path <store>`) searches remembered text word for word. `{invoke} zoom --root <id>` (or `--path <store>`) opens a pack: a line with an `x<N> <hash>:` prefix is a nap that can be zoomed in on. A leaf is `x1 YYYY-MM-DD:` and is not a zoom target.
 """
     if catalog:
         text += (
             "\nListed catalog lines are `N: ./path`: `N:` is a count, then the path. "
             "They are not commands. "
             f"When you work under a cataloged path, run `{invoke} wake --path <path>` "
-            "if that store's wake is not already in this conversation. "
-            f"`{invoke} note --path <file> \"…\"` records in the nearest store for that file. "
-            "The same `--path` on nap, recall, and zoom walks up the same way.\n"
+            "if that store's wake is not already in this conversation.\n"
         )
     return text
 
@@ -1483,11 +1487,11 @@ Shared memory for this repository is managed through SumMem.
 
 ## At Session Start: Activating SumMem (mandatory)
 
-Run `python {AGENT_BIN} wake` from the repository root. If you can see a prior project-root SumMem wake in this conversation's history, do not run it again.
+Run `python {AGENT_BIN} wake` from the repository root. Read `wake` output to the end; never pipe it through `head`, `tail`, or a pager. If you can see a prior project-root SumMem wake in this conversation's history, do not run it again.
 
 ## While Working: Register Memories
 
-When something matches the write rule below, record it with SumMem's `note`.
+When something matches the write rule below, record it with SumMem's `note`. Record each note in the store nearest the code it is about; use the root store only when it applies to the whole project.
 
 One short line another contributor needs to work on this repository: gotchas, norms, failed approaches, lore and tribal knowledge, etc. Not merely "news" - e.g. that a PR opened, checks passed, or a task completed. Personal, machine-local, and user preference facts stay out. Skip if nothing qualifies or it is already remembered.
 """

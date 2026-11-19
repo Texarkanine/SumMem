@@ -273,3 +273,16 @@ def test_init_text_posix_has_no_windows_warning(monkeypatch, summem):
     assert "only work on Windows" not in text
     assert "starting write rule" in recipe.lower()
     assert rest.lstrip() == m.prompt_text()
+
+
+def test_how_to_text_always_explains_root_and_path(monkeypatch, summem):
+    """Base how_to_text() always includes --root and --path command forms even without a catalog."""
+    m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
+    base = m.how_to_text()
+    assert f"{m.AGENT_BIN} note --path" in base
+    assert f"{m.AGENT_BIN} note --root" in base
+    assert f"{m.AGENT_BIN} recall --root" in base
+    assert f"{m.AGENT_BIN} zoom --root" in base
+    assert "walks up" in base
+    assert "wake --path" not in base

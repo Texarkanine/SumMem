@@ -390,6 +390,7 @@ def test_empty_root_omits_project_root_header(tmp_path, monkeypatch, capsys, sum
     monkeypatch.chdir(repo)
     (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
+    assert m.main(["note", "--path", "pkg", "pkg-note"]) == 0
     capsys.readouterr()
     assert m.main(["wake"]) == 0
     out = capsys.readouterr().out
@@ -456,8 +457,8 @@ def test_root_wake_catalogs_other_store(tmp_path, monkeypatch, capsys, summem):
     assert "git" not in out
 
 
-def test_catalog_empty_store_prints_zero(tmp_path, monkeypatch, capsys, summem):
-    """An empty started child store catalogs as 0: ./pkg."""
+def test_catalog_hides_zero_count_child_store(tmp_path, monkeypatch, capsys, summem):
+    """An empty started child store is omitted from catalog_text while started_stores still lists it."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
@@ -465,8 +466,11 @@ def test_catalog_empty_store_prints_zero(tmp_path, monkeypatch, capsys, summem):
     assert m.main(["start", "pkg"]) == 0
     capsys.readouterr()
     assert m.main(["wake"]) == 0
-    lines = capsys.readouterr().out.splitlines()
-    assert "0: ./pkg" in lines
+    out = capsys.readouterr().out
+    assert "0: ./pkg" not in out.splitlines()
+    assert "./pkg" not in out
+    assert "== Additional SumMem Catalogs ==" not in out
+    assert (repo / "pkg").resolve() in {p.resolve() for p in m.started_stores(repo)}
 
 
 def test_catalog_one_note_prints_one(tmp_path, monkeypatch, capsys, summem):
@@ -486,12 +490,13 @@ def test_catalog_one_note_prints_one(tmp_path, monkeypatch, capsys, summem):
 
 
 def test_catalog_does_not_pad_count_width(tmp_path, monkeypatch, capsys, summem):
-    """Catalog count prefixes are not digit-padded: 0: ./a next to 10: ./b."""
+    """Catalog count prefixes are not digit-padded: 1: ./a next to 10: ./b."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     (repo / "a").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "a"]) == 0
+    assert m.main(["note", "--path", "a", "only"]) == 0
     (repo / "b").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "b"]) == 0
     for i in range(10):
@@ -499,9 +504,9 @@ def test_catalog_does_not_pad_count_width(tmp_path, monkeypatch, capsys, summem)
     capsys.readouterr()
     assert m.main(["wake"]) == 0
     lines = capsys.readouterr().out.splitlines()
-    assert "0: ./a" in lines
+    assert "1: ./a" in lines
     assert "10: ./b" in lines
-    assert "0:  ./a" not in lines
+    assert "1:  ./a" not in lines
 
 
 def test_catalog_text_does_not_list_view(tmp_path, monkeypatch, summem):
@@ -617,8 +622,10 @@ def test_gitignore_store_omitted_from_catalog(tmp_path, monkeypatch, capsys, sum
     (repo / ".gitignore").write_text("hidden/.summem\n", encoding="utf-8")
     (repo / "hidden").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "hidden"]) == 0
+    assert m.main(["note", "--path", "hidden", "hidden-note"]) == 0
     (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
+    assert m.main(["note", "--path", "pkg", "visible-note"]) == 0
     capsys.readouterr()
     assert m.main(["wake"]) == 0
     out = capsys.readouterr().out
@@ -633,6 +640,7 @@ def test_catalog_does_not_os_walk(tmp_path, monkeypatch, capsys, summem):
     monkeypatch.chdir(repo)
     (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
+    assert m.main(["note", "--path", "pkg", "pkg-note"]) == 0
     capsys.readouterr()
 
     def boom(*_a, **_k):
@@ -662,13 +670,17 @@ def test_file_ignored_config_still_catalogs_store(tmp_path, monkeypatch, capsys,
 
 
 def test_catalog_requires_config_toml_sentinel(tmp_path, monkeypatch, capsys, summem):
-    """A child .summem directory without config.toml is not cataloged."""
+    """A child .summem directory without config.toml is not in started_stores or cataloged."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     (repo / "bare" / ".summem").mkdir(parents=True)
     (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
+    stores = {p.resolve() for p in m.started_stores(repo)}
+    assert (repo / "pkg").resolve() in stores
+    assert (repo / "bare").resolve() not in stores
+    assert m.main(["note", "--path", "pkg", "pkg-note"]) == 0
     capsys.readouterr()
     assert m.main(["wake"]) == 0
     out = capsys.readouterr().out
@@ -762,4 +774,29 @@ def test_saved_to_and_start_paths_are_root_relative_from_subdir(tmp_path, monkey
     ids = [node.id for node in m.list_view(repo / "packages" / "cli")]
     assert m.main(["nap", "--path", ".", ids[0], ids[1], "both"]) == 0
     assert capsys.readouterr().out == "Saved to `./packages/cli/.summem`\n\nNothing left to compress.\n"
+
+
+def test_catalog_omits_empty_child_stores_and_header_when_none_remain(tmp_path, monkeypatch, capsys, summem):
+    """Child stores with 0 notes are hidden from catalog_text, and the header disappears when all are empty."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    (repo / "empty").mkdir()
+    (repo / "filled").mkdir()
+    assert m.main(["start", "empty"]) == 0
+    assert m.main(["start", "filled"]) == 0
+    assert m.catalog_text(repo, repo) == ""
+    capsys.readouterr()
+    assert m.main(["wake"]) == 0
+    empty_wake = capsys.readouterr().out
+    assert "== Additional SumMem Catalogs ==" not in empty_wake
+    assert "wake --path" not in empty_wake
+
+    assert m.main(["note", "--path", "filled", "one"]) == 0
+    assert m.catalog_text(repo, repo) == "== Additional SumMem Catalogs ==\n1: ./filled\n"
+    capsys.readouterr()
+    assert m.main(["wake"]) == 0
+    mixed_wake = capsys.readouterr().out
+    assert "1: ./filled" in mixed_wake.splitlines()
+    assert "./empty" not in mixed_wake
 
