@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import re
 import subprocess
 import sys
@@ -224,3 +225,51 @@ def reaches(m, repo, sentence: str) -> bool:
             return True
         pending.extend(_nap_child_ids(m, repo, cid))
     return False
+
+
+COMMAND_ONLY = ("tomllib", "fcntl", "subprocess", "dataclasses", "argparse")
+
+_IMPORT_PROBE = r"""
+import builtins
+import importlib.util
+import json
+import sys
+from importlib.machinery import SourceFileLoader
+
+watched = ("tomllib", "fcntl", "subprocess", "dataclasses", "argparse")
+from_driver = {name: False for name in watched}
+real_import = builtins.__import__
+
+def tracked(name, globals=None, locals=None, fromlist=(), level=0):
+    root = name.split(".", 1)[0]
+    if root in from_driver and globals and globals.get("__name__") == "summem_probe":
+        from_driver[root] = True
+    return real_import(name, globals, locals, fromlist, level)
+
+builtins.__import__ = tracked
+path, *cmd = sys.argv[1:]
+loader = SourceFileLoader("summem_probe", path)
+spec = importlib.util.spec_from_loader("summem_probe", loader)
+mod = importlib.util.module_from_spec(spec)
+sys.modules["summem_probe"] = mod
+spec.loader.exec_module(mod)
+code = mod.main(cmd)
+sys.stdout.write("\n")
+sys.stdout.write(json.dumps(from_driver))
+raise SystemExit(0 if code is None else code)
+"""
+
+
+def fresh_imported(cmd: list[str]) -> tuple[int, dict[str, bool]]:
+    """Run *cmd* in a new interpreter and report modules the driver itself imported.
+
+    3.14's pathlib imports fcntl, so sys.modules is the wrong oracle.
+    """
+    result = subprocess.run(
+        [sys.executable, "-c", _IMPORT_PROBE, str(SCRIPT), *cmd],
+        capture_output=True,
+        text=True,
+    )
+    payload = result.stdout.splitlines()[-1] if result.stdout.splitlines() else ""
+    imported = json.loads(payload)
+    return result.returncode, imported

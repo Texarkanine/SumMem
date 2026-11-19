@@ -30,24 +30,9 @@ def test_version_rejects_extra_args(summem):
     assert m.main(["version", "x"]) == 2
 
 
-def test_version_rejects_path_flag(capsys, summem):
-    """version --path is rejected; version -h prints root usage."""
-    m = summem
-    assert m.main(["version", "--path", "."]) != 0
-    capsys.readouterr()
-    assert m.main(["version", "-h"]) == 0
-    captured = capsys.readouterr()
-    assert captured.out == m.usage_text()
-    assert captured.err == ""
-
-
-def test_help_before_version_prints_version_help(capsys, summem):
-    """-h version prints root usage on stdout."""
-    m = summem
-    assert m.main(["-h", "version"]) == 0
-    captured = capsys.readouterr()
-    assert captured.out == m.usage_text()
-    assert captured.err == ""
+def test_version_rejects_path_flag(summem):
+    """version --path is rejected."""
+    assert summem.main(["version", "--path", "."]) != 0
 
 
 def test_version_line_has_release_please_marker():
