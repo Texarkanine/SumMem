@@ -53,7 +53,7 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 3. Write tests and run red: Fill in the new test functions (asserting exit code `2` and zero writes on missing/both store flags without pinning prose beyond `--root`/`--path`, ``Saved to `<store>` `` on `note`, `nap`, and already-folded `nap`, root-relative `start` and `Run:` output from subdirectories, and uncut single-store `recall`), and update existing CLI invocations and `Saved.` / `Run:` assertions across `tests/gitutil.py`, `tests/test_cli.py`, `tests/test_scopes.py`, `tests/test_fold.py`, `tests/test_recall.py`, `tests/test_zipper.py`, `tests/test_nap_reject.py`, `tests/test_path_walkup_and_catalog.py`, `tests/test_caption_conflict.py`, `tests/test_worktree_note_merge.py`, and `tests/test_nap_variants.py`. Run those test suites under `tox -e py311` and confirm red.
 4. Write code and run green: Implement `_store_flag_error`, `_root_path`, and `_fold_store_flag` in `summem`; add `--root` (`action="store_true"`) to `note`, `nap`, `zoom`, and `recall` subparsers; enforce `args.root != (args.path is not None)` with exit `2` before resolving the store; resolve `--root` via `find_store_parent(Path.cwd())` and `--path` via `resolve_parent(Path.cwd(), args.path)`; update `start` to format paths with `_root_path`; update `note` and `nap` to print ``Saved to `{_root_path(Path(parent) / '.summem', root)}`\n``; and update `fold_request` to use `_fold_store_flag(parent)`. Run all modified test files under `tox -e py311` and confirm green.
 
-### 3. Mandatory `--root` / `--path` and FR-5 Fold Requests in `surgery.py` — executable
+### 3. Mandatory `--root` / `--path` and FR-5 Fold Requests in `surgery.py` — executable [DONE]
 
 - Files: `surgery.py`, `tests/test_surgery.py`
 
