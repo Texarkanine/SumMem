@@ -63,11 +63,7 @@ def test_root_wake_lists_other_stores_pull_prints_only_that_store(tmp_path):
     assert "== SumMem Usage ==" in root_out
     root_lines = root_out.splitlines()
     cat_start = root_lines.index("== Additional SumMem Catalogs ==")
-    cat_end = (
-        root_lines.index("== Project-root Memories ==")
-        if "== Project-root Memories ==" in root_lines
-        else len(root_lines) - 1
-    )
+    cat_end = root_lines.index("== Project-root Memories ==")
     catalog = "\n".join(root_lines[cat_start:cat_end])
     assert "summem wake --path pkg" not in catalog
     assert ".summem/summem" not in catalog

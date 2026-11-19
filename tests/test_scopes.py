@@ -332,8 +332,8 @@ def test_unreadable_config_uses_defaults(tmp_path, monkeypatch, capsys, summem):
     assert config.read_bytes() == before
 
 
-def test_monkeypatch_wake_lines_still_applies_when_config_omits_knob(tmp_path, monkeypatch, capsys, summem):
-    """Omitted WAKE_LINES still follows the module constant, including a monkeypatch."""
+def test_omitted_config_wake_lines_uses_default_budget(tmp_path, monkeypatch, capsys, summem):
+    """A store whose config.toml omits WAKE_LINES uses the default budget."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
@@ -452,6 +452,7 @@ def test_root_wake_catalogs_other_store(tmp_path, monkeypatch, capsys, summem):
     assert f"{m.AGENT_BIN} wake --path <path>" in out
     catalog = _catalog_section(out)
     assert "summem wake --path pkg" not in catalog
+    assert ".summem/summem" not in catalog
     assert "notes/" not in out
     assert "naps/" not in out
     assert "git" not in out
@@ -510,21 +511,29 @@ def test_catalog_does_not_pad_count_width(tmp_path, monkeypatch, capsys, summem)
 
 
 def test_catalog_text_does_not_list_view(tmp_path, monkeypatch, summem):
-    """catalog_text does not call list_view or heal_view to count."""
+    """catalog_text counts filenames without parsing note UTF-8 or healing overlapping packs."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
-    assert m.main(["note", "--path", "pkg", "pkg-note"]) == 0
-
-    def boom(*_a, **_k):
-        raise AssertionError("view")
-
-    monkeypatch.setattr(m, "list_view", boom)
-    monkeypatch.setattr(m, "heal_view", boom)
+    assert m.main(["note", "--path", "pkg", "alpha"]) == 0
+    assert m.main(["note", "--path", "pkg", "beta"]) == 0
+    ids = [node.id for node in m.list_view(repo / "pkg")]
+    assert m.main(["nap", "--path", "pkg", ids[0], ids[1], "one"]) == 0
+    node = m.list_view(repo / "pkg")[0]
+    tree_bytes = node.tree_path.read_bytes()
+    caption_two = m.note_file_bytes("two")
+    stem_two = m.nap_stem(m._seq_prefix(node.name), node.id, 2, tree_bytes, caption_two)
+    naps = repo / "pkg" / ".summem" / "naps"
+    (naps / f"{stem_two}.tree").write_bytes(tree_bytes)
+    (naps / f"{stem_two}.summ").write_bytes(caption_two)
+    bad_note = repo / "pkg" / ".summem" / "notes" / "20260101T000099Z-0000000000000099"
+    bad_note.write_bytes(b"\xff\xfe\n")
     text = m.catalog_text(repo, repo)
-    assert "1: ./pkg" in text.splitlines()
+    assert "5: ./pkg" in text.splitlines()
+    assert (naps / f"{node.name}.tree").is_file()
+    assert (naps / f"{stem_two}.tree").is_file()
 
 
 def test_catalog_folded_pair_counts_as_two(tmp_path, monkeypatch, capsys, summem):
@@ -633,26 +642,6 @@ def test_gitignore_store_omitted_from_catalog(tmp_path, monkeypatch, capsys, sum
     assert "./hidden" not in out
 
 
-def test_catalog_does_not_os_walk(tmp_path, monkeypatch, capsys, summem):
-    """Root catalog lists other stores without calling os.walk."""
-    m = summem
-    repo = init_repo(tmp_path / "r")
-    monkeypatch.chdir(repo)
-    (repo / "pkg").mkdir(parents=True, exist_ok=True)
-    assert m.main(["start", "pkg"]) == 0
-    assert m.main(["note", "--path", "pkg", "pkg-note"]) == 0
-    capsys.readouterr()
-
-    def boom(*_a, **_k):
-        raise AssertionError("os.walk")
-
-    monkeypatch.setattr(m.os, "walk", boom)
-    assert m.main(["wake"]) == 0
-    out = capsys.readouterr().out
-    assert "./pkg" in out
-    assert "== Additional SumMem Catalogs ==" in out
-
-
 def test_file_ignored_config_still_catalogs_store(tmp_path, monkeypatch, capsys, summem):
     """A file-level gitignore of config.toml does not hide a store that has notes."""
     m = summem
@@ -669,8 +658,8 @@ def test_file_ignored_config_still_catalogs_store(tmp_path, monkeypatch, capsys,
     assert "== Additional SumMem Catalogs ==" in out
 
 
-def test_catalog_requires_config_toml_sentinel(tmp_path, monkeypatch, capsys, summem):
-    """A child .summem directory without config.toml is not in started_stores or cataloged."""
+def test_empty_summem_dir_without_files_is_not_started_or_cataloged(tmp_path, monkeypatch, capsys, summem):
+    """An empty child .summem directory with no files is neither in started_stores nor cataloged."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)

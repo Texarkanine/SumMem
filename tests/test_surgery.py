@@ -262,7 +262,7 @@ def test_plan_break_out_kid_stem_is_rematerialize_dest(tmp_path, summem):
     assert (naps / f"{chain[1]}.summ").is_file()
 
 
-def test_dry_run_prints_chain_and_writes_nothing(tmp_path, summem):
+def test_dry_run_returns_chain_and_writes_nothing(tmp_path, summem):
     """Dry-run returns the rematerialize chain and does not change store bytes."""
     s = load_surgery()
     m = summem
@@ -364,9 +364,10 @@ def test_main_usage_without_target(tmp_path, monkeypatch, capsys):
     s = load_surgery()
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
-    assert s.main([]) == 2
-    err = capsys.readouterr().err
-    assert err
+    assert s.main(["--root"]) == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err == s._usage()
 
 
 def test_main_version_prints_script_version(capsys):
@@ -396,6 +397,7 @@ def test_main_prints_fold_request_when_over_budget(tmp_path, monkeypatch, capsys
     s = load_surgery()
     m = summem
     monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
+    monkeypatch.setattr(s, "load_summem", lambda: m)
     repo = init_repo(tmp_path / "r")
     secret = "sentinel-fold-secret-kk11"
     paths = _write_notes(m, repo, [secret, "keep-b", "keep-c", "keep-d"])
@@ -444,10 +446,12 @@ def test_main_dry_run_omits_fold_request(tmp_path, monkeypatch, capsys, summem):
     secret = "sentinel-dryfold-secret-ll22"
     _write_notes(m, repo, [secret, "keep-b", "keep-c", "keep-d"])
     (repo / ".summem" / "config.toml").write_text("WAKE_LINES = 2\n", encoding="utf-8")
+    before = _store_bytes(repo)
     monkeypatch.chdir(repo)
     assert s.main(["--root", "--dry-run", "--contains", secret]) == 0
     out = capsys.readouterr().out
-    assert "Run: .summem/summem nap" not in out
+    assert "Run:" not in out
+    assert _store_bytes(repo) == before
 
 
 def test_main_requires_root_or_path_flag(tmp_path, monkeypatch, capsys, summem):

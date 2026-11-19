@@ -102,13 +102,9 @@ def test_recall_malformed_tree_does_not_raise(tmp_path, capsys, summem):
     next((repo / ".summem" / "naps").glob("*.tree")).write_bytes(b"{not json\n")
     capsys.readouterr()
     out = m.recall_text(repo, "alpha")
-    assert isinstance(out, str)
+    assert out == ""
     err = capsys.readouterr().err
     assert err == "skipped a pack\n"
-    assert "notes/" not in err
-    assert "naps/" not in err
-    assert "git" not in err
-    assert "Traceback" not in err
 
 
 def test_recall_matches_nested_nap_caption(tmp_path, summem):
@@ -271,10 +267,9 @@ def test_recall_unprojectable_note_name_skips(tmp_path, capsys, summem):
     )
     capsys.readouterr()
     out = m.recall_text(repo, "x")
-    assert isinstance(out, str)
+    assert out == ""
     err = capsys.readouterr().err
     assert err == "skipped a pack\n"
-    assert "Traceback" not in err
 
 
 def test_recall_invalid_pattern_is_cli_error(tmp_path, monkeypatch, capsys, summem):

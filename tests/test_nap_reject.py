@@ -33,15 +33,16 @@ def _payload_files(repo: Path) -> list[Path]:
     return out
 
 
-def test_nap_help_exits_zero():
-    """nap --help exits 0 because nap is a known subcommand."""
+def test_nap_help_prints_root_usage(summem):
+    """Process nap --help exits 0 and prints root usage on stdout."""
     result = subprocess.run(
         [sys.executable, str(SCRIPT), "nap", "--help"],
         capture_output=True,
+        text=True,
     )
     assert result.returncode == 0
-    err = result.stderr.decode("utf-8", "replace").lower()
-    assert "invalid choice" not in err
+    assert result.stdout == summem.usage_text()
+    assert result.stderr == ""
 
 
 def test_nap_range_16_31_rejected_without_writing(tmp_path):

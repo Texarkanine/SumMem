@@ -22,7 +22,7 @@ def _run(args, cwd, check=True):
     return result
 
 
-def test_same_pair_two_captions_conflict_only_on_sum(tmp_path, monkeypatch, summem):
+def test_same_pair_two_captions_merge_cleanly_as_distinct_variants(tmp_path, monkeypatch, summem):
     """Two nappers of the same pair merge as distinct paths; wake may show two same-id rows."""
     m = summem
     monkeypatch.setattr(m, "WAKE_LINES", 1)
