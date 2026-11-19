@@ -75,3 +75,15 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
     - Stopped Niko workflow at the Level 2 terminal node (`Reflect -> ManualArchive`) before opening the draft pull request requested by the operator.
 * Insights
     - Store-layer functions (`fold_request`) must remain usable on bare non-git `tmp_path` directories (`test_fold_many_writers.py`), while CLI entrypoints enforce `.git` presence.
+
+## 2026-11-19 - REWORK INITIATION - COMPLETE
+
+* Work completed
+    - Initiated rework on `multi-store-filing` (current complexity: Level 2) to remediate the SLOBAC test-suite audit findings in `.slobac/2026-11-19T14-31-00/audit.md`.
+    - Cleared stale ephemeral state (`tasks.md`, `activeContext.md`, `.qa-validation-status`, `.preflight-status`).
+* Decisions made
+    - Delete `test_agents_md_starts_with_prompt_text` (Finding 25): the repository's own `AGENTS.md` is operator-owned and need not start with `prompt_text()`; update `memory-bank/techContext.md` accordingly.
+    - Keep `tests/test_path_walkup_and_catalog.py` as a child-process binary integration test file alongside in-process `tests/test_scopes.py` (skipping Findings 47 and 49 because in-process unit calls and binary-invoking child-process integration tests walk two distinct layers), and fix Finding 29 (`conditional-logic`) in place; apply the same unit-vs-binary rule to keep `tests/test_nap_reject.py::test_nap_help_exits_zero` as a strengthened child-process `--help` test (Findings 27 and 28) while deduplicating in-process `-h`/`--help` calls across `test_init.py`, `test_version.py`, and `test_cli.py` (Findings 7, 8, 24, 40, 46, 48).
+* Insights
+    - `.slobac/` is an untracked local audit artifact directory and stays out of git commits.
+
