@@ -37,8 +37,8 @@ The product succeeds when these process-level tests hold:
 - Originals survive squash onto `main`.
 - Positional ids are rejected.
 - Long-lived branches union then fold lazily.
-- A path flag resolves to the nearest started store.
-- Root wake catalogs other stores and a pull prints only that store.
+- A `--path` flag resolves to the nearest started store; `--root` selects the repository-root store; `note`, `nap`, `zoom`, and `recall` require one of the two.
+- Root wake catalogs non-empty other stores and a pull prints only that store.
 
 ## Key Constraints
 

@@ -38,3 +38,17 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
     - `prompt_text()` phrase assertions conflict with the `techContext.md` rule that tests do not pin write-rule wording.
     - `start` outside a repository needs the root before it formats `not a directory:`.
     - The root-relative `Run: nap --path <dir>` line resolves against `$PWD` and fails from sibling directories (inherited from #103 FR-5).
+
+## 2026-11-19 - BUILD - COMPLETE
+
+* Work completed
+    - Unit 1: Short-circuited `-h` / `--help` before `"--"` (plus leading `help`) at the top of `main()` before `import argparse` with zero command-only imports and zero store/lock side effects; updated `usage_text()`.
+    - Unit 2: Enforced mandatory `--root` xor `--path` (`_select_store`) on `note`, `nap`, `zoom`, and `recall`; added `_root_path` and `_fold_store_flag`; updated `note` and `nap` acknowledgements to ``Saved to `<store>` ``; migrated CLI test calls across 13 test files (including `test_branch_pack_merge.py` and `test_middle_orphans.py`).
+    - Unit 3: Updated `surgery.py` (`_usage`, `--root`, `m._select_store`) and `tests/test_surgery.py`.
+    - Unit 4: Filtered `count > 0` in `catalog_text()` while keeping `started_stores()` intact; updated `how_to_text()`, `prompt_text()`, and `AGENTS.md` in lockstep.
+    - Unit 5: Updated all affected `docs/` pages and persistent `memory-bank/` briefings (`productContext.md`, `systemPatterns.md`); verified `properdocs build --strict` (0 warnings) and `tox run-parallel` (`py311`–`py314`, 459 passed).
+* Decisions made
+    - Shared `_select_store(cwd, root_flag, path_arg, cmd)` between `summem` and `surgery.py` for single-source flag validation and root/walk-up resolution.
+    - Kept `_fold_store_flag(parent)` safe for standalone non-git library callers (`test_fold_many_writers.py`) by falling back to `"--root"` when `find_store_parent(parent)` raises `ValueError`.
+* Insights
+    - `test_catalog_requires_config_toml_sentinel` exercises `config.toml` as the git-visible file sentinel that lets `git ls-files` (`started_stores`) discover empty started directories without `os.walk`, even though `catalog_text()` hides `0`-count child stores.

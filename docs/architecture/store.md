@@ -92,7 +92,7 @@ Settings are not environment variables. The script writes the file only when it 
 
 ## More than one store
 
-A command uses **one** store. It walks from the work path, `--path` or the current directory, toward the git root, and takes the first directory that already has a store. A work path that is a file starts the walk at its directory.
+A command uses **one** store. `note`, `nap`, `zoom`, and `recall` require either `--root` (which selects the git-root store from any working directory) or `--path` (which resolves relative to `$PWD`, walks up toward the git root, and takes the first directory that already has a store, starting at the parent directory when `--path` names a file). `wake` takes an optional `--path` and walks up from `$PWD` when `--path` is omitted. Every path the script prints is formatted relative to the git root with forward slashes.
 
 The git root gets a store on the first store command. Every other store is created with `start`. The script never parses workspace manifests, and walking up never creates a store, so an empty package stays empty even when someone records a note from deep inside it.
 

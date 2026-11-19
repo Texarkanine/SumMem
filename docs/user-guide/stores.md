@@ -22,13 +22,18 @@ Only the root needs a copy of the script. Every store is used through the root's
 
 ### Which store a command uses
 
-A command uses one store. It starts from `--path`, or from the current directory, and walks up toward the repository root. The first directory on the way that has a store is the one it uses.
+`note`, `nap`, `zoom`, and `recall` each use one store and require either `--root` or `--path`:
+
+- `--root` always uses the store at the repository root, from any working directory.
+- `--path` resolves from the current directory and walks up toward the repository root. The first directory on the way that has a store is the one it uses.
+
+`wake` takes an optional `--path` and starts from the current directory when `--path` is omitted.
 
 So, with stores at the root and at `packages/api`:
 
 | Command | Store |
 |---|---|
-| `.summem/summem note "…"` | root |
+| `.summem/summem note --root "…"` | root |
 | `.summem/summem note --path packages/api/src/db.py "…"` | `packages/api` |
 | `.summem/summem note --path packages/web/app.js "…"` | root, because `packages/web` has no store |
 
@@ -36,14 +41,14 @@ Walking up never creates a store. Only the root, and directories you `start`, ev
 
 ### How agents find other stores
 
-The root `wake` lists the other stores in a catalog, and its how-to tells agents how to use them:
+The root `wake` how-to always explains `--root` and `--path`. When other stores hold at least one memory, root `wake` also lists them in a catalog and appends how to load them:
 
 ```text
 == Additional SumMem Catalogs ==
 1: ./pkg/a
 ```
 
-`1:` is how many notes that store holds. Agents do not load these stores at the start of a session. When an agent works under one of these paths, the how-to tells it to run `wake --path <path>` for that store, and to record notes there with `note --path <file>`.
+`1:` is how many notes that store holds. Child stores with zero memories are omitted from the catalog (and the header is omitted when none remain), though `--path` still walks up into any started store to record its first note. Agents do not load child stores at the start of a session: when an agent works under a cataloged path, the how-to tells it to run `wake --path <path>` for that store, and to record notes there with `note --path <file>`.
 
 The root's memories are pushed into every session. Other stores are pulled only when they are needed. That keeps the start of a session short in a large monorepo.
 

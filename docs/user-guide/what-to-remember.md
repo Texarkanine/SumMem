@@ -13,19 +13,19 @@ Shared memory for this repository is managed through SumMem.
 
 ## At Session Start: Activating SumMem (mandatory)
 
-Run `python .summem/summem wake` from the repository root. If you can see a prior project-root SumMem wake in this conversation's history, do not run it again.
+Run `python .summem/summem wake` from the repository root. Read `wake` output to the end; never pipe it through `head`, `tail`, or a pager. If you can see a prior project-root SumMem wake in this conversation's history, do not run it again.
 
 ## While Working: Register Memories
 
-When something matches the write rule below, record it with SumMem's `note`.
+When something matches the write rule below, record it with SumMem's `note`. Record each note in the store nearest the code it is about; use the root store only when it applies to the whole project.
 
 One short line another contributor needs to work on this repository: gotchas, norms, failed approaches, lore and tribal knowledge, etc. Not merely "news" - e.g. that a PR opened, checks passed, or a task completed. Personal, machine-local, and user preference facts stay out. Skip if nothing qualifies or it is already remembered.
 ```
 
 It has two jobs:
 
-- **At Session Start** tells the agent to wake SumMem once per session. The second sentence stops an agent from loading the memory twice in one conversation.
-- **While Working** holds the write rule: the last paragraph.
+- **At Session Start** tells the agent to wake SumMem once per session, read the full output without truncating it, and skip waking again if a project-root wake is already in the conversation.
+- **While Working** tells the agent to choose the nearest store for code-specific notes (reserving the root store for whole-project facts) and holds the write rule in the last paragraph.
 
 ## Change the write rule
 

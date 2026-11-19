@@ -63,8 +63,8 @@ At or over budget, `wake` lists every row and opens no children file.
 
 A root `wake` prints, in order:
 
-1. `== SumMem Usage ==`: the agent how-to, from the script. A newer script brings a newer how-to without touching `AGENTS.md`.
-2. `== Additional SumMem Catalogs ==`: one `N: ./path` line per other store, when there are any. `N` counts the notes in that store's filenames. These lines are not commands; the how-to explains how to load one.
+1. `== SumMem Usage ==`: the agent how-to, from the script, always explaining `--root` and `--path` (and appending the catalog pull recipe when cataloged stores exist). A newer script brings a newer how-to without touching `AGENTS.md`.
+2. `== Additional SumMem Catalogs ==`: one `N: ./path` line per non-empty other store, when there are any (`0`-count child stores are omitted). `N` counts the notes in that store's filenames. These lines are not commands; the how-to explains how to load one.
 3. `== Project-root Memories ==`: the root store's memory lines, when there are any.
 4. `You are up to speed.`
 

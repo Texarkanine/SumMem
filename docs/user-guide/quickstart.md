@@ -46,8 +46,9 @@ The first `wake`, `note`, `nap`, `zoom`, or `recall` creates the store: `.summem
 $ .summem/summem wake
 == SumMem Usage ==
 
-`.summem/summem note "…"` records one short line.
-...
+Read `wake` output to the end; never pipe it through `head`, `tail`, or a pager.
+
+`.summem/summem note --path <file> "…"` records one short line in the nearest store for that file; `.summem/summem note --root "…"` records in the project-root store. ...
 You are up to speed.
 ```
 

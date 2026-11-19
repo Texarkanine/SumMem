@@ -71,7 +71,7 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 3. Write tests and run red: Implement the new tests in `tests/test_scopes.py` and `tests/test_init.py`, and update existing catalog/how-to tests in `tests/test_scopes.py` (`test_empty_root_omits_project_root_header`, `test_catalog_empty_store_prints_zero` → `test_catalog_hides_zero_count_child_store`, `test_catalog_does_not_pad_count_width`, `test_gitignore_store_omitted_from_catalog`, `test_catalog_does_not_os_walk`, `test_catalog_requires_config_toml_sentinel`) and `tests/test_init.py` (`test_how_to_text_catalog_is_opt_in`) for FR-6, FR-8, and FR-9. Run `tox -e py311 -- tests/test_scopes.py tests/test_init.py` and confirm red.
 4. Write code and run green: Filter `count > 0` in `catalog_text()` (leaving `_listed_store_counts` and `started_stores` intact per `C-2`); update `how_to_text()` so base text always explains `--path <file>` / `--path <store>`, `--root`, and reading wake output to the end without `head`/`tail`/pager while `catalog=True` still appends catalog-line and `wake --path <path>` pull guidance; update `prompt_text()` with the read-wake-whole sentence and the store-choice sentence; update the top of `AGENTS.md` to match `prompt_text()`. Run full `tox -e py311` and confirm green.
 
-### 5. Documentation Site, `README.md` Verification, and Memory Bank Briefing Updates — prose/policy
+### 5. Documentation Site, `README.md` Verification, and Memory Bank Briefing Updates — prose/policy [DONE]
 
 - Files: `docs/user-guide/commands.md`, `docs/user-guide/stores.md`, `docs/user-guide/upgrading.md`, `docs/user-guide/quickstart.md`, `docs/user-guide/what-to-remember.md`, `docs/user-guide/index.md`, `docs/user-guide/troubleshooting.md`, `docs/how-it-works/index.md`, `docs/how-it-works/no-conflicts.md`, `docs/how-it-works/why-memories-converge.md`, `docs/advanced/surgery.md`, `docs/architecture/store.md`, `docs/architecture/wake.md`, `docs/architecture/merges-and-healing.md`, `README.md`, `memory-bank/productContext.md`, `memory-bank/systemPatterns.md`
 - No tests: prose/policy artifact
@@ -114,5 +114,5 @@ No new technology - validation not required (Python 3.11+ standard library only 
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
 - [x] Preflight
-- [ ] Build
+- [x] Build
 - [ ] QA

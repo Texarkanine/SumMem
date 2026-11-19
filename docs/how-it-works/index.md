@@ -35,10 +35,10 @@ sequenceDiagram
     Script-->>Agent: how-to, then the memory list
     Agent->>Script: note with one short line
     Script->>Files: write one new note file
-    Script-->>Agent: Saved. Sometimes a request to summarize two memories
+    Script-->>Agent: Saved to store. Sometimes a request to summarize two memories
     Agent->>Script: nap with two ids and a summary
     Script->>Files: write the summary, remove the two from the list
-    Script-->>Agent: Saved. Then the next request, or Nothing left to compress.
+    Script-->>Agent: Saved to store. Then the next request, or Nothing left to compress.
     Agent->>Files: commit the files with the rest of the work
 ```
 
@@ -71,7 +71,7 @@ Record `i`:
 
 ```console
 $ .summem/summem note --path dogfood i
-Saved.
+Saved to `./dogfood/.summem`
 
 Summarize these two into one line of at most 280 characters.
 Keep what has lasting effect, drop what does not. Invent nothing.
@@ -88,7 +88,7 @@ Write the summary:
 
 ```console
 $ .summem/summem nap --path dogfood 3fc87382 fa6da6a9 "g & h"
-Saved.
+Saved to `./dogfood/.summem`
 
 Nothing left to compress.
 ```

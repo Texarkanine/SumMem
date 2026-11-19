@@ -1,11 +1,11 @@
 # Active Context
 
 ## Current Task: multi-store-filing
-**Phase:** BUILD - IN-PROGRESS
+**Phase:** QA - IN-PROGRESS
 
 ## What Was Done
-- Preflight passed (`PASS WITH ADVISORY`); reviewed all 7 advisories in `memory-bank/active/.preflight-status`.
-- Incorporating advisories during Build: migrate `tests/test_branch_pack_merge.py:94` in Unit 2, avoid write-rule/prose change-detectors in Unit 4, check repository root first on `start` outside a repository, document root-relative `Run:` behavior in `docs/user-guide/commands.md`, and share `_select_store` between `summem` and `surgery.py`.
+- Completed Units 1–5 in strict TDD order across `summem`, `surgery.py`, `AGENTS.md`, `tests/`, `docs/`, and persistent memory-bank files (`productContext.md`, `systemPatterns.md`), incorporating all Preflight advisories.
+- Verified `uv run --no-config properdocs build --strict` (zero warnings) and full `tox run-parallel` matrix (`py311`, `py312`, `py313`, `py314` all green, 459 passed per env).
 
 ## Next Step
-- Execute Unit 1 through Unit 5 of `memory-bank/active/tasks.md` in strict TDD order.
+- Run `/niko-qa` in a verification subagent and transition to Reflect on PASS.

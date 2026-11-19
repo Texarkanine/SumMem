@@ -21,7 +21,14 @@ You can skip versions: install the newest script over any older one. If the stor
 
 The how-to that root `wake` prints comes from the script, so agents pick up new instructions in their next session.
 
-Your activation block in `AGENTS.md` does not change. To see whether the starting block is different in the new version, compare your block with what `.summem/summem init` prints. If you want the change, copy it in by hand, and keep your own edits to the write rule.
+Your activation block in `AGENTS.md` does not change automatically. To see whether the starting block is different in the new version, compare your block with what `.summem/summem init` prints. If you want the change, copy it in by hand, and keep your own edits to the write rule.
+
+## Mandatory `--root` and `--path` flags
+
+Starting in 0.15.0, `note`, `nap`, `zoom`, `recall`, and `surgery.py` require either `--root` (for the repository-root store) or `--path` (for the nearest store at or above a file or directory). Bare `wake`, `start`, `init`, `version`, and `migrate.py` still work without a store flag, and `note` and `nap` now print ``Saved to `<store>` `` instead of `Saved.`
+
+- **Agents** pick up the new command forms automatically on their next root `wake`. Compare your `AGENTS.md` activation block with `.summem/summem init` to pick up the two added lines (reading `wake` output to the end without piping, and recording in the nearest store rather than always at the root).
+- **Custom scripts, hooks, or skills** that invoke `note`, `nap`, `zoom`, `recall`, or `surgery.py` directly must pass `--root` or `--path`. Invocations with neither flag (or both) exit with status `2` and write nothing.
 
 ## Older nap files
 
