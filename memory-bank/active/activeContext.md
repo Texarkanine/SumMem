@@ -1,11 +1,11 @@
 # Active Context
 
 ## Current Task: multi-store-filing
-**Phase:** PLAN - COMPLETE
+**Phase:** BUILD - IN-PROGRESS
 
 ## What Was Done
-- Surveyed `summem`, `surgery.py`, `migrate.py`, all 31 test files under `tests/`, `README.md`, and `docs/` to map every touchpoint and existing test assertion for [Texarkanine/SumMem#103](https://github.com/Texarkanine/SumMem/issues/103).
-- Authored full TDD Test Plan, 5-unit Implementation Plan (4 executable TDD units + 1 prose/policy docs unit), Challenges & Mitigations, and Pre-Mortem in `memory-bank/active/tasks.md`.
+- Preflight passed (`PASS WITH ADVISORY`); reviewed all 7 advisories in `memory-bank/active/.preflight-status`.
+- Incorporating advisories during Build: migrate `tests/test_branch_pack_merge.py:94` in Unit 2, avoid write-rule/prose change-detectors in Unit 4, check repository root first on `start` outside a repository, document root-relative `Run:` behavior in `docs/user-guide/commands.md`, and share `_select_store` between `summem` and `surgery.py`.
 
 ## Next Step
-- Commit plan and spawn subagent to run `/niko-preflight`.
+- Execute Unit 1 through Unit 5 of `memory-bank/active/tasks.md` in strict TDD order.

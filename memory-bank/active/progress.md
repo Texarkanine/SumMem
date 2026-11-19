@@ -27,3 +27,14 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 * Insights
     - `Saved to` uses backticked `./<rel>/.summem` with no trailing period (``Saved to `./packages/cli/.summem` `` and ``Saved to `./.summem` ``), whereas `Run:` uses `nap --root` or `nap --path <rel-store-dir>` without `./` or `.summem`.
     - Six existing tests in `tests/test_scopes.py` relied on `0:` empty child stores appearing in root `wake` and are explicitly scheduled for update in Unit 4.
+## 2026-11-19 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Validated the plan against `summem`, `surgery.py`, `migrate.py`, `tests/`, and `docs/`. `.preflight-status` first line: `PASS WITH ADVISORY`.
+* Decisions made
+    - No in-phase plan edits: no TDD ordering swaps and no whole-step strikes were needed.
+* Insights
+    - `tests/test_branch_pack_merge.py:94` calls `note` with no store flag and is missing from Unit 2's file list.
+    - `prompt_text()` phrase assertions conflict with the `techContext.md` rule that tests do not pin write-rule wording.
+    - `start` outside a repository needs the root before it formats `not a directory:`.
+    - The root-relative `Run: nap --path <dir>` line resolves against `$PWD` and fails from sibling directories (inherited from #103 FR-5).
