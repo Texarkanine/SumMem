@@ -1,0 +1,1 @@
+Repo AGENTS.md is operator-owned (no prompt_text() lockstep test); test_summem_fixture.py bans the token load_summem in tests/test_*.py; in-process m.main unit suites stay separate from child-process binary integration suites.
