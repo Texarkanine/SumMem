@@ -1317,20 +1317,44 @@ def wake_text(parent) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _fold_path_flag(parent) -> str:
-    """Return `` --path REL`` when walk-up from cwd would not select *parent*, else empty.
+def _fold_store_flag(parent) -> str:
+    """Return the root-relative store flag (``--root`` or ``--path REL``) for *parent*."""
+    resolved_parent = Path(parent).resolve()
+    resolved_root = Path(find_store_parent(resolved_parent)).resolve()
+    if resolved_parent == resolved_root:
+        return "--root"
+    return f"--path {resolved_parent.relative_to(resolved_root).as_posix()}"
 
-    *REL* is the path from cwd to *parent*. The fold request's Run: line is
-    meant to be pasted from the same directory that printed it.
-    """
+
+def _store_flag_error(cmd: str) -> str:
+    """Return the one-line stderr hint when ``--root`` / ``--path`` is missing or doubled."""
+    target = "<file>" if cmd == "note" else "<store>"
+    return f"pass either --root (project-root store) or --path {target} (nearest store)\n"
+
+
+def _select_store(
+    cwd, root_flag: bool, path_arg: str | None, cmd: str
+) -> tuple[tuple[Path, Path] | None, int]:
+    """Validate ``--root`` xor ``--path`` and return ``((parent, root), 0)`` or ``(None, code)``."""
+    if root_flag == (path_arg is not None):
+        sys.stderr.write(_store_flag_error(cmd))
+        return None, 2
     try:
-        walked = resolve_parent(Path.cwd())
-    except ValueError:
-        walked = None
-    if walked is not None and Path(walked).resolve() == Path(parent).resolve():
-        return ""
-    rel = os.path.relpath(Path(parent).resolve(), Path.cwd().resolve())
-    return f" --path {Path(rel).as_posix()}"
+        if root_flag:
+            root = find_store_parent(cwd)
+            return (root, root), 0
+        parent = resolve_parent(cwd, path_arg)
+        root = find_store_parent(parent)
+        return (parent, root), 0
+    except ValueError as exc:
+        sys.stderr.write(f"{exc}\n")
+        return None, 1
+
+
+def _root_path(path: Path, root: Path) -> str:
+    """Return *path* formatted as ``./rel`` from repository *root* with forward slashes."""
+    rel = Path(path).resolve().relative_to(Path(root).resolve()).as_posix()
+    return "." if rel == "." else f"./{rel}"
 
 
 def fold_request(parent, wake_lines: int | None = None, nodes=None, entry_chars: int | None = None) -> str:
@@ -1364,7 +1388,7 @@ def fold_request(parent, wake_lines: int | None = None, nodes=None, entry_chars:
         f"  {left_src}\n"
         f"  {right_src}\n"
         "\n"
-        f'Run: {agent_invoke()} nap{_fold_path_flag(parent)} {short_id(left.id, ids)} {short_id(right.id, ids)} "<your line>"\n'
+        f'Run: {agent_invoke()} nap {_fold_store_flag(parent)} {short_id(left.id, ids)} {short_id(right.id, ids)} "<your line>"\n'
         f"{extra}"
     )
 
@@ -1511,18 +1535,6 @@ def _cli_argv(argv: list[str] | None) -> list[str]:
     return list(argv)
 
 
-def _cli_path(text: str) -> str:
-    """Return *text* in the ./path form the root-wake catalog uses."""
-    path = Path(text)
-    if path.is_absolute():
-        try:
-            path = path.relative_to(Path.cwd())
-        except ValueError:
-            return path.as_posix()
-    shown = path.as_posix()
-    return shown if shown == "." or shown.startswith("./") else f"./{shown}"
-
-
 def main(argv: list[str] | None = None) -> int:
     """Run a SumMem subcommand. Return 0 on success, 2 on usage, 1 on validation."""
     require_python()
@@ -1561,20 +1573,22 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("version")
     for parser_with_path in (wake, note, nap, zoom, recall):
         parser_with_path.add_argument("--path", help="aim at this file or directory")
+    for parser_with_root in (note, nap, zoom, recall):
+        parser_with_root.add_argument("--root", action="store_true", help="select the repository-root store")
     try:
         args = parser.parse_args(args_list)
     except SystemExit as exc:
         return 0 if exc.code is None else int(exc.code)
     if args.cmd == "start":
-        shown = _cli_path(args.dir)
         target = Path(args.dir)
-        if not target.is_dir():
-            sys.stderr.write(f"not a directory: {shown}\n")
-            return 1
         try:
-            find_store_parent(target)
+            root = find_store_parent(target)
         except ValueError as exc:
             sys.stderr.write(f"{exc}\n")
+            return 1
+        shown = _root_path(target, root)
+        if not target.is_dir():
+            sys.stderr.write(f"not a directory: {shown}\n")
             return 1
         ensure_store(target)
         sys.stdout.write(f"There is a store in {shown}.\n")
@@ -1585,13 +1599,12 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "version":
         sys.stdout.write(f"{__version__}\n")
         return 0
-    try:
-        parent = resolve_parent(Path.cwd(), args.path)
-    except ValueError as exc:
-        sys.stderr.write(f"{exc}\n")
-        return 1
-    k = knobs(parent)
     if args.cmd == "wake":
+        try:
+            parent = resolve_parent(Path.cwd(), args.path)
+        except ValueError as exc:
+            sys.stderr.write(f"{exc}\n")
+            return 1
         doc = wake_text(parent)
         root = find_store_parent(parent)
         is_root = Path(parent).resolve() == Path(root).resolve()
@@ -1612,6 +1625,12 @@ def main(argv: list[str] | None = None) -> int:
             body += doc
         sys.stdout.write(body + footer)
         return 0
+    pair, err_code = _select_store(Path.cwd(), args.root, args.path, args.cmd)
+    if pair is None:
+        return err_code
+    parent, root = pair
+    store_ack = f"Saved to `{_root_path(Path(parent) / '.summem', root)}`\n"
+    k = knobs(parent)
     if args.cmd == "nap":
         for token in (args.id_a, args.id_b):
             if is_range_token(token):
@@ -1645,7 +1664,7 @@ def main(argv: list[str] | None = None) -> int:
             sys.stderr.write(f"{exc}\n")
             return 1
         # Idle is nap-only. Do not move it into fold_request: note shares that helper.
-        sys.stdout.write("Saved.\n")
+        sys.stdout.write(store_ack)
         if out:
             sys.stdout.write("\n")
             sys.stdout.write(out)
@@ -1695,7 +1714,7 @@ def main(argv: list[str] | None = None) -> int:
     except ValueError as exc:
         sys.stderr.write(f"{exc}\n")
         return 1
-    sys.stdout.write("Saved.\n")
+    sys.stdout.write(store_ack)
     if out:
         sys.stdout.write("\n")
         sys.stdout.write(out)

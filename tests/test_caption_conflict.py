@@ -27,8 +27,8 @@ def test_same_pair_two_captions_conflict_only_on_sum(tmp_path, monkeypatch, summ
     m = summem
     monkeypatch.setattr(m, "WAKE_LINES", 1)
     main = init_repo(tmp_path / "main")
-    _run([sys.executable, str(SCRIPT), "note", "alpha"], main)
-    _run([sys.executable, str(SCRIPT), "note", "beta"], main)
+    _run([sys.executable, str(SCRIPT), "note", "--root", "alpha"], main)
+    _run([sys.executable, str(SCRIPT), "note", "--root", "beta"], main)
     _run(["git", "add", ".summem"], main)
     _run(["git", "commit", "-m", "two notes"], main)
 
@@ -41,7 +41,7 @@ def test_same_pair_two_captions_conflict_only_on_sum(tmp_path, monkeypatch, summ
     _run(["git", "worktree", "add", "-b", "nap-b", str(wt_b)], main)
 
     def nap_and_commit(tree, caption):
-        noted = _run([sys.executable, str(SCRIPT), "nap", ids[0], ids[1], caption], tree)
+        noted = _run([sys.executable, str(SCRIPT), "nap", "--root", ids[0], ids[1], caption], tree)
         assert noted.returncode == 0
         _run(["git", "add", "-A"], tree)
         _run(["git", "commit", "-m", caption], tree)
@@ -60,7 +60,7 @@ def test_same_pair_two_captions_conflict_only_on_sum(tmp_path, monkeypatch, summ
     wake_out = m.wake_text(wt_a)
     assert "ours caption" in wake_out
     assert "theirs caption" in wake_out
-    zoom_out = _run([sys.executable, str(SCRIPT), "zoom", naps[0].id], wt_a).stdout.decode("utf-8")
+    zoom_out = _run([sys.executable, str(SCRIPT), "zoom", "--root", naps[0].id], wt_a).stdout.decode("utf-8")
     assert "alpha" in zoom_out
     assert "beta" in zoom_out
 

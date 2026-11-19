@@ -210,7 +210,7 @@ def test_cli_note_lists_once_when_disjoint(tmp_path, monkeypatch, summem):
 
     monkeypatch.setattr(m, "list_view", wrap_list)
     monkeypatch.setattr(m, "knobs", wrap_knobs)
-    assert m.main(["note", "gamma"]) == 0
+    assert m.main(["note", "--root", "gamma"]) == 0
     assert lists["n"] == 1
     assert knobs_n["n"] == 1
 
@@ -230,7 +230,7 @@ def test_cli_nap_passes_heal_nodes_to_write_nap(tmp_path, monkeypatch, summem):
         return real(parent, id_a, id_b, caption, entry_chars, nodes)
 
     monkeypatch.setattr(m, "write_nap", wrapped)
-    assert m.main(["nap", ids[0], ids[1], "pair"]) == 0
+    assert m.main(["nap", "--root", ids[0], ids[1], "pair"]) == 0
     assert seen.get("nodes") is not None
     assert {n.id for n in seen["nodes"]} == set(ids)
 
@@ -271,7 +271,7 @@ def test_cli_note_reads_each_children_file_once(tmp_path, monkeypatch, capsys, s
     dup = _write_notes(m, repo, ["A"], start=30)[0]
     _write_notes(m, repo, ["x", "y"], start=40)
     counts = _count_tree_reads(monkeypatch)
-    assert m.main(["note", "z"]) == 0
+    assert m.main(["note", "--root", "z"]) == 0
     assert "Run:" in capsys.readouterr().out
     assert not dup.exists()
     assert max(counts.values(), default=0) <= 1, counts
@@ -287,9 +287,9 @@ def test_cli_nap_reads_each_children_file_once(tmp_path, monkeypatch, capsys, su
     monkeypatch.chdir(repo)
     _over_budget_naps(m, repo)
     _write_notes(m, repo, ["x", "y", "z"], start=40)
-    id_a, id_b = re.search(r' nap (\S+) (\S+) "', m.fold_request(repo, 2)).groups()
+    id_a, id_b = re.search(r' nap --root (\S+) (\S+) "', m.fold_request(repo, 2)).groups()
     counts = _count_tree_reads(monkeypatch)
-    assert m.main(["nap", id_a, id_b, "xy"]) == 0
+    assert m.main(["nap", "--root", id_a, id_b, "xy"]) == 0
     assert "Run:" in capsys.readouterr().out
     assert max(counts.values(), default=0) <= 1, counts
 
@@ -815,11 +815,11 @@ def test_cli_note_and_nap_call_heal(tmp_path, monkeypatch, capsys, summem):
         return real(parent)
 
     monkeypatch.setattr(m, "heal_view", wrapped)
-    assert m.main(["note", "hello"]) == 0
-    assert m.main(["note", "world"]) == 0
+    assert m.main(["note", "--root", "hello"]) == 0
+    assert m.main(["note", "--root", "world"]) == 0
     assert calls["n"] == 2
     ids = [n.id for n in m.list_view(repo)]
-    assert m.main(["nap", ids[0], ids[1], "pair"]) == 0
+    assert m.main(["nap", "--root", ids[0], ids[1], "pair"]) == 0
     assert calls["n"] == 3
     calls["n"] = 0
     capsys.readouterr()
@@ -854,7 +854,7 @@ def test_cli_nap_overlapping_ids_exits_1_without_concat(tmp_path, monkeypatch, s
     monkeypatch.chdir(repo)
     _plant_abd_abe(m, repo)
     ids = [n.id for n in m.list_view(repo)]
-    assert m.main(["nap", ids[0], ids[1], "concat-caption"]) == 1
+    assert m.main(["nap", "--root", ids[0], ids[1], "concat-caption"]) == 1
     sum_texts = []
     for path in (repo / ".summem" / "naps").glob("*.summ"):
         text = path.read_text(encoding="utf-8")
@@ -874,8 +874,8 @@ def test_cli_note_text_inside_nap_exits_0_no_loose_note(tmp_path, monkeypatch, c
     ids = [n.id for n in m.list_view(repo)]
     m.write_nap(repo, ids[0], ids[1], "ab")
     nap_id = m.list_view(repo)[0].id
-    assert m.main(["note", "A"]) == 0
-    assert capsys.readouterr().out == "Saved.\n"
+    assert m.main(["note", "--root", "A"]) == 0
+    assert capsys.readouterr().out == "Saved to `./.summem`\n"
     nodes = m.list_view(repo)
     assert all(n.kind == "nap" for n in nodes)
     assert not any(n.kind == "note" and n.caption == "A" for n in nodes)
@@ -898,7 +898,7 @@ def test_cli_invalid_nap_caption_does_not_heal(tmp_path, monkeypatch, summem):
         return real(parent)
 
     monkeypatch.setattr(m, "heal_view", wrapped)
-    assert m.main(["nap", ids[0], ids[1], ""]) != 0
+    assert m.main(["nap", "--root", ids[0], ids[1], ""]) != 0
     assert calls["n"] == 0
     assert _payload_names(repo) == before
 
@@ -1093,9 +1093,9 @@ def test_cli_note_lock_fallback_has_no_traceback(tmp_path, monkeypatch, capsys, 
     monkeypatch.setattr(m, "_runtime_lock_path", lambda store: tmp_path / "locks" / "store.lock")
     _block_naps_dir_open(monkeypatch, m, repo / ".summem" / "naps")
     capsys.readouterr()
-    assert m.main(["note", "hello"]) == 0
+    assert m.main(["note", "--root", "hello"]) == 0
     captured = capsys.readouterr()
-    assert "Saved." in captured.out
+    assert "Saved to `./.summem`" in captured.out
     assert "Traceback" not in captured.err
     assert "fcntl" not in captured.err
 

@@ -53,7 +53,7 @@ def test_root_wake_lists_other_stores_pull_prints_only_that_store(tmp_path):
     repo = init_repo(tmp_path / "r")
     (repo / "pkg").mkdir()
     _run([sys.executable, str(SCRIPT), "start", "pkg"], repo)
-    _run([sys.executable, str(SCRIPT), "note", "root-note"], repo)
+    _run([sys.executable, str(SCRIPT), "note", "--root", "root-note"], repo)
     _run([sys.executable, str(SCRIPT), "note", "--path", "pkg", "pkg-note"], repo)
     root_wake = _run([sys.executable, str(SCRIPT), "wake"], repo)
     root_out = root_wake.stdout.decode("utf-8")

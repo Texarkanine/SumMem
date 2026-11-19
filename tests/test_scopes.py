@@ -219,7 +219,7 @@ def test_nap_zoom_recall_path_use_started_store(tmp_path, monkeypatch, capsys, s
     assert m.main(["start", "pkg"]) == 0
     assert m.main(["note", "--path", "pkg", "alpha"]) == 0
     assert m.main(["note", "--path", "pkg", "beta"]) == 0
-    assert m.main(["note", "root-only"]) == 0
+    assert m.main(["note", "--root", "root-only"]) == 0
     ids = [node.id for node in m.list_view(repo / "pkg")]
     assert len(ids) == 2
     assert m.main(["nap", "--path", "pkg", ids[0], ids[1], "pair"]) == 0
@@ -270,9 +270,9 @@ def test_config_wake_lines_is_per_store(tmp_path, monkeypatch, capsys, summem):
     (repo / ".summem" / "config.toml").write_text("WAKE_LINES = 1\n", encoding="utf-8")
     (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
-    assert m.main(["note", "root-a"]) == 0
+    assert m.main(["note", "--root", "root-a"]) == 0
     capsys.readouterr()
-    assert m.main(["note", "root-b"]) == 0
+    assert m.main(["note", "--root", "root-b"]) == 0
     root_out = capsys.readouterr().out
     assert "Run:" in root_out
     assert "root-a" in root_out
@@ -280,7 +280,7 @@ def test_config_wake_lines_is_per_store(tmp_path, monkeypatch, capsys, summem):
     assert m.main(["note", "--path", "pkg", "pkg-a"]) == 0
     assert m.main(["note", "--path", "pkg", "pkg-b"]) == 0
     pkg_out = capsys.readouterr().out
-    assert "Saved." in pkg_out
+    assert "Saved to `./pkg/.summem`" in pkg_out
     assert "Run:" not in pkg_out
 
 
@@ -303,7 +303,7 @@ def test_config_entry_chars_is_per_store_for_notes_and_naps(tmp_path, monkeypatc
     assert str(n) in note_err
     assert "5" in note_err
     assert "280" not in note_err
-    assert m.main(["note", too_long]) == 0
+    assert m.main(["note", "--root", too_long]) == 0
     assert m.main(["note", "--path", "tight", "ok"]) == 0
     assert m.main(["note", "--path", "tight", "ab"]) == 0
     ids = [node.id for node in m.list_view(repo / "tight")]
@@ -325,7 +325,7 @@ def test_unreadable_config_uses_defaults(tmp_path, monkeypatch, capsys, summem):
     config = repo / ".summem" / "config.toml"
     config.write_text("{not toml", encoding="utf-8")
     before = config.read_bytes()
-    assert m.main(["note", "hello"]) == 0
+    assert m.main(["note", "--root", "hello"]) == 0
     assert m.main(["wake"]) == 0
     out = capsys.readouterr().out
     assert "hello" in out
@@ -338,9 +338,9 @@ def test_monkeypatch_wake_lines_still_applies_when_config_omits_knob(tmp_path, m
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     monkeypatch.setattr(m, "WAKE_LINES", 1)
-    assert m.main(["note", "alpha"]) == 0
+    assert m.main(["note", "--root", "alpha"]) == 0
     capsys.readouterr()
-    assert m.main(["note", "beta"]) == 0
+    assert m.main(["note", "--root", "beta"]) == 0
     out = capsys.readouterr().out
     assert "Run:" in out
     assert "alpha" in out
@@ -438,7 +438,7 @@ def test_root_wake_catalogs_other_store(tmp_path, monkeypatch, capsys, summem):
     monkeypatch.chdir(repo)
     (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
-    assert m.main(["note", "root-note"]) == 0
+    assert m.main(["note", "--root", "root-note"]) == 0
     assert m.main(["note", "--path", "pkg", "pkg-note"]) == 0
     capsys.readouterr()
     assert m.main(["wake"]) == 0
@@ -574,7 +574,7 @@ def test_pull_wake_omits_catalog_and_root_notes(tmp_path, monkeypatch, capsys, s
     monkeypatch.chdir(repo)
     (repo / "pkg").mkdir(parents=True, exist_ok=True)
     assert m.main(["start", "pkg"]) == 0
-    assert m.main(["note", "root-note"]) == 0
+    assert m.main(["note", "--root", "root-note"]) == 0
     assert m.main(["note", "--path", "pkg", "pkg-note"]) == 0
     capsys.readouterr()
     assert m.main(["wake", "--path", "pkg"]) == 0
@@ -681,7 +681,7 @@ def test_root_only_wake_labels_nonempty_document(tmp_path, monkeypatch, capsys, 
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
-    assert m.main(["note", "hello"]) == 0
+    assert m.main(["note", "--root", "hello"]) == 0
     capsys.readouterr()
     assert m.main(["wake"]) == 0
     out = capsys.readouterr().out
@@ -719,4 +719,47 @@ def test_started_stores_omits_root_without_store_directory(tmp_path, summem):
     shutil.rmtree(repo / ".summem")
     stores = {path.resolve() for path in m.started_stores(repo)}
     assert repo.resolve() not in stores
+
+
+def test_note_root_from_subdir_writes_git_root_store(tmp_path, monkeypatch, capsys, summem):
+    """note --root from any subdirectory (including inside a child store) writes to the root store."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    sub = repo / "packages" / "cli" / "src"
+    sub.mkdir(parents=True)
+    monkeypatch.chdir(repo)
+    assert m.main(["start", "packages/cli"]) == 0
+    capsys.readouterr()
+    monkeypatch.chdir(sub)
+    assert m.main(["note", "--root", "whole-project"]) == 0
+    assert capsys.readouterr().out == "Saved to `./.summem`\n"
+    root_notes = [p for p in (repo / ".summem" / "notes").iterdir() if p.is_file() and not p.name.startswith(".")]
+    child_notes = [
+        p for p in (repo / "packages" / "cli" / ".summem" / "notes").iterdir() if p.is_file() and not p.name.startswith(".")
+    ]
+    assert len(root_notes) == 1
+    assert root_notes[0].read_text(encoding="utf-8") == "whole-project\n"
+    assert child_notes == []
+
+
+def test_saved_to_and_start_paths_are_root_relative_from_subdir(tmp_path, monkeypatch, capsys, summem):
+    """note, nap, and start run from a subdirectory print paths relative to the git root, not $PWD."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    cli_src = repo / "packages" / "cli" / "src"
+    cli_src.mkdir(parents=True)
+    monkeypatch.chdir(repo / "packages")
+    assert m.main(["start", "cli"]) == 0
+    assert capsys.readouterr().out == "There is a store in ./packages/cli.\n"
+    assert m.main(["start", "missing"]) == 1
+    assert capsys.readouterr().err == "not a directory: ./packages/missing\n"
+    monkeypatch.chdir(repo)
+    assert m.main(["note", "--path", "packages/cli/src/index.ts", "first"]) == 0
+    assert capsys.readouterr().out == "Saved to `./packages/cli/.summem`\n"
+    monkeypatch.chdir(cli_src)
+    assert m.main(["note", "--path", "index.ts", "second"]) == 0
+    assert capsys.readouterr().out == "Saved to `./packages/cli/.summem`\n"
+    ids = [node.id for node in m.list_view(repo / "packages" / "cli")]
+    assert m.main(["nap", "--path", ".", ids[0], ids[1], "both"]) == 0
+    assert capsys.readouterr().out == "Saved to `./packages/cli/.summem`\n\nNothing left to compress.\n"
 
