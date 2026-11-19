@@ -5,7 +5,7 @@ from __future__ import annotations
 import importlib.util
 import shlex
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from importlib.machinery import SourceFileLoader
 from pathlib import Path
 from random import Random
@@ -13,7 +13,14 @@ from random import Random
 import pytest
 
 from conftest import ROOT
-from gitutil import assert_unique_cover, init_repo, reaches
+from gitutil import (
+    assert_unique_cover,
+    init_repo,
+    payload_names as _payload_names,
+    plant_nap as _plant_nap,
+    reaches,
+    write_notes as _write_notes,
+)
 
 UTC = timezone.utc
 SURGERY = ROOT / "surgery.py"
@@ -31,18 +38,6 @@ def load_surgery():
     return mod
 
 
-def _write_notes(m, repo, texts, start=1):
-    paths = []
-    base = datetime(2026, 1, 1, tzinfo=UTC)
-    for i, text in enumerate(texts):
-        paths.append(
-            m.write_note(
-                repo, text, base + timedelta(seconds=start + i), Random(start + i)
-            )
-        )
-    return paths
-
-
 def _balanced_4(m, repo, texts, cap_ab, cap_cd, cap_p, start):
     paths = _write_notes(m, repo, texts, start=start)
     names = {p.name for p in paths}
@@ -55,16 +50,6 @@ def _balanced_4(m, repo, texts, cap_ab, cap_cd, cap_p, start):
     cd = next(n for n in m.list_view(repo) if n.caption == cap_cd)
     m.write_nap(repo, ab.id, cd.id, cap_p)
     return paths, next(n for n in m.list_view(repo) if n.caption == cap_p)
-
-
-def _payload_names(repo: Path) -> set[str]:
-    names = set()
-    for folder in ("notes", "naps"):
-        root = repo / ".summem" / folder
-        if not root.is_dir():
-            continue
-        names.update(p.name for p in root.iterdir() if p.is_file() and not p.name.startswith("."))
-    return names
 
 
 def test_contains_unique_nested_note(tmp_path, summem):
@@ -121,14 +106,6 @@ def test_unknown_target_errors(tmp_path, summem):
     with pytest.raises(ValueError):
         s.locate_note(m, repo, contains="no-such-sentence", name=None)
     assert _payload_names(repo) == before
-
-
-def _plant_nap(m, repo, kids, caption: str):
-    tree = m.Tree(kids=list(kids))
-    digests = m._digests_of_tree(tree)
-    child = m.NapChild(id=m.leafset_id(digests), sum=caption, tree=tree)
-    m.rematerialize_child(repo, child)
-    return child
 
 
 def _tree_embeds(repo: Path, sentence: str) -> bool:

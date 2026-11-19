@@ -9,7 +9,7 @@ from random import Random
 import pytest
 
 from conftest import dated_leaf
-from gitutil import break_children, init_repo, plant_pack
+from gitutil import break_children, init_repo, payload_names as _payload_names, plant_pack
 
 UTC = timezone.utc
 
@@ -22,16 +22,6 @@ def _two_notes(m, repo, a="alpha", b="beta"):
 
 def _ids(m, repo):
     return [node.id for node in m.list_view(repo)]
-
-
-def _payload_names(repo: Path) -> set[str]:
-    names = set()
-    for folder in ("notes", "naps"):
-        root = repo / ".summem" / folder
-        if not root.is_dir():
-            continue
-        names.update(p.name for p in root.iterdir() if p.is_file() and not p.name.startswith("."))
-    return names
 
 
 def test_nap_two_adjacent_notes_writes_pair_and_unlinks(tmp_path, monkeypatch, summem):

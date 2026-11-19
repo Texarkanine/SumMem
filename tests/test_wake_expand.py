@@ -7,7 +7,7 @@ from pathlib import Path
 from random import Random
 
 from conftest import dated_leaf
-from gitutil import fold_ids, init_repo, plant_pack
+from gitutil import fold_ids, init_repo, payload_names as _payload_names, plant_pack
 
 UTC = timezone.utc
 
@@ -33,16 +33,6 @@ def _two_eights(m, repo):
     _fold_loose_notes(m, repo, "eight-a")
     _add_notes(m, repo, 8, 8, "b")
     _fold_loose_notes(m, repo, "eight-b")
-
-
-def _payload_names(repo: Path) -> set[str]:
-    names = set()
-    for folder in ("notes", "naps"):
-        root = repo / ".summem" / folder
-        if not root.is_dir():
-            continue
-        names.update(p.name for p in root.iterdir() if p.is_file() and not p.name.startswith("."))
-    return names
 
 
 def test_under_budget_expands_right_edge_until_budget(tmp_path, monkeypatch, summem):

@@ -7,11 +7,14 @@ import json
 import re
 import subprocess
 import sys
+from datetime import datetime, timedelta, timezone
 from importlib.machinery import SourceFileLoader
 from pathlib import Path
+from random import Random
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "summem"
+UTC = timezone.utc
 
 
 def _load_driver():
@@ -273,3 +276,49 @@ def fresh_imported(cmd: list[str]) -> tuple[int, dict[str, bool]]:
     payload = result.stdout.splitlines()[-1] if result.stdout.splitlines() else ""
     imported = json.loads(payload)
     return result.returncode, imported
+
+
+def write_notes(m, repo, texts, start: int = 1) -> list[Path]:
+    """Write *texts* as deterministic sequential notes beginning at second *start*."""
+    paths = []
+    base = datetime(2026, 1, 1, tzinfo=UTC)
+    for i, text in enumerate(texts):
+        paths.append(
+            m.write_note(repo, text, base + timedelta(seconds=start + i), Random(start + i))
+        )
+    return paths
+
+
+def payload_names(repo: Path) -> set[str]:
+    """Return non-hidden filenames across notes/ and naps/ in *repo*'s root store."""
+    names: set[str] = set()
+    for folder in ("notes", "naps"):
+        root = repo / ".summem" / folder
+        if not root.is_dir():
+            continue
+        names.update(p.name for p in root.iterdir() if p.is_file() and not p.name.startswith("."))
+    return names
+
+
+def plant_nap(m, repo, kids, caption: str):
+    """Materialize a NapChild built from *kids* and *caption* into *repo*."""
+    tree = m.Tree(kids=list(kids))
+    digests = m._digests_of_tree(tree)
+    child = m.NapChild(id=m.leafset_id(digests), sum=caption, tree=tree)
+    m.rematerialize_child(repo, child)
+    return child
+
+
+def balanced_4(m, repo, texts, cap_ab: str, cap_cd: str, cap_p: str, start: int):
+    """Write four notes and fold them into a balanced 4-pack returning the parent ViewNode."""
+    paths = write_notes(m, repo, texts, start=start)
+    names = {p.name for p in paths}
+    nodes = [n for n in m.list_view(repo) if n.name in names]
+    m.write_nap(repo, nodes[0].id, nodes[1].id, cap_ab)
+    c = next(n for n in m.list_view(repo) if n.kind == "note" and n.caption == texts[2])
+    d = next(n for n in m.list_view(repo) if n.kind == "note" and n.caption == texts[3])
+    m.write_nap(repo, c.id, d.id, cap_cd)
+    ab = next(n for n in m.list_view(repo) if n.caption == cap_ab)
+    cd = next(n for n in m.list_view(repo) if n.caption == cap_cd)
+    m.write_nap(repo, ab.id, cd.id, cap_p)
+    return next(n for n in m.list_view(repo) if n.caption == cap_p)
