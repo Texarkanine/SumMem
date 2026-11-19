@@ -152,3 +152,14 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
     - Searching for `"in step with"` in addition to `"lockstep"` caught the remaining contributor-doc reference to `test_agents_md_starts_with_prompt_text`.
 
 
+## 2026-11-19 - PREFLIGHT (REVISION 3) - COMPLETE (PASS WITH ADVISORY)
+
+* Work completed
+    - Re-validated the Revision 3 rework plan against `tests/`, `summem`, `surgery.py`, `docs/`, `.github/workflows/pr.yaml`, and the SLOBAC audit. `.preflight-status` first line: `PASS WITH ADVISORY`.
+* Decisions made
+    - No in-phase plan edits: no TDD ordering swaps and no whole-step strikes were needed.
+* Insights
+    - Confirmed baseline of 459 collected tests and the 459 -> 445 reconciliation (14 deletions); intermediate checkpoints are 458 / 456 / 449 / 445 after Units 1-4.
+    - Finding 33's planted overlapping packs must hold valid, heal-eligible trees, or "pairs stay on disk" is vacuous against a `heal_view` call.
+    - `fold_balanced`, `plant_abd_abe`, and the heal-only helpers have a single consumer, so promoting them to `gitutil` is not needed.
+    - Advisory: a throwaway mutation sweep would show the strengthened tests can actually go red.
