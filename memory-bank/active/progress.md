@@ -142,3 +142,13 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
     - Prior Preflight defects are fixed: Finding 17 assertion is no longer vacuous, and the 459 -> 445 count reconciles (14 deletions).
     - Advisories: `_balanced_4` return-shape mismatch between `test_zipper.py` and `test_surgery.py`; `test_wake_expand.py` duplicate `_payload_names`; `test_zipper.py` partition assignment detail; overlapping-pack planting for Finding 33 needs a variant helper.
 
+## 2026-11-19 - PLAN (REVISION 3) - COMPLETE
+
+* Work completed
+    - Updated `memory-bank/active/tasks.md` Unit 5 to remove the `AGENTS.md` sync bullet in `docs/contributing/index.md` alongside the `memory-bank/techContext.md` update, and spelled out the remaining helper/partition details in Units 1, 2, and 4.
+* Decisions made
+    - Remove the `AGENTS.md`-matches-`init` bullet in `docs/contributing/index.md` rather than moving the check to a CI script, matching the operator's ruling that this repository's `AGENTS.md` is operator-owned.
+* Insights
+    - Searching for `"in step with"` in addition to `"lockstep"` caught the remaining contributor-doc reference to `test_agents_md_starts_with_prompt_text`.
+
+
