@@ -115,4 +115,8 @@ No new technology - validation not required (Python 3.11+ standard library only 
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
+
+## QA Results
+
+PASS (see `memory-bank/active/.qa-validation-status`). Semantic review of `summem`, `surgery.py`, `AGENTS.md`, `tests/`, `docs/`, and persistent memory-bank updates against this plan found no blocking issues: KISS/DRY/YAGNI hold (`_select_store` shared with `surgery.py`, `_root_path` shared across commands), all FR/NFR/AC are implemented and tested, lazy-help and error conventions are preserved, and all planned docs surfaces moved in lockstep. Non-blocking advisories: FR-8/FR-9 prose is unpinned per Preflight advisory 2 (verified present by inspection); help-scan `--` boundary (Preflight advisory 6) and `Run:` sibling-cwd walk-up (Preflight advisory 3) are informational for the operator.

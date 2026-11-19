@@ -52,3 +52,15 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
     - Kept `_fold_store_flag(parent)` safe for standalone non-git library callers (`test_fold_many_writers.py`) by falling back to `"--root"` when `find_store_parent(parent)` raises `ValueError`.
 * Insights
     - `test_catalog_requires_config_toml_sentinel` exercises `config.toml` as the git-visible file sentinel that lets `git ls-files` (`started_stores`) discover empty started directories without `os.walk`, even though `catalog_text()` hides `0`-count child stores.
+
+## 2026-11-19 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Semantically reviewed `summem`, `surgery.py`, `AGENTS.md`, the full `tests/` diff, all `docs/` changes, and the persistent memory-bank updates against the Level 2 plan: KISS, DRY, YAGNI, completeness, regression, integrity, and documentation all pass.
+    - Wrote `.qa-validation-status` (PASS with three non-blocking advisories) and recorded QA results in `tasks.md`.
+* Decisions made
+    - Accepted the narrowed FR-8/FR-9 test coverage (command forms pinned, prose unpinned) as the correct application of Preflight advisory 2 and the `techContext.md` no-write-rule-wording rule; the sentences themselves are present in `prompt_text()`, `how_to_text()`, and `AGENTS.md`.
+    - Confirmed Preflight advisory 7 was applied: `_select_store` is the single store-selection helper shared by `summem` and `surgery.py`.
+* Insights
+    - `README.md` needed no edits: it contains no CLI invocations, so FR-10's README surface was already clean.
+    - Two informational items ride to the operator with the PASS: the help scan's `--` boundary (FR-7 refinement, pinned by `test_note_double_dash_records_help_flag`) and the `Run: nap --path <dir>` sibling-cwd walk-up limit inherited from #103 FR-5.

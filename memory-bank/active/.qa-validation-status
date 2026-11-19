@@ -1,0 +1,17 @@
+PASS
+
+QA semantic review of multi-store-filing (Texarkanine/SumMem#103) against the Level 2 plan in `memory-bank/active/tasks.md`. Reviewed `summem`, `surgery.py`, `AGENTS.md`, the full `tests/` diff, all `docs/` changes, and the persistent memory-bank updates. Mechanical verification (properdocs strict, tox run-parallel py311–py314, 459 passed/env) was recorded green at Build and not re-run; QA judged semantics only.
+
+Checks
+- KISS: PASS. Four small single-job helpers (`_select_store`, `_store_flag_error`, `_root_path`, `_fold_store_flag`); no speculative abstraction.
+- DRY: PASS. `_select_store` is shared between `summem` and `surgery.py` (preflight advisory 7 applied); `_root_path` serves `start`, `note`, and `nap`; the ``Saved to `` ack is computed once.
+- YAGNI: PASS. `--root` exists only on `note`, `nap`, `zoom`, `recall`, and `surgery.py`; `wake` keeps optional `--path`; `migrate.py` untouched (C-6, out-of-scope honored).
+- Completeness: PASS. Every FR/NFR/constraint/acceptance criterion maps to implementation plus tests. Planned `prompt_text()`/`how_to_text()` prose-wording assertions were narrowed to command forms per preflight advisory 2 (change-detector avoidance; techContext "tests do not pin write-rule wording"); the FR-8/FR-9 sentences are present in code and the `AGENTS.md` lockstep test guards propagation.
+- Regression: PASS. Lazy `argparse` import and zero-side-effect help preserved (`_fresh_imported` test); CLI error conventions hold (no `git`/`notes/`/`naps/`); exit-code semantics intact (2 usage, 1 validation); `resolve_parent`, `_listed_store_counts`, and `started_stores` intact per C-2 with `count > 0` filtered only in `catalog_text()`.
+- Integrity: PASS. No TODOs, placeholders, debug prints, or skip markers in the diff; removed helpers (`_cli_path`, `_fold_path_flag`, `_COMMANDS`, `_HELP_FLAGS`) have no remaining callers; `upgrading.md` targets 0.15.0 consistently with a `feat!:` release off 0.14.0.
+- Documentation: PASS. All planned `docs/` pages updated (commands, stores, quickstart, upgrading, troubleshooting, architecture, how-it-works, surgery); `README.md` confirmed free of outdated invocations; `productContext.md`/`systemPatterns.md` surgically updated; `AGENTS.md` starts with `prompt_text()`.
+
+Advisory findings (non-blocking)
+1. FR-8/FR-9 prose (read-wake-whole, store-choice sentence) is not phrase-pinned in tests — deliberate per preflight advisory 2 and the repo's no-write-rule-wording rule; verified present by inspection in `prompt_text()`, `how_to_text()`, and `AGENTS.md`.
+2. Informational for the operator (preflight advisory 6): the help scan stops at `--`, so `note --root -- --help` records literal `--help` — a reasoned narrowing of FR-7's "anywhere in argv", pinned by `test_note_double_dash_records_help_flag`.
+3. Informational (preflight advisory 3): `Run: nap --path <dir>` is documented as run-from-repository-root (`docs/user-guide/commands.md`); from a sibling cwd the same line resolves to the root store by walk-up. Docs describe the intended usage.
