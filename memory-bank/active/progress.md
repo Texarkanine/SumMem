@@ -87,3 +87,14 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 * Insights
     - `.slobac/` is an untracked local audit artifact directory and stays out of git commits.
 
+## 2026-11-19 - COMPLEXITY-ANALYSIS - COMPLETE
+
+* Work completed
+    - Evaluated rework scope against `.slobac/2026-11-19T14-31-00/audit.md` and classified as Level 2.
+    - Created `activeContext.md` and stub `tasks.md` for Level 2 planning.
+* Decisions made
+    - Kept `**Complexity:** Level 2`: all changes are test-suite remediations and test-file splits with zero product CLI or store-engine changes.
+* Insights
+    - Since `summem` and `surgery.py` executable behavior is unchanged (`always-tdd.mdc`), test refactoring and test-file reorganization do not alter product behavior; test-only units must still be verified directly against `tox -e py311` so zero assertions or coverage are lost.
+
+
