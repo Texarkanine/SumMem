@@ -97,4 +97,17 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 * Insights
     - Since `summem` and `surgery.py` executable behavior is unchanged (`always-tdd.mdc`), test refactoring and test-file reorganization do not alter product behavior; test-only units must still be verified directly against `tox -e py311` so zero assertions or coverage are lost.
 
+## 2026-11-19 - PLAN - COMPLETE
+
+* Work completed
+    - Surveyed all 15 audited test files plus `summem`, `surgery.py`, `conftest.py`, and `gitutil.py`.
+    - Wrote the Level 2 rework plan in `memory-bank/active/tasks.md` across 5 units (4 test-refactor units + 1 persistent `memory-bank/techContext.md` sync unit), accounting for every one of the 49 SLOBAC findings.
+* Decisions made
+    - Partition `tests/test_cli.py` (57 tests) into `tests/test_cli_bootstrap.py` (10), `tests/test_cli_help.py` (13), `tests/test_nap.py` (+11), `tests/test_zoom.py` (+4), and `tests/test_cli.py` (17), folding 5 duplicate in-process `-h`/`--help` functions into `test_subcommand_help_prints_root_usage_without_touching_store`.
+    - Partition `tests/test_zipper.py` (45 tests) into `tests/test_rematerialize.py` (11), `tests/test_heal_view.py` (16), `tests/test_cli_heal.py` (8), and `tests/test_store_lock.py` (6), promoting shared fixture helpers into `tests/gitutil.py` and deleting 4 over-specified-mock / duplicate tests.
+    - Replace raw source-byte offset assertions in `test_version_info_is_checked_before_import_tomllib` with an in-process `SourceFileLoader` execution check under patched `sys.version_info = (3, 10, 0)` and a `builtins.__import__` guard.
+* Insights
+    - `summem.leaf_digests(node)` already wraps `_as_child(node)` and returns `None` on `(OSError, ValueError)`, cleanly replacing all 4 private `_as_child` assertions in `tests/test_fold.py`.
+
+
 
