@@ -25,6 +25,7 @@ Replace `--root` xor `--path` with one `--path`, required on `note`, `nap`, `zoo
 - B13: `migrate.py --path :/` limits the rewrite to the root store (via the shared resolver).
 - B14: `surgery.py --path :/ --contains T` excises from the root store; `surgery.py --root …` is rejected.
 - B15: the odd-arity heal test (`tests/test_heal_view.py`) plants a nap that partially overlaps a neighbour, so heal takes the split branch; the 50-call cap still holds; every original leaf is reachable; `assert_unique_cover` passes.
+- B16 (round trip, creative rule 4): every printed path (`Saved to`, `Run:` after `shlex.split`, catalog line, `start`) passed back as `--path` from the root, a child dir, and a sibling dir selects the same store. One parametrized test in `tests/test_scopes.py`; `_input_path`/`_root_path` are a parse/format pair.
 - Regression: bare `wake` from the root and from a child-store subdirectory behaves as today; `-h`/`--help` stays side-effect-free.
 
 ### Test Infrastructure
@@ -49,7 +50,7 @@ Replace `--root` xor `--path` with one `--path`, required on `note`, `nap`, `zoo
 
 - Files: `summem` (`_select_store`, `_store_flag_error`, `_root_path`, `_fold_store_flag`, `main` argparse, `start` branch, `catalog_text`), `tests/gitutil.py` (`_FOLD_RUN`), and every test file that uses `--root` (19 files, about 150 occurrences)
 
-1. Stub tests: B4, B5, B9 and B12 in `tests/test_cli.py` / `tests/test_scopes.py`; B10 in `tests/test_fold.py`; B11 in `tests/test_path_walkup_and_catalog.py`.
+1. Stub tests: B4, B5, B9, B12 and B16 in `tests/test_cli.py` / `tests/test_scopes.py`; B10 in `tests/test_fold.py`; B11 in `tests/test_path_walkup_and_catalog.py`.
 2. Stub interface: `_select_store(cwd, path_arg, cmd)` (drop `root_flag`).
 3. Modify the existing tests: mechanically replace `"--root"` with `"--path", ":/"`; expected `nap --root` with `nap --path :/`; ``Saved to `./x/.summem` `` with ``Saved to `:/x` ``; catalog `N: ./x` with `N: :/x`; `There is a store in ./x.` with `:/x`. Update `_FOLD_RUN` to `' nap --path (\'[^\']*\'|\S+) (\S+) (\S+) "'` (with the group indices fixed). Write the new tests and run red.
 4. Write code and run green:
@@ -58,7 +59,7 @@ Replace `--root` xor `--path` with one `--path`, required on `note`, `nap`, `zoo
    - `_fold_store_flag` returns `"--path " + shlex.quote(":/" + rel)`; a non-git fallback returns `--path :/`.
    - `catalog_text` uses `_root_path`.
    - Remove the `--root` argparse option.
-   - `start` resolves its target with `_input_path` and prints with `_root_path`.
+   - `start` resolves its target with `_input_path` (containment first) and only then formats `not a directory:` / `There is a store in` with `_root_path`.
    - `_store_flag_error` reads `pass --path <file> (nearest store; :/ is the project root)`, with `<store>` for the other commands.
 
 ### 3. `surgery.py` on the new selector — executable
@@ -85,7 +86,7 @@ Replace `--root` xor `--path` with one `--path`, required on `note`, `nap`, `zoo
 
 1. Stub: rewrite the test body plan in its docstring: the one-kid nap wraps a multi-leaf child, and a neighbour shares some but not all of its leaves with the three-kid nap.
 2. Stub interface: none.
-3. Implement the test. Confirm it reaches the split branch by temporarily wrapping `rematerialize_child` with a counter (assert it is called at least once) and keep that assertion. Keep the 50-call cap. Assert `reaches` for every leaf and `assert_unique_cover`. Run it.
+3. Implement the test. Prove the split branch ran with an observable outcome: the overlapping nap's files on disk change (payload names before != after), not a call count on `rematerialize_child`. Keep the 50-call cap. Assert `reaches` for every leaf and `assert_unique_cover`. Run it.
 4. Production code: none expected. If heal loops or loses a leaf, this is a real bug: stop and report (circuit breaker).
 
 ### 6. Agent-facing text — executable output, prose content
@@ -98,13 +99,21 @@ Replace `--root` xor `--path` with one `--path`, required on `note`, `nap`, `zoo
 
 ### 7. Docs — prose/policy
 
-- Files: `docs/user-guide/{commands,quickstart,stores,troubleshooting,upgrading}.md`, `docs/advanced/surgery.md`, `docs/architecture/{store,wake}.md`, `docs/how-it-works/no-conflicts.md`, `memory-bank/productContext.md`, `memory-bank/systemPatterns.md`
+- Files: `docs/user-guide/{commands,quickstart,stores,troubleshooting,upgrading}.md`, `docs/advanced/surgery.md`, `docs/architecture/{store,wake}.md`, `docs/how-it-works/{index,no-conflicts}.md`, plus anything a sweep finds, `memory-bank/productContext.md`, `memory-bank/systemPatterns.md`
 - No tests: prose/policy artifact
 
-1. Replace `--root` with `--path :/` and `./x` output examples with `:/x`; explain `:/`, the prefix reservation, the `./:name` escape and the containment refusal once, in `commands.md` and `stores.md`.
+1. Sweep `docs/` and `memory-bank/*.md` with `grep -rnE -- '--root|Saved to `\./|N: \./|store in \./'`; replace `--root` with `--path :/` and `./x` output examples with `:/x`; explain `:/`, the prefix reservation, the `./:name` escape and the containment refusal once, in `commands.md` and `stores.md`.
 2. `commands.md:148`: a store command with no `--path` exits 2 before any repository check (PR #104 item 6).
-3. `upgrading.md`: `--root` is removed; use `--path :/`.
+3. `upgrading.md`: `--root` is removed; use `--path :/`. `commands.md`: one sentence that a relative path into a nested repository uses that repository, as before.
 4. Run `properdocs build --strict`.
+
+### 8. Supersede the stale project memory — prose/policy
+
+- Files: `.summem/` (via the script only)
+- No tests: prose/policy artifact
+
+1. `.summem/summem note --path :/ "…"` stating that note, nap, zoom, recall and surgery.py require `--path` (`:/` = repo root, git syntax; `--root` removed), printed paths are `:/` form and pasteable, and the `Run:` path is shell-quoted. This supersedes note `20261119T200011Z-420729d3` (notes are grow-only; never edit it).
+2. Do any nap the note requests.
 
 ## Technology Validation
 

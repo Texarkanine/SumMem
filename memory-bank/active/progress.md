@@ -219,3 +219,17 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
     - Store-containment check lives in `resolve_parent` (covers wake, migrate, every command); `Saved to` formats the store directory.
 * Insights
     - `tests/gitutil.py::_FOLD_RUN` must learn the quoted `--path` form or every fold-driving test breaks.
+
+## 2026-11-19 - PREFLIGHT (REWORK 2) - COMPLETE (FAIL (fixable))
+
+* Work completed
+    - Validated the Rework 2 plan against `summem`, `surgery.py`, `migrate.py`, `tests/test_heal_view.py`, `docs/`, and `.summem/`. `.preflight-status` first line: `FAIL (fixable)`.
+* Decisions made
+    - No in-phase plan edits: no TDD ordering swaps and no whole-step strikes were needed.
+* Insights
+    - Unit 7 misses `docs/how-it-works/index.md` (`./dogfood/.summem` acks); a tracked `.summem` note still states the `--root xor --path` contract and needs superseding.
+    - Advisories: `rematerialize_child` spy is implementation-coupled; brief says exit 2 where plan/creative say 1; round-trip parse/format property test suggested.
+
+## 2026-11-19 - PLAN (re-run after preflight FAIL fixable) - COMPLETE
+
+* Added docs/how-it-works/index.md + grep sweep, step 8 superseding stale .summem note, B16 round-trip test, observable odd-arity proof, start formatting after containment, brief exit codes -> 1.

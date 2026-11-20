@@ -82,8 +82,8 @@ Remediate the SLOBAC test-suite audit findings in `.slobac/2026-11-19T14-31-00/a
 Design is settled in `memory-bank/active/creative/creative-store-flag-scheme.md` (rules 1-7). Supersedes `--root` everywhere in FR-1, FR-5, FR-11 and AC 1-17 above.
 
 1. **Single store flag:** `--path P` is the only store selector; `--root` is removed with no alias. Required on `note`, `nap`, `zoom`, `recall`, `surgery.py`; optional on `wake` (bare `wake` = `:/`). Missing `--path` exits 2 with one line and mutates nothing.
-2. **Git `:/` anchor:** `P` starting with `:/` is root-relative (`:/` alone = root); otherwise `$PWD`-relative; absolute accepted. Walk-up to nearest started store unchanged. Any other leading `:` exits 2 (`unknown path prefix`); a literal colon name is written `./:name`.
-3. **Containment in the resolver:** the resolver resolves the path once (symlinks included) and exits 2 with one line if the result is outside the git root (covers `:/../x` and an out-of-repo `.summem` symlink; PR #104 items 3-4). Formatting runs only on checked paths; no symlink-specific code.
+2. **Git `:/` anchor:** `P` starting with `:/` is root-relative (`:/` alone = root); otherwise `$PWD`-relative; absolute accepted. Walk-up to nearest started store unchanged. Any other leading `:` exits 1 (`unknown path prefix`); a literal colon name is written `./:name`.
+3. **Containment in the resolver:** the resolver resolves the path once (symlinks included) and exits 1 with one line if the result is outside the git root (covers `:/../x` and an out-of-repo `.summem` symlink; PR #104 items 3-4). Formatting runs only on checked paths; no symlink-specific code.
 4. **Every printed path in `:/` form and pasteable as `--path`:** `Saved to :/packages/cli` (store directory, no `.summem`), `Run: nap --path :/packages/cli …`, catalog `N: :/dogfood`, `start` output.
 5. **Shell-quote the `Run:` path** (`shlex.quote`); test with a store path containing a space (PR #104 items 1-2).
 6. **One resolver** for `wake --path`, `start <dir>`, `surgery.py --path`, and `migrate.py --path`.
