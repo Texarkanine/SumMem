@@ -246,3 +246,7 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 ## 2026-11-19 - BUILD (in progress) - operator ruling
 
 * Operator: "as in git" is allowed in CLI output as a decompression key. productContext rule reworded (no git operations or error text; naming git as a convention source is fine). Text tests use tests/gitutil.py git_free(), which allows only that phrase; error-path tests keep the strict check.
+
+## 2026-11-19 - BUILD - COMPLETE
+
+* All 8 steps done. tox run-parallel py311-py314 OK (460 tests each); properdocs build --strict clean.

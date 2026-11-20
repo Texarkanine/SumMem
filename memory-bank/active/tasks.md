@@ -145,5 +145,5 @@ No new technology. `shlex` and `Path.is_relative_to` are stdlib on the 3.11 floo
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
 - [ ] Preflight
-- [ ] Build
+- [x] Build
 - [ ] QA
