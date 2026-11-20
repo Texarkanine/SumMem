@@ -9,3 +9,7 @@
 - **Change:** `_root_path` now shell-quotes (`shlex.quote`; ordinary paths unchanged), so every printed path is paste-safe. Paths in sentences (`start`, `not a directory`, the three resolver errors) are backticked. `shlex` moved to a module import.
 - **Files:** `summem`, `tests/test_scopes.py`, `docs/user-guide/{commands,stores}.md`, `memory-bank/systemPatterns.md`.
 - **Verify:** `tox run-parallel` py311–py314 OK (461 tests); `properdocs build --strict` clean.
+
+## QA (rework 3)
+
+- QA PASS: every `_root_path` caller is a print site; docs/systemPatterns match; no debris. Advisory: Run: regex in round-trip test assumes shlex single-quote form.
