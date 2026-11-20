@@ -1,16 +1,14 @@
-FAIL (fixable)
+PASS WITH ADVISORY
 
-Rework 2 preflight (single `--path` with `:/` anchor + PR #104 fixes). TDD ordering is correct in Units 1-5; Units 6-7 are prose and owe no tests. No in-phase plan edits (no swaps, no strikes).
+Re-validated the Rework 2 plan (revised after the prior FAIL (fixable)) against summem (resolve_parent, find_store_parent, _select_store, _fold_store_flag, _store_flag_error, _root_path), surgery.py, migrate.py, tests/gitutil.py::_FOLD_RUN, the 19 test files and 11 docs/memory-bank files that still carry --root, and the creative doc. No in-phase plan edits: no TDD swaps and no strikes were needed.
 
-Findings:
+Prior FAIL items are fixed: Unit 7 now lists docs/how-it-works/index.md plus a grep sweep; Unit 8 supersedes .summem note 20261119T200011Z-420729d37491f5ab (it exists); B16 round-trip test is planned; Unit 5 proves the split branch by an on-disk change; the brief uses exit 1 for resolver refusals.
 
-1. FAIL (fixable) - Unit 7 doc list is incomplete. `docs/how-it-works/index.md` lines 74 and 91 show ``Saved to `./dogfood/.summem` ``, which becomes ``Saved to `:/dogfood` ``. The file is not in Unit 7. Fix: add it, and have Unit 7 grep `docs/` for `--root`, `./`-form output and `.summem` acks rather than rely on a fixed list.
-2. FAIL (fixable) - The tracked project memory `.summem/notes/20261119T200011Z-420729d37491f5ab` says "require --root xor --path" and "printed paths are root-relative" (`./` form). After build that note is false. The plan has no step to supersede it (for example a new `note --path :/` stating the `--path`/`:/` contract, so agents reading wake are not misled).
-3. Advisory - Unit 5 step 3 proves the split branch by wrapping `rematerialize_child` with a call counter. That is an internal-interaction spy, the `over-specified-mock`/`implementation-coupled` pattern that the SLOBAC rework removed. Prefer an observable: after `heal_view`, the overlapping nap's `.tree` is gone or rewritten on disk, `payload_names` changes, and every leaf is still reachable. If no observable exists, keep the spy and record why.
-4. Advisory - `projectbrief.md` Rework 2 items 2-3 say unknown prefix and containment refusals exit 2. The plan (B6, B7, B12) and the creative amendment say exit 1. The plan is the one to follow; the brief text is stale.
-5. Advisory - For non-`:/` relative paths, `_input_path` takes the root from the target (`find_store_parent(origin)`), so "outside the repository" can only trigger for `:/..` and symlinked stores. A relative path into another repository resolves against that repository. This is today's behaviour and B7 covers only `:/..`. Worth one sentence in `commands.md`.
-6. Advisory - `start` today calls `find_store_parent(Path(args.dir))` with a `$PWD`-relative `Path`. Step 2 moves it to `_input_path`. Make sure the "not a directory" and "not in a repository" paths still format after the containment check (creative rule 6: formatting runs only on checked paths).
+TDD: Units 1-5 put stub/write-tests/run-red before code. Unit 6 (agent text) and Units 7-8 (prose) owe no wording tests; command forms are covered by B4/B11/B9.
 
-Verified: `resolve_parent` is the single entry point for `wake` (summem:1608) and `migrate.py:130`, so Unit 4 expecting green with no production change is right. `_select_store` checks the flag before the repository, which matches PR #104 item 6. `prompt_text()` and `AGENTS.md` carry no `--root`. `rematerialize_child` exists (summem:657) and heal calls it (summem:712).
-
-Radical innovation (advisory): make `_input_path` and `_root_path` an explicit parse/format pair, and add one round-trip property test. For every path SumMem prints (`Saved to`, `Run:` after `shlex.split`, catalog `N:`, `start`), feeding it back as `--path` from an arbitrary subdirectory must select the same store. One parametrized test over all four output sites, run from root, child and sibling cwd, replaces the separate per-site checks in B9-B12 with the invariant the creative doc actually promises (rule 4: "every printed path is a valid `--path` value").
+Advisories:
+1. The Pre-Mortem still says "step 5 asserts that rematerialize_child is called", which contradicts Unit 5 step 3 (observable payload change, no call count). Follow Unit 5.
+2. Unit 6 does not name prompt_text() or AGENTS.md, which brief item 8 lists. Neither contains --root today, so likely no edit is needed; confirm during build.
+3. Containment root for non-:/ paths comes from the target (find_store_parent(origin)), so a relative path into a sibling or nested repository is accepted, not refused. This matches the commands.md sentence in Unit 7 step 3; keep B7 scoped to :/../.
+4. The new _FOLD_RUN regex puts the quoted alternative first; keep that order so ':/team docs' is not split by \S+.
+5. Radical idea: make _input_path/_root_path a single tiny StorePath value type (parse(cwd, arg) -> Path; format(path, root) -> ":/rel"), and property-test parse(format(x)) == x over generated relative paths (spaces, unicode, leading colon names written ./:name). That turns B16 from one parametrized example set into a general invariant and gives surgery.py and migrate.py one import point. Cost: small; optional.

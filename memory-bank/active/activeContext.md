@@ -1,7 +1,7 @@
 # Active Context
 
 **Current Task:** multi-store-filing rework 2 — single `--path` with git `:/` root anchor + PR #104 review fixes
-**Phase:** PLAN - COMPLETE (revised after preflight)
+**Phase:** PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
 
 ## What Was Done
 

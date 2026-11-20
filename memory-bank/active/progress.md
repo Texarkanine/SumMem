@@ -233,3 +233,12 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 ## 2026-11-19 - PLAN (re-run after preflight FAIL fixable) - COMPLETE
 
 * Added docs/how-it-works/index.md + grep sweep, step 8 superseding stale .summem note, B16 round-trip test, observable odd-arity proof, start formatting after containment, brief exit codes -> 1.
+
+## 2026-11-19 - PREFLIGHT (REWORK 2, re-run) - COMPLETE (PASS WITH ADVISORY)
+
+* Work completed
+    - Re-validated the revised Rework 2 plan. `.preflight-status` first line: `PASS WITH ADVISORY`.
+* Decisions made
+    - No in-phase plan edits.
+* Insights
+    - All prior FAIL items fixed. Advisories: stale Pre-Mortem line on rematerialize_child call counts; confirm prompt_text/AGENTS.md need no edit; non-:/ relative paths into other repos are accepted by design; keep quoted alternative first in _FOLD_RUN.
