@@ -14,7 +14,7 @@ from gitutil import init_repo
 
 def _run_nap(cwd, extra):
     return subprocess.run(
-        [sys.executable, str(SCRIPT), "nap", "--root", *extra],
+        [sys.executable, str(SCRIPT), "nap", "--path", ":/", *extra],
         cwd=cwd,
         capture_output=True,
     )

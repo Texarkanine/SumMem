@@ -91,7 +91,7 @@ def test_two_branch_overlapping_packs_heal_on_next_mutate(tmp_path, monkeypatch,
     assert merged_d.returncode == 0
     assert merged_e.returncode == 0
     monkeypatch.chdir(repo)
-    assert m.main(["note", "--root", "later"]) == 0
+    assert m.main(["note", "--path", ":/", "later"]) == 0
     assert_unique_cover(m, repo)
     for sentence in ("A", "B", "D", "E"):
         assert reaches(m, repo, sentence), sentence

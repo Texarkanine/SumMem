@@ -123,7 +123,7 @@ def fold_ids(m, repo, ids, caption: str) -> str:
     return remaining[0]
 
 
-_FOLD_RUN = re.compile(r' nap (?:--root|--path \S+) (\S+) (\S+) "')
+_FOLD_RUN = re.compile(r" nap --path (?:'[^']*'|\S+) (\S+) (\S+) " '"')
 
 
 def break_children(node, how: str) -> None:

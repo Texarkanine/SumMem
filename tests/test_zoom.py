@@ -404,7 +404,7 @@ def test_cli_zoom_range_token_is_not_a_content_id(tmp_path, monkeypatch, capsys,
     """CLI zoom of a range token names the token and says to copy an id from wake."""
     m = summem
     monkeypatch.chdir(init_repo(tmp_path / "r"))
-    assert m.main(["zoom", "--root", "16-31"]) == 2
+    assert m.main(["zoom", "--path", ":/", "16-31"]) == 2
     err = capsys.readouterr().err
     assert "not a content id: 16-31" in err
     assert "Copy an id from wake" in err
@@ -422,7 +422,7 @@ def test_cli_zoom_malformed_tree_returns_1(tmp_path, monkeypatch, capsys, summem
     nap = next(n for n in m.list_view(repo) if n.kind == "nap")
     nap.tree_path.write_bytes(b"{not json")
     capsys.readouterr()
-    assert m.main(["zoom", "--root", nap.id]) == 1
+    assert m.main(["zoom", "--path", ":/", nap.id]) == 1
     err = capsys.readouterr().err
     assert "unreadable pack" in err
     assert "Traceback" not in err
@@ -451,7 +451,7 @@ def test_cli_zoom_oserror_returns_1(tmp_path, monkeypatch, capsys, summem):
 
     monkeypatch.setattr(Path, "read_bytes", patched)
     capsys.readouterr()
-    assert m.main(["zoom", "--root", nap.id]) == 1
+    assert m.main(["zoom", "--path", ":/", nap.id]) == 1
     err = capsys.readouterr().err
     assert "unreadable pack" in err
     assert "Traceback" not in err
@@ -479,7 +479,7 @@ def test_cli_zoom_nested_id_skips_sibling_bad_tree(tmp_path, monkeypatch, capsys
     child_id = m.leafset_id([m.note_digest(m.note_file_bytes(tree.kids[0].text))])
     first.tree_path.write_bytes(b"{not json")
     capsys.readouterr()
-    assert m.main(["zoom", "--root", child_id]) == 0
+    assert m.main(["zoom", "--path", ":/", child_id]) == 0
     captured = capsys.readouterr()
     assert tree.kids[0].text in captured.out
     assert captured.err == "skipped a pack\n"

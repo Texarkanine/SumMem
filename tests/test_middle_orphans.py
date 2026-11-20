@@ -22,7 +22,7 @@ from conftest import ROOT
 from gitutil import fold_ids, git, init_repo, obey_folds, plant_pack
 
 UTC = timezone.utc
-RUN = re.compile(r' nap (?:--root|--path \S+) (\S+) (\S+) "')
+RUN = re.compile(r" nap --path (?:'[^']*'|\S+) (\S+) (\S+) " '"')
 
 
 def _at(t: int) -> datetime:

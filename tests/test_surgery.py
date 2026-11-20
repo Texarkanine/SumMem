@@ -283,7 +283,7 @@ def test_identical_text_deletes_only_named_file(tmp_path, summem):
 
 
 def test_main_contains_excises(tmp_path, monkeypatch, capsys, summem):
-    """main(['--root', '--contains', sentence]) excises that nested note from the root store."""
+    """main(['--path', ':/', '--contains', sentence]) excises that nested note from the root store."""
     s = load_surgery()
     m = summem
     repo = init_repo(tmp_path / "r")
@@ -292,7 +292,7 @@ def test_main_contains_excises(tmp_path, monkeypatch, capsys, summem):
         m, repo, [secret, "keep-b", "keep-c", "keep-d"], "ab", "cd", "abcd", start=1
     )
     monkeypatch.chdir(repo)
-    assert s.main(["--root", "--contains", secret]) == 0
+    assert s.main(["--path", ":/", "--contains", secret]) == 0
     out = capsys.readouterr().out
     assert parent.name in out
     assert paths[0].name in out.splitlines()[-1]
@@ -302,7 +302,7 @@ def test_main_contains_excises(tmp_path, monkeypatch, capsys, summem):
 
 
 def test_main_dry_run(tmp_path, monkeypatch, capsys, summem):
-    """main(['--root', '--dry-run', '--contains', sentence]) prints the chain and writes nothing."""
+    """main(['--path', ':/', '--dry-run', '--contains', sentence]) prints the chain and writes nothing."""
     s = load_surgery()
     m = summem
     repo = init_repo(tmp_path / "r")
@@ -312,7 +312,7 @@ def test_main_dry_run(tmp_path, monkeypatch, capsys, summem):
     )
     before = _store_bytes(repo)
     monkeypatch.chdir(repo)
-    assert s.main(["--root", "--dry-run", "--contains", secret]) == 0
+    assert s.main(["--path", ":/", "--dry-run", "--contains", secret]) == 0
     out = capsys.readouterr().out
     lines = out.splitlines()
     assert parent.name in lines
@@ -341,7 +341,7 @@ def test_main_usage_without_target(tmp_path, monkeypatch, capsys):
     s = load_surgery()
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
-    assert s.main(["--root"]) == 2
+    assert s.main(["--path", ":/"]) == 2
     captured = capsys.readouterr()
     assert captured.out == ""
     assert captured.err == s._usage()
@@ -379,7 +379,7 @@ def test_main_prints_fold_request_when_over_budget(tmp_path, monkeypatch, capsys
     (repo / ".summem" / "config.toml").write_text("WAKE_LINES = 2\n", encoding="utf-8")
     ids_before = [node.id for node in m.list_view(repo)]
     monkeypatch.chdir(repo)
-    assert s.main(["--root", "--contains", secret]) == 0
+    assert s.main(["--path", ":/", "--contains", secret]) == 0
     out = capsys.readouterr().out
     assert paths[0].name in out.splitlines()
     assert f"Run: {m.agent_invoke()} nap " in out
@@ -388,7 +388,7 @@ def test_main_prints_fold_request_when_over_budget(tmp_path, monkeypatch, capsys
     remain_ids = [node.id for node in remain]
     pa = m.short_id(remain_ids[0], remain_ids)
     pb = m.short_id(remain_ids[1], remain_ids)
-    assert f"nap --root {pa} {pb} " in out
+    assert f"nap --path :/ {pa} {pb} " in out
     assert ids_before[0] not in out
 
 
@@ -423,14 +423,14 @@ def test_main_dry_run_omits_fold_request(tmp_path, monkeypatch, capsys, summem):
     (repo / ".summem" / "config.toml").write_text("WAKE_LINES = 2\n", encoding="utf-8")
     before = _store_bytes(repo)
     monkeypatch.chdir(repo)
-    assert s.main(["--root", "--dry-run", "--contains", secret]) == 0
+    assert s.main(["--path", ":/", "--dry-run", "--contains", secret]) == 0
     out = capsys.readouterr().out
     assert "Run:" not in out
     assert _store_bytes(repo) == before
 
 
-def test_main_requires_root_or_path_flag(tmp_path, monkeypatch, capsys, summem):
-    """surgery.py with neither --root nor --path exits 2 and leaves the store untouched."""
+def test_main_requires_path_flag(tmp_path, monkeypatch, capsys, summem):
+    """surgery.py with neither --path :/ nor --path exits 2 and leaves the store untouched."""
     s = load_surgery()
     m = summem
     repo = init_repo(tmp_path / "r")
@@ -442,14 +442,14 @@ def test_main_requires_root_or_path_flag(tmp_path, monkeypatch, capsys, summem):
     captured = capsys.readouterr()
     assert captured.out == ""
     assert len(captured.err.splitlines()) == 1
-    assert "--root" in captured.err
+    assert ":/" in captured.err
     assert "--path" in captured.err
     assert "git" not in captured.err.lower()
     assert _store_bytes(repo) == before
 
 
-def test_main_rejects_both_root_and_path(tmp_path, monkeypatch, capsys, summem):
-    """surgery.py with both --root and --path exits 2 and leaves the store untouched."""
+def test_main_rejects_removed_root_flag(tmp_path, monkeypatch, capsys, summem):
+    """surgery.py rejects the removed --root flag (exit 2) and leaves the store untouched (B14)."""
     s = load_surgery()
     m = summem
     repo = init_repo(tmp_path / "r")
@@ -457,15 +457,15 @@ def test_main_rejects_both_root_and_path(tmp_path, monkeypatch, capsys, summem):
     _write_notes(m, repo, [secret, "keep-b"])
     before = _store_bytes(repo)
     monkeypatch.chdir(repo)
-    assert s.main(["--root", "--path", ".", "--contains", secret]) == 2
+    assert s.main(["--root", "--contains", secret]) == 2
     captured = capsys.readouterr()
     assert captured.out == ""
-    assert len(captured.err.splitlines()) == 1
+    assert "unrecognized arguments: --root" in captured.err
     assert _store_bytes(repo) == before
 
 
 def test_main_root_from_subdir_excises_root_store(tmp_path, monkeypatch, summem):
-    """--root from inside a started child directory excises from the repository-root store."""
+    """--path :/ from inside a started child directory excises from the repository-root store."""
     s = load_surgery()
     m = summem
     repo = init_repo(tmp_path / "r")
@@ -477,7 +477,7 @@ def test_main_root_from_subdir_excises_root_store(tmp_path, monkeypatch, summem)
     root_note = m.write_note(repo, secret, datetime(2026, 1, 1, tzinfo=UTC), Random(1))
     pkg_note = m.write_note(pkg, secret, datetime(2026, 1, 2, tzinfo=UTC), Random(2))
     monkeypatch.chdir(pkg)
-    assert s.main(["--root", "--contains", secret]) == 0
+    assert s.main(["--path", ":/", "--contains", secret]) == 0
     assert not root_note.exists()
     assert pkg_note.exists()
 
@@ -498,4 +498,4 @@ def test_main_subdir_path_fold_request_is_root_relative(tmp_path, monkeypatch, c
     capsys.readouterr()
     assert s.main(["--path", "cli", "--contains", secret]) == 0
     out = capsys.readouterr().out
-    assert "nap --path packages/cli " in out
+    assert "nap --path :/packages/cli " in out

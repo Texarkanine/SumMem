@@ -53,12 +53,12 @@ def test_root_wake_lists_other_stores_pull_prints_only_that_store(tmp_path):
     repo = init_repo(tmp_path / "r")
     (repo / "pkg").mkdir()
     _run([sys.executable, str(SCRIPT), "start", "pkg"], repo)
-    _run([sys.executable, str(SCRIPT), "note", "--root", "root-note"], repo)
+    _run([sys.executable, str(SCRIPT), "note", "--path", ":/", "root-note"], repo)
     _run([sys.executable, str(SCRIPT), "note", "--path", "pkg", "pkg-note"], repo)
     root_wake = _run([sys.executable, str(SCRIPT), "wake"], repo)
     root_out = root_wake.stdout.decode("utf-8")
     assert "root-note" in root_out
-    assert "./pkg" in root_out
+    assert ":/pkg" in root_out
     assert "== Additional SumMem Catalogs ==" in root_out
     assert "== SumMem Usage ==" in root_out
     root_lines = root_out.splitlines()
@@ -73,3 +73,17 @@ def test_root_wake_lists_other_stores_pull_prints_only_that_store(tmp_path):
     assert "root-note" not in pull_out
     assert "wake --path pkg" not in pull_out
     assert "== SumMem Usage ==" not in pull_out
+
+
+def test_catalog_line_pulls_with_root_anchor_from_any_dir(tmp_path):
+    """Root wake catalogs `N: :/dogfood`; `wake --path :/dogfood` from a sibling pulls it (B11)."""
+    repo = init_repo(tmp_path / "r")
+    dog = repo / "dogfood"
+    dog.mkdir()
+    (repo / "sib").mkdir()
+    _run([sys.executable, str(SCRIPT), "start", "dogfood"], cwd=repo)
+    _run([sys.executable, str(SCRIPT), "note", "--path", "dogfood/x.md", "dog fact"], cwd=repo)
+    root_wake = _run([sys.executable, str(SCRIPT), "wake"], cwd=repo).stdout.decode()
+    assert "1: :/dogfood" in root_wake.splitlines()
+    pulled = _run([sys.executable, str(SCRIPT), "wake", "--path", ":/dogfood"], cwd=repo / "sib").stdout.decode()
+    assert "dog fact" in pulled

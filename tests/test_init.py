@@ -238,14 +238,14 @@ def test_init_text_separates_recipe_from_prompt_at_divider(summem):
     assert rest.lstrip() == m.prompt_text()
 
 
-def test_how_to_text_always_explains_root_and_path(monkeypatch, summem):
-    """Base how_to_text() always includes --root and --path command forms even without a catalog."""
+def test_how_to_text_always_explains_path_and_root_anchor(monkeypatch, summem):
+    """Base how_to_text() always includes --path :/ and --path command forms even without a catalog."""
     m = summem
     monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
     base = m.how_to_text()
     assert f"{m.AGENT_BIN} note --path" in base
-    assert f"{m.AGENT_BIN} note --root" in base
-    assert f"{m.AGENT_BIN} recall --root" in base
-    assert f"{m.AGENT_BIN} zoom --root" in base
+    assert f"{m.AGENT_BIN} note --path :/" in base
+    assert f"{m.AGENT_BIN} recall --path :/" in base
+    assert f"{m.AGENT_BIN} zoom --path :/" in base
     assert "walks up" in base
     assert "wake --path" not in base

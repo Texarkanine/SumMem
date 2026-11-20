@@ -119,7 +119,7 @@ def test_note_heals_equal_variants(tmp_path, summem):
     _commit(wt_b, "theirs")
     assert git(["merge", "--no-edit", "nap-b"], wt_a, check=False).returncode == 0
     assert len(_nap_nodes(m, wt_a)) == 2
-    noted = _run([sys.executable, str(SCRIPT), "note", "--root", "gamma"], wt_a)
+    noted = _run([sys.executable, str(SCRIPT), "note", "--path", ":/", "gamma"], wt_a)
     assert noted.returncode == 0
     naps = _nap_nodes(m, wt_a)
     assert len(naps) == 1
@@ -144,7 +144,7 @@ def test_nap_heals_equal_variants(tmp_path, summem):
     _commit(wt_b, "theirs")
     assert git(["merge", "--no-edit", "nap-b"], wt_a, check=False).returncode == 0
     assert len(_nap_nodes(m, wt_a)) == 2
-    napped = _run([sys.executable, str(SCRIPT), "nap", "--root", ids[2], ids[3], "later"], wt_a)
+    napped = _run([sys.executable, str(SCRIPT), "nap", "--path", ":/", ids[2], ids[3], "later"], wt_a)
     assert napped.returncode == 0
     naps = _nap_nodes(m, wt_a)
     assert len(naps) == 2
@@ -229,7 +229,7 @@ def test_triple_worker_one_two_four(tmp_path, summem):
     assert _unmerged(workers[0]) == []
     assert len(_nap_nodes(m, workers[0])) == 3
     _scan_markers(workers[0])
-    noted = _run([sys.executable, str(SCRIPT), "note", "--root", "extra"], workers[0])
+    noted = _run([sys.executable, str(SCRIPT), "note", "--path", ":/", "extra"], workers[0])
     assert noted.returncode == 0
     naps = _nap_nodes(m, workers[0])
     assert len(naps) == 1

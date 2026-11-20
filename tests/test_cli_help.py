@@ -23,8 +23,8 @@ def test_bare_invocation_prints_command_catalog(capsys, summem):
         assert name in lines
         assert "--path" in lines[name]
     for name in ("note", "nap", "zoom", "recall"):
-        assert "--root" in lines[name]
-    assert "--root" not in lines["wake"]
+        assert "[--path" not in lines[name]
+    assert "[--path" in lines["wake"]
     assert "start" in lines
     assert "--path" not in lines["start"]
     assert "init" in lines
@@ -52,7 +52,7 @@ def test_help_flag_prints_catalog(capsys, summem):
         assert captured.out == catalog
         assert captured.err == ""
     assert "PWD" not in catalog
-    assert "--root" in catalog
+    assert ":/" in catalog
     assert "--path" in catalog
     assert "file" in catalog.lower() or "directory" in catalog.lower()
 
@@ -90,7 +90,7 @@ def test_subcommand_help_prints_root_usage_without_touching_store(tmp_path, monk
     for argv in (
         ["note", "--help"],
         ["note", "-h"],
-        ["note", "--root", "x", "--help"],
+        ["note", "--path", ":/", "x", "--help"],
         ["-h"],
         ["--help"],
         ["help"],
@@ -112,29 +112,29 @@ def test_subcommand_help_prints_root_usage_without_touching_store(tmp_path, monk
     assert list(repo.rglob(".summem")) == []
     assert not locks_dir.exists()
     assert not (repo / "help").exists()
-    code, imported = fresh_imported(["note", "--root", "x", "--help"])
+    code, imported = fresh_imported(["note", "--path", ":/", "x", "--help"])
     assert code == 0
     for name in COMMAND_ONLY:
         assert imported[name] is False, name
 
 
 def test_note_help_records_the_word(tmp_path, monkeypatch, summem):
-    """note --root help records the text help."""
+    """note --path :/ help records the text help."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
-    assert m.main(["note", "--root", "help"]) == 0
+    assert m.main(["note", "--path", ":/", "help"]) == 0
     notes = [p for p in (repo / ".summem" / "notes").iterdir() if p.is_file() and not p.name.startswith(".")]
     assert len(notes) == 1
     assert notes[0].read_text(encoding="utf-8") == "help\n"
 
 
 def test_note_double_dash_records_help_flag(tmp_path, monkeypatch, summem):
-    """note --root -- --help records the literal --help."""
+    """note --path :/ -- --help records the literal --help."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
-    assert m.main(["note", "--root", "--", "--help"]) == 0
+    assert m.main(["note", "--path", ":/", "--", "--help"]) == 0
     notes = [p for p in (repo / ".summem" / "notes").iterdir() if p.is_file() and not p.name.startswith(".")]
     assert len(notes) == 1
     assert notes[0].read_text(encoding="utf-8") == "--help\n"

@@ -276,7 +276,7 @@ def test_recall_invalid_pattern_is_cli_error(tmp_path, monkeypatch, capsys, summ
     """An invalid regex is a CLI error and does not mention store paths."""
     m = summem
     monkeypatch.chdir(init_repo(tmp_path / "r"))
-    assert m.main(["recall", "--root", "["]) == 2
+    assert m.main(["recall", "--path", ":/", "["]) == 2
     err = capsys.readouterr().err.lower()
     assert "invalid choice" not in err
     assert "notes/" not in err
@@ -295,7 +295,7 @@ def test_recall_prints_all_matches_uncut_above_wake_budget(tmp_path, monkeypatch
     for idx in range(40):
         m.write_note(repo, f"item-{idx:02d}", datetime(2026, 1, 1, 0, 0, idx, tzinfo=timezone.utc), Random(idx + 1))
     capsys.readouterr()
-    assert m.main(["recall", "--root", "^item-"]) == 0
+    assert m.main(["recall", "--path", ":/", "^item-"]) == 0
     root_lines = capsys.readouterr().out.splitlines()
     assert len(root_lines) == 40
     assert all("item-pkg" not in ln for ln in root_lines)

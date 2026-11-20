@@ -6,11 +6,11 @@ from gitutil import init_repo
 
 
 def test_note_subcommand_writes_and_wake_reads(tmp_path, monkeypatch, capsys, summem):
-    """main(['note', '--root', text]) writes a note; main(['wake']) prints it."""
+    """main(['note', '--path', ':/', text]) writes a note; main(['wake']) prints it."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
-    assert m.main(["note", "--root", "hello"]) == 0
+    assert m.main(["note", "--path", ":/", "hello"]) == 0
     assert m.main(["wake"]) == 0
     out = capsys.readouterr().out
     assert "hello" in out
@@ -22,7 +22,7 @@ def test_nap_one_id_rejected(tmp_path, monkeypatch, capsys, summem):
     """nap with one id exits nonzero without calling nap an unknown command."""
     m = summem
     monkeypatch.chdir(init_repo(tmp_path / "r"))
-    assert m.main(["nap", "--root", "a" * 64]) != 0
+    assert m.main(["nap", "--path", ":/", "a" * 64]) != 0
     err = capsys.readouterr().err.lower()
     assert "invalid choice" not in err
 
@@ -32,20 +32,20 @@ def test_nap_three_ids_rejected(tmp_path, monkeypatch, capsys, summem):
     m = summem
     monkeypatch.chdir(init_repo(tmp_path / "r"))
     ids = ["a" * 64, "b" * 64, "c" * 64]
-    assert m.main(["nap", "--root", *ids, "caption"]) != 0
+    assert m.main(["nap", "--path", ":/", *ids, "caption"]) != 0
     err = capsys.readouterr().err.lower()
     assert "invalid choice" not in err
 
 
 def test_nap_subcommand_writes_and_wake_reads(tmp_path, monkeypatch, capsys, summem):
-    """main(['nap', '--root', id_a, id_b, caption]) folds two notes; wake prints the caption."""
+    """main(['nap', '--path', ':/', id_a, id_b, caption]) folds two notes; wake prints the caption."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
-    assert m.main(["note", "--root", "alpha"]) == 0
-    assert m.main(["note", "--root", "beta"]) == 0
+    assert m.main(["note", "--path", ":/", "alpha"]) == 0
+    assert m.main(["note", "--path", ":/", "beta"]) == 0
     ids = [node.id for node in m.list_view(repo)]
-    assert m.main(["nap", "--root", ids[0], ids[1], "pair"]) == 0
+    assert m.main(["nap", "--path", ":/", ids[0], ids[1], "pair"]) == 0
     monkeypatch.setattr(m, "WAKE_LINES", 1)
     capsys.readouterr()
     assert m.main(["wake"]) == 0
@@ -85,12 +85,12 @@ def test_cli_nap_overlong_prints_ratchet(tmp_path, monkeypatch, capsys, summem):
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
-    assert m.main(["note", "--root", "alpha"]) == 0
-    assert m.main(["note", "--root", "beta"]) == 0
+    assert m.main(["note", "--path", ":/", "alpha"]) == 0
+    assert m.main(["note", "--path", ":/", "beta"]) == 0
     ids = [node.id for node in m.list_view(repo)]
     capsys.readouterr()
     caption = "x" * (m.ENTRY_CHARS + 1)
-    assert m.main(["nap", "--root", ids[0], ids[1], caption]) == 1
+    assert m.main(["nap", "--path", ":/", ids[0], ids[1], caption]) == 1
     err = capsys.readouterr().err
     assert str(len(caption.encode("utf-8"))) in err
     assert str(m.ENTRY_CHARS) in err
@@ -108,11 +108,11 @@ def test_rejected_nap_does_not_print_saved(tmp_path, monkeypatch, capsys, summem
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
-    assert m.main(["note", "--root", "alpha"]) == 0
-    assert m.main(["note", "--root", "beta"]) == 0
+    assert m.main(["note", "--path", ":/", "alpha"]) == 0
+    assert m.main(["note", "--path", ":/", "beta"]) == 0
     ids = [node.id for node in m.list_view(repo)]
     capsys.readouterr()
-    assert m.main(["nap", "--root", ids[0], ids[1], "x" * 281]) == 1
+    assert m.main(["nap", "--path", ":/", ids[0], ids[1], "x" * 281]) == 1
     captured = capsys.readouterr()
     assert "Saved" not in captured.out
     assert "Compress it further" in captured.err
@@ -122,7 +122,7 @@ def test_rejected_note_does_not_print_saved(tmp_path, monkeypatch, capsys, summe
     """A too-long note exits 1 and does not print Saved."""
     m = summem
     monkeypatch.chdir(init_repo(tmp_path / "r"))
-    assert m.main(["note", "--root", "x" * 281]) == 1
+    assert m.main(["note", "--path", ":/", "x" * 281]) == 1
     captured = capsys.readouterr()
     assert "Saved" not in captured.out
 
@@ -131,7 +131,7 @@ def test_note_error_text_omits_store_paths_and_git(tmp_path, monkeypatch, capsys
     """Rejection text for an over-long note mentions neither notes/, naps/, nor git."""
     m = summem
     monkeypatch.chdir(init_repo(tmp_path / "r"))
-    assert m.main(["note", "--root", "x" * 281]) == 1
+    assert m.main(["note", "--path", ":/", "x" * 281]) == 1
     err = capsys.readouterr().err
     assert "281" in err
     assert "280" in err
@@ -177,7 +177,7 @@ def test_start_missing_dir_outside_repository_errors(tmp_path, monkeypatch, caps
     assert not (tmp_path / "missing").exists()
 
 
-def test_store_commands_require_root_or_path_flag(tmp_path, monkeypatch, capsys, summem):
+def test_store_commands_require_path_flag(tmp_path, monkeypatch, capsys, summem):
     """note, nap, zoom, and recall with no store flag exit 2 and write nothing."""
     m = summem
     repo = init_repo(tmp_path / "r")
@@ -192,7 +192,7 @@ def test_store_commands_require_root_or_path_flag(tmp_path, monkeypatch, capsys,
         captured = capsys.readouterr()
         assert captured.out == "", argv
         assert len(captured.err.splitlines()) == 1, argv
-        assert "--root" in captured.err, argv
+        assert ":/" in captured.err, argv
         assert "--path" in captured.err, argv
         assert "git" not in captured.err.lower(), argv
         assert "notes/" not in captured.err, argv
@@ -200,26 +200,26 @@ def test_store_commands_require_root_or_path_flag(tmp_path, monkeypatch, capsys,
         assert not (repo / ".summem").exists(), argv
 
 
-def test_store_commands_reject_both_root_and_path(tmp_path, monkeypatch, capsys, summem):
-    """note, nap, zoom, and recall with both --root and --path exit 2 and write nothing."""
+def test_store_commands_reject_removed_root_flag(tmp_path, monkeypatch, capsys, summem):
+    """note, nap, zoom, and recall reject the removed --root flag (exit 2) and write nothing."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
     for argv in (
-        ["note", "--root", "--path", "a", "x"],
-        ["nap", "--root", "--path", "a", "deadbeef", "cafebabe", "cap"],
-        ["zoom", "--root", "--path", "a", "deadbeef"],
-        ["recall", "--root", "--path", "a", "pat"],
+        ["note", "--root", "x"],
+        ["nap", "--root", "deadbeef", "cafebabe", "cap"],
+        ["zoom", "--root", "deadbeef"],
+        ["recall", "--root", "pat"],
     ):
         assert m.main(argv) == 2, argv
         captured = capsys.readouterr()
         assert captured.out == "", argv
-        assert len(captured.err.splitlines()) == 1, argv
+        assert "unrecognized arguments: --root" in captured.err, argv
         assert not (repo / ".summem").exists(), argv
 
 
 def test_wake_start_init_version_reject_root_flag(tmp_path, monkeypatch, summem):
-    """wake, start, init, and version do not accept --root."""
+    """wake, start, init, and version do not accept the removed --root flag."""
     m = summem
     repo = init_repo(tmp_path / "r")
     (repo / "pkg").mkdir()
@@ -241,5 +241,5 @@ def test_unknown_token_does_not_write_a_note(tmp_path, monkeypatch, capsys, summ
     notes = repo / ".summem" / "notes"
     written = list(notes.glob("*")) if notes.is_dir() else []
     assert written == []
-    assert m.main(["note", "--root", "ok"]) == 0
+    assert m.main(["note", "--path", ":/", "ok"]) == 0
     assert any(p.is_file() and not p.name.startswith(".") for p in notes.iterdir())

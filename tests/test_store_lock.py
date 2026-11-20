@@ -187,8 +187,8 @@ def test_cli_note_lock_fallback_has_no_traceback(tmp_path, monkeypatch, capsys, 
     monkeypatch.setattr(m, "_runtime_lock_path", lambda store: tmp_path / "locks" / "store.lock")
     _block_naps_dir_open(monkeypatch, m, repo / ".summem" / "naps")
     capsys.readouterr()
-    assert m.main(["note", "--root", "hello"]) == 0
+    assert m.main(["note", "--path", ":/", "hello"]) == 0
     captured = capsys.readouterr()
-    assert "Saved to `./.summem`" in captured.out
+    assert "Saved to `:/`" in captured.out
     assert "Traceback" not in captured.err
     assert "fcntl" not in captured.err

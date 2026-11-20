@@ -46,7 +46,7 @@ Replace `--root` xor `--path` with one `--path`, required on `note`, `nap`, `zoo
 3. Write the tests and run them red.
 4. Write the code and run it green. `resolve_parent` uses `_input_path` when it gets a `path_arg`. After choosing the store parent, it checks that `(parent / ".summem").resolve()` is inside the root; if not, it raises `ValueError("store outside the repository: …")`. Existing callers (`wake`, `migrate.py`) inherit this.
 
-### 2. One required `--path`, `:/` output, quoted `Run:` — executable
+### 2. ✅ One required `--path`, `:/` output, quoted `Run:` — executable
 
 - Files: `summem` (`_select_store`, `_store_flag_error`, `_root_path`, `_fold_store_flag`, `main` argparse, `start` branch, `catalog_text`), `tests/gitutil.py` (`_FOLD_RUN`), and every test file that uses `--root` (19 files, about 150 occurrences)
 
@@ -62,7 +62,7 @@ Replace `--root` xor `--path` with one `--path`, required on `note`, `nap`, `zoo
    - `start` resolves its target with `_input_path` (containment first) and only then formats `not a directory:` / `There is a store in` with `_root_path`.
    - `_store_flag_error` reads `pass --path <file> (nearest store; :/ is the project root)`, with `<store>` for the other commands.
 
-### 3. `surgery.py` on the new selector — executable
+### 3. ✅ `surgery.py` on the new selector — executable
 
 - Files: `surgery.py` (`_usage`, argparse, `_select_store` call), `tests/test_surgery.py`
 
@@ -89,7 +89,7 @@ Replace `--root` xor `--path` with one `--path`, required on `note`, `nap`, `zoo
 3. Implement the test. Prove the split branch ran with an observable outcome: the overlapping nap's files on disk change (payload names before != after), not a call count on `rematerialize_child`. Keep the 50-call cap. Assert `reaches` for every leaf and `assert_unique_cover`. Run it.
 4. Production code: none expected. If heal loops or loses a leaf, this is a real bug: stop and report (circuit breaker).
 
-### 6. Agent-facing text — executable output, prose content
+### 6. ✅ Agent-facing text — executable output, prose content
 
 - Files: `summem` (`how_to_text`, `usage_text`, `wake --path` help), `surgery.py` `_usage`
 - No tests that pin wording (`techContext.md` rule). The command forms in B4 and B11 are already covered.

@@ -600,16 +600,16 @@ def test_cli_malformed_tree_returns_1_without_traceback(tmp_path, monkeypatch, c
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
-    assert m.main(["note", "--root", "alpha"]) == 0
-    assert m.main(["note", "--root", "beta"]) == 0
+    assert m.main(["note", "--path", ":/", "alpha"]) == 0
+    assert m.main(["note", "--path", ":/", "beta"]) == 0
     ids = [node.id for node in m.list_view(repo)]
-    assert m.main(["nap", "--root", ids[0], ids[1], "pair"]) == 0
-    assert m.main(["note", "--root", "gamma"]) == 0
+    assert m.main(["nap", "--path", ":/", ids[0], ids[1], "pair"]) == 0
+    assert m.main(["note", "--path", ":/", "gamma"]) == 0
     nap = next(n for n in m.list_view(repo) if n.kind == "nap")
     note = next(n for n in m.list_view(repo) if n.kind == "note")
     nap.tree_path.write_bytes(b"{not json")
     capsys.readouterr()
-    assert m.main(["nap", "--root", nap.id, note.id, "nope"]) == 1
+    assert m.main(["nap", "--path", ":/", nap.id, note.id, "nope"]) == 1
     err = capsys.readouterr().err
     assert "Traceback" not in err
     assert "unreadable pack" in err
@@ -627,7 +627,7 @@ def test_nap_accepts_unique_prefix(tmp_path, monkeypatch, capsys, summem):
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
     ids = [node.id for node in m.list_view(repo)]
     pa, pb = m.short_id(ids[0], ids), m.short_id(ids[1], ids)
-    assert m.main(["nap", "--root", pa, pb, "pair"]) == 0
+    assert m.main(["nap", "--path", ":/", pa, pb, "pair"]) == 0
     capsys.readouterr()
     view = m.list_view(repo)
     assert len(view) == 1
@@ -641,7 +641,7 @@ def test_unknown_prefix_is_error(tmp_path, monkeypatch, capsys, summem):
     monkeypatch.chdir(repo)
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
-    assert m.main(["nap", "--root", "deadbeef", "cafebabe", "pair"]) == 1
+    assert m.main(["nap", "--path", ":/", "deadbeef", "cafebabe", "pair"]) == 1
     err = capsys.readouterr().err
     assert err == "unknown id: deadbeef cafebabe\n"
     assert "wake" not in err
@@ -656,7 +656,7 @@ def test_unknown_nap_id_names_only_the_miss(tmp_path, monkeypatch, capsys, summe
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
     known = m.list_view(repo)[0].id
-    assert m.main(["nap", "--root", known, "deadbeef", "pair"]) == 1
+    assert m.main(["nap", "--path", ":/", known, "deadbeef", "pair"]) == 1
     err = capsys.readouterr().err
     assert err == "unknown id: deadbeef\n"
     assert known not in err
@@ -672,12 +672,12 @@ def test_second_nap_of_folded_notes_succeeds(tmp_path, monkeypatch, capsys, summ
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
     ids = [node.id for node in m.list_view(repo)]
     pa, pb = m.short_id(ids[0], ids), m.short_id(ids[1], ids)
-    assert m.main(["nap", "--root", pa, pb, "pair"]) == 0
+    assert m.main(["nap", "--path", ":/", pa, pb, "pair"]) == 0
     names = _nap_names(repo)
     capsys.readouterr()
-    assert m.main(["nap", "--root", pa, pb, "again"]) == 0
+    assert m.main(["nap", "--path", ":/", pa, pb, "again"]) == 0
     captured = capsys.readouterr()
-    assert captured.out == "Saved to `./.summem`\n\nNothing left to compress.\n"
+    assert captured.out == "Saved to `:/`\n\nNothing left to compress.\n"
     assert captured.err == ""
     assert _nap_names(repo) == names
 
@@ -690,15 +690,15 @@ def test_nap_of_expanded_children_succeeds(tmp_path, monkeypatch, capsys, summem
     for i, text in enumerate(("a", "b", "c", "d"), start=1):
         m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
     by_text = {node.caption: node.id for node in m.list_view(repo)}
-    assert m.main(["nap", "--root", by_text["a"], by_text["b"], "ab"]) == 0
-    assert m.main(["nap", "--root", by_text["c"], by_text["d"], "cd"]) == 0
+    assert m.main(["nap", "--path", ":/", by_text["a"], by_text["b"], "ab"]) == 0
+    assert m.main(["nap", "--path", ":/", by_text["c"], by_text["d"], "cd"]) == 0
     children = [node.id for node in m.list_view(repo)]
-    assert m.main(["nap", "--root", children[0], children[1], "abcd"]) == 0
+    assert m.main(["nap", "--path", ":/", children[0], children[1], "abcd"]) == 0
     names = _nap_names(repo)
     capsys.readouterr()
-    assert m.main(["nap", "--root", children[0], children[1], "again"]) == 0
+    assert m.main(["nap", "--path", ":/", children[0], children[1], "again"]) == 0
     captured = capsys.readouterr()
-    assert captured.out == "Saved to `./.summem`\n\nNothing left to compress.\n"
+    assert captured.out == "Saved to `:/`\n\nNothing left to compress.\n"
     assert captured.err == ""
     assert _nap_names(repo) == names
 
@@ -711,13 +711,13 @@ def test_nap_of_nested_cousins_is_not_a_fold_row(tmp_path, monkeypatch, capsys, 
     for i, text in enumerate(("a", "b", "c", "d"), start=1):
         m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
     by_text = {node.caption: node.id for node in m.list_view(repo)}
-    assert m.main(["nap", "--root", by_text["a"], by_text["b"], "ab"]) == 0
-    assert m.main(["nap", "--root", by_text["c"], by_text["d"], "cd"]) == 0
+    assert m.main(["nap", "--path", ":/", by_text["a"], by_text["b"], "ab"]) == 0
+    assert m.main(["nap", "--path", ":/", by_text["c"], by_text["d"], "cd"]) == 0
     children = [node.id for node in m.list_view(repo)]
-    assert m.main(["nap", "--root", children[0], children[1], "abcd"]) == 0
+    assert m.main(["nap", "--path", ":/", children[0], children[1], "abcd"]) == 0
     names = _nap_names(repo)
     capsys.readouterr()
-    assert m.main(["nap", "--root", _note_id(m, "a"), _note_id(m, "c"), "cross"]) == 1
+    assert m.main(["nap", "--path", ":/", _note_id(m, "a"), _note_id(m, "c"), "cross"]) == 1
     captured = capsys.readouterr()
     assert captured.err == "not a fold row\n"
     assert "wake" not in captured.err
@@ -732,15 +732,15 @@ def test_nap_of_buried_pair_succeeds(tmp_path, monkeypatch, capsys, summem):
     for i, text in enumerate(("a", "b", "c", "d"), start=1):
         m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
     by_text = {node.caption: node.id for node in m.list_view(repo)}
-    assert m.main(["nap", "--root", by_text["a"], by_text["b"], "ab"]) == 0
-    assert m.main(["nap", "--root", by_text["c"], by_text["d"], "cd"]) == 0
+    assert m.main(["nap", "--path", ":/", by_text["a"], by_text["b"], "ab"]) == 0
+    assert m.main(["nap", "--path", ":/", by_text["c"], by_text["d"], "cd"]) == 0
     children = [node.id for node in m.list_view(repo)]
-    assert m.main(["nap", "--root", children[0], children[1], "abcd"]) == 0
+    assert m.main(["nap", "--path", ":/", children[0], children[1], "abcd"]) == 0
     names = _nap_names(repo)
     capsys.readouterr()
-    assert m.main(["nap", "--root", _note_id(m, "a"), _note_id(m, "b"), "again"]) == 0
+    assert m.main(["nap", "--path", ":/", _note_id(m, "a"), _note_id(m, "b"), "again"]) == 0
     captured = capsys.readouterr()
-    assert captured.out == "Saved to `./.summem`\n\nNothing left to compress.\n"
+    assert captured.out == "Saved to `:/`\n\nNothing left to compress.\n"
     assert captured.err == ""
     assert _nap_names(repo) == names
 
@@ -753,10 +753,10 @@ def test_nap_of_view_row_and_nested_id_is_not_a_fold_row(tmp_path, monkeypatch, 
     for i, text in enumerate(("a", "b", "c"), start=1):
         m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
     by_text = {node.caption: node.id for node in m.list_view(repo)}
-    assert m.main(["nap", "--root", by_text["a"], by_text["b"], "ab"]) == 0
+    assert m.main(["nap", "--path", ":/", by_text["a"], by_text["b"], "ab"]) == 0
     names = _nap_names(repo)
     capsys.readouterr()
-    assert m.main(["nap", "--root", by_text["c"], _note_id(m, "a"), "mix"]) == 1
+    assert m.main(["nap", "--path", ":/", by_text["c"], _note_id(m, "a"), "mix"]) == 1
     captured = capsys.readouterr()
     assert captured.err == "not a fold row\n"
     assert "wake" not in captured.err
@@ -775,7 +775,7 @@ def test_ambiguous_prefix_is_error(tmp_path, monkeypatch, capsys, summem):
     b = "aabbccdd" + "1" * 56
     colliding = [m._replace(nodes[0], id=a), m._replace(nodes[1], id=b)]
     monkeypatch.setattr(m, "list_view", lambda _parent: colliding)
-    assert m.main(["nap", "--root", "aabbccdd", "aabbccdd", "pair"]) == 1
+    assert m.main(["nap", "--path", ":/", "aabbccdd", "aabbccdd", "pair"]) == 1
     err = capsys.readouterr().err
     assert "ambiguous" in err
     assert "Give a longer prefix" in err
@@ -793,7 +793,7 @@ def test_cli_nap_identical_notes_prefix_fails_as_not_two_rows(tmp_path, monkeypa
     assert ids[0] == ids[1]
     prefix = m.short_id(ids[0], ids)
     assert len(prefix) == 8
-    assert m.main(["nap", "--root", prefix, prefix, "twins"]) == 1
+    assert m.main(["nap", "--path", ":/", prefix, prefix, "twins"]) == 1
     err = capsys.readouterr().err
     assert "not two rows" in err
     view = m.list_view(repo)
