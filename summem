@@ -314,28 +314,49 @@ def is_store(directory):
     return (Path(directory) / ".summem").is_dir()
 
 
+def _input_path(cwd, arg: str) -> Path:
+    """Return the resolved path a `--path` or `start` argument names.
+
+    As in git, `:/rel` is relative to the repository root and `:/` is the root.
+    Any other leading `:` is reserved and refused; `./:name` is a literal name.
+    Other values resolve against *cwd*. Raise ValueError on a reserved prefix
+    or a `:/` path that leaves the repository.
+    """
+    if arg.startswith(":/"):
+        root = find_store_parent(cwd)
+        p = (root / arg[2:]).resolve()
+        if not p.is_relative_to(root):
+            raise ValueError(f"outside the repository: {arg}")
+        return p
+    if arg.startswith(":"):
+        raise ValueError(f"unknown path prefix: {arg} (use :/ for the repository root)")
+    return (Path(cwd) / arg).resolve()
+
+
 def resolve_parent(cwd, path_arg=None):
     """Return the parent directory of the store that *cwd* / *path_arg* resolve to.
 
-    *path_arg* is a `--path` value or None for `$PWD`. An existing directory is
-    the walk start. Any other path, including a missing file, walks from its
-    parent.     Walk toward the git root and take the first `is_store`. If none,
-    return the git root. Raise ValueError if there is no repository.
+    *path_arg* is a `--path` value (see `_input_path`) or None for `$PWD`. An
+    existing directory is the walk start. Any other path, including a missing
+    file, walks from its parent. Walk toward the git root and take the first
+    `is_store`. If none, return the git root. Raise ValueError if there is no
+    repository or the chosen store resolves outside it.
     """
     origin = Path(cwd).resolve()
     if path_arg is not None:
-        p = Path(path_arg)
-        if not p.is_absolute():
-            p = origin / p
-        p = p.resolve()
+        p = _input_path(origin, path_arg)
         origin = p if p.is_dir() else p.parent
     root = find_store_parent(origin)
+    parent = root
     for candidate in (origin, *origin.parents):
         if is_store(candidate):
-            return candidate
+            parent = candidate
+            break
         if candidate == root:
             break
-    return root
+    if not (parent / ".summem").resolve().is_relative_to(root):
+        raise ValueError(f"store outside the repository: {_root_path(parent, root)}")
+    return parent
 
 
 def ensure_store(parent):

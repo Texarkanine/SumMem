@@ -37,7 +37,7 @@ Replace `--root` xor `--path` with one `--path`, required on `note`, `nap`, `zoo
 
 ## Implementation Plan
 
-### 1. Resolver: `:/` anchor, prefix reservation, containment — executable
+### 1. ✅ Resolver: `:/` anchor, prefix reservation, containment — executable
 
 - Files: `summem` (`resolve_parent`, new `_input_path`), `tests/test_scopes.py`
 

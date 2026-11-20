@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import os
 import shlex
 import shutil
 import subprocess
 import tomllib
+
+import pytest
 
 from gitutil import git, init_repo
 
@@ -789,3 +792,70 @@ def test_catalog_omits_empty_child_stores_and_header_when_none_remain(tmp_path, 
     assert "1: ./filled" in mixed_wake.splitlines()
     assert "./empty" not in mixed_wake
 
+
+
+def test_resolve_colon_slash_is_root_from_any_dir(tmp_path, summem):
+    """`:/` names the git root whatever the cwd; `:/rel` is root-relative (B1, B2)."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    pkg = repo / "pkg"
+    sib = repo / "sib" / "deep"
+    pkg.mkdir()
+    sib.mkdir(parents=True)
+    m.ensure_store(pkg)
+    assert m.resolve_parent(sib, ":/") == repo.resolve()
+    assert m.resolve_parent(pkg, ":/") == repo.resolve()
+    assert m.resolve_parent(sib, ":/pkg/f.py") == pkg.resolve()
+
+
+def test_resolve_plain_path_stays_cwd_relative(tmp_path, summem):
+    """A path without `:/` resolves against cwd, as before (B3)."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    pkg = repo / "pkg"
+    pkg.mkdir()
+    m.ensure_store(pkg)
+    assert m.resolve_parent(repo, "pkg/f.py") == pkg.resolve()
+    assert m.resolve_parent(pkg, "f.py") == pkg.resolve()
+
+
+@pytest.mark.parametrize("arg", [":x", ":(top)", ":!pkg"])
+def test_resolve_refuses_unknown_colon_prefix(tmp_path, summem, arg):
+    """Only `:/` is path magic; any other leading `:` is refused (B6)."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    with pytest.raises(ValueError, match="unknown path prefix"):
+        m.resolve_parent(repo, arg)
+
+
+def test_resolve_dot_slash_escapes_a_literal_colon_name(tmp_path, summem):
+    """`./:name` is a literal path, as in git."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    odd = repo / ":odd"
+    odd.mkdir()
+    m.ensure_store(odd)
+    assert m.resolve_parent(repo, "./:odd") == odd.resolve()
+
+
+def test_resolve_refuses_root_anchor_outside_repo(tmp_path, summem):
+    """`:/..` leaves the repository and is refused (B7)."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    with pytest.raises(ValueError, match="outside the repository"):
+        m.resolve_parent(repo, ":/../elsewhere")
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX symlinks")
+def test_note_refuses_store_symlinked_outside_repo(tmp_path, monkeypatch, capsys, summem):
+    """A `.summem` that resolves outside the repo is one stderr line, exit 1, no write (B8)."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (repo / ".summem").symlink_to(outside, target_is_directory=True)
+    monkeypatch.chdir(repo)
+    assert m.main(["note", "--path", ":/", "x"]) == 1
+    err = capsys.readouterr().err
+    assert err.count("\n") == 1 and "outside the repository" in err
+    assert list(outside.iterdir()) == []
