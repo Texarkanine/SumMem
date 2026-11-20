@@ -1,0 +1,1 @@
+note/nap/zoom/recall/surgery.py require --path (git syntax: :/ = repo root, else cwd-relative; --root removed, never released). Printed paths are :/ form, pasteable; Run: path is shlex-quoted; resolver refuses other : prefixes and out-of-repo paths/stores.

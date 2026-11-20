@@ -64,6 +64,7 @@ import hashlib
 import json
 import os
 import re
+import shlex
 import sys
 if sys.version_info < (3, 11):
     sys.stderr.write("SumMem needs Python 3.11 or newer\n")
@@ -314,28 +315,51 @@ def is_store(directory):
     return (Path(directory) / ".summem").is_dir()
 
 
+def _input_path(cwd, arg: str) -> Path:
+    """Return the resolved path a `--path` or `start` argument names.
+
+    As in git, `:/rel` is relative to the repository root and `:/` is the root.
+    Any other leading `:` is reserved and refused; `./:name` is a literal name.
+    Other values resolve against *cwd*. As in git, the repository of *cwd* is
+    the repository: raise ValueError on a reserved prefix or a path whose own
+    repository is a different one (outside it, or in a nested repository).
+    """
+    root = find_store_parent(cwd)
+    if arg.startswith(":/"):
+        p = (root / arg[2:]).resolve()
+    elif arg.startswith(":"):
+        raise ValueError(f"unknown path prefix: `{arg}` (use :/ for the repository root)")
+    else:
+        p = (Path(cwd) / arg).resolve()
+    if not p.is_relative_to(root) or find_store_parent(p) != root:
+        raise ValueError(f"not in this repository: `{arg}`")
+    return p
+
+
 def resolve_parent(cwd, path_arg=None):
     """Return the parent directory of the store that *cwd* / *path_arg* resolve to.
 
-    *path_arg* is a `--path` value or None for `$PWD`. An existing directory is
-    the walk start. Any other path, including a missing file, walks from its
-    parent.     Walk toward the git root and take the first `is_store`. If none,
-    return the git root. Raise ValueError if there is no repository.
+    *path_arg* is a `--path` value (see `_input_path`) or None for `$PWD`. An
+    existing directory is the walk start. Any other path, including a missing
+    file, walks from its parent. Walk toward the git root and take the first
+    `is_store`. If none, return the git root. Raise ValueError if there is no
+    repository or the chosen store resolves outside it.
     """
     origin = Path(cwd).resolve()
     if path_arg is not None:
-        p = Path(path_arg)
-        if not p.is_absolute():
-            p = origin / p
-        p = p.resolve()
+        p = _input_path(origin, path_arg)
         origin = p if p.is_dir() else p.parent
     root = find_store_parent(origin)
+    parent = root
     for candidate in (origin, *origin.parents):
         if is_store(candidate):
-            return candidate
+            parent = candidate
+            break
         if candidate == root:
             break
-    return root
+    if not (parent / ".summem").resolve().is_relative_to(root):
+        raise ValueError(f"store is not in this repository: `{_root_path(parent, root)}`")
+    return parent
 
 
 def ensure_store(parent):
@@ -444,19 +468,20 @@ def started_stores(git_root) -> list[Path]:
 
 
 def catalog_text(git_root, resolved_parent) -> str:
-    """Return root-wake catalog of other started stores, or empty.
+    """Return root-wake catalog of non-empty other started stores, or empty.
 
-    Each line after the header is ``N: ./path``: note count from filenames,
-    then the store path. Pulls pass a non-root *resolved_parent* and get empty.
+    Each line after the header is ``N: :/path``: note count from filenames,
+    then the store path. Child stores whose count is ``0`` are omitted. Pulls
+    pass a non-root *resolved_parent* and get empty.
     """
     root = Path(git_root).resolve()
     if Path(resolved_parent).resolve() != root:
         return ""
     counts = _listed_store_counts(root)
     rows = [
-        f"{count}: ./{parent.relative_to(root).as_posix()}"
+        f"{count}: {_root_path(parent, root)}"
         for parent, count in sorted(counts.items())
-        if parent != root
+        if parent != root and count > 0
     ]
     if not rows:
         return ""
@@ -1317,20 +1342,47 @@ def wake_text(parent) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _fold_path_flag(parent) -> str:
-    """Return `` --path REL`` when walk-up from cwd would not select *parent*, else empty.
-
-    *REL* is the path from cwd to *parent*. The fold request's Run: line is
-    meant to be pasted from the same directory that printed it.
-    """
+def _fold_store_flag(parent) -> str:
+    """Return the shell-quoted ``--path :/REL`` flag that names *parent* from any directory."""
     try:
-        walked = resolve_parent(Path.cwd())
+        root = find_store_parent(parent)
     except ValueError:
-        walked = None
-    if walked is not None and Path(walked).resolve() == Path(parent).resolve():
-        return ""
-    rel = os.path.relpath(Path(parent).resolve(), Path.cwd().resolve())
-    return f" --path {Path(rel).as_posix()}"
+        return "--path :/"
+    return f"--path {_root_path(parent, root)}"
+
+
+def _store_flag_error(cmd: str) -> str:
+    """Return the one-line stderr hint when ``--path`` is missing."""
+    target = "<file>" if cmd == "note" else "<store>"
+    return f"pass --path {target} (nearest store; :/ is the project root)\n"
+
+
+def _select_store(cwd, path_arg: str | None, cmd: str) -> tuple[tuple[Path, Path] | None, int]:
+    """Require ``--path`` and return ``((parent, root), 0)`` or ``(None, code)``."""
+    if path_arg is None:
+        sys.stderr.write(_store_flag_error(cmd))
+        return None, 2
+    try:
+        parent = resolve_parent(cwd, path_arg)
+        return (parent, find_store_parent(parent)), 0
+    except ValueError as exc:
+        sys.stderr.write(f"{exc}\n")
+        return None, 1
+
+
+def _root_path(path: Path, root: Path) -> str:
+    """Return *path* as a shell-safe ``:/rel`` (git's root anchor; the root is ``:/``).
+
+    Every path SumMem prints comes from here, so each one can be pasted back as
+    ``--path`` from any directory. ``shlex.quote`` leaves ordinary paths bare.
+    PowerShell ends a single-quoted string at a typographic single quote, so
+    each one is double-quoted outside the single quotes.
+    """
+    rel = Path(path).resolve().relative_to(Path(root).resolve()).as_posix()
+    quoted = shlex.quote(":/" if rel == "." else f":/{rel}")
+    for mark in "\u2018\u2019\u201a\u201b":
+        quoted = quoted.replace(mark, f"'\"{mark}\"'")
+    return quoted
 
 
 def fold_request(parent, wake_lines: int | None = None, nodes=None, entry_chars: int | None = None) -> str:
@@ -1364,7 +1416,7 @@ def fold_request(parent, wake_lines: int | None = None, nodes=None, entry_chars:
         f"  {left_src}\n"
         f"  {right_src}\n"
         "\n"
-        f'Run: {agent_invoke()} nap{_fold_path_flag(parent)} {short_id(left.id, ids)} {short_id(right.id, ids)} "<your line>"\n'
+        f'Run: {agent_invoke()} nap {_fold_store_flag(parent)} {short_id(left.id, ids)} {short_id(right.id, ids)} "<your line>"\n'
         f"{extra}"
     )
 
@@ -1422,30 +1474,28 @@ def how_to_text(*, catalog: bool = False) -> str:
 
     The section includes its ``== SumMem Usage ==`` header and a trailing
     newline, matching ``catalog_text()``. It is not the operator ``-h``
-    catalog from ``usage_text()``. When *catalog* is true, append how to
-    read ``N: ./path`` catalog lines, pull with ``wake --path``, and record
-    with ``note --path`` (walk-up).
+    catalog from ``usage_text()``. Base text always explains ``--path`` and
+    its ``:/`` root anchor; when *catalog* is true, append how to read ``N: :/path``
+    catalog lines and pull with ``wake --path``.
     """
     invoke = agent_invoke()
     text = f"""\
 == SumMem Usage ==
 
-`{invoke} note "…"` records one short line.
+Every store command takes `--path`: a path from where you stand, or `:/path` from the repository root, as in git. `:/` is the root store. `{invoke} note --path <file> "…"` records one short line in the nearest store for that file (it walks up to the nearest store); `{invoke} note --path :/ "…"` records in the root store. `nap`, `recall`, and `zoom` take `--path <store>` the same way.
 
 Never invent filenames, rewrite note bytes, or delete memory files by hand. The script is the only writer. The files it writes are part of your work; do not leave them untracked.
 
 If `note` asks for a nap, do that nap before your next action.
 
-`{invoke} recall <regex>` searches remembered text word for word. `{invoke} zoom <id>` opens a pack: a line with an `x<N> <hash>:` prefix is a nap that can be zoomed in on. A leaf is `x1 YYYY-MM-DD:` and is not a zoom target.
+`{invoke} recall --path :/ <regex>` searches remembered text word for word. `{invoke} zoom --path :/ <id>` opens a pack: a line with an `x<N> <hash>:` prefix is a nap that can be zoomed in on. A leaf is `x1 YYYY-MM-DD:` and is not a zoom target.
 """
     if catalog:
         text += (
-            "\nListed catalog lines are `N: ./path`: `N:` is a count, then the path. "
+            "\nListed catalog lines are `N: :/path`: `N:` is a count, then the path. "
             "They are not commands. "
             f"When you work under a cataloged path, run `{invoke} wake --path <path>` "
-            "if that store's wake is not already in this conversation. "
-            f"`{invoke} note --path <file> \"…\"` records in the nearest store for that file. "
-            "The same `--path` on nap, recall, and zoom walks up the same way.\n"
+            "if that store's wake is not already in this conversation.\n"
         )
     return text
 
@@ -1459,11 +1509,11 @@ Shared memory for this repository is managed through SumMem.
 
 ## At Session Start: Activating SumMem (mandatory)
 
-Run `python {AGENT_BIN} wake` from the repository root. If you can see a prior project-root SumMem wake in this conversation's history, do not run it again.
+Run `python {AGENT_BIN} wake` from the repository root. Read `wake` output to the end; never truncate it - it is important memory and you need all of it. If you can see a prior project-root SumMem wake in this conversation's history, do not run it again.
 
 ## While Working: Register Memories
 
-When something matches the write rule below, record it with SumMem's `note`.
+When something matches the write rule below, record it with SumMem's `note`. Record each note in the store nearest the code it is about; use the root store only when it applies to the whole project.
 
 One short line another contributor needs to work on this repository: gotchas, norms, failed approaches, lore and tribal knowledge, etc. Not merely "news" - e.g. that a PR opened, checks passed, or a task completed. Personal, machine-local, and user preference facts stay out. Skip if nothing qualifies or it is already remembered.
 """
@@ -1490,24 +1540,18 @@ def usage_text() -> str:
     return f"""\
 SumMem: shared memory for agents in a repository.
 
-  {CLI_NAME} wake    [--path PATH]                    print this store's view
-  {CLI_NAME} note    [--path PATH] TEXT               record one line
-  {CLI_NAME} nap     [--path PATH] ID-A ID-B CAPTION  fold two ids of the same grain
-  {CLI_NAME} zoom    [--path PATH] ID                 open a nap to its children
-  {CLI_NAME} recall  [--path PATH] PATTERN            search remembered text
-  {CLI_NAME} start <path>                             create a store in that directory
-  {CLI_NAME} init                                     print the agent prompt
-  {CLI_NAME} version                                  print this script's version
+  {CLI_NAME} wake    [--path PATH]                              print this store's view
+  {CLI_NAME} note    --path FILE TEXT                           record one line
+  {CLI_NAME} nap     --path STORE ID-A ID-B CAPTION             fold two ids of the same grain
+  {CLI_NAME} zoom    --path STORE ID                            open a nap to its children
+  {CLI_NAME} recall  --path STORE PATTERN                       search remembered text
+  {CLI_NAME} start <path>                                       create a store in that directory
+  {CLI_NAME} init                                               print the agent prompt
+  {CLI_NAME} version                                            print this script's version
 
-Every command except start, init, and version takes optional --path. Omit it to use $PWD.
---path aims at a file or directory and walks up to the nearest store.
-
-For a command's options: {CLI_NAME} <command> -h
+note, nap, zoom, and recall require --path. It walks up from a file or directory to the nearest store.
+A path is relative to where you stand; :/path is relative to the repository root and :/ is the root, as in git.
 """
-
-
-_COMMANDS = ("wake", "note", "nap", "zoom", "recall", "start", "init", "version")
-_HELP_FLAGS = ("-h", "--help")
 
 
 def _cli_argv(argv: list[str] | None) -> list[str]:
@@ -1517,18 +1561,6 @@ def _cli_argv(argv: list[str] | None) -> list[str]:
     return list(argv)
 
 
-def _cli_path(text: str) -> str:
-    """Return *text* in the ./path form the root-wake catalog uses."""
-    path = Path(text)
-    if path.is_absolute():
-        try:
-            path = path.relative_to(Path.cwd())
-        except ValueError:
-            return path.as_posix()
-    shown = path.as_posix()
-    return shown if shown == "." or shown.startswith("./") else f"./{shown}"
-
-
 def main(argv: list[str] | None = None) -> int:
     """Run a SumMem subcommand. Return 0 on success, 2 on usage, 1 on validation."""
     require_python()
@@ -1536,13 +1568,10 @@ def main(argv: list[str] | None = None) -> int:
     if not args_list:
         sys.stderr.write(usage_text())
         return 2
-    if args_list[0] == "help":
-        args_list = ["-h", *args_list[1:]]
-    if args_list[0] in _HELP_FLAGS:
-        if len(args_list) == 1 or args_list[1] not in _COMMANDS:
-            sys.stdout.write(usage_text())
-            return 0
-        args_list = [args_list[1], "--help", *args_list[2:]]
+    opts = args_list[: args_list.index("--")] if "--" in args_list else args_list
+    if args_list[0] == "help" or "-h" in opts or "--help" in opts:
+        sys.stdout.write(usage_text())
+        return 0
     if args_list == ["version"]:
         sys.stdout.write(f"{__version__}\n")
         return 0
@@ -1569,24 +1598,24 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("init")
     sub.add_parser("version")
     for parser_with_path in (wake, note, nap, zoom, recall):
-        parser_with_path.add_argument("--path", help="aim at this file or directory")
+        parser_with_path.add_argument("--path", help="file or directory; :/ is the repository root")
     try:
         args = parser.parse_args(args_list)
     except SystemExit as exc:
         return 0 if exc.code is None else int(exc.code)
     if args.cmd == "start":
-        shown = _cli_path(args.dir)
-        target = Path(args.dir)
-        if not target.is_dir():
-            sys.stderr.write(f"not a directory: {shown}\n")
-            return 1
         try:
-            find_store_parent(target)
+            target = _input_path(Path.cwd(), args.dir)
+            root = find_store_parent(target)
         except ValueError as exc:
             sys.stderr.write(f"{exc}\n")
             return 1
+        shown = _root_path(target, root)
+        if not target.is_dir():
+            sys.stderr.write(f"not a directory: `{shown}`\n")
+            return 1
         ensure_store(target)
-        sys.stdout.write(f"There is a store in {shown}.\n")
+        sys.stdout.write(f"There is a store in `{shown}`.\n")
         return 0
     if args.cmd == "init":
         sys.stdout.write(init_text())
@@ -1594,13 +1623,12 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "version":
         sys.stdout.write(f"{__version__}\n")
         return 0
-    try:
-        parent = resolve_parent(Path.cwd(), args.path)
-    except ValueError as exc:
-        sys.stderr.write(f"{exc}\n")
-        return 1
-    k = knobs(parent)
     if args.cmd == "wake":
+        try:
+            parent = resolve_parent(Path.cwd(), args.path)
+        except ValueError as exc:
+            sys.stderr.write(f"{exc}\n")
+            return 1
         doc = wake_text(parent)
         root = find_store_parent(parent)
         is_root = Path(parent).resolve() == Path(root).resolve()
@@ -1621,6 +1649,12 @@ def main(argv: list[str] | None = None) -> int:
             body += doc
         sys.stdout.write(body + footer)
         return 0
+    pair, err_code = _select_store(Path.cwd(), args.path, args.cmd)
+    if pair is None:
+        return err_code
+    parent, root = pair
+    store_ack = f"Saved to `{_root_path(parent, root)}`\n"
+    k = knobs(parent)
     if args.cmd == "nap":
         for token in (args.id_a, args.id_b):
             if is_range_token(token):
@@ -1654,7 +1688,7 @@ def main(argv: list[str] | None = None) -> int:
             sys.stderr.write(f"{exc}\n")
             return 1
         # Idle is nap-only. Do not move it into fold_request: note shares that helper.
-        sys.stdout.write("Saved.\n")
+        sys.stdout.write(store_ack)
         if out:
             sys.stdout.write("\n")
             sys.stdout.write(out)
@@ -1704,7 +1738,7 @@ def main(argv: list[str] | None = None) -> int:
     except ValueError as exc:
         sys.stderr.write(f"{exc}\n")
         return 1
-    sys.stdout.write("Saved.\n")
+    sys.stdout.write(store_ack)
     if out:
         sys.stdout.write("\n")
         sys.stdout.write(out)

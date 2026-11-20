@@ -22,11 +22,11 @@ sequenceDiagram
     loop While working
         opt Learned something worth keeping
             Agent->>Script: note
-            Script-->>Agent: Saved.
+            Script-->>Agent: Saved to store
             opt List is over its budget
                 Script-->>Agent: summarize these two
                 Agent->>Script: nap
-                Script-->>Agent: Saved.
+                Script-->>Agent: Saved to store
             end
         end
         opt Needs the detail behind a summary

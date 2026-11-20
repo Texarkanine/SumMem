@@ -3,14 +3,18 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import re
 import subprocess
 import sys
+from datetime import datetime, timedelta, timezone
 from importlib.machinery import SourceFileLoader
 from pathlib import Path
+from random import Random
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "summem"
+UTC = timezone.utc
 
 
 def _load_driver():
@@ -119,7 +123,7 @@ def fold_ids(m, repo, ids, caption: str) -> str:
     return remaining[0]
 
 
-_FOLD_RUN = re.compile(r' nap(?: --path \S+)? (\S+) (\S+) "')
+_FOLD_RUN = re.compile(r" nap --path (?:'[^']*'|\S+) (\S+) (\S+) " '"')
 
 
 def break_children(node, how: str) -> None:
@@ -183,7 +187,7 @@ def zoom_reaches(cwd: Path, start_id: str, sentence: str, bound: int = 200) -> N
         if seen > bound:
             raise AssertionError(f"zoom bound exceeded looking for {sentence!r}")
         result = subprocess.run(
-            [sys.executable, str(SCRIPT), "zoom", cid],
+            [sys.executable, str(SCRIPT), "zoom", "--path", ".", cid],
             cwd=cwd,
             capture_output=True,
         )
@@ -224,3 +228,105 @@ def reaches(m, repo, sentence: str) -> bool:
             return True
         pending.extend(_nap_child_ids(m, repo, cid))
     return False
+
+
+COMMAND_ONLY = ("tomllib", "fcntl", "subprocess", "dataclasses", "argparse")
+
+_IMPORT_PROBE = r"""
+import builtins
+import importlib.util
+import json
+import sys
+from importlib.machinery import SourceFileLoader
+
+watched = ("tomllib", "fcntl", "subprocess", "dataclasses", "argparse")
+from_driver = {name: False for name in watched}
+real_import = builtins.__import__
+
+def tracked(name, globals=None, locals=None, fromlist=(), level=0):
+    root = name.split(".", 1)[0]
+    if root in from_driver and globals and globals.get("__name__") == "summem_probe":
+        from_driver[root] = True
+    return real_import(name, globals, locals, fromlist, level)
+
+builtins.__import__ = tracked
+path, *cmd = sys.argv[1:]
+loader = SourceFileLoader("summem_probe", path)
+spec = importlib.util.spec_from_loader("summem_probe", loader)
+mod = importlib.util.module_from_spec(spec)
+sys.modules["summem_probe"] = mod
+spec.loader.exec_module(mod)
+code = mod.main(cmd)
+sys.stdout.write("\n")
+sys.stdout.write(json.dumps(from_driver))
+raise SystemExit(0 if code is None else code)
+"""
+
+
+def fresh_imported(cmd: list[str]) -> tuple[int, dict[str, bool]]:
+    """Run *cmd* in a new interpreter and report modules the driver itself imported.
+
+    3.14's pathlib imports fcntl, so sys.modules is the wrong oracle.
+    """
+    result = subprocess.run(
+        [sys.executable, "-c", _IMPORT_PROBE, str(SCRIPT), *cmd],
+        capture_output=True,
+        text=True,
+    )
+    payload = result.stdout.splitlines()[-1] if result.stdout.splitlines() else ""
+    imported = json.loads(payload)
+    return result.returncode, imported
+
+
+def write_notes(m, repo, texts, start: int = 1) -> list[Path]:
+    """Write *texts* as deterministic sequential notes beginning at second *start*."""
+    paths = []
+    base = datetime(2026, 1, 1, tzinfo=UTC)
+    for i, text in enumerate(texts):
+        paths.append(
+            m.write_note(repo, text, base + timedelta(seconds=start + i), Random(start + i))
+        )
+    return paths
+
+
+def payload_names(repo: Path) -> set[str]:
+    """Return non-hidden filenames across notes/ and naps/ in *repo*'s root store."""
+    names: set[str] = set()
+    for folder in ("notes", "naps"):
+        root = repo / ".summem" / folder
+        if not root.is_dir():
+            continue
+        names.update(p.name for p in root.iterdir() if p.is_file() and not p.name.startswith("."))
+    return names
+
+
+def plant_nap(m, repo, kids, caption: str):
+    """Materialize a NapChild built from *kids* and *caption* into *repo*."""
+    tree = m.Tree(kids=list(kids))
+    digests = m._digests_of_tree(tree)
+    child = m.NapChild(id=m.leafset_id(digests), sum=caption, tree=tree)
+    m.rematerialize_child(repo, child)
+    return child
+
+
+def balanced_4(m, repo, texts, cap_ab: str, cap_cd: str, cap_p: str, start: int):
+    """Write four notes and fold them into a balanced 4-pack returning the parent ViewNode."""
+    paths = write_notes(m, repo, texts, start=start)
+    names = {p.name for p in paths}
+    nodes = [n for n in m.list_view(repo) if n.name in names]
+    m.write_nap(repo, nodes[0].id, nodes[1].id, cap_ab)
+    c = next(n for n in m.list_view(repo) if n.kind == "note" and n.caption == texts[2])
+    d = next(n for n in m.list_view(repo) if n.kind == "note" and n.caption == texts[3])
+    m.write_nap(repo, c.id, d.id, cap_cd)
+    ab = next(n for n in m.list_view(repo) if n.caption == cap_ab)
+    cd = next(n for n in m.list_view(repo) if n.caption == cap_cd)
+    m.write_nap(repo, ab.id, cd.id, cap_p)
+    return next(n for n in m.list_view(repo) if n.caption == cap_p)
+
+
+GIT_CONVENTION_KEY = "as in git"
+
+
+def git_free(text: str) -> bool:
+    """True if *text* names git only as the ``as in git`` convention key (productContext CLI rule)."""
+    return "git" not in text.lower().replace(GIT_CONVENTION_KEY, "")

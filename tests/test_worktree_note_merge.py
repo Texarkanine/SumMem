@@ -26,7 +26,7 @@ def test_two_worktrees_note_merge_without_conflict(tmp_path):
     _run(["git", "worktree", "add", "-b", "wt-b", str(wt_b)], main)
 
     def note_and_commit(tree: Path, text: str) -> None:
-        noted = _run([sys.executable, str(SCRIPT), "note", text], tree)
+        noted = _run([sys.executable, str(SCRIPT), "note", "--path", ":/", text], tree)
         assert noted.returncode == 0
         _run(["git", "add", ".summem"], tree)
         _run(["git", "commit", "-m", text], tree)

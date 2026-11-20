@@ -87,25 +87,6 @@ def test_nap_stem_inherits_left_child_seq_prefix(tmp_path, summem):
     assert tag == m.variant_tag(tree_bytes, caption_bytes)
 
 
-def test_write_nap_serializes_tree_once(tmp_path, monkeypatch, summem):
-    """write_nap calls dumps_tree once for a two-note fold."""
-    m = summem
-    repo = init_repo(tmp_path / "r")
-    m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
-    m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
-    orig = m.dumps_tree
-    calls = {"n": 0}
-
-    def wrapped(tree):
-        calls["n"] += 1
-        return orig(tree)
-
-    monkeypatch.setattr(m, "dumps_tree", wrapped)
-    nodes = m.list_view(repo)
-    m.write_nap(repo, nodes[0].id, nodes[1].id, "pair")
-    assert calls["n"] == 1
-
-
 def test_same_second_nap_stays_in_left_slot(tmp_path, summem):
     """Four notes in one UTC second: napping the oldest two leaves grains [2, 1, 1]."""
     m = summem
@@ -119,28 +100,35 @@ def test_same_second_nap_stays_in_left_slot(tmp_path, summem):
     assert [n.leaves for n in m.list_view(repo)] == [2, 1, 1]
 
 
-def test_equal_grain_pair_returns_two_oldest_ids_when_all_ones(tmp_path, summem):
-    """equal_grain_pair returns the two oldest ids when every file is a 1."""
+def test_fold_request_pairs_two_oldest_ones(tmp_path, summem):
+    """fold_request pairs the two oldest note ids when every row has grain 1."""
     m = summem
     repo = init_repo(tmp_path / "r")
-    for i, text in enumerate(("alpha", "beta", "gamma"), start=1):
-        m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
+    pa = m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
+    pb = m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
+    m.write_note(repo, "gamma", datetime(2026, 1, 1, 0, 0, 3, tzinfo=UTC), Random(3))
+    pa_id = m.leafset_id([m.note_digest(pa.read_bytes())])
+    pb_id = m.leafset_id([m.note_digest(pb.read_bytes())])
     nodes = m.list_view(repo)
-    assert _equal_grain_pair(nodes) == (nodes[0].id, nodes[1].id)
+    assert len(nodes) == 3
+    out = m.fold_request(repo, 2, nodes=nodes)
+    assert _named_pair(m, nodes, out) == {pa_id, pb_id}
 
 
-def test_equal_grain_pair_returns_none_for_16_plus_1(tmp_path, summem):
-    """A 16-pack plus a later note has no equal-grain pair."""
+def test_fold_request_is_empty_for_16_plus_1(tmp_path, summem):
+    """A 16-pack plus a later note emits no fold request."""
     m = summem
     repo = init_repo(tmp_path / "r")
     _add_notes(m, repo, 16, 0, "n")
     _fold_loose_notes(m, repo, "pack")
     m.write_note(repo, "later", datetime(2026, 1, 1, 0, 1, 0, tzinfo=UTC), Random(99))
-    assert _equal_grain_pair(m.list_view(repo)) is None
+    nodes = m.list_view(repo)
+    assert [node.leaves for node in nodes] == [16, 1]
+    assert m.fold_request(repo, 1, nodes=nodes) == ""
 
 
-def test_equal_grain_pair_returns_two_8s_not_16_plus_8(tmp_path, summem):
-    """Two 8-packs beside an older 16-pack yield the two 8s."""
+def test_fold_request_pairs_two_8s_not_16_plus_8(tmp_path, summem):
+    """Two 8-packs beside an older 16-pack pair the two 8s."""
     m = summem
     repo = init_repo(tmp_path / "r")
     _add_notes(m, repo, 16, 0, "a")
@@ -151,11 +139,12 @@ def test_equal_grain_pair_returns_two_8s_not_16_plus_8(tmp_path, summem):
     _fold_loose_notes(m, repo, "eight-c")
     nodes = m.list_view(repo)
     assert [node.leaves for node in nodes] == [16, 8, 8]
-    assert _equal_grain_pair(nodes) == (nodes[1].id, nodes[2].id)
+    out = m.fold_request(repo, 2, nodes=nodes)
+    assert _named_pair(m, nodes, out) == {nodes[1].id, nodes[2].id}
 
 
-def test_equal_grain_pair_returns_two_1s_not_2_plus_1(tmp_path, summem):
-    """Grains 2, 1, 1 yield the two 1s, not 2+1."""
+def test_fold_request_pairs_two_1s_not_2_plus_1(tmp_path, summem):
+    """Grains 2, 1, 1 pair the two 1s, not 2+1."""
     m = summem
     repo = init_repo(tmp_path / "r")
     for i, text in enumerate(("a", "b", "c", "d"), start=1):
@@ -164,44 +153,33 @@ def test_equal_grain_pair_returns_two_1s_not_2_plus_1(tmp_path, summem):
     m.write_nap(repo, nodes[0].id, nodes[1].id, "pair")
     nodes = m.list_view(repo)
     assert [node.leaves for node in nodes] == [2, 1, 1]
-    assert _equal_grain_pair(nodes) == (nodes[1].id, nodes[2].id)
-
-
-def test_equal_grain_pair_duplicate_ids_when_same_text(tmp_path, summem):
-    """After heal, two identical notes are one view node; no (id, id) pair."""
-    m = summem
-    repo = init_repo(tmp_path / "r")
-    m.write_note(repo, "same", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
-    m.write_note(repo, "same", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
-    m.heal_view(repo)
-    nodes = m.list_view(repo)
-    assert len(nodes) == 1
-    assert _equal_grain_pair(nodes) is None
+    out = m.fold_request(repo, 2, nodes=nodes)
+    assert _named_pair(m, nodes, out) == {nodes[1].id, nodes[2].id}
 
 
 def test_over_budget_note_prints_saved_when_16_plus_1(tmp_path, monkeypatch, capsys, summem):
-    """WAKE_LINES=1, a 16-pack plus a new note prints Saved. and no fold request."""
+    """WAKE_LINES=1, a 16-pack plus a new note prints Saved to store and no fold request."""
     m = summem
     repo = init_repo(tmp_path / "r")
     _add_notes(m, repo, 16, 0, "n")
     _fold_loose_notes(m, repo, "pack")
     monkeypatch.chdir(repo)
     monkeypatch.setattr(m, "WAKE_LINES", 1)
-    assert m.main(["note", "later"]) == 0
+    assert m.main(["note", "--path", ":/", "later"]) == 0
     out = capsys.readouterr().out
-    assert out == "Saved.\n"
+    assert out == "Saved to `:/`\n"
     assert "Run:" not in out
     assert "Nothing left to compress." not in out
 
 
 def test_under_budget_note_prints_saved(tmp_path, monkeypatch, capsys, summem):
-    """Under-budget note exits 0 with stdout Saved. and no fold request."""
+    """Under-budget note exits 0 with stdout Saved to store and no fold request."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
-    assert m.main(["note", "hello"]) == 0
+    assert m.main(["note", "--path", ":/", "hello"]) == 0
     out = capsys.readouterr().out
-    assert out == "Saved.\n"
+    assert out == "Saved to `:/`\n"
     assert "Run:" not in out
     assert "Nothing left to compress." not in out
 
@@ -246,7 +224,7 @@ def test_sixteen_leaf_pack_tree_depth_is_log(tmp_path, summem):
 
 
 def test_nap_prints_saved_and_idle_when_at_or_under_budget(tmp_path, monkeypatch, capsys, summem):
-    """A successful nap at or under file budget prints Saved. then Nothing left to compress."""
+    """A successful nap at or under file budget prints Saved to store then Nothing left to compress."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
@@ -254,12 +232,12 @@ def test_nap_prints_saved_and_idle_when_at_or_under_budget(tmp_path, monkeypatch
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
     nodes = m.list_view(repo)
-    assert m.main(["nap", nodes[0].id, nodes[1].id, "pair"]) == 0
-    assert capsys.readouterr().out == "Saved.\n\nNothing left to compress.\n"
+    assert m.main(["nap", "--path", ":/", nodes[0].id, nodes[1].id, "pair"]) == 0
+    assert capsys.readouterr().out == "Saved to `:/`\n\nNothing left to compress.\n"
 
 
 def test_nap_prints_remaining_count_after_saved(tmp_path, monkeypatch, capsys, summem):
-    """Five notes at budget 2: first nap prints Saved. then 1 compression remains after this one."""
+    """Five notes at budget 2: first nap prints Saved to store then 1 compression remains after this one."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
@@ -267,9 +245,9 @@ def test_nap_prints_remaining_count_after_saved(tmp_path, monkeypatch, capsys, s
     for i, text in enumerate(("a", "b", "c", "d", "e"), start=1):
         m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
     nodes = m.list_view(repo)
-    assert m.main(["nap", nodes[0].id, nodes[1].id, "pair"]) == 0
+    assert m.main(["nap", "--path", ":/", nodes[0].id, nodes[1].id, "pair"]) == 0
     out = capsys.readouterr().out
-    assert out.startswith("Saved.\n\n")
+    assert out.startswith("Saved to `:/`\n\n")
     assert "1 compression remains after this one." in out
     assert "  c\n" in out
     assert "  d\n" in out
@@ -287,16 +265,16 @@ def test_over_budget_note_requests_equal_grain_ones(tmp_path, monkeypatch, capsy
     m.write_note(repo, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
     m.write_note(repo, "gamma", datetime(2026, 1, 1, 0, 0, 3, tzinfo=UTC), Random(3))
     ids = [node.id for node in m.list_view(repo)]
-    assert m.main(["note", "delta"]) == 0
+    assert m.main(["note", "--path", ":/", "delta"]) == 0
     out = capsys.readouterr().out
-    assert out.startswith("Saved.\n")
+    assert out.startswith("Saved to `:/`\n")
     assert "  alpha\n" in out
     assert "  beta\n" in out
     assert 'Run: .summem/summem nap ' in out
     assert '"<your line>"' in out
     pa = m.short_id(ids[0], ids)
     pb = m.short_id(ids[1], ids)
-    assert f"nap {pa} {pb} " in out
+    assert f"nap --path :/ {pa} {pb} " in out
     assert ids[0] not in out
     notes = [p for p in (repo / ".summem" / "notes").iterdir() if not p.name.startswith(".")]
     assert len(notes) == 4
@@ -320,11 +298,11 @@ def test_config_toml_wake_lines_is_read(tmp_path, monkeypatch, capsys, summem):
     m.ensure_store(repo)
     (repo / ".summem" / "config.toml").write_text("WAKE_LINES = 1\n", encoding="utf-8")
     m.write_note(repo, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
-    assert m.main(["note", "beta"]) == 0
+    assert m.main(["note", "--path", ":/", "beta"]) == 0
     out = capsys.readouterr().out
-    assert out.startswith("Saved.\n")
-    assert out.index("Saved.") < out.index("Run:")
-    assert "Run: .summem/summem nap " in out
+    assert out.startswith("Saved to `:/`\n")
+    assert out.index("Saved to `:/`") < out.index("Run:")
+    assert "Run: .summem/summem nap --path :/ " in out
     assert "Invent nothing." in out
     notes = [p for p in (repo / ".summem" / "notes").iterdir() if not p.name.startswith(".")]
     assert len(notes) == 2
@@ -332,22 +310,22 @@ def test_config_toml_wake_lines_is_read(tmp_path, monkeypatch, capsys, summem):
 
 
 def test_fold_request_reuses_nodes_and_entry_chars(tmp_path, monkeypatch, summem):
-    """fold_request(nodes=..., entry_chars=...) does not list or parse knobs."""
+    """fold_request honors supplied nodes and entry_chars overrides over on-disk store state."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
+    m.ensure_store(repo)
+    (repo / ".summem" / "config.toml").write_text("ENTRY_CHARS = 140\n", encoding="utf-8")
     for i, text in enumerate(("a", "b", "c"), start=1):
         m.write_note(repo, text, datetime(2026, 1, 1, 0, 0, i, tzinfo=UTC), Random(i))
     nodes = m.list_view(repo)
-    expected = m.fold_request(repo, 1)
-
-    def boom(*_args, **_kwargs):
-        raise AssertionError("fold_request must reuse nodes and entry_chars")
-
-    monkeypatch.setattr(m, "list_view", boom)
-    monkeypatch.setattr(m, "knobs", boom)
-    out = m.fold_request(repo, 1, nodes=nodes, entry_chars=280)
-    assert out == expected
+    out = m.fold_request(repo, 1, nodes=nodes[1:], entry_chars=99)
+    assert "99 characters" in out
+    assert "140 characters" not in out
+    assert "  a\n" not in out
+    assert "  b\n" in out
+    assert "  c\n" in out
+    assert "compression" not in out
 
 
 def test_fold_request_mentions_remaining(tmp_path, monkeypatch, summem):
@@ -367,23 +345,17 @@ def test_fold_request_mentions_remaining(tmp_path, monkeypatch, summem):
     assert "Run: summem nap " not in out
 
 
-def test_fold_request_identical_notes_use_short_prefix(tmp_path, monkeypatch, summem):
-    """After heal, two identical notes are one node; fold_request has no (prefix, prefix) Run line."""
+def test_fold_request_is_empty_after_healing_identical_notes(tmp_path, monkeypatch, summem):
+    """After heal collapses two identical notes to one row, fold_request at budget 0 emits nothing."""
     m = summem
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
-    monkeypatch.setattr(m, "WAKE_LINES", 1)
     m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(repo, "hello", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
     m.heal_view(repo)
     nodes = m.list_view(repo)
     assert len(nodes) == 1
-    out = m.fold_request(repo, 1)
-    assert out == ""
-    assert "Run:" not in out
-    cid = nodes[0].id
-    prefix = m.short_id(cid, [cid])
-    assert f"nap {prefix} {prefix} " not in out
+    assert m.fold_request(repo, 0, nodes=nodes) == ""
 
 
 def test_fold_request_uses_config_entry_chars(tmp_path, monkeypatch, summem):
@@ -402,7 +374,7 @@ def test_fold_request_uses_config_entry_chars(tmp_path, monkeypatch, summem):
 
 
 def test_fold_request_includes_path_when_cwd_misses_store(tmp_path, monkeypatch, summem):
-    """Walk-up from $PWD is a different store: Run: includes --path to the folded store."""
+    """A child store's Run: line always includes --path relative to the repository root."""
     m = summem
     repo = init_repo(tmp_path / "r")
     nested = repo / "foo" / "packages" / "baz"
@@ -413,11 +385,11 @@ def test_fold_request_includes_path_when_cwd_misses_store(tmp_path, monkeypatch,
     m.write_note(nested, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(nested, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
     out = m.fold_request(nested, 1)
-    assert "nap --path foo/packages/baz " in out
+    assert "nap --path :/foo/packages/baz " in out
 
 
-def test_fold_request_omits_path_when_cwd_selects_store(tmp_path, monkeypatch, summem):
-    """Walk-up from $PWD already finds the folded store: Run: has no --path."""
+def test_fold_request_includes_root_relative_path_even_inside_child_store(tmp_path, monkeypatch, summem):
+    """Even when $PWD is inside the child store, Run: still carries root-relative --path."""
     m = summem
     monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
     repo = init_repo(tmp_path / "r")
@@ -431,8 +403,7 @@ def test_fold_request_omits_path_when_cwd_selects_store(tmp_path, monkeypatch, s
     m.write_note(pkg, "alpha", datetime(2026, 1, 1, 0, 0, 1, tzinfo=UTC), Random(1))
     m.write_note(pkg, "beta", datetime(2026, 1, 1, 0, 0, 2, tzinfo=UTC), Random(2))
     out = m.fold_request(pkg, 1)
-    assert " --path " not in out
-    assert "Run: .summem/summem nap " in out
+    assert "Run: .summem/summem nap --path :/pkg " in out
 
 
 def test_fold_request_run_uses_agent_invoke(tmp_path, monkeypatch, summem):
@@ -470,7 +441,7 @@ def test_fold_request_note_pair_quotes_text_only(tmp_path, monkeypatch, summem):
     assert dated_leaf("20260101T000001Z", "alpha") not in out
     assert dated_leaf("20260101T000002Z", "beta") not in out
     assert "x1 " not in out
-    assert f"nap {pa} {pb} " in out
+    assert f"nap --path :/ {pa} {pb} " in out
     wake = m.wake_text(repo)
     assert dated_leaf("20260101T000001Z", "alpha") in wake
     assert dated_leaf("20260101T000002Z", "beta") in wake
@@ -497,7 +468,7 @@ def test_fold_request_pack_pair_quotes_captions_only(tmp_path, monkeypatch, summ
     assert "  g & h\n" in out
     assert f"x2 {pa}:" not in out
     assert f"x2 {pb}:" not in out
-    assert f"nap {pa} {pb} " in out
+    assert f"nap --path :/ {pa} {pb} " in out
     wake = m.wake_text(repo)
     assert f"x2 {pa}: e & f" in wake
     assert f"x2 {pb}: g & h" in wake
@@ -525,10 +496,10 @@ def test_fold_request_empty_pack_caption_is_blank_quote(tmp_path, monkeypatch, s
     assert "\n  \n  \n\nRun:" in out
     assert f"x2 {pa}:" not in out
     assert f"x2 {pb}:" not in out
-    assert f"nap {pa} {pb} " in out
+    assert f"nap --path :/ {pa} {pb} " in out
 
 
-_RUN = re.compile(r' nap(?: --path \S+)? (\S+) (\S+) "')
+_RUN = re.compile(r" nap --path (?:'[^']*'|\S+) (\S+) (\S+) " '"')
 
 
 def _seal(m, repo, count, start, prefix):
@@ -589,8 +560,8 @@ def test_run_line_for_a_skip_pair_is_accepted_by_nap(tmp_path, monkeypatch, caps
     view = m.list_view(repo)
     out = m.fold_request(repo, 3, nodes=view)
     id_a, id_b = _RUN.search(out).groups()
-    assert m.main(["nap", id_a, id_b, "the two ones"]) == 0
-    assert capsys.readouterr().out.startswith("Saved.\n")
+    assert m.main(["nap", "--path", ":/", id_a, id_b, "the two ones"]) == 0
+    assert capsys.readouterr().out.startswith("Saved to `:/`\n")
 
 
 @pytest.mark.parametrize("how", ["missing", "unreadable"])
@@ -611,15 +582,15 @@ def test_fold_request_skips_a_pack_whose_children_file_is_broken(tmp_path, monke
     out = m.fold_request(repo, 4, nodes=view)
     assert _named_pair(m, view, out) == {view[1].id, view[3].id}
     id_a, id_b = _RUN.search(out).groups()
-    assert m.main(["nap", id_a, id_b, "the two ones"]) == 0
-    assert capsys.readouterr().out.startswith("Saved.\n")
+    assert m.main(["nap", "--path", ":/", id_a, id_b, "the two ones"]) == 0
+    assert capsys.readouterr().out.startswith("Saved to `:/`\n")
 
 
 def test_fold_request_keeps_a_note_unlinked_after_listing(tmp_path, monkeypatch, capsys, summem):
     """Three notes, third file removed after listing: fold names the first two and nap writes a grain-2 pack.
 
-    The scan keeps each note at node.leaves and does not open a note file.
-    _as_child of the removed note still raises OSError.
+    The scan keeps each note at node.leaves without reading note files, while
+    leaf_digests of the removed note returns None.
     """
     m = summem
     repo = init_repo(tmp_path / "r")
@@ -637,18 +608,16 @@ def test_fold_request_keeps_a_note_unlinked_after_listing(tmp_path, monkeypatch,
 
     monkeypatch.setattr(Path, "read_bytes", spy)
     try:
-        assert m._fold_grains(view) == [1, 1, 1]
-        assert opened == []
+        out = m.fold_request(repo, 1, nodes=view)
+        assert [p for p in opened if p.parent.name == "notes"] == []
     finally:
         monkeypatch.setattr(Path, "read_bytes", real_read)
-    out = m.fold_request(repo, 1, nodes=view)
     assert _named_pair(m, view, out) == {view[0].id, view[1].id}
+    assert m.leaf_digests(view[2]) is None
     id_a, id_b = _RUN.search(out).groups()
-    assert m.main(["nap", id_a, id_b, "the two notes"]) == 0
-    assert capsys.readouterr().out.startswith("Saved.\n")
+    assert m.main(["nap", "--path", ":/", id_a, id_b, "the two notes"]) == 0
+    assert capsys.readouterr().out.startswith("Saved to `:/`\n")
     assert [node.leaves for node in m.list_view(repo)] == [2]
-    with pytest.raises(OSError):
-        m._as_child(view[2])
 
 
 def _set_first_note_text(node, text):
@@ -685,14 +654,13 @@ def test_fold_request_skips_a_pack_whose_note_text_is_not_a_string(
     assert [node.leaves for node in view] == [2, 1, 2, 1, 1]
     _set_first_note_text(view[0], text)
     m.loads_tree(view[0].tree_path.read_bytes())
-    with pytest.raises(ValueError, match="unreadable pack"):
-        m._as_child(view[0])
+    assert m.leaf_digests(view[0]) is None
     view = m.list_view(repo)
     out = m.fold_request(repo, 4, nodes=view)
     assert _named_pair(m, view, out) == {view[1].id, view[3].id}
     id_a, id_b = _RUN.search(out).groups()
-    assert m.main(["nap", id_a, id_b, "the two ones"]) == 0
-    assert capsys.readouterr().out.startswith("Saved.\n")
+    assert m.main(["nap", "--path", ":/", id_a, id_b, "the two ones"]) == 0
+    assert capsys.readouterr().out.startswith("Saved to `:/`\n")
 
 
 def test_fold_pair_matches_neighbors_rule_for_one_writer(summem):
@@ -738,16 +706,16 @@ def test_fold_request_skips_a_pack_whose_digest_count_is_not_the_stem_grain(
     extra = m.NoteChild(name="20260101T000000Z-eeeeeeeeeeeeeeee", text="extra")
     view[0].tree_path.write_bytes(m.dumps_tree(m.Tree(kids=[*tree.kids, extra])))
     view = m.list_view(repo)
-    _child, digests = m._as_child(view[0])
-    assert len(digests) != view[0].leaves
+    digests = m.leaf_digests(view[0])
+    assert digests is not None and len(digests) != view[0].leaves
     x2_lines = [line for line in m.wake_text(repo).splitlines() if line.startswith("x2 ")]
     assert len(x2_lines) == 1
     assert x2_lines[0].endswith(": a-0")
     out = m.fold_request(repo, 4, nodes=view)
     assert _named_pair(m, view, out) == {view[1].id, view[3].id}
     id_a, id_b = _RUN.search(out).groups()
-    assert m.main(["nap", id_a, id_b, "the two ones"]) == 0
-    assert capsys.readouterr().out.startswith("Saved.\n")
+    assert m.main(["nap", "--path", ":/", id_a, id_b, "the two ones"]) == 0
+    assert capsys.readouterr().out.startswith("Saved to `:/`\n")
 
 
 def test_fold_request_folds_a_lying_filename_with_a_truthful_row(
@@ -768,13 +736,57 @@ def test_fold_request_folds_a_lying_filename_with_a_truthful_row(
     view[1].sum_path.rename(folder / f"{stem}.summ")
     view = m.list_view(repo)
     assert [node.leaves for node in view] == [4, 2]
-    assert [len(m._as_child(node)[1]) for node in view] == [4, 4]
+    assert [len(m.leaf_digests(node)) for node in view] == [4, 4]
     (repo / ".summem" / "config.toml").write_text("WAKE_LINES = 2\n", encoding="utf-8")
     assert [line.split(" ", 1)[0] for line in m.wake_text(repo).splitlines()] == ["x4", "x2"]
     out = m.fold_request(repo, 1, nodes=view)
     assert _named_pair(m, view, out) == {view[0].id, view[1].id}
     id_a, id_b = _RUN.search(out).groups()
-    assert m.main(["nap", id_a, id_b, "the eights"]) == 0
-    assert capsys.readouterr().out.startswith("Saved.\n")
+    assert m.main(["nap", "--path", ":/", id_a, id_b, "the eights"]) == 0
+    assert capsys.readouterr().out.startswith("Saved to `:/`\n")
     assert [node.leaves for node in m.list_view(repo)] == [8]
+
+
+def test_fold_request_run_line_names_store_dir_or_root_from_any_cwd(tmp_path, monkeypatch, capsys, summem):
+    """After note --path foo/bar/baz/fee.c, Run: says nap --path foo/bar/baz; root says nap --path :/."""
+    import shlex
+
+    m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
+    repo = init_repo(tmp_path / "r")
+    baz = repo / "foo" / "bar" / "baz"
+    baz.mkdir(parents=True)
+    monkeypatch.chdir(repo)
+    assert m.main(["start", "foo/bar/baz"]) == 0
+    (baz / ".summem" / "config.toml").write_text("WAKE_LINES = 1\n", encoding="utf-8")
+    m.ensure_store(repo)
+    (repo / ".summem" / "config.toml").write_text("WAKE_LINES = 1\n", encoding="utf-8")
+    capsys.readouterr()
+    monkeypatch.chdir(repo / "foo" / "bar")
+    assert m.main(["note", "--path", "baz/fee.c", "first"]) == 0
+    capsys.readouterr()
+    assert m.main(["note", "--path", "baz/fee.c", "second"]) == 0
+    child_out = capsys.readouterr().out
+    assert child_out.startswith("Saved to `:/foo/bar/baz`\n")
+    child_run = next(ln for ln in child_out.splitlines() if ln.startswith("Run: "))
+    assert "nap --path :/foo/bar/baz " in child_run
+    assert "fee.c" not in child_run
+    monkeypatch.chdir(repo)
+    tokens = shlex.split(child_run.removeprefix("Run: "))
+    tokens[-1] = "folded-child"
+    assert m.main(tokens[1:]) == 0
+    assert capsys.readouterr().out == "Saved to `:/foo/bar/baz`\n\nNothing left to compress.\n"
+    monkeypatch.chdir(baz)
+    assert m.main(["note", "--path", ":/", "r1"]) == 0
+    capsys.readouterr()
+    assert m.main(["note", "--path", ":/", "r2"]) == 0
+    root_out = capsys.readouterr().out
+    assert root_out.startswith("Saved to `:/`\n")
+    root_run = next(ln for ln in root_out.splitlines() if ln.startswith("Run: "))
+    assert "nap --path :/ " in root_run
+    monkeypatch.chdir(repo)
+    rtokens = shlex.split(root_run.removeprefix("Run: "))
+    rtokens[-1] = "folded-root"
+    assert m.main(rtokens[1:]) == 0
+    assert capsys.readouterr().out == "Saved to `:/`\n\nNothing left to compress.\n"
 

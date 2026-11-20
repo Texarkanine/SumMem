@@ -28,13 +28,13 @@ You need a clone of the SumMem repository and Python 3.11 or newer. Run it from 
 
 ```text
 python /path/to/SumMem/surgery.py version
-python /path/to/SumMem/surgery.py [--path PATH] [--dry-run] --contains TEXT
-python /path/to/SumMem/surgery.py [--path PATH] [--dry-run] NAME
+python /path/to/SumMem/surgery.py --path STORE [--dry-run] --contains TEXT
+python /path/to/SumMem/surgery.py --path STORE [--dry-run] NAME
 ```
 
+- **`--path STORE`** picks the store and is required. It walks up from a file or directory to the nearest store, the same way it does for `summem`; `--path :/` is the repository-root store.
 - **`--contains TEXT`** picks the note whose text contains `TEXT`. It searches note text only, loose or inside naps, never nap summaries. If more than one note matches, give `NAME` instead.
 - **`NAME`** is the note's file name in `notes/`, or a unique prefix of it. If you give both, `NAME` picks the file and its text must contain `TEXT`.
-- **`--path`** picks the store, the same way it does for `summem`.
 - **`--dry-run`** prints what it would do and changes nothing.
 
 Always start with `--dry-run`. It prints each nap it would open, in order, then the note it would delete. Here, in the `dogfood` store after the walk on [How SumMem Works](../how-it-works/index.md#a-walk-through-one-store), the note `g` sits inside the `g & h` nap:
@@ -53,16 +53,16 @@ Opening naps removes their summaries and leaves more lines in the list. `surgery
 
 If the list is now over its wake budget, `surgery.py` ends by printing the same fold request that `note` would print, with a `Run:` line. `wake` does not ask for folds, so this is the easiest way to start them. After you commit the clean tip:
 
-1. Give the `Run:` line to an agent, or run it yourself with a summary of the two quoted lines.
-2. Each `nap` prints `Saved.`, then the next request or `Nothing left to compress.` Repeat until it says `Nothing left to compress.`
+1. Give the `Run:` line to an agent, or run it yourself from the repository root with a summary of the two quoted lines.
+2. Each `nap` prints ``Saved to `<store>` ``, then the next request or `Nothing left to compress.` Repeat until it says `Nothing left to compress.`
 3. Commit the new files.
 
 You may also leave the extra lines. The next `note` will ask for the same folds.
 
-Then check, in the same store, that the text is gone. Give `recall` the `--path` you gave `surgery.py`, if any. `recall` takes a regular expression, so put `\` before any of `. ^ $ * + ? ( ) [ ] { } | \` in the text. This should print nothing:
+Then check, in the same store, that the text is gone. Give `recall` the same `--path` you gave `surgery.py`. `recall` takes a regular expression, so put `\` before any of `. ^ $ * + ? ( ) [ ] { } | \` in the text. This should print nothing:
 
 ```bash
-.summem/summem recall --path PATH 'the removed text'
+.summem/summem recall --path STORE 'the removed text'
 ```
 
 If it prints a note, run `surgery.py` on that note too. If it prints a summary, the text is in a caption, and `surgery.py` removes only notes.

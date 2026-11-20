@@ -35,10 +35,10 @@ sequenceDiagram
     Script-->>Agent: how-to, then the memory list
     Agent->>Script: note with one short line
     Script->>Files: write one new note file
-    Script-->>Agent: Saved. Sometimes a request to summarize two memories
+    Script-->>Agent: Saved to store. Sometimes a request to summarize two memories
     Agent->>Script: nap with two ids and a summary
     Script->>Files: write the summary, remove the two from the list
-    Script-->>Agent: Saved. Then the next request, or Nothing left to compress.
+    Script-->>Agent: Saved to store. Then the next request, or Nothing left to compress.
     Agent->>Files: commit the files with the rest of the work
 ```
 
@@ -71,7 +71,7 @@ Record `i`:
 
 ```console
 $ .summem/summem note --path dogfood i
-Saved.
+Saved to `:/dogfood`
 
 Summarize these two into one line of at most 280 characters.
 Keep what has lasting effect, drop what does not. Invent nothing.
@@ -79,7 +79,7 @@ Keep what has lasting effect, drop what does not. Invent nothing.
   g
   h
 
-Run: .summem/summem nap --path dogfood 3fc87382 fa6da6a9 "<your line>"
+Run: .summem/summem nap --path :/dogfood 3fc87382 fa6da6a9 "<your line>"
 ```
 
 The list would now have 5 lines, one over its budget. So `note` asks for a nap. SumMem picks the oldest two memories of the same grain, `g` and `h`. It prints the command to run, with a placeholder for the summary.
@@ -87,8 +87,8 @@ The list would now have 5 lines, one over its budget. So `note` asks for a nap. 
 Write the summary:
 
 ```console
-$ .summem/summem nap --path dogfood 3fc87382 fa6da6a9 "g & h"
-Saved.
+$ .summem/summem nap --path :/dogfood 3fc87382 fa6da6a9 "g & h"
+Saved to `:/dogfood`
 
 Nothing left to compress.
 ```

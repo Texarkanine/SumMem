@@ -6,7 +6,7 @@
 |---|---|
 | Two `wake` lines have the same id. | Two branches summarized the same memories in different words. The next `note` or `nap` keeps one. See [Working with Git](git.md#merges). |
 | `wake` prints more lines than `WAKE_LINES`. | Usually right after a merge. `wake` never drops lines. The next `note` or `nap` asks for folds until the list fits. |
-| An agent noted something the store already had, and still got `Saved.` | The store holds each memory once, so it removed one of the two files. The memory was not lost. |
+| An agent noted something the store already had, and still got ``Saved to `<store>` ``. | The store holds each memory once, so it removed one of the two files. The memory was not lost. |
 | `wake` shows fewer naps after an upgrade. | The naps have names in an older format. See [Upgrading](upgrading.md#older-nap-files). |
 | `recall` printed nothing. | No match. `recall` is case-sensitive; start the pattern with `(?i)` to ignore case. |
 
@@ -29,6 +29,10 @@ Error messages go to standard error, and the command exits with a non-zero statu
 |---|---|---|
 | `SumMem needs Python 3.11 or newer` | any | The Python that ran the script is older than 3.11. Both `python` and `python3` must be 3.11 or newer. |
 | `not in a repository` | `wake`, `note`, `nap`, `zoom`, `recall`, `start` | The command ran outside a git repository. |
+| `pass --path …` | `note`, `nap`, `zoom`, `recall` | No `--path` was given. Pass `--path :/` for the repository-root store or `--path <file>` for the nearest store. |
+| `unknown path prefix: …` | any `--path` or `start` | The path starts with `:` but not `:/`. Use `:/` for the repository root, or `./:name` for a name that starts with `:`. |
+| `not in this repository: …` | any `--path` or `start` | The path is outside the repository you are in, or inside a nested repository such as a submodule. Point at a directory in this repository, or run the command from inside the nested one. |
+| `store is not in this repository: …` | store commands | The store's `.summem` is a symlink to a directory outside the repository. Make it a real directory. |
 | `Too long: N bytes, limit L. …` | `note`, `nap` | The text is longer than the store's `ENTRY_CHARS`, counted in bytes of UTF-8. |
 | `One line only. Merge the lines.` | `note`, `nap` | The text has a line break. |
 | `note is empty` | `note`, `nap` | There is no text. |

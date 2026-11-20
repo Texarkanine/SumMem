@@ -49,7 +49,7 @@ A note's content id comes from its text, so a loose note holds the same memory a
 - Beside a nap that holds that memory, the loose note's file is removed. The nap still holds the memory.
 - Beside a loose note with the same text, the file with the earlier name is removed, and the later one stays.
 
-The same repair runs when an agent records a sentence the store already holds, because `note` heals right after it writes. `note` prints `Saved.` either way. That is true of what the store remembers, not of the files:
+The same repair runs when an agent records a sentence the store already holds, because `note` heals right after it writes. `note` prints ``Saved to `<store>` `` either way. That is true of what the store remembers, not of the files:
 
 | The sentence was already | On disk after `note` |
 |---|---|
@@ -76,7 +76,7 @@ When two naps hold some of the same memories but neither holds all of the other'
 | `nap` | Before resolving the ids the agent passed. |
 | `wake`, `zoom`, `recall` | Never. Reading never waits on a repair. |
 
-Because `nap` heals first, an id from a fold request can be gone by the time a later `nap` runs: a merge landed in between, or another agent on the machine ran the same request first. If that pair is already the two children of a nap, `nap` succeeds, prints `Saved.`, and then whatever fold is actually left. The memories stay in the nap that won. An id the store does not have is `unknown id`.
+Because `nap` heals first, an id from a fold request can be gone by the time a later `nap` runs: a merge landed in between, or another agent on the machine ran the same request first. If that pair is already the two children of a nap, `nap` succeeds, prints ``Saved to `<store>` ``, and then whatever fold is actually left. The memories stay in the nap that won. An id the store does not have is `unknown id`.
 
 ## The lock
 

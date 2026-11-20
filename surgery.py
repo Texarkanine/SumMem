@@ -187,9 +187,10 @@ def _usage() -> str:
 Emergency zipper excision of one raw SumMem note. Not a shipped command.
 
   surgery.py version
-  surgery.py [--path PATH] [--dry-run] --contains TEXT
-  surgery.py [--path PATH] [--dry-run] NAME
+  surgery.py --path STORE [--dry-run] --contains TEXT
+  surgery.py --path STORE [--dry-run] NAME
 
+surgery.py requires --path. :/ is the repository root, as in git.
 NAME is a notes/ filename or unique prefix. --contains matches note text only.
 If both are given, NAME selects the file and TEXT must appear in it.
 version prints this script's version (lockstep with summem; not enforced).
@@ -208,7 +209,7 @@ def main(argv: list[str] | None = None) -> int:
         sys.stdout.write(f"{__version__}\n")
         return 0
     parser = argparse.ArgumentParser(prog="surgery.py")
-    parser.add_argument("--path", help="aim at this file or directory")
+    parser.add_argument("--path", help="file or directory; :/ is the repository root")
     parser.add_argument("--contains", help="unique substring of the note text")
     parser.add_argument(
         "--dry-run",
@@ -223,11 +224,10 @@ def main(argv: list[str] | None = None) -> int:
     if not args.contains and not args.name:
         sys.stderr.write(_usage())
         return 2
-    try:
-        parent = m.resolve_parent(Path.cwd(), args.path)
-    except ValueError as exc:
-        sys.stderr.write(f"{exc}\n")
-        return 1
+    pair, err_code = m._select_store(Path.cwd(), args.path, "surgery")
+    if pair is None:
+        return err_code
+    parent, _root = pair
     try:
         note_name = locate_note(m, parent, contains=args.contains, name=args.name)
 

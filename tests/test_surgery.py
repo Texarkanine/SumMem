@@ -5,7 +5,7 @@ from __future__ import annotations
 import importlib.util
 import shlex
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from importlib.machinery import SourceFileLoader
 from pathlib import Path
 from random import Random
@@ -13,7 +13,14 @@ from random import Random
 import pytest
 
 from conftest import ROOT
-from gitutil import assert_unique_cover, init_repo, reaches
+from gitutil import (
+    assert_unique_cover,
+    init_repo,
+    payload_names as _payload_names,
+    plant_nap as _plant_nap,
+    reaches,
+    write_notes as _write_notes,
+)
 
 UTC = timezone.utc
 SURGERY = ROOT / "surgery.py"
@@ -31,18 +38,6 @@ def load_surgery():
     return mod
 
 
-def _write_notes(m, repo, texts, start=1):
-    paths = []
-    base = datetime(2026, 1, 1, tzinfo=UTC)
-    for i, text in enumerate(texts):
-        paths.append(
-            m.write_note(
-                repo, text, base + timedelta(seconds=start + i), Random(start + i)
-            )
-        )
-    return paths
-
-
 def _balanced_4(m, repo, texts, cap_ab, cap_cd, cap_p, start):
     paths = _write_notes(m, repo, texts, start=start)
     names = {p.name for p in paths}
@@ -55,16 +50,6 @@ def _balanced_4(m, repo, texts, cap_ab, cap_cd, cap_p, start):
     cd = next(n for n in m.list_view(repo) if n.caption == cap_cd)
     m.write_nap(repo, ab.id, cd.id, cap_p)
     return paths, next(n for n in m.list_view(repo) if n.caption == cap_p)
-
-
-def _payload_names(repo: Path) -> set[str]:
-    names = set()
-    for folder in ("notes", "naps"):
-        root = repo / ".summem" / folder
-        if not root.is_dir():
-            continue
-        names.update(p.name for p in root.iterdir() if p.is_file() and not p.name.startswith("."))
-    return names
 
 
 def test_contains_unique_nested_note(tmp_path, summem):
@@ -121,14 +106,6 @@ def test_unknown_target_errors(tmp_path, summem):
     with pytest.raises(ValueError):
         s.locate_note(m, repo, contains="no-such-sentence", name=None)
     assert _payload_names(repo) == before
-
-
-def _plant_nap(m, repo, kids, caption: str):
-    tree = m.Tree(kids=list(kids))
-    digests = m._digests_of_tree(tree)
-    child = m.NapChild(id=m.leafset_id(digests), sum=caption, tree=tree)
-    m.rematerialize_child(repo, child)
-    return child
 
 
 def _tree_embeds(repo: Path, sentence: str) -> bool:
@@ -262,7 +239,7 @@ def test_plan_break_out_kid_stem_is_rematerialize_dest(tmp_path, summem):
     assert (naps / f"{chain[1]}.summ").is_file()
 
 
-def test_dry_run_prints_chain_and_writes_nothing(tmp_path, summem):
+def test_dry_run_returns_chain_and_writes_nothing(tmp_path, summem):
     """Dry-run returns the rematerialize chain and does not change store bytes."""
     s = load_surgery()
     m = summem
@@ -306,7 +283,7 @@ def test_identical_text_deletes_only_named_file(tmp_path, summem):
 
 
 def test_main_contains_excises(tmp_path, monkeypatch, capsys, summem):
-    """main(['--contains', sentence]) excises that nested note from cwd's store."""
+    """main(['--path', ':/', '--contains', sentence]) excises that nested note from the root store."""
     s = load_surgery()
     m = summem
     repo = init_repo(tmp_path / "r")
@@ -315,7 +292,7 @@ def test_main_contains_excises(tmp_path, monkeypatch, capsys, summem):
         m, repo, [secret, "keep-b", "keep-c", "keep-d"], "ab", "cd", "abcd", start=1
     )
     monkeypatch.chdir(repo)
-    assert s.main(["--contains", secret]) == 0
+    assert s.main(["--path", ":/", "--contains", secret]) == 0
     out = capsys.readouterr().out
     assert parent.name in out
     assert paths[0].name in out.splitlines()[-1]
@@ -325,7 +302,7 @@ def test_main_contains_excises(tmp_path, monkeypatch, capsys, summem):
 
 
 def test_main_dry_run(tmp_path, monkeypatch, capsys, summem):
-    """main(['--dry-run', '--contains', sentence]) prints the chain and writes nothing."""
+    """main(['--path', ':/', '--dry-run', '--contains', sentence]) prints the chain and writes nothing."""
     s = load_surgery()
     m = summem
     repo = init_repo(tmp_path / "r")
@@ -335,7 +312,7 @@ def test_main_dry_run(tmp_path, monkeypatch, capsys, summem):
     )
     before = _store_bytes(repo)
     monkeypatch.chdir(repo)
-    assert s.main(["--dry-run", "--contains", secret]) == 0
+    assert s.main(["--path", ":/", "--dry-run", "--contains", secret]) == 0
     out = capsys.readouterr().out
     lines = out.splitlines()
     assert parent.name in lines
@@ -364,9 +341,10 @@ def test_main_usage_without_target(tmp_path, monkeypatch, capsys):
     s = load_surgery()
     repo = init_repo(tmp_path / "r")
     monkeypatch.chdir(repo)
-    assert s.main([]) == 2
-    err = capsys.readouterr().err
-    assert err
+    assert s.main(["--path", ":/"]) == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err == s._usage()
 
 
 def test_main_version_prints_script_version(capsys):
@@ -395,28 +373,27 @@ def test_main_prints_fold_request_when_over_budget(tmp_path, monkeypatch, capsys
     """After a root excision over budget, Run: names the two oldest survivors and omits the excised id."""
     s = load_surgery()
     m = summem
-    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
     repo = init_repo(tmp_path / "r")
     secret = "sentinel-fold-secret-kk11"
     paths = _write_notes(m, repo, [secret, "keep-b", "keep-c", "keep-d"])
     (repo / ".summem" / "config.toml").write_text("WAKE_LINES = 2\n", encoding="utf-8")
     ids_before = [node.id for node in m.list_view(repo)]
     monkeypatch.chdir(repo)
-    assert s.main(["--contains", secret]) == 0
+    assert s.main(["--path", ":/", "--contains", secret]) == 0
     out = capsys.readouterr().out
     assert paths[0].name in out.splitlines()
-    assert "Run: .summem/summem nap " in out
+    assert f"Run: {m.agent_invoke()} nap " in out
     remain = [node for node in m.list_view(repo) if node.kind == "note"]
     assert len(remain) == 3
     remain_ids = [node.id for node in remain]
     pa = m.short_id(remain_ids[0], remain_ids)
     pb = m.short_id(remain_ids[1], remain_ids)
-    assert f"nap {pa} {pb} " in out
+    assert f"nap --path :/ {pa} {pb} " in out
     assert ids_before[0] not in out
 
 
 def test_main_path_fold_request_is_copy_paste_safe(tmp_path, monkeypatch, capsys, summem):
-    """After --path excision over budget, Run: naps that store from $PWD."""
+    """After --path excision over budget, Run: naps that store from the repository root."""
     s = load_surgery()
     m = summem
     repo = init_repo(tmp_path / "r")
@@ -444,7 +421,81 @@ def test_main_dry_run_omits_fold_request(tmp_path, monkeypatch, capsys, summem):
     secret = "sentinel-dryfold-secret-ll22"
     _write_notes(m, repo, [secret, "keep-b", "keep-c", "keep-d"])
     (repo / ".summem" / "config.toml").write_text("WAKE_LINES = 2\n", encoding="utf-8")
+    before = _store_bytes(repo)
     monkeypatch.chdir(repo)
-    assert s.main(["--dry-run", "--contains", secret]) == 0
+    assert s.main(["--path", ":/", "--dry-run", "--contains", secret]) == 0
     out = capsys.readouterr().out
-    assert "Run: .summem/summem nap" not in out
+    assert "Run:" not in out
+    assert _store_bytes(repo) == before
+
+
+def test_main_requires_path_flag(tmp_path, monkeypatch, capsys, summem):
+    """surgery.py with neither --path :/ nor --path exits 2 and leaves the store untouched."""
+    s = load_surgery()
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    secret = "sentinel-noflag-secret-nn44"
+    _write_notes(m, repo, [secret, "keep-b"])
+    before = _store_bytes(repo)
+    monkeypatch.chdir(repo)
+    assert s.main(["--contains", secret]) == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert len(captured.err.splitlines()) == 1
+    assert ":/" in captured.err
+    assert "--path" in captured.err
+    assert "git" not in captured.err.lower()
+    assert _store_bytes(repo) == before
+
+
+def test_main_rejects_removed_root_flag(tmp_path, monkeypatch, capsys, summem):
+    """surgery.py rejects the removed --root flag (exit 2) and leaves the store untouched (B14)."""
+    s = load_surgery()
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    secret = "sentinel-bothflags-secret-oo55"
+    _write_notes(m, repo, [secret, "keep-b"])
+    before = _store_bytes(repo)
+    monkeypatch.chdir(repo)
+    assert s.main(["--root", "--contains", secret]) == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "unrecognized arguments: --root" in captured.err
+    assert _store_bytes(repo) == before
+
+
+def test_main_root_from_subdir_excises_root_store(tmp_path, monkeypatch, summem):
+    """--path :/ from inside a started child directory excises from the repository-root store."""
+    s = load_surgery()
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    pkg = repo / "pkg"
+    pkg.mkdir()
+    monkeypatch.chdir(repo)
+    assert m.main(["start", "pkg"]) == 0
+    secret = "sentinel-rootsubdir-secret-pp66"
+    root_note = m.write_note(repo, secret, datetime(2026, 1, 1, tzinfo=UTC), Random(1))
+    pkg_note = m.write_note(pkg, secret, datetime(2026, 1, 2, tzinfo=UTC), Random(2))
+    monkeypatch.chdir(pkg)
+    assert s.main(["--path", ":/", "--contains", secret]) == 0
+    assert not root_note.exists()
+    assert pkg_note.exists()
+
+
+def test_main_subdir_path_fold_request_is_root_relative(tmp_path, monkeypatch, capsys, summem):
+    """From a subdirectory, surgery.py --path prints a root-relative Run: line."""
+    s = load_surgery()
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    cli = repo / "packages" / "cli"
+    cli.mkdir(parents=True)
+    monkeypatch.chdir(repo)
+    assert m.main(["start", "packages/cli"]) == 0
+    secret = "sentinel-subdirfold-secret-qq77"
+    _write_notes(m, cli, [secret, "keep-b", "keep-c", "keep-d"])
+    (cli / ".summem" / "config.toml").write_text("WAKE_LINES = 2\n", encoding="utf-8")
+    monkeypatch.chdir(repo / "packages")
+    capsys.readouterr()
+    assert s.main(["--path", "cli", "--contains", secret]) == 0
+    out = capsys.readouterr().out
+    assert "nap --path :/packages/cli " in out

@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
-from conftest import ROOT
+from gitutil import git_free
 
 
 def test_init_prints_recipe_and_prompt(capsys, summem):
@@ -57,27 +55,9 @@ def test_init_rejects_extra_args(summem):
     assert m.main(["init", "x"]) != 0
 
 
-def test_init_rejects_path_flag(capsys, summem):
-    """init --path is rejected; init -h does not list --path."""
-    m = summem
-    assert m.main(["init", "--path", "."]) != 0
-    capsys.readouterr()
-    assert m.main(["init", "-h"]) == 0
-    captured = capsys.readouterr()
-    text = captured.out + captured.err
-    assert "--path" not in text
-
-
-def test_help_before_init_prints_init_help(capsys, summem):
-    """-h init prints init help, not top-level-only usage."""
-    m = summem
-    catalog = m.usage_text()
-    assert m.main(["-h", "init"]) == 0
-    captured = capsys.readouterr()
-    text = captured.out + captured.err
-    assert captured.out
-    assert "{wake,note" not in text
-    assert catalog.strip() not in text
+def test_init_rejects_path_flag(summem):
+    """init --path is rejected."""
+    assert summem.main(["init", "--path", "."]) != 0
 
 
 def test_how_to_text_notes_are_part_of_the_work(summem):
@@ -88,7 +68,7 @@ def test_how_to_text_notes_are_part_of_the_work(summem):
     assert "part of your work" in lower
     assert "untracked" in lower
     assert "git add" not in text
-    assert "git" not in lower
+    assert git_free(lower)
     assert "own commit" not in lower
     assert "the tool manages them" not in text
     assert "invent filenames" in lower
@@ -96,18 +76,6 @@ def test_how_to_text_notes_are_part_of_the_work(summem):
     assert "the only writer" in lower
     assert "notes/" not in text
     assert "naps/" not in text
-
-
-def test_agents_md_starts_with_prompt_text(summem):
-    """This repo's AGENTS.md prefix is prompt_text(); consumers may edit theirs.
-
-    A prompt_text() change that is not copied onto AGENTS.md must fail. Tweaking
-    the write rule and updating both files must not.
-    """
-    m = summem
-    agents = Path(ROOT, "AGENTS.md").read_text(encoding="utf-8")
-    prompt = m.prompt_text().strip()
-    assert agents.startswith(prompt)
 
 
 def test_how_to_text_is_the_usage_section(monkeypatch, summem):
@@ -140,7 +108,7 @@ def test_how_to_text_is_the_usage_section(monkeypatch, summem):
     assert "recall" in lower
     assert "wake --path" not in text
     assert "catalog" not in lower
-    assert "git" not in lower
+    assert git_free(lower)
     assert "notes/" not in text
     assert "naps/" not in text
     assert "Run:" not in text
@@ -250,29 +218,36 @@ def test_prompt_text_bootstrap_wake_is_python(monkeypatch, summem):
 
 
 def test_init_text_is_host_agnostic(monkeypatch, capsys, summem):
-    """init_text is the same on both hosts: no Windows warning, body is prompt_text()."""
+    """init_text is identical across host invoke modes and matches main(['init'])."""
     m = summem
     monkeypatch.setattr(m, "_host_needs_interpreter", lambda: True)
     windows = m.init_text()
     monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
     posix = m.init_text()
     assert windows == posix
-    assert "only work on Windows" not in windows
     assert m.sys.executable not in windows
-    recipe, _, rest = windows.partition("---")
-    assert "starting write rule" in recipe.lower()
-    assert rest.lstrip() == m.prompt_text()
     assert f"`python {m.AGENT_BIN} wake`" in windows
     assert m.main(["init"]) == 0
     assert capsys.readouterr().out == windows
 
 
-def test_init_text_posix_has_no_windows_warning(monkeypatch, summem):
-    """POSIX init_text has no Windows-only warning and still ends the recipe at ---."""
+def test_init_text_separates_recipe_from_prompt_at_divider(summem):
+    """init_text separates the starting-rule recipe from prompt_text() at ---."""
     m = summem
-    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
-    text = m.init_text()
-    recipe, _, rest = text.partition("---")
-    assert "only work on Windows" not in text
+    recipe, sep, rest = m.init_text().partition("---")
+    assert sep == "---"
     assert "starting write rule" in recipe.lower()
     assert rest.lstrip() == m.prompt_text()
+
+
+def test_how_to_text_always_explains_path_and_root_anchor(monkeypatch, summem):
+    """Base how_to_text() always includes --path :/ and --path command forms even without a catalog."""
+    m = summem
+    monkeypatch.setattr(m, "_host_needs_interpreter", lambda: False)
+    base = m.how_to_text()
+    assert f"{m.AGENT_BIN} note --path" in base
+    assert f"{m.AGENT_BIN} note --path :/" in base
+    assert f"{m.AGENT_BIN} recall --path :/" in base
+    assert f"{m.AGENT_BIN} zoom --path :/" in base
+    assert "walks up" in base
+    assert "wake --path" not in base

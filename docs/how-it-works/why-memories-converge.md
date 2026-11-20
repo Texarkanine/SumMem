@@ -168,7 +168,7 @@ The partition also explains what happens to a sentence recorded twice.
 
 Two copies of one sentence are one member of `L`. As files they are two items whose `leaves` are the same note, so they overlap, and the view is not a partition until one goes. Heal keeps the later filename. A loose copy of a sentence that already sits inside a bundle goes the same way: the bundle keeps it.
 
-So recording a sentence the store already holds adds nothing to `L`. `note` still prints `Saved.`, which is true of `L`, and heal [removes the extra file](../architecture/merges-and-healing.md#a-note-held-twice).
+So recording a sentence the store already holds adds nothing to `L`. `note` still prints ``Saved to `<store>` ``, which is true of `L`, and heal [removes the extra file](../architecture/merges-and-healing.md#a-note-held-twice).
 
 The same reasoning forbids folding the two copies together. A block's grain is its size in `L`, and these two files cover one note. A nap of them would claim grain 2 for grain 1, so `nap` refuses any pair whose notes overlap.
 

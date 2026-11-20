@@ -29,19 +29,19 @@ graph TD
 
 ## Operator help is handwritten; agent invoke is host-specific
 
-Bare invocation and `-h` print a handwritten catalog (`usage_text`); a command registered only with argparse will not appear there. The catalog names one way to do each thing. `help` works and is not listed. `usage_text` uses `CLI_NAME` (`summem`).
+Bare invocation prints a handwritten catalog (`usage_text`) to stderr; `-h`, `--help` (anywhere before `--`), or `help` as the first argument prints `usage_text` to stdout and exits `0` before importing `argparse` or touching any store. A command registered only with argparse will not appear in `usage_text`. The catalog names one way to do each thing; `help` works and is not listed. `usage_text` uses `CLI_NAME` (`summem`).
 
-`prompt_text` names SumMem, then the wake command `python .summem/summem wake`; it does not name `{AGENT_BIN}` as an invoke. `how_to_text` and `fold_request`'s `Run:` line use `agent_invoke()`: `AGENT_BIN` when this host can exec that path, otherwise `python {AGENT_BIN}`. That `Run:` line includes `--path REL` when walk-up from `$PWD` would not select the store that produced the ids.
+`prompt_text` names SumMem, then the wake command `python .summem/summem wake`; it does not name `{AGENT_BIN}` as an invoke or include command flags. `how_to_text` and `fold_request`'s `Run:` line use `agent_invoke()`: `AGENT_BIN` when this host can exec that path, otherwise `python {AGENT_BIN}`. Every printed path (`Saved to`, `Run:`, catalog lines, `start`) comes from `_root_path`: git's root-anchored `:/rel` form (the root is `:/`), shell-quoted with `shlex.quote` when needed, never `$PWD`-relative, so it can be pasted back as `--path` from anywhere. Inside a sentence (`start`, `Saved to`, errors) the path is wrapped in backticks; `Run:` and catalog lines print it bare.
 
 ## Write rule lives in the prefix; recipes live on root wake
 
-`prompt_text` is the committed bootstrap: the write rule (what to remember, and when) plus the wake handoff. The intro does not name an invoke path; wake prints recipes. `how_to_text` is the versioned how-to on root wake: argv, grammar, writer-only, fold follow-ups, and catalog how-to (pull and `--path` walk-up) only when other stores exist. Usage must not repeat the write rule.
+`prompt_text` is the committed bootstrap: the write rule (what to remember, when, and choosing the nearest store rather than always the root) plus the wake handoff (including reading wake output to the end without piping through `head`, `tail`, or a pager). The intro does not name an invoke path; wake prints recipes. `how_to_text` is the versioned how-to on root wake: reading wake whole, `--path` store selection (with its `:/` root form) on every root wake, writer-only, fold follow-ups, and catalog pull how-to (`wake --path`) only when non-empty other stores exist. Usage must not repeat the write rule.
 
 `init` prints the bootstrap as a starting write rule the operator may edit; that block at the top of committed `AGENTS.md` is how a repository opts in. The script does not reassert its default over an edited prefix. The script assigns names, times, and hashes.
 
-## Saved. is the ACK; fold_request is the next fold
+## Saved to `<store>` is the ACK; fold_request is the next fold
 
-`fold_request` quotes captions without grain or prefix; those ids live on the `Run:` line. Successful `note` prints `Saved.` then maybe that fold request; successful `nap` prints `Saved.` then maybe that fold request or `Nothing left to compress.` Do not put the ACK or the idle line inside `fold_request`.
+`fold_request` quotes captions without grain or prefix; those ids live on the `Run:` line. Successful `note` prints ``Saved to `<store>` `` (e.g. ``Saved to `:/` `` or ``Saved to `:/packages/cli` ``) then maybe that fold request; successful `nap` prints ``Saved to `<store>` `` then maybe that fold request or `Nothing left to compress.` Do not put the ACK or the idle line inside `fold_request`. `note`, `nap`, `zoom`, `recall`, and `surgery.py` require `--path` (missing exits `2` and writes nothing). `_input_path` reads `:/rel` from the git root and other values from `$PWD`, and refuses other leading `:` and any path whose own repository is not the one containing `$PWD` (outside it, or nested); `resolve_parent` refuses a store whose `.summem` resolves outside the root (exit `1`). `wake`, `start`, and `migrate.py` share that resolver.
 
 ## Agent-facing errors are ratchets
 
@@ -87,7 +87,7 @@ Wake does not open `.tree` to heal overlapping packs; mutating `note` and `nap` 
 
 Session start wakes the true root once, because of the `AGENTS.md` block, not a harness hook. Skip if a prior project-root wake is still readable in the conversation.
 
-Root wake prints `== SumMem Usage ==` (`how_to_text`), then a labeled catalog (`== Additional SumMem Catalogs ==` and `N: ./path` lines, not pull commands) when other stores exist, then that store's decaying document under `== Project-root Memories ==` when the document is non-empty. Walk the tree, honor git ignore (including `.git/info/exclude`), do not keep a committed index. The pull recipe lives in Usage when other stores exist, not in the bootstrap.
+Root wake prints `== SumMem Usage ==` (`how_to_text`), then a labeled catalog (`== Additional SumMem Catalogs ==` and `N: :/path` lines, not pull commands; `0`-count child stores are omitted, though `started_stores()` still returns them) when non-empty other stores exist, then that store's decaying document under `== Project-root Memories ==` when the document is non-empty. Walk the tree, honor git ignore (including `.git/info/exclude`), do not keep a committed index. The pull recipe lives in Usage when non-empty other stores exist, not in the bootstrap.
 
 `wake --path` prints only the nearest store: no Usage, no catalog, no Project-root header. Do not load every started store in the root wake. Child memory in context is advertised, not enforced. Outside a repository, store commands fail; `init`, `version`, and help still print.
 

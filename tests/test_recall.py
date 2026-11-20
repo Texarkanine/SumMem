@@ -102,13 +102,9 @@ def test_recall_malformed_tree_does_not_raise(tmp_path, capsys, summem):
     next((repo / ".summem" / "naps").glob("*.tree")).write_bytes(b"{not json\n")
     capsys.readouterr()
     out = m.recall_text(repo, "alpha")
-    assert isinstance(out, str)
+    assert out == ""
     err = capsys.readouterr().err
     assert err == "skipped a pack\n"
-    assert "notes/" not in err
-    assert "naps/" not in err
-    assert "git" not in err
-    assert "Traceback" not in err
 
 
 def test_recall_matches_nested_nap_caption(tmp_path, summem):
@@ -271,19 +267,39 @@ def test_recall_unprojectable_note_name_skips(tmp_path, capsys, summem):
     )
     capsys.readouterr()
     out = m.recall_text(repo, "x")
-    assert isinstance(out, str)
+    assert out == ""
     err = capsys.readouterr().err
     assert err == "skipped a pack\n"
-    assert "Traceback" not in err
 
 
 def test_recall_invalid_pattern_is_cli_error(tmp_path, monkeypatch, capsys, summem):
     """An invalid regex is a CLI error and does not mention store paths."""
     m = summem
     monkeypatch.chdir(init_repo(tmp_path / "r"))
-    assert m.main(["recall", "["]) != 0
+    assert m.main(["recall", "--path", ":/", "["]) == 2
     err = capsys.readouterr().err.lower()
     assert "invalid choice" not in err
     assert "notes/" not in err
     assert "naps/" not in err
     assert "git" not in err
+
+
+def test_recall_prints_all_matches_uncut_above_wake_budget(tmp_path, monkeypatch, capsys, summem):
+    """recall matching every note in a store above WAKE_LINES prints every note."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    monkeypatch.chdir(repo)
+    (repo / "pkg").mkdir()
+    assert m.main(["start", "pkg"]) == 0
+    assert m.main(["note", "--path", "pkg", "item-pkg"]) == 0
+    for idx in range(40):
+        m.write_note(repo, f"item-{idx:02d}", datetime(2026, 1, 1, 0, 0, idx, tzinfo=timezone.utc), Random(idx + 1))
+    capsys.readouterr()
+    assert m.main(["recall", "--path", ":/", "^item-"]) == 0
+    root_lines = capsys.readouterr().out.splitlines()
+    assert len(root_lines) == 40
+    assert all("item-pkg" not in ln for ln in root_lines)
+    assert m.main(["recall", "--path", "pkg", "^item-"]) == 0
+    pkg_lines = capsys.readouterr().out.splitlines()
+    assert len(pkg_lines) == 1
+    assert "item-pkg" in pkg_lines[0]

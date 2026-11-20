@@ -37,8 +37,8 @@ The product succeeds when these process-level tests hold:
 - Originals survive squash onto `main`.
 - Positional ids are rejected.
 - Long-lived branches union then fold lazily.
-- A path flag resolves to the nearest started store.
-- Root wake catalogs other stores and a pull prints only that store.
+- A `--path` flag resolves to the nearest started store; `--path :/` is the repository-root store (git's root anchor); `note`, `nap`, `zoom`, and `recall` require it.
+- Root wake catalogs non-empty other stores and a pull prints only that store.
 
 ## Key Constraints
 
@@ -59,6 +59,6 @@ Script size and cost:
 
 CLI and scopes:
 
-- CLI output does not mention store files, hashes as paths, or git. Root-wake Usage treats the files the script wrote as part of your work, not a separate publish procedure.
+- CLI output never directs the agent to store files, hashes as paths, or git operations: no `git add`/commit/push steps, and no git error text. Naming git as the source of a convention ("`:/` … as in git") is allowed, because it explains syntax and asks for no git action. Root-wake Usage treats the files the script wrote as part of your work, not a separate publish procedure.
 - A scope is not a package manifest. `start` is how a directory becomes a store.
 - The git root auto-creates on first `wake`, `note`, `nap`, `zoom`, or `recall`. Other stores appear only via `start`. Outside a repository, store commands fail. Help, `init`, and `version` still print.
