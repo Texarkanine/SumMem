@@ -209,3 +209,13 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 ## 2026-11-19 - COMPLEXITY-ANALYSIS - COMPLETE
 
 * Level 2 rework; design settled by creative-store-flag-scheme.md.
+
+## 2026-11-19 - PLAN - COMPLETE
+
+* Work completed
+    - Level 2 plan in tasks.md: 15 behaviors, 7 steps (resolver, selector/output, surgery, migrate, heal test, agent text, docs).
+* Decisions made
+    - Amended creative: bare `wake` stays `--path .` (today's behavior); resolver refusals exit 1 like `not in a repository`.
+    - Store-containment check lives in `resolve_parent` (covers wake, migrate, every command); `Saved to` formats the store directory.
+* Insights
+    - `tests/gitutil.py::_FOLD_RUN` must learn the quoted `--path` form or every fold-driving test breaks.

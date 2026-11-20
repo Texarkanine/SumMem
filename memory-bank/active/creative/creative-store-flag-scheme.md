@@ -26,7 +26,7 @@ Rules (each one closes a specific hole):
 
 1. **One flag.** `--path P` is the only store selector. `--root` is removed with no alias (clean break, pre-1.0).
 2. **Anchors.** If `P` starts with `:/`, it is relative to the git root, and `:/` alone means the root. Any other value is relative to `$PWD`. Absolute paths are accepted. The walk up to the nearest started store is unchanged.
-3. **Required where #103 requires a store flag:** `note`, `nap`, `zoom`, `recall`, `surgery.py`. On `wake`, the flag stays optional, and bare `wake` means `:/`.
+3. **Required where #103 requires a store flag:** `note`, `nap`, `zoom`, `recall`, `surgery.py`. On `wake`, the flag stays optional, and bare `wake` keeps today's behaviour, the same as `--path .` (git's default is also the current directory). Plan amendment, 2026-11-19: this keeps today's behaviour and gives one rule for a missing flag.
 4. **Every printed path is in `:/` form**, and every printed path is a valid `--path` value:
    - `Saved to :/packages/cli`
    - `Run: nap --path :/packages/cli …`
@@ -34,8 +34,8 @@ Rules (each one closes a specific hole):
    - `start` output.
 
    Any printed path can then be pasted from any directory. This fixes the `Run:` hole, and output no longer mixes `./x` with `--path x`.
-5. **The `:` namespace is reserved.** A leading `:` other than `:/` (for example `:(top)` or `:!x`) exits 2 with `unknown path prefix`. Git magic can be adopted later without a breaking change. A file whose name really starts with `:` is written as `./:name`, the same escape git uses.
-6. **No paths outside the repository.** The resolver resolves the path (symlinks included) once. If the result is not inside the git root, it exits 2 with a one-line error. This covers `:/../x` and a `.summem` symlinked out of the repository. Formatting runs after this check, so it can't fail. There is no separate symlink handling: a store outside the repository can't be committed, so it isn't a SumMem store (PR #104 review items 3 and 4).
+5. **The `:` namespace is reserved.** A leading `:` other than `:/` (for example `:(top)` or `:!x`) is refused with `unknown path prefix`. All resolver refusals use the existing resolution exit code, 1, as `not in a repository` does (plan amendment). Git magic can be adopted later without a breaking change. A file whose name really starts with `:` is written as `./:name`, the same escape git uses.
+6. **No paths outside the repository.** The resolver resolves the path (symlinks included) once. If the result is not inside the git root, it refuses with a one-line error (exit 1). This covers `:/../x` and a `.summem` symlinked out of the repository. Formatting runs after this check, so it can't fail. There is no separate symlink handling: a store outside the repository can't be committed, so it isn't a SumMem store (PR #104 review items 3 and 4).
 7. **One resolver.** `wake --path`, `start <dir>`, `surgery.py --path` and `migrate.py --path` all use the same resolver, so the rule holds for every path input.
 
 Traded away: a separate visible `--root` word. `--path :/` replaces it at the same length. `:/` must be quoted in no common shell (bash, zsh, PowerShell, cmd).
