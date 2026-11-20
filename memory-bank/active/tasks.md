@@ -135,7 +135,7 @@ No new technology. `shlex` and `Path.is_relative_to` are stdlib on the 3.11 floo
 
 - The wrong premise, "bare `wake` = `:/`", would have changed session start from child directories: already amended to `--path .` (today's behaviour).
 - The symlink check placed in formatting instead of the resolver would bring back the PR #104 crash: step 1 puts it in `resolve_parent`, and B8 pins it.
-- The odd-arity test passes without hitting the split branch again (the same vacuity): step 5 asserts that `rematerialize_child` is called.
+- The odd-arity test passes without hitting the split branch again (the same vacuity): step 5 asserts that the planted pack files leave the disk.
 
 ## Status
 
@@ -146,4 +146,4 @@ No new technology. `shlex` and `Path.is_relative_to` are stdlib on the 3.11 floo
 - [x] Pre-Mortem complete
 - [ ] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA (PASS, advisories in .qa-validation-status)

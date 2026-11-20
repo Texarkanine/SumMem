@@ -250,3 +250,7 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 ## 2026-11-19 - BUILD - COMPLETE
 
 * All 8 steps done. tox run-parallel py311-py314 OK (460 tests each); properdocs build --strict clean.
+
+## QA (rework 2)
+
+- QA PASS: plan steps 1-8 implemented; `tox -e py311` 460 passed; no leftover `--root`/`./x` output forms in docs or scripts. Advisories: local `import shlex`; stale Pre-Mortem wording on rematerialize_child.
