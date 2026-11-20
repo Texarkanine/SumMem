@@ -64,6 +64,7 @@ import hashlib
 import json
 import os
 import re
+import shlex
 import sys
 if sys.version_info < (3, 11):
     sys.stderr.write("SumMem needs Python 3.11 or newer\n")
@@ -326,10 +327,10 @@ def _input_path(cwd, arg: str) -> Path:
         root = find_store_parent(cwd)
         p = (root / arg[2:]).resolve()
         if not p.is_relative_to(root):
-            raise ValueError(f"outside the repository: {arg}")
+            raise ValueError(f"outside the repository: `{arg}`")
         return p
     if arg.startswith(":"):
-        raise ValueError(f"unknown path prefix: {arg} (use :/ for the repository root)")
+        raise ValueError(f"unknown path prefix: `{arg}` (use :/ for the repository root)")
     return (Path(cwd) / arg).resolve()
 
 
@@ -355,7 +356,7 @@ def resolve_parent(cwd, path_arg=None):
         if candidate == root:
             break
     if not (parent / ".summem").resolve().is_relative_to(root):
-        raise ValueError(f"store outside the repository: {_root_path(parent, root)}")
+        raise ValueError(f"store outside the repository: `{_root_path(parent, root)}`")
     return parent
 
 
@@ -1345,9 +1346,7 @@ def _fold_store_flag(parent) -> str:
         root = find_store_parent(parent)
     except ValueError:
         return "--path :/"
-    import shlex
-
-    return f"--path {shlex.quote(_root_path(parent, root))}"
+    return f"--path {_root_path(parent, root)}"
 
 
 def _store_flag_error(cmd: str) -> str:
@@ -1370,9 +1369,13 @@ def _select_store(cwd, path_arg: str | None, cmd: str) -> tuple[tuple[Path, Path
 
 
 def _root_path(path: Path, root: Path) -> str:
-    """Return *path* as git's root-anchored ``:/rel`` form (the root is ``:/``)."""
+    """Return *path* as a shell-safe ``:/rel`` (git's root anchor; the root is ``:/``).
+
+    Every path SumMem prints comes from here, so each one can be pasted back as
+    ``--path`` from any directory. ``shlex.quote`` leaves ordinary paths bare.
+    """
     rel = Path(path).resolve().relative_to(Path(root).resolve()).as_posix()
-    return ":/" if rel == "." else f":/{rel}"
+    return shlex.quote(":/" if rel == "." else f":/{rel}")
 
 
 def fold_request(parent, wake_lines: int | None = None, nodes=None, entry_chars: int | None = None) -> str:
@@ -1600,16 +1603,16 @@ def main(argv: list[str] | None = None) -> int:
             target = _input_path(Path.cwd(), args.dir)
             root = find_store_parent(target)
             if not target.is_relative_to(root):
-                raise ValueError(f"outside the repository: {args.dir}")
+                raise ValueError(f"outside the repository: `{args.dir}`")
         except ValueError as exc:
             sys.stderr.write(f"{exc}\n")
             return 1
         shown = _root_path(target, root)
         if not target.is_dir():
-            sys.stderr.write(f"not a directory: {shown}\n")
+            sys.stderr.write(f"not a directory: `{shown}`\n")
             return 1
         ensure_store(target)
-        sys.stdout.write(f"There is a store in {shown}.\n")
+        sys.stdout.write(f"There is a store in `{shown}`.\n")
         return 0
     if args.cmd == "init":
         sys.stdout.write(init_text())

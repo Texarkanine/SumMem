@@ -29,7 +29,7 @@ That output is what `.summem/summem -h` (or `--help` or `help`) prints.
 
 A store command with no `--path` writes nothing and exits with status `2`, before any repository check. `wake` takes an optional `--path` and walks up from the current directory when `--path` is omitted.
 
-Every path SumMem prints (`Saved to`, `Run:`, catalog lines, and `start`) is in `:/` form, so you can pass it back as `--path` from any directory. The `Run:` line shell-quotes a path that needs it, such as `--path ':/team docs'`; that quoting works in POSIX shells and PowerShell, not in Windows `cmd`.
+Every path SumMem prints (`Saved to`, `Run:`, catalog lines, `start`, and errors) is in `:/` form and shell-quoted when it needs it, so you can paste it back as `--path` from any directory: `:/pkg` prints bare, while a store at `team docs` prints as `':/team docs'`. Inside a sentence the path sits in backticks, as in ``There is a store in `':/team docs'`.`` The quoting works in POSIX shells and PowerShell, not in Windows `cmd`.
 
 A repository has one store at its root until someone runs `start`. See [Stores and Settings](stores.md).
 
@@ -138,7 +138,7 @@ The search is case-sensitive. Start the pattern with `(?i)` to ignore case. No m
 
 ## `start <path>`
 
-Creates a store in a directory that already exists. `<path>` follows the same rules as `--path` (`:/path` from the root, anything else from the current directory). It prints `There is a store in :/path.` whether the store is new or already there, and it does not rewrite an existing config. A path that is not a directory fails with `not a directory: :/path`. See [Stores and Settings](stores.md).
+Creates a store in a directory that already exists. `<path>` follows the same rules as `--path` (`:/path` from the root, anything else from the current directory). It prints ``There is a store in `:/path`.`` whether the store is new or already there, and it does not rewrite an existing config. A path that is not a directory fails with ``not a directory: `:/path` ``. See [Stores and Settings](stores.md).
 
 ## `init`
 

@@ -267,3 +267,7 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 ## 2026-11-19 - COMPLEXITY-ANALYSIS - COMPLETE
 
 * Level 1.
+
+## 2026-11-19 - BUILD - COMPLETE (rework 3)
+
+* One formatter: _root_path shell-quotes; sentences backtick paths. The round-trip test now shell-splits printed paths. 461 tests on py311-py314.

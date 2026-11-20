@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 import shlex
 import shutil
 import subprocess
@@ -118,7 +119,7 @@ def test_start_says_there_is_a_store(tmp_path, monkeypatch, capsys, summem):
     (repo / "pkg").mkdir()
     assert m.main(["start", "pkg"]) == 0
     out = capsys.readouterr().out
-    assert out == "There is a store in :/pkg.\n"
+    assert out == "There is a store in `:/pkg`.\n"
     store = repo / "pkg" / ".summem"
     assert (store / "notes").is_dir()
     assert (store / "naps").is_dir()
@@ -141,7 +142,7 @@ def test_start_again_prints_the_same_line(tmp_path, monkeypatch, capsys, summem)
     capsys.readouterr()
     assert m.main(["start", "pkg"]) == 0
     captured = capsys.readouterr()
-    assert captured.out == "There is a store in :/pkg.\n"
+    assert captured.out == "There is a store in `:/pkg`.\n"
     assert captured.err == ""
     assert (repo / "pkg" / ".summem" / "config.toml").read_bytes() == config
 
@@ -153,7 +154,7 @@ def test_start_refuses_missing_directory(tmp_path, monkeypatch, capsys, summem):
     monkeypatch.chdir(repo)
     assert m.main(["start", "missing"]) == 1
     err = capsys.readouterr().err
-    assert err == "not a directory: :/missing\n"
+    assert err == "not a directory: `:/missing`\n"
     assert not (repo / "missing").exists()
     assert "git" not in err.lower()
     assert "notes/" not in err
@@ -167,7 +168,7 @@ def test_start_refuses_missing_nested_directory(tmp_path, monkeypatch, capsys, s
     monkeypatch.chdir(repo)
     assert m.main(["start", "foo/packages/baz"]) == 1
     err = capsys.readouterr().err
-    assert err == "not a directory: :/foo/packages/baz\n"
+    assert err == "not a directory: `:/foo/packages/baz`\n"
     assert not (repo / "foo").exists()
 
 
@@ -179,7 +180,7 @@ def test_start_refuses_a_file(tmp_path, monkeypatch, capsys, summem):
     (repo / "file").write_text("x", encoding="utf-8")
     assert m.main(["start", "file"]) == 1
     err = capsys.readouterr().err
-    assert err == "not a directory: :/file\n"
+    assert err == "not a directory: `:/file`\n"
     assert (repo / "file").is_file()
     assert list(repo.rglob(".summem")) == []
 
@@ -757,9 +758,9 @@ def test_saved_to_and_start_paths_are_root_relative_from_subdir(tmp_path, monkey
     cli_src.mkdir(parents=True)
     monkeypatch.chdir(repo / "packages")
     assert m.main(["start", "cli"]) == 0
-    assert capsys.readouterr().out == "There is a store in :/packages/cli.\n"
+    assert capsys.readouterr().out == "There is a store in `:/packages/cli`.\n"
     assert m.main(["start", "missing"]) == 1
-    assert capsys.readouterr().err == "not a directory: :/packages/missing\n"
+    assert capsys.readouterr().err == "not a directory: `:/packages/missing`\n"
     monkeypatch.chdir(repo)
     assert m.main(["note", "--path", "packages/cli/src/index.ts", "first"]) == 0
     assert capsys.readouterr().out == "Saved to `:/packages/cli`\n"
@@ -873,7 +874,7 @@ def test_start_accepts_root_anchor_and_refuses_outside(tmp_path, monkeypatch, ca
     deep.mkdir(parents=True)
     monkeypatch.chdir(deep)
     assert m.main(["start", ":/newdir"]) == 0
-    assert capsys.readouterr().out == "There is a store in :/newdir.\n"
+    assert capsys.readouterr().out == "There is a store in `:/newdir`.\n"
     assert m.is_store(repo / "newdir")
     (tmp_path / "x").mkdir()
     assert m.main(["start", ":/../x"]) == 1
@@ -885,15 +886,14 @@ def _printed_store_paths(m, repo, child, capsys):
     """Return every store path SumMem prints for *child* and the root, as printed."""
     printed = []
     assert m.main(["start", str(child)]) == 0
-    printed.append(capsys.readouterr().out.removeprefix("There is a store in ").removesuffix(".\n"))
+    printed.append(capsys.readouterr().out.removeprefix("There is a store in `").removesuffix("`.\n"))
     assert m.main(["note", "--path", str(child), "hello"]) == 0
     printed.append(capsys.readouterr().out.split("`")[1])
     assert m.main(["note", "--path", ":/", "root hello"]) == 0
     printed.append(capsys.readouterr().out.split("`")[1])
     m.write_note(child, "second", datetime.now(timezone.utc), Random(7))
     run = m.fold_request(child, 1)
-    argv = shlex.split(run.split("Run: ", 1)[1].splitlines()[0])
-    printed.append(argv[argv.index("--path") + 1])
+    printed.append(re.search(r" nap --path ('[^']*'|\S+) ", run).group(1))
     assert m.main(["wake"]) == 0
     printed += [ln.split(": ", 1)[1] for ln in capsys.readouterr().out.splitlines() if ln[:1].isdigit()]
     return printed
@@ -909,11 +909,12 @@ def test_every_printed_path_round_trips_as_path_arg(tmp_path, monkeypatch, capsy
     (repo / "sib").mkdir()
     monkeypatch.chdir(repo)
     printed = _printed_store_paths(m, repo, child, capsys)
-    assert set(printed) == {":/team docs", ":/"}
+    assert set(printed) == {"':/team docs'", ":/"}
     monkeypatch.chdir({"root": repo, "child": child, "sibling": repo / "sib"}[where])
     for shown in printed:
-        expect = repo.resolve() if shown == ":/" else child.resolve()
-        assert m.resolve_parent(Path.cwd(), shown) == expect, shown
+        (arg,) = shlex.split(shown)
+        expect = repo.resolve() if arg == ":/" else child.resolve()
+        assert m.resolve_parent(Path.cwd(), arg) == expect, shown
 
 
 def test_fold_run_line_for_spaced_store_runs_from_sibling(tmp_path, monkeypatch, capsys, summem):
@@ -932,5 +933,25 @@ def test_fold_run_line_for_spaced_store_runs_from_sibling(tmp_path, monkeypatch,
     argv[-1] = "alpha and beta"
     monkeypatch.chdir(repo / "sib")
     assert m.main(argv) == 0
-    assert "Saved to `:/team docs`" in capsys.readouterr().out
+    assert "Saved to `':/team docs'`" in capsys.readouterr().out
     assert [n.kind for n in m.list_view(child)] == ["nap"]
+
+
+def test_sentence_paths_are_backticked_and_shell_quoted(tmp_path, monkeypatch, capsys, summem):
+    """Paths inside sentences sit in backticks; a path needing quotes is shell-quoted everywhere."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    (repo / "team docs").mkdir()
+    monkeypatch.chdir(repo)
+    assert m.main(["start", "team docs"]) == 0
+    assert capsys.readouterr().out == "There is a store in `':/team docs'`.\n"
+    assert m.main(["start", "no such dir"]) == 1
+    assert capsys.readouterr().err == "not a directory: `':/no such dir'`\n"
+    assert m.main(["note", "--path", ":/team docs", "x"]) == 0
+    assert capsys.readouterr().out == "Saved to `':/team docs'`\n"
+    assert m.main(["note", "--path", ":/../out", "x"]) == 1
+    assert capsys.readouterr().err == "outside the repository: `:/../out`\n"
+    assert m.main(["note", "--path", ":x", "x"]) == 1
+    assert capsys.readouterr().err.startswith("unknown path prefix: `:x`")
+    assert m.main(["wake"]) == 0
+    assert "1: ':/team docs'" in capsys.readouterr().out.splitlines()
