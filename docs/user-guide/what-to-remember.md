@@ -13,7 +13,7 @@ Shared memory for this repository is managed through SumMem.
 
 ## At Session Start: Activating SumMem (mandatory)
 
-Run `python .summem/summem wake` from the repository root. Read `wake` output to the end; never pipe it through `head`, `tail`, or a pager. If you can see a prior project-root SumMem wake in this conversation's history, do not run it again.
+Run `python .summem/summem wake` from the repository root. Read `wake` output to the end; never truncate it - it is important memory and you need all of it. If you can see a prior project-root SumMem wake in this conversation's history, do not run it again.
 
 ## While Working: Register Memories
 
