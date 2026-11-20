@@ -955,3 +955,20 @@ def test_sentence_paths_are_backticked_and_shell_quoted(tmp_path, monkeypatch, c
     assert capsys.readouterr().err.startswith("unknown path prefix: `:x`")
     assert m.main(["wake"]) == 0
     assert "1: ':/team docs'" in capsys.readouterr().out.splitlines()
+
+
+@pytest.mark.parametrize("name", ["team’s docs", "‘a’ ‚b‛", "plain's"])
+def test_printed_path_quoting_is_posix_and_powershell_safe(tmp_path, summem, name):
+    """A printed path splits back exactly in POSIX, and no typographic single quote sits inside
+    a single-quoted run, where PowerShell would read it as the closing quote."""
+    m = summem
+    repo = init_repo(tmp_path / "r")
+    (repo / name).mkdir()
+    shown = m._root_path(repo / name, repo)
+    assert shlex.split(shown) == [f":/{name}"]
+    in_single = False
+    for ch in shown:
+        if ch == "'":
+            in_single = not in_single
+        elif in_single:
+            assert ch not in "‘’‚‛", shown

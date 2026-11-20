@@ -284,3 +284,7 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 ## 2026-11-19 - COMPLEXITY-ANALYSIS - COMPLETE
 
 * Level 1.
+
+## 2026-11-19 - BUILD - COMPLETE (rework 4)
+
+* Note deleted, PowerShell-safe quoting, docs for Run: and nested repos. Matrix green.

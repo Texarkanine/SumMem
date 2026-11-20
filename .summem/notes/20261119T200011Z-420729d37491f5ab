@@ -1,1 +1,0 @@
-note, nap, zoom, recall, and surgery.py require --root xor --path; ACK is Saved to `<store>` and printed paths are root-relative; catalog_text hides 0-count stores (started_stores keeps them); fold_request runs on non-git tmp_path dirs in test_fold_many_writers.

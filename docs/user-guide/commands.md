@@ -25,7 +25,8 @@ That output is what `.summem/summem -h` (or `--help` or `help`) prints.
 - **`:/path`** is relative to the repository root, from any working directory. **`:/`** alone is the root store.
 - **Any other path** is relative to the current directory. Absolute paths work too.
 - **Any other leading `:`** is reserved and refused with `unknown path prefix`. Write a name that really starts with `:` as `./:name`.
-- **A path or store outside the repository** (for example `:/../x`, or a `.summem` that is a symlink to a directory elsewhere) is refused with one line and exit status `1`. A relative path into a nested repository uses that repository's root.
+- **A path or store outside the repository** (for example `:/../x`, or a `.summem` that is a symlink to a directory elsewhere) is refused with one line and exit status `1`.
+- **A path inside a nested repository**, such as a submodule, stays in that repository. It walks up to that repository's nearest store, and printed `:/` paths are relative to that repository's root.
 
 A store command with no `--path` writes nothing and exits with status `2`, before any repository check. `wake` takes an optional `--path` and walks up from the current directory when `--path` is omitted.
 
@@ -90,7 +91,7 @@ Keep what has lasting effect, drop what does not. Invent nothing.
 Run: .summem/summem nap --path :/dogfood 3fc87382 fa6da6a9 "<your line>"
 ```
 
-The `Run:` line is the exact command to run from any directory, with the summary in place of `<your line>`. It always carries `--path :/` for the root store or `--path :/<dir>` naming the store directory (never a file inside it). When more than one fold is needed, the request ends with a count of how many remain after this one.
+Run the `Run:` line from the repository root, with your summary in place of `<your line>`. Its `--path` works from any directory, but `.summem/summem` is relative to the root. It always carries `--path :/` for the root store or `--path :/<dir>` naming the store directory (never a file inside it). When more than one fold is needed, the request ends with a count of how many remain after this one.
 
 Recording text that the store already holds still prints ``Saved to `<store>` ``. The store still holds that memory once, not twice.
 

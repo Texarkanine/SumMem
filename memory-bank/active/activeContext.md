@@ -1,6 +1,6 @@
 # Active Context
 
 **Current Task:** multi-store-filing rework 4: PR #104 review fixes
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** BUILD - COMPLETE
 
-Level 1. Next: Build.
+Level 1. Next: QA.
