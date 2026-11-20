@@ -1,7 +1,7 @@
 # Active Context
 
 **Current Task:** multi-store-filing rework 2: single `--path` with git `:/` root anchor + PR #104 review fixes
-**Phase:** QA - COMPLETE (PASS)
+**Phase:** REFLECT - COMPLETE
 
 ## Files modified
 
@@ -19,4 +19,4 @@
 
 ## Next Step
 
-QA (subagent).
+Operator runs /niko-archive.

@@ -36,3 +36,37 @@ In the initial build, handling `ValueError` in `_fold_store_flag` kept store-lay
 ### Million-Dollar Question
 
 Separating store selection (`_select_store` returning `(parent, root)`) from pure `parent`-scoped store operations, formatting every user-visible path through `_root_path(path, root)`, and organizing `tests/` from the outset into small capability modules (`test_cli_bootstrap.py`, `test_cli_help.py`, `test_rematerialize.py`, `test_heal_view.py`, `test_cli_heal.py`, `test_store_lock.py`) paired with thin child-process binary smoke files is the exact structure that would have emerged if multi-store filing and SLOBAC hygiene had been foundational from day one.
+
+---
+
+# Rework 2: single `--path` with git's `:/` root anchor + PR #104 review fixes
+
+## Summary
+
+Replaced `--root` xor `--path` with one required `--path`. `:/` makes a path root-relative, as in git; every printed path is in `:/` form, and the `Run:` path is shell-quoted. The resolver refuses reserved `:` prefixes and paths or stores outside the repository. This fixed all six PR #104 review items, among them the symlinked-store crash, which now goes through containment in the resolver with no symlink-specific code. Tests are green on py311–py314 (460 each), the strict docs build is clean, and QA passed.
+
+## Requirements vs Outcome
+
+Every brief item shipped. Two changes came from the plan, before build: bare `wake` stays `--path .`, and resolver refusals exit 1. Two came from operator rulings during build: "as in git" is allowed in output, and `--root` gets no migration text because it never shipped.
+
+## Plan Accuracy
+
+The sequence held. Preflight's first pass caught a missed doc page and a stale `.summem` note. Its round-trip test idea (B16) became the strongest single test of the design. Nothing surprised the plan except the product rule on mentioning git, which turned out to be over-literal.
+
+## Build & QA Observations
+
+The mechanical `--root` → `--path ":/"` rewrite across 19 test files went fast, but it left two kinds of damage: five `assert "--path", ":/" in x` tuple assertions, which are always true, and a raw string broken by the new quote characters. Grep caught both. argparse rejections print two lines (usage and error), so the "one stderr line" checks moved to `unrecognized arguments: --root`. QA was clean, with three style advisories.
+
+## Insights
+
+### Technical
+- A token-level sed over Python test lists can silently turn a membership assert into a tuple assert (`assert "a", "b" in x`), which is always true. After such a rewrite, grep for `assert "…", "…" in` before trusting a green run.
+- Putting containment in the one resolver (`resolve_parent`) covers every entry point (`wake`, `start`, `migrate.py`, `surgery.py`) and makes formatting total. That is why the symlink case needed no code of its own.
+
+### Process
+- Before writing upgrade or compatibility text, check the release tags. An interface that never shipped gets no migration docs (operator, emphatic).
+- Read a product rule for its intent before letting a test enforce its literal words. "Don't mention git" meant "don't send agents into git operations".
+
+### Million-Dollar Question
+
+Had root-anchored paths been there from the start, SumMem would have had one path concept: a parse/format pair (`_input_path` / `_root_path`), with every output a valid input, which the round-trip test pins. That is what this rework built. The only leftover is that `--root` ever existed on the branch.
