@@ -4,27 +4,32 @@ Agents run these commands as `.summem/summem <command>`. They learn them from th
 
 ```text
 summem wake    [--path PATH]                              print this store's view
-summem note    (--root | --path FILE) TEXT                record one line
-summem nap     (--root | --path STORE) ID-A ID-B CAPTION  fold two ids of the same grain
-summem zoom    (--root | --path STORE) ID                 open a nap to its children
-summem recall  (--root | --path STORE) PATTERN            search remembered text
+summem note    --path FILE TEXT                           record one line
+summem nap     --path STORE ID-A ID-B CAPTION             fold two ids of the same grain
+summem zoom    --path STORE ID                            open a nap to its children
+summem recall  --path STORE PATTERN                       search remembered text
 summem start <path>                                       create a store in that directory
 summem init                                               print the agent prompt
 summem version                                            print this script's version
+
+note, nap, zoom, and recall require --path. It walks up from a file or directory to the nearest store.
+A path is relative to where you stand; :/path is relative to the repository root and :/ is the root, as in git.
 ```
 
 That output is what `.summem/summem -h` (or `--help` or `help`) prints.
 
 ## Choosing a store
 
-`note`, `nap`, `zoom`, and `recall` each act on one store and require either `--root` or `--path`:
+`note`, `nap`, `zoom`, and `recall` each act on one store and require `--path`. It walks up from that file or directory toward the repository root and uses the first directory that has a store (or the repository root if none do). The path is written the way git writes pathspecs:
 
-- **`--root`** selects the store at the repository root from any working directory, even inside a child store.
-- **`--path`** resolves relative to the current directory and walks up from that file or directory toward the repository root, using the first directory that has a store (or the repository root if none do).
+- **`:/path`** is relative to the repository root, from any working directory. **`:/`** alone is the root store.
+- **Any other path** is relative to the current directory. Absolute paths work too.
+- **Any other leading `:`** is reserved and refused with `unknown path prefix`. Write a name that really starts with `:` as `./:name`.
+- **A path or store outside the repository** (for example `:/../x`, or a `.summem` that is a symlink to a directory elsewhere) is refused with one line and exit status `1`. A relative path into a nested repository uses that repository's root.
 
-Passing neither flag, or both flags together, writes nothing and exits with status `2`. `wake` takes an optional `--path` and walks up from the current directory when `--path` is omitted.
+A store command with no `--path` writes nothing and exits with status `2`, before any repository check. `wake` takes an optional `--path` and walks up from the current directory when `--path` is omitted.
 
-Every path SumMem prints (`Saved to`, `Run:`, catalog lines, and `start`) is relative to the repository root with forward slashes, regardless of the current working directory.
+Every path SumMem prints (`Saved to`, `Run:`, catalog lines, and `start`) is in `:/` form, so you can pass it back as `--path` from any directory. The `Run:` line shell-quotes a path that needs it, such as `--path ':/team docs'`; that quoting works in POSIX shells and PowerShell, not in Windows `cmd`.
 
 A repository has one store at its root until someone runs `start`. See [Stores and Settings](stores.md).
 
@@ -50,14 +55,14 @@ At the repository root, `wake` prints up to three sections, then a final line:
 ...how-to for agents...
 
 == Additional SumMem Catalogs ==
-1: ./pkg/a
+1: :/pkg/a
 
 == Project-root Memories ==
 x1 2026-11-06: Run tests with tox -e py311.
 You are up to speed.
 ```
 
-- **SumMem Usage** is the how-to for agents, including `--root` and `--path`. It comes from the script, so a newer script brings a newer how-to.
+- **SumMem Usage** is the how-to for agents, including `--path` and its `:/` root form. It comes from the script, so a newer script brings a newer how-to.
 - **Additional SumMem Catalogs** lists the other stores in the repository that hold at least one memory. Empty child stores are omitted, and the section is left out when none remain. `1:` is how many notes that store holds. These lines are not commands.
 - **Project-root Memories** is the root store's list. It is left out while the store is empty.
 
@@ -67,14 +72,14 @@ You are up to speed.
 
 ## `note`
 
-Records one line in the selected store (`--root` or `--path <file>`) and prints ``Saved to `<store>` ``.
+Records one line in the selected store (`--path <file>`) and prints ``Saved to `<store>` ``.
 
 The text must be a single line, at most 280 bytes of UTF-8 by default. Accented and other non-ASCII characters take 2 or more bytes. The limit is the store's `ENTRY_CHARS` setting.
 
 If the list is now over its wake budget, `note` then asks for a nap:
 
 ```text
-Saved to `./dogfood/.summem`
+Saved to `:/dogfood`
 
 Summarize these two into one line of at most 280 characters.
 Keep what has lasting effect, drop what does not. Invent nothing.
@@ -82,20 +87,20 @@ Keep what has lasting effect, drop what does not. Invent nothing.
   g
   h
 
-Run: .summem/summem nap --path dogfood 3fc87382 fa6da6a9 "<your line>"
+Run: .summem/summem nap --path :/dogfood 3fc87382 fa6da6a9 "<your line>"
 ```
 
-The `Run:` line is the exact command to run from the repository root, with the summary in place of `<your line>`. It always carries `--root` for the root store or `--path <dir>` naming the store directory relative to the repository root (never a file inside it). When more than one fold is needed, the request ends with a count of how many remain after this one.
+The `Run:` line is the exact command to run from any directory, with the summary in place of `<your line>`. It always carries `--path :/` for the root store or `--path :/<dir>` naming the store directory (never a file inside it). When more than one fold is needed, the request ends with a count of how many remain after this one.
 
 Recording text that the store already holds still prints ``Saved to `<store>` ``. The store still holds that memory once, not twice.
 
 ## `nap`
 
-Folds two memories in the selected store (`--root` or `--path <store>`) into one summary. Use the ids from the `Run:` line, and write a summary of the two lines it quoted. The summary has the same length limit as a note.
+Folds two memories in the selected store (`--path <store>`) into one summary. Use the ids from the `Run:` line, and write a summary of the two lines it quoted. The summary has the same length limit as a note.
 
 ```console
-$ .summem/summem nap --path dogfood 3fc87382 fa6da6a9 "g & h"
-Saved to `./dogfood/.summem`
+$ .summem/summem nap --path :/dogfood 3fc87382 fa6da6a9 "g & h"
+Saved to `:/dogfood`
 
 Nothing left to compress.
 ```
@@ -106,7 +111,7 @@ SumMem asks for one pair at a time: the oldest memory that has another of the sa
 
 ## `zoom`
 
-Opens a nap in the selected store (`--root` or `--path <store>`) one level, into the two memories under it:
+Opens a nap in the selected store (`--path <store>`) one level, into the two memories under it:
 
 ```console
 $ .summem/summem zoom --path dogfood cfbf987a
@@ -118,7 +123,7 @@ Zoom into a printed child nap to go further down.
 
 ## `recall`
 
-Searches remembered text in the selected store (`--root` or `--path <store>`) with a [Python regular expression](https://docs.python.org/3/library/re.html#regular-expression-syntax). It searches note text and nap summaries, including those inside naps, and prints every match without cutting at the wake budget. It does not search the grain, the id, or the date.
+Searches remembered text in the selected store (`--path <store>`) with a [Python regular expression](https://docs.python.org/3/library/re.html#regular-expression-syntax). It searches note text and nap summaries, including those inside naps, and prints every match without cutting at the wake budget. It does not search the grain, the id, or the date.
 
 ```console
 $ .summem/summem recall --path dogfood 'c|f'
@@ -133,7 +138,7 @@ The search is case-sensitive. Start the pattern with `(?i)` to ignore case. No m
 
 ## `start <path>`
 
-Creates a store in a directory that already exists (`<path>` resolves from the current directory, while the printed `./path` is relative to the repository root). It prints `There is a store in ./path.` whether the store is new or already there, and it does not rewrite an existing config. A path that is not a directory fails with `not a directory: ./path`. See [Stores and Settings](stores.md).
+Creates a store in a directory that already exists. `<path>` follows the same rules as `--path` (`:/path` from the root, anything else from the current directory). It prints `There is a store in :/path.` whether the store is new or already there, and it does not rewrite an existing config. A path that is not a directory fails with `not a directory: :/path`. See [Stores and Settings](stores.md).
 
 ## `init`
 
@@ -145,4 +150,4 @@ Prints the script's version, such as `0.12.2`.
 
 ## Outside a repository
 
-`wake`, `note`, `nap`, `zoom`, `recall`, and `start` need a git repository, and fail with `not in a repository` outside one. `init`, `version`, and `-h` work anywhere.
+`wake`, `note`, `nap`, `zoom`, `recall`, and `start` need a git repository, and fail with `not in a repository` outside one. A store command with no `--path` fails with the missing-flag line first, before that check. `init`, `version`, and `-h` work anywhere.

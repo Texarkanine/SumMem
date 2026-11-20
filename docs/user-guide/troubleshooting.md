@@ -29,7 +29,9 @@ Error messages go to standard error, and the command exits with a non-zero statu
 |---|---|---|
 | `SumMem needs Python 3.11 or newer` | any | The Python that ran the script is older than 3.11. Both `python` and `python3` must be 3.11 or newer. |
 | `not in a repository` | `wake`, `note`, `nap`, `zoom`, `recall`, `start` | The command ran outside a git repository. |
-| `pass either --root … or --path …` | `note`, `nap`, `zoom`, `recall` | Neither `--root` nor `--path` was given, or both were given together. Pass `--root` for the repository-root store or `--path` for the nearest store. |
+| `pass --path …` | `note`, `nap`, `zoom`, `recall` | No `--path` was given. Pass `--path :/` for the repository-root store or `--path <file>` for the nearest store. |
+| `unknown path prefix: …` | any `--path` or `start` | The path starts with `:` but not `:/`. Use `:/` for the repository root, or `./:name` for a name that starts with `:`. |
+| `outside the repository: …` / `store outside the repository: …` | any `--path` or `start` | The path, or the store it reaches, resolves outside the repository. Point at a directory inside it. |
 | `Too long: N bytes, limit L. …` | `note`, `nap` | The text is longer than the store's `ENTRY_CHARS`, counted in bytes of UTF-8. |
 | `One line only. Merge the lines.` | `note`, `nap` | The text has a line break. |
 | `note is empty` | `note`, `nap` | There is no text. |

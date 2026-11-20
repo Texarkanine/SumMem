@@ -9,8 +9,8 @@ Alice and Bob branch from the same store. It holds four notes, `a` to `d`, and i
 On Alice's branch:
 
 ```console
-$ .summem/summem note --root "e (alice)"
-Saved to `./.summem`
+$ .summem/summem note --path :/ "e (alice)"
+Saved to `:/`
 
 Summarize these two into one line of at most 280 characters.
 Keep what has lasting effect, drop what does not. Invent nothing.
@@ -18,9 +18,9 @@ Keep what has lasting effect, drop what does not. Invent nothing.
   a
   b
 
-Run: .summem/summem nap --root 2bba5f0f 50782259 "<your line>"
-$ .summem/summem nap --root 2bba5f0f 50782259 "a and b (alice's words)"
-Saved to `./.summem`
+Run: .summem/summem nap --path :/ 2bba5f0f 50782259 "<your line>"
+$ .summem/summem nap --path :/ 2bba5f0f 50782259 "a and b (alice's words)"
+Saved to `:/`
 
 Nothing left to compress.
 ```

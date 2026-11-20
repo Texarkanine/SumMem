@@ -16,16 +16,13 @@ In a monorepo, or any repository where one directory has its own concerns, give 
 .summem/summem start packages/api
 ```
 
-`packages/api` must already exist. `start` prints `There is a store in ./packages/api.` It creates the store when that directory does not have one, and it leaves an existing config unchanged.
+`packages/api` must already exist. `start` prints `There is a store in :/packages/api.` It creates the store when that directory does not have one, and it leaves an existing config unchanged.
 
 Only the root needs a copy of the script. Every store is used through the root's `.summem/summem`.
 
 ### Which store a command uses
 
-`note`, `nap`, `zoom`, and `recall` each use one store and require either `--root` or `--path`:
-
-- `--root` always uses the store at the repository root, from any working directory.
-- `--path` resolves from the current directory and walks up toward the repository root. The first directory on the way that has a store is the one it uses.
+`note`, `nap`, `zoom`, and `recall` each use one store and require `--path`. It walks up toward the repository root, and the first directory on the way that has a store is the one it uses. As in git, `:/path` starts from the repository root (`:/` is the root itself) and any other path starts from the current directory. See [Choosing a store](commands.md#choosing-a-store).
 
 `wake` takes an optional `--path` and starts from the current directory when `--path` is omitted.
 
@@ -33,7 +30,7 @@ So, with stores at the root and at `packages/api`:
 
 | Command | Store |
 |---|---|
-| `.summem/summem note --root "…"` | root |
+| `.summem/summem note --path :/ "…"` | root |
 | `.summem/summem note --path packages/api/src/db.py "…"` | `packages/api` |
 | `.summem/summem note --path packages/web/app.js "…"` | root, because `packages/web` has no store |
 
@@ -41,11 +38,11 @@ Walking up never creates a store. Only the root, and directories you `start`, ev
 
 ### How agents find other stores
 
-The root `wake` how-to always explains `--root` and `--path`. When other stores hold at least one memory, root `wake` also lists them in a catalog and appends how to load them:
+The root `wake` how-to always explains `--path` and its `:/` root form. When other stores hold at least one memory, root `wake` also lists them in a catalog and appends how to load them:
 
 ```text
 == Additional SumMem Catalogs ==
-1: ./pkg/a
+1: :/pkg/a
 ```
 
 `1:` is how many notes that store holds. Child stores with zero memories are omitted from the catalog (and the header is omitted when none remain), though `--path` still walks up into any started store to record its first note. Agents do not load child stores at the start of a session: when an agent works under a cataloged path, the how-to tells it to run `wake --path <path>` for that store, and to record notes there with `note --path <file>`.

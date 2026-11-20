@@ -48,7 +48,7 @@ $ .summem/summem wake
 
 Read `wake` output to the end; never pipe it through `head`, `tail`, or a pager.
 
-`.summem/summem note --path <file> "…"` records one short line in the nearest store for that file; `.summem/summem note --root "…"` records in the project-root store. ...
+Every store command takes `--path`: a path from where you stand, or `:/path` from the repository root, as in git. `:/` is the root store. ...
 You are up to speed.
 ```
 

@@ -28,11 +28,11 @@ You need a clone of the SumMem repository and Python 3.11 or newer. Run it from 
 
 ```text
 python /path/to/SumMem/surgery.py version
-python /path/to/SumMem/surgery.py (--root | --path STORE) [--dry-run] --contains TEXT
-python /path/to/SumMem/surgery.py (--root | --path STORE) [--dry-run] NAME
+python /path/to/SumMem/surgery.py --path STORE [--dry-run] --contains TEXT
+python /path/to/SumMem/surgery.py --path STORE [--dry-run] NAME
 ```
 
-- **`--root` or `--path STORE`** picks the store (one of the two is required). `--root` selects the repository-root store; `--path` walks up from a file or directory to the nearest store, the same way it does for `summem`.
+- **`--path STORE`** picks the store and is required. It walks up from a file or directory to the nearest store, the same way it does for `summem`; `--path :/` is the repository-root store.
 - **`--contains TEXT`** picks the note whose text contains `TEXT`. It searches note text only, loose or inside naps, never nap summaries. If more than one note matches, give `NAME` instead.
 - **`NAME`** is the note's file name in `notes/`, or a unique prefix of it. If you give both, `NAME` picks the file and its text must contain `TEXT`.
 - **`--dry-run`** prints what it would do and changes nothing.
@@ -59,7 +59,7 @@ If the list is now over its wake budget, `surgery.py` ends by printing the same 
 
 You may also leave the extra lines. The next `note` will ask for the same folds.
 
-Then check, in the same store, that the text is gone. Give `recall` the same `--root` or `--path` flag you gave `surgery.py`. `recall` takes a regular expression, so put `\` before any of `. ^ $ * + ? ( ) [ ] { } | \` in the text. This should print nothing:
+Then check, in the same store, that the text is gone. Give `recall` the same `--path` you gave `surgery.py`. `recall` takes a regular expression, so put `\` before any of `. ^ $ * + ? ( ) [ ] { } | \` in the text. This should print nothing:
 
 ```bash
 .summem/summem recall --path STORE 'the removed text'

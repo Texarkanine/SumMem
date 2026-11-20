@@ -314,17 +314,27 @@ def test_heal_disjoint_is_noop(tmp_path, summem):
 
 
 def test_heal_odd_arity_finishes_under_iteration_cap(tmp_path, monkeypatch, summem):
-    """A one-kid or three-kid nap finishes without hanging."""
+    """Partly overlapping one-kid and three-kid naps split, finish under the cap, and keep every leaf.
+
+    The one-kid nap wraps a two-leaf nap ``{t1, x}``; the three-kid nap holds
+    ``{t0, t1, t2}``. They share ``t1`` only, so heal must take its split branch
+    (the planted packs leave the disk) rather than the disjoint no-op.
+    """
     m = summem
     repo = init_repo(tmp_path / "r")
-    one = m.NoteChild(name="20260101T000001Z-aaaaaaaaaaaaaaaa", text="solo")
-    plant_nap(m, repo, [one], "one")
-    three = [
-        m.NoteChild(name="20260101T000010Z-bbbbbbbbbbbbbbbb", text="t0"),
-        m.NoteChild(name="20260101T000011Z-cccccccccccccccc", text="t1"),
-        m.NoteChild(name="20260101T000012Z-dddddddddddddddd", text="t2"),
-    ]
-    plant_nap(m, repo, three, "three")
+    t0, t1, t2 = (
+        m.NoteChild(name=f"20260101T0000{10 + i}Z-{c * 16}", text=f"t{i}")
+        for i, c in enumerate("bcd")
+    )
+    x = m.NoteChild(name="20260101T000020Z-eeeeeeeeeeeeeeee", text="x")
+    inner = m.NapChild(
+        id=m.leafset_id([_digest(m, "t1"), _digest(m, "x")]),
+        sum="t1 and x",
+        tree=m.Tree(kids=[t1, x]),
+    )
+    plant_nap(m, repo, [inner], "one")
+    plant_nap(m, repo, [t0, t1, t2], "three")
+    planted = payload_names(repo)
     calls = {"n": 0}
     real = m.list_view
 
@@ -336,10 +346,11 @@ def test_heal_odd_arity_finishes_under_iteration_cap(tmp_path, monkeypatch, summ
 
     monkeypatch.setattr(m, "list_view", wrapped)
     m.heal_view(repo)
-    assert calls["n"] <= 50
     monkeypatch.setattr(m, "list_view", real)
-    assert reaches(m, repo, "solo")
-    assert reaches(m, repo, "t1")
+    assert not planted <= payload_names(repo)
+    assert_unique_cover(m, repo)
+    for sentence in ("t0", "t1", "t2", "x"):
+        assert reaches(m, repo, sentence)
 
 
 def test_heal_malformed_overlapping_nap_skipped(tmp_path, summem):

@@ -80,7 +80,7 @@ Replace `--root` xor `--path` with one `--path`, required on `note`, `nap`, `zoo
 3. Write the B13 test and run it; it should be green after step 1. If it fails, fix it in `migrate.py`.
 4. Confirm the help string `limit rewrite to this store` still holds.
 
-### 5. Odd-arity heal test overlap — executable (test fix)
+### 5. ✅ Odd-arity heal test overlap — executable (test fix)
 
 - Files: `tests/test_heal_view.py::test_heal_odd_arity_finishes_under_iteration_cap`
 
@@ -97,7 +97,7 @@ Replace `--root` xor `--path` with one `--path`, required on `note`, `nap`, `zoo
 1. `how_to_text`: "Every store command takes `--path`: a path from where you stand, or `:/path` from the repository root, as in git. `:/` is the root store." All examples use `:/`; catalog line form `N: :/path`.
 2. `usage_text`: `note --path FILE TEXT`, `nap --path STORE …`, and so on, plus one `:/` line.
 
-### 7. Docs — prose/policy
+### 7. ✅ Docs — prose/policy
 
 - Files: `docs/user-guide/{commands,quickstart,stores,troubleshooting,upgrading}.md`, `docs/advanced/surgery.md`, `docs/architecture/{store,wake}.md`, `docs/how-it-works/{index,no-conflicts}.md`, plus anything a sweep finds, `memory-bank/productContext.md`, `memory-bank/systemPatterns.md`
 - No tests: prose/policy artifact
@@ -107,7 +107,7 @@ Replace `--root` xor `--path` with one `--path`, required on `note`, `nap`, `zoo
 3. `upgrading.md`: `--root` is removed; use `--path :/`. `commands.md`: one sentence that a relative path into a nested repository uses that repository, as before.
 4. Run `properdocs build --strict`.
 
-### 8. Supersede the stale project memory — prose/policy
+### 8. ✅ Supersede the stale project memory — prose/policy
 
 - Files: `.summem/` (via the script only)
 - No tests: prose/policy artifact
