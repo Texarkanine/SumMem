@@ -25,8 +25,7 @@ That output is what `.summem/summem -h` (or `--help` or `help`) prints.
 - **`:/path`** is relative to the repository root, from any working directory. **`:/`** alone is the root store.
 - **Any other path** is relative to the current directory. Absolute paths work too.
 - **Any other leading `:`** is reserved and refused with `unknown path prefix`. Write a name that really starts with `:` as `./:name`.
-- **A path or store outside the repository** (for example `:/../x`, or a `.summem` that is a symlink to a directory elsewhere) is refused with one line and exit status `1`.
-- **A path inside a nested repository**, such as a submodule, stays in that repository. It walks up to that repository's nearest store, and printed `:/` paths are relative to that repository's root.
+- **The repository you are in is the repository**, as in git. A path outside it (such as `:/../x`), or inside a nested repository such as a submodule, is refused with `not in this repository` and exit status `1`. So is a `.summem` that is a symlink to a directory elsewhere. To use a nested repository's store, run the command from inside that repository.
 
 A store command with no `--path` writes nothing and exits with status `2`, before any repository check. `wake` takes an optional `--path` and walks up from the current directory when `--path` is omitted.
 

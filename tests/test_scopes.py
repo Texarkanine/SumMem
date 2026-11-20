@@ -846,7 +846,7 @@ def test_resolve_refuses_root_anchor_outside_repo(tmp_path, summem):
     """`:/..` leaves the repository and is refused (B7)."""
     m = summem
     repo = init_repo(tmp_path / "r")
-    with pytest.raises(ValueError, match="outside the repository"):
+    with pytest.raises(ValueError, match="not in this repository"):
         m.resolve_parent(repo, ":/../elsewhere")
 
 
@@ -861,7 +861,7 @@ def test_note_refuses_store_symlinked_outside_repo(tmp_path, monkeypatch, capsys
     monkeypatch.chdir(repo)
     assert m.main(["note", "--path", ":/", "x"]) == 1
     err = capsys.readouterr().err
-    assert err.count("\n") == 1 and "outside the repository" in err
+    assert err.count("\n") == 1 and "not in this repository" in err
     assert list(outside.iterdir()) == []
 
 
@@ -878,7 +878,7 @@ def test_start_accepts_root_anchor_and_refuses_outside(tmp_path, monkeypatch, ca
     assert m.is_store(repo / "newdir")
     (tmp_path / "x").mkdir()
     assert m.main(["start", ":/../x"]) == 1
-    assert "outside the repository" in capsys.readouterr().err
+    assert "not in this repository" in capsys.readouterr().err
     assert not m.is_store(tmp_path / "x")
 
 
@@ -950,7 +950,7 @@ def test_sentence_paths_are_backticked_and_shell_quoted(tmp_path, monkeypatch, c
     assert m.main(["note", "--path", ":/team docs", "x"]) == 0
     assert capsys.readouterr().out == "Saved to `':/team docs'`\n"
     assert m.main(["note", "--path", ":/../out", "x"]) == 1
-    assert capsys.readouterr().err == "outside the repository: `:/../out`\n"
+    assert capsys.readouterr().err == "not in this repository: `:/../out`\n"
     assert m.main(["note", "--path", ":x", "x"]) == 1
     assert capsys.readouterr().err.startswith("unknown path prefix: `:x`")
     assert m.main(["wake"]) == 0
@@ -972,3 +972,31 @@ def test_printed_path_quoting_is_posix_and_powershell_safe(tmp_path, summem, nam
             in_single = not in_single
         elif in_single:
             assert ch not in "‘’‚‛", shown
+
+
+@pytest.mark.parametrize("arg", [":/vendor/lib/x.c", "vendor/lib/x.c"])
+def test_path_into_nested_repository_is_refused(tmp_path, monkeypatch, capsys, summem, arg):
+    """From the outer repository, a path whose own repository is a nested one is refused (git's rule)."""
+    m = summem
+    outer = init_repo(tmp_path / "r")
+    inner = init_repo(outer / "vendor" / "lib")
+    m.ensure_store(inner)
+    monkeypatch.chdir(outer)
+    assert m.main(["note", "--path", arg, "x"]) == 1
+    assert capsys.readouterr().err == f"not in this repository: `{arg}`\n"
+    assert list((inner / ".summem" / "notes").iterdir()) == []
+    assert not (outer / ".summem").exists()
+    assert m.main(["start", "vendor/lib"]) == 1
+    assert "not in this repository" in capsys.readouterr().err
+
+
+def test_commands_work_inside_the_nested_repository(tmp_path, monkeypatch, capsys, summem):
+    """Run from inside the nested repository, that repository is the repository."""
+    m = summem
+    outer = init_repo(tmp_path / "r")
+    inner = init_repo(outer / "vendor" / "lib")
+    monkeypatch.chdir(inner)
+    assert m.main(["note", "--path", ":/", "inner fact"]) == 0
+    assert capsys.readouterr().out == "Saved to `:/`\n"
+    assert len(list((inner / ".summem" / "notes").iterdir())) == 1
+    assert not (outer / ".summem").exists()

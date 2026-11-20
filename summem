@@ -320,18 +320,20 @@ def _input_path(cwd, arg: str) -> Path:
 
     As in git, `:/rel` is relative to the repository root and `:/` is the root.
     Any other leading `:` is reserved and refused; `./:name` is a literal name.
-    Other values resolve against *cwd*. Raise ValueError on a reserved prefix
-    or a `:/` path that leaves the repository.
+    Other values resolve against *cwd*. As in git, the repository of *cwd* is
+    the repository: raise ValueError on a reserved prefix or a path whose own
+    repository is a different one (outside it, or in a nested repository).
     """
+    root = find_store_parent(cwd)
     if arg.startswith(":/"):
-        root = find_store_parent(cwd)
         p = (root / arg[2:]).resolve()
-        if not p.is_relative_to(root):
-            raise ValueError(f"outside the repository: `{arg}`")
-        return p
-    if arg.startswith(":"):
+    elif arg.startswith(":"):
         raise ValueError(f"unknown path prefix: `{arg}` (use :/ for the repository root)")
-    return (Path(cwd) / arg).resolve()
+    else:
+        p = (Path(cwd) / arg).resolve()
+    if not p.is_relative_to(root) or find_store_parent(p) != root:
+        raise ValueError(f"not in this repository: `{arg}`")
+    return p
 
 
 def resolve_parent(cwd, path_arg=None):
@@ -356,7 +358,7 @@ def resolve_parent(cwd, path_arg=None):
         if candidate == root:
             break
     if not (parent / ".summem").resolve().is_relative_to(root):
-        raise ValueError(f"store outside the repository: `{_root_path(parent, root)}`")
+        raise ValueError(f"store is not in this repository: `{_root_path(parent, root)}`")
     return parent
 
 
@@ -1607,8 +1609,6 @@ def main(argv: list[str] | None = None) -> int:
         try:
             target = _input_path(Path.cwd(), args.dir)
             root = find_store_parent(target)
-            if not target.is_relative_to(root):
-                raise ValueError(f"outside the repository: `{args.dir}`")
         except ValueError as exc:
             sys.stderr.write(f"{exc}\n")
             return 1
