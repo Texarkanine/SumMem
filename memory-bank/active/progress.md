@@ -263,3 +263,7 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 
 * Operator: printed paths with spaces print poorly (start line). One rule: shell-quote every printed path; backticks around paths in sentences.
 * Complexity: Level 1 (single formatter + tests).
+
+## 2026-11-19 - COMPLEXITY-ANALYSIS - COMPLETE
+
+* Level 1.
