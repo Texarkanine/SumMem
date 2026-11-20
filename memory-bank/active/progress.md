@@ -275,3 +275,12 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 ## 2026-11-19 - QA - COMPLETE (rework 3)
 
 * PASS. tox -e py311 461 passed.
+
+## 2026-11-19 - REWORK 4 - INITIATED
+
+* PR #104 review 5985942421 as judged; operator ruled nested repos get docs only, no code.
+* Complexity: Level 1.
+
+## 2026-11-19 - COMPLEXITY-ANALYSIS - COMPLETE
+
+* Level 1.

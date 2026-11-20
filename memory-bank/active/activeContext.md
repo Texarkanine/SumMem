@@ -1,6 +1,6 @@
 # Active Context
 
-**Current Task:** multi-store-filing rework 3: one formatting rule for printed paths
-**Phase:** QA - COMPLETE (PASS)
+**Current Task:** multi-store-filing rework 4: PR #104 review fixes
+**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
 
-Level 1: one formatter (`_root_path` callers) plus tests. Next: QA.
+Level 1. Next: Build.

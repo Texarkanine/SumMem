@@ -99,3 +99,11 @@ Operator: `There is a store in :/team docs.` prints poorly (the full stop runs i
 2. Paths inside sentences are wrapped in backticks: `There is a store in `…`.`, `not a directory: `…``, `outside the repository: `…``, `store outside the repository: `…``. `Saved to` already uses backticks. `Run:` and catalog lines stay bare (they are values or commands, not sentences).
 3. The round-trip test shell-splits each printed path before passing it back as `--path`.
 4. Docs and Usage text show the new forms. `tox run-parallel` passes; `properdocs build --strict` is clean.
+
+## Rework 4: PR #104 review 5985942421
+
+1. Delete the stale loose note `.summem/notes/20261119T200011Z-420729d37491f5ab`; it describes `--root` (operator: notes invalidated on this branch may be deleted).
+2. Printed-path quoting also works in PowerShell: typographic single quotes (‘ ’ ‚ ‛) must not end a quoted path.
+3. `commands.md`: the `--path` value works from any directory; run the `Run:` line from the repository root (the script path is relative).
+4. Nested repositories: no special code. Document that a path inside a nested repository walks up within that repository to its nearest store, and that printed `:/` paths are relative to that repository.
+5. Writing: ISO 24495 plain language, Orwell's six rules, the doc site's style, no needless words.
