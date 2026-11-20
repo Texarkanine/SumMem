@@ -35,7 +35,7 @@ Rules (each one closes a specific hole):
 
    Any printed path can then be pasted from any directory. This fixes the `Run:` hole, and output no longer mixes `./x` with `--path x`.
 5. **The `:` namespace is reserved.** A leading `:` other than `:/` (for example `:(top)` or `:!x`) exits 2 with `unknown path prefix`. Git magic can be adopted later without a breaking change. A file whose name really starts with `:` is written as `./:name`, the same escape git uses.
-6. **No paths outside the repository.** A `:/../x` path, or any path that resolves outside the git root, exits 2.
+6. **No paths outside the repository.** The resolver resolves the path (symlinks included) once. If the result is not inside the git root, it exits 2 with a one-line error. This covers `:/../x` and a `.summem` symlinked out of the repository. Formatting runs after this check, so it can't fail. There is no separate symlink handling: a store outside the repository can't be committed, so it isn't a SumMem store (PR #104 review items 3 and 4).
 7. **One resolver.** `wake --path`, `start <dir>`, `surgery.py --path` and `migrate.py --path` all use the same resolver, so the rule holds for every path input.
 
 Traded away: a separate visible `--root` word. `--path :/` replaces it at the same length. `:/` must be quoted in no common shell (bash, zsh, PowerShell, cmd).
