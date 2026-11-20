@@ -8,3 +8,7 @@
 - **Tests:** a nested repository is refused from the outer repository (both `:/` and relative forms, plus `start`) and works from inside it; existing refusal assertions now expect the new message.
 - **Docs:** `commands.md` bullet, troubleshooting rows, `architecture/store.md`, `systemPatterns.md`.
 - **Verify:** `tox run-parallel` py311–py314 OK (467 tests); `properdocs build --strict` clean.
+
+## QA (rework 5)
+
+- PASS. One check replaces two; nested-repo and symlink refusals tested; docs updated. Advisory: `is_relative_to(root)` in `_input_path` is partly redundant with the `find_store_parent` comparison but harmless and readable.

@@ -1,0 +1,2 @@
+PASS
+rework 5: single repository check in _input_path; tests and docs consistent; tox -e py311 467 passed.

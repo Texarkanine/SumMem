@@ -309,3 +309,7 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 ## 2026-11-19 - BUILD - COMPLETE (rework 5)
 
 * One repository check in _input_path; nested repos refused. Matrix green.
+
+## 2026-11-19 - QA - COMPLETE (rework 5)
+
+* PASS. tox -e py311 467 passed.
