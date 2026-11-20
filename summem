@@ -1474,7 +1474,7 @@ def how_to_text(*, catalog: bool = False) -> str:
 
 Read `wake` output to the end; never pipe it through `head`, `tail`, or a pager.
 
-Every store command takes `--path`: a path from where you stand, or `:/path` from the repository root. `:/` is the root store. `{invoke} note --path <file> "…"` records one short line in the nearest store for that file (it walks up to the nearest store); `{invoke} note --path :/ "…"` records in the root store. `nap`, `recall`, and `zoom` take `--path <store>` the same way.
+Every store command takes `--path`: a path from where you stand, or `:/path` from the repository root, as in git. `:/` is the root store. `{invoke} note --path <file> "…"` records one short line in the nearest store for that file (it walks up to the nearest store); `{invoke} note --path :/ "…"` records in the root store. `nap`, `recall`, and `zoom` take `--path <store>` the same way.
 
 Never invent filenames, rewrite note bytes, or delete memory files by hand. The script is the only writer. The files it writes are part of your work; do not leave them untracked.
 
@@ -1542,7 +1542,7 @@ SumMem: shared memory for agents in a repository.
   {CLI_NAME} version                                            print this script's version
 
 note, nap, zoom, and recall require --path. It walks up from a file or directory to the nearest store.
-A path is relative to where you stand; :/path is relative to the repository root and :/ is the root.
+A path is relative to where you stand; :/path is relative to the repository root and :/ is the root, as in git.
 """
 
 

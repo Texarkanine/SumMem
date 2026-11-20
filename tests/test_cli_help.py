@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from gitutil import COMMAND_ONLY, fresh_imported, init_repo
+from gitutil import COMMAND_ONLY, fresh_imported, git_free, init_repo
 
 
 def test_bare_invocation_prints_command_catalog(capsys, summem):
@@ -149,7 +149,7 @@ def test_catalog_omits_store_paths_and_git(capsys, summem):
     text = catalog + captured.out + captured.err
     assert "notes/" not in text
     assert "naps/" not in text
-    assert "git" not in text.lower()
+    assert git_free(text)
     assert "--path" in catalog
     assert "summem wake" in catalog
 

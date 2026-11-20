@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from gitutil import git_free
+
 
 def test_init_prints_recipe_and_prompt(capsys, summem):
     """main(['init']) exits 0 and prints the insert recipe plus prompt_text()."""
@@ -66,7 +68,7 @@ def test_how_to_text_notes_are_part_of_the_work(summem):
     assert "part of your work" in lower
     assert "untracked" in lower
     assert "git add" not in text
-    assert "git" not in lower
+    assert git_free(lower)
     assert "own commit" not in lower
     assert "the tool manages them" not in text
     assert "invent filenames" in lower
@@ -106,7 +108,7 @@ def test_how_to_text_is_the_usage_section(monkeypatch, summem):
     assert "recall" in lower
     assert "wake --path" not in text
     assert "catalog" not in lower
-    assert "git" not in lower
+    assert git_free(lower)
     assert "notes/" not in text
     assert "naps/" not in text
     assert "Run:" not in text

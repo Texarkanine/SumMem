@@ -242,3 +242,7 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
     - No in-phase plan edits.
 * Insights
     - All prior FAIL items fixed. Advisories: stale Pre-Mortem line on rematerialize_child call counts; confirm prompt_text/AGENTS.md need no edit; non-:/ relative paths into other repos are accepted by design; keep quoted alternative first in _FOLD_RUN.
+
+## 2026-11-19 - BUILD (in progress) - operator ruling
+
+* Operator: "as in git" is allowed in CLI output as a decompression key. productContext rule reworded (no git operations or error text; naming git as a convention source is fine). Text tests use tests/gitutil.py git_free(), which allows only that phrase; error-path tests keep the strict check.

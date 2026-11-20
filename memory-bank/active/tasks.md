@@ -71,7 +71,7 @@ Replace `--root` xor `--path` with one `--path`, required on `note`, `nap`, `zoo
 3. Replace `--root` in the tests, write B14, run red.
 4. Drop the `--root` argument, call `m._select_store(Path.cwd(), args.path, "surgery")`, and update `_usage` to `surgery.py --path STORE …` / `:/`. Run green.
 
-### 4. `migrate.py` accepts `:/` — executable
+### 4. ✅ `migrate.py` accepts `:/` — executable
 
 - Files: `tests/test_migrate.py` (no production change expected: it already calls `resolve_parent`)
 

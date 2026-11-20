@@ -190,7 +190,7 @@ Emergency zipper excision of one raw SumMem note. Not a shipped command.
   surgery.py --path STORE [--dry-run] --contains TEXT
   surgery.py --path STORE [--dry-run] NAME
 
-surgery.py requires --path. :/ is the repository root.
+surgery.py requires --path. :/ is the repository root, as in git.
 NAME is a notes/ filename or unique prefix. --contains matches note text only.
 If both are given, NAME selects the file and TEXT must appear in it.
 version prints this script's version (lockstep with summem; not enforced).

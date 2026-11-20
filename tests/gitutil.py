@@ -322,3 +322,11 @@ def balanced_4(m, repo, texts, cap_ab: str, cap_cd: str, cap_p: str, start: int)
     cd = next(n for n in m.list_view(repo) if n.caption == cap_cd)
     m.write_nap(repo, ab.id, cd.id, cap_p)
     return next(n for n in m.list_view(repo) if n.caption == cap_p)
+
+
+GIT_CONVENTION_KEY = "as in git"
+
+
+def git_free(text: str) -> bool:
+    """True if *text* names git only as the ``as in git`` convention key (productContext CLI rule)."""
+    return "git" not in text.lower().replace(GIT_CONVENTION_KEY, "")

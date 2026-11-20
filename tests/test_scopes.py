@@ -13,7 +13,7 @@ from random import Random
 
 import pytest
 
-from gitutil import git, init_repo
+from gitutil import git, git_free, init_repo
 
 
 def test_resolve_subdir_without_store_is_git_root(tmp_path, summem):
@@ -461,7 +461,7 @@ def test_root_wake_catalogs_other_store(tmp_path, monkeypatch, capsys, summem):
     assert ".summem/summem" not in catalog
     assert "notes/" not in out
     assert "naps/" not in out
-    assert "git" not in out
+    assert git_free(out)
 
 
 def test_catalog_hides_zero_count_child_store(tmp_path, monkeypatch, capsys, summem):

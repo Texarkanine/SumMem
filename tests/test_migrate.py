@@ -7,6 +7,7 @@ import importlib.util
 import sys
 from importlib.machinery import SourceFileLoader
 
+import pytest
 from conftest import ROOT
 from gitutil import init_repo
 
@@ -196,8 +197,9 @@ def test_migrate_skips_incomplete_pair(tmp_path, monkeypatch, capsys, summem):
     assert not (naps / f"{stem}.summ").exists()
 
 
-def test_migrate_path_leaves_other_store_untouched(tmp_path, monkeypatch, summem):
-    """--path rewrites one store and does not touch another."""
+@pytest.mark.parametrize(("arg", "cwd"), [("pkg", "."), (":/pkg", "elsewhere")])
+def test_migrate_path_leaves_other_store_untouched(tmp_path, monkeypatch, summem, arg, cwd):
+    """--path (cwd-relative or `:/` from another directory) rewrites one store only (B13)."""
     mig = load_migrate()
     m = summem
     repo = init_repo(tmp_path / "r")
@@ -211,8 +213,9 @@ def test_migrate_path_leaves_other_store_untouched(tmp_path, monkeypatch, summem
         m, pkg, tree_pkg, "pkg-pair", _full_leafset(d_pkg), 2, "four"
     )
     dest_pkg, _rewritten = _oracle(m, seq, _full_leafset(d_pkg), 2, tree_pkg, cap)
-    monkeypatch.chdir(repo)
-    assert mig.main(["--path", "pkg"]) == 0
+    (repo / "elsewhere").mkdir()
+    monkeypatch.chdir(repo / cwd)
+    assert mig.main(["--path", arg]) == 0
     assert (pkg / ".summem" / "naps" / f"{dest_pkg}.tree").is_file()
     assert (repo / ".summem" / "naps" / f"{stem_root}.tree").is_file()
     assert not (pkg / ".summem" / "naps" / f"{stem_pkg}.tree").exists()

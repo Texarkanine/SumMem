@@ -59,6 +59,6 @@ Script size and cost:
 
 CLI and scopes:
 
-- CLI output does not mention store files, hashes as paths, or git. Root-wake Usage treats the files the script wrote as part of your work, not a separate publish procedure.
+- CLI output never directs the agent to store files, hashes as paths, or git operations: no `git add`/commit/push steps, and no git error text. Naming git as the source of a convention ("`:/` … as in git") is allowed, because it explains syntax and asks for no git action. Root-wake Usage treats the files the script wrote as part of your work, not a separate publish procedure.
 - A scope is not a package manifest. `start` is how a directory becomes a store.
 - The git root auto-creates on first `wake`, `note`, `nap`, `zoom`, or `recall`. Other stores appear only via `start`. Outside a repository, store commands fail. Help, `init`, and `version` still print.
