@@ -288,3 +288,7 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 ## 2026-11-19 - BUILD - COMPLETE (rework 4)
 
 * Note deleted, PowerShell-safe quoting, docs for Run: and nested repos. Matrix green.
+
+## 2026-11-19 - QA - COMPLETE (rework 4)
+
+* PASS. tox -e py311 464 passed.
