@@ -205,3 +205,7 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 
 * Operator feedback: replace `--root` xor `--path` with one required `--path` using git's `:/` root anchor (creative-store-flag-scheme.md), and fix PR #104 review findings: shell-quote `Run:` paths, resolver containment check (symlinked store), odd-arity heal test overlap, commands.md error-order sentence.
 * Complexity: Level 2 (carried over).
+
+## 2026-11-19 - COMPLEXITY-ANALYSIS - COMPLETE
+
+* Level 2 rework; design settled by creative-store-flag-scheme.md.
