@@ -296,3 +296,12 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 ## 2026-11-19 - CREATIVE (nested repos) - RESOLVED
 
 * Decision: refuse paths whose repository differs from the current directory's (git rule); one check replaces the :/.. check. creative-nested-repo-paths.md
+
+## 2026-11-19 - REWORK 5 - INITIATED
+
+* Operator approved creative-nested-repo-paths.md option B.
+* Complexity: Level 1.
+
+## 2026-11-19 - COMPLEXITY-ANALYSIS - COMPLETE
+
+* Level 1.

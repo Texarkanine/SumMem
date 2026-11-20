@@ -1,6 +1,6 @@
 # Active Context
 
-**Current Task:** multi-store-filing rework 4: PR #104 review fixes
-**Phase:** QA - COMPLETE (PASS)
+**Current Task:** multi-store-filing rework 5: refuse paths in another repository
+**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
 
-Level 1. Next: QA.
+Level 1. Next: Build.

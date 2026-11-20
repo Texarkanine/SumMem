@@ -107,3 +107,11 @@ Operator: `There is a store in :/team docs.` prints poorly (the full stop runs i
 3. `commands.md`: the `--path` value works from any directory; run the `Run:` line from the repository root (the script path is relative).
 4. Nested repositories: no special code. Document that a path inside a nested repository walks up within that repository to its nearest store, and that printed `:/` paths are relative to that repository.
 5. Writing: ISO 24495 plain language, Orwell's six rules, the doc site's style, no needless words.
+
+## Rework 5: refuse paths in another repository
+
+Implements `creative/creative-nested-repo-paths.md` (option B). This replaces rework 4's "nested repositories: docs only".
+
+1. The repository of the current directory is the repository. A `--path` or `start` target whose own repository differs is refused with ``not in this repository: `<arg>` `` (exit 1) and nothing is written. This one check also covers `:/../x`.
+2. Inside the nested repository, commands work normally.
+3. Docs: replace the nested-repository bullet and the outside-repository wording; update the troubleshooting rows.
