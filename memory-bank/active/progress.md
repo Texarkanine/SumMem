@@ -292,3 +292,7 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 ## 2026-11-19 - QA - COMPLETE (rework 4)
 
 * PASS. tox -e py311 464 passed.
+
+## 2026-11-19 - CREATIVE (nested repos) - RESOLVED
+
+* Decision: refuse paths whose repository differs from the current directory's (git rule); one check replaces the :/.. check. creative-nested-repo-paths.md
