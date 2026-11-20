@@ -76,3 +76,17 @@ Remediate the SLOBAC test-suite audit findings in `.slobac/2026-11-19T14-31-00/a
 5. **Layering and file modularity (`semantic-redundancy`, `monolithic-test-file`):** Preserve `tests/test_path_walkup_and_catalog.py` (and `tests/test_nap_reject.py`'s `--help` check) as child-process binary integration tests distinct from in-process `m.main(...)` unit suites (declining Findings 47 and 49 while copying `assert ".summem/summem" not in catalog` into `tests/test_scopes.py`), deduplicate in-process `-h`/`--help` calls into `tests/test_cli_help.py` (Findings 46 and 48), and split `tests/test_cli.py` (57 tests) and `tests/test_zipper.py` (45 tests, 1,101 lines) into focused capability modules.
 6. **Verification:** No regressions in `summem` or `surgery.py` behavior; `tox run-parallel` passes across `py311`–`py314`.
 
+
+## Rework 2: single `--path` with git `:/` root anchor + PR #104 review fixes
+
+Design is settled in `memory-bank/active/creative/creative-store-flag-scheme.md` (rules 1-7). Supersedes `--root` everywhere in FR-1, FR-5, FR-11 and AC 1-17 above.
+
+1. **Single store flag:** `--path P` is the only store selector; `--root` is removed with no alias. Required on `note`, `nap`, `zoom`, `recall`, `surgery.py`; optional on `wake` (bare `wake` = `:/`). Missing `--path` exits 2 with one line and mutates nothing.
+2. **Git `:/` anchor:** `P` starting with `:/` is root-relative (`:/` alone = root); otherwise `$PWD`-relative; absolute accepted. Walk-up to nearest started store unchanged. Any other leading `:` exits 2 (`unknown path prefix`); a literal colon name is written `./:name`.
+3. **Containment in the resolver:** the resolver resolves the path once (symlinks included) and exits 2 with one line if the result is outside the git root (covers `:/../x` and an out-of-repo `.summem` symlink; PR #104 items 3-4). Formatting runs only on checked paths; no symlink-specific code.
+4. **Every printed path in `:/` form and pasteable as `--path`:** `Saved to :/packages/cli` (store directory, no `.summem`), `Run: nap --path :/packages/cli …`, catalog `N: :/dogfood`, `start` output.
+5. **Shell-quote the `Run:` path** (`shlex.quote`); test with a store path containing a space (PR #104 items 1-2).
+6. **One resolver** for `wake --path`, `start <dir>`, `surgery.py --path`, and `migrate.py --path`.
+7. **Odd-arity heal test** in `tests/test_heal_view.py` plants partially overlapping naps so it exercises the split branch; keep the iteration cap; assert every leaf reachable and unique cover (PR #104 item 5).
+8. **Docs:** `docs/user-guide/commands.md` states that a store command with no `--path` exits 2 before any repository check (PR #104 item 6); all docs, `usage_text()`, `how_to_text()`, `prompt_text()`, `AGENTS.md`, `upgrading.md` describe `--path` and `:/` (examples use `:/`).
+9. **Verification:** `tox run-parallel` py311-py314 passes; `properdocs build --strict` clean.

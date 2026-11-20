@@ -200,3 +200,8 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 * Insights
     - Searching contributor prose for plain words (`"in step"`, `"A test checks this"`) alongside internal terms (`"lockstep"`) catches doc claims invalidated when a test is deleted.
 
+
+## 2026-11-19 - REWORK 2 - INITIATED
+
+* Operator feedback: replace `--root` xor `--path` with one required `--path` using git's `:/` root anchor (creative-store-flag-scheme.md), and fix PR #104 review findings: shell-quote `Run:` paths, resolver containment check (symlinked store), odd-arity heal test overlap, commands.md error-order sentence.
+* Complexity: Level 2 (carried over).
