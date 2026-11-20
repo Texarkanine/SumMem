@@ -1,5 +1,0 @@
-PASS
-QA rework 2 (single --path with :/): implementation matches plan steps 1-8; tox -e py311 460 passed; doc sweep clean.
-Advisory: `import shlex` is local inside _fold_store_flag while stdlib imports sit at module top.
-Advisory: _input_path and start's branch both check containment; start's extra check covers non-:/ args (not duplicate in effect).
-Advisory: tasks.md Pre-Mortem still says "assert rematerialize_child is called"; step 5 and the test use the payload-name change instead (correct per plan step 5).

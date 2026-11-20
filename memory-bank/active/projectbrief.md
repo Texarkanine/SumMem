@@ -90,3 +90,12 @@ Design is settled in `memory-bank/active/creative/creative-store-flag-scheme.md`
 7. **Odd-arity heal test** in `tests/test_heal_view.py` plants partially overlapping naps so it exercises the split branch; keep the iteration cap; assert every leaf reachable and unique cover (PR #104 item 5).
 8. **Docs:** `docs/user-guide/commands.md` states that a store command with no `--path` exits 2 before any repository check (PR #104 item 6); all docs, `usage_text()`, `how_to_text()`, `prompt_text()`, `AGENTS.md`, `upgrading.md` describe `--path` and `:/` (examples use `:/`).
 9. **Verification:** `tox run-parallel` py311-py314 passes; `properdocs build --strict` clean.
+
+## Rework 3: one formatting rule for every printed path
+
+Operator: `There is a store in :/team docs.` prints poorly (the full stop runs into the path; spaces aren't paste-safe).
+
+1. Every path SumMem prints goes through one formatter: `:/rel` form, then `shlex.quote` (ordinary paths print unchanged; `':/team docs'` when quoting is needed). Applies to `start`, `Saved to`, catalog lines, `Run:`, and resolver errors.
+2. Paths inside sentences are wrapped in backticks: `There is a store in `…`.`, `not a directory: `…``, `outside the repository: `…``, `store outside the repository: `…``. `Saved to` already uses backticks. `Run:` and catalog lines stay bare (they are values or commands, not sentences).
+3. The round-trip test shell-splits each printed path before passing it back as `--path`.
+4. Docs and Usage text show the new forms. `tox run-parallel` passes; `properdocs build --strict` is clean.

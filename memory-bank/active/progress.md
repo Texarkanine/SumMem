@@ -258,3 +258,8 @@ Require an explicit `--root` or `--path` store flag on `note`, `nap`, `zoom`, `r
 ## 2026-11-19 - REFLECT - COMPLETE (rework 2)
 
 * Reflection appended; techContext gains git_free oracle sentence; productContext and systemPatterns were updated in build (skip).
+
+## 2026-11-19 - REWORK 3 - INITIATED
+
+* Operator: printed paths with spaces print poorly (start line). One rule: shell-quote every printed path; backticks around paths in sentences.
+* Complexity: Level 1 (single formatter + tests).
